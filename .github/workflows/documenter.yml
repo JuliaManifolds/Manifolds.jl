@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     if: contains( github.event.pull_request.labels.*.name, 'preview docs') || github.ref == 'refs/heads/master' || contains(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
           version: "1.9.38"
@@ -22,7 +22,7 @@ jobs:
         uses: julia-actions/cache@v3
       - name: Cache Quarto
         id: cache-quarto
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         env:
           cache-name: cache-quarto
         with:
@@ -32,7 +32,7 @@ jobs:
             ${{ runner.os }}-${{ env.cache-name }}-
       - name: Cache Documenter
         id: cache-documenter
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         env:
           cache-name: cache-documenter
         with:
