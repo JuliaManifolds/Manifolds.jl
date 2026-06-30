@@ -30,37 +30,14 @@ Pages = ["manifolds/Sphere.jl"]
 Order = [:function]
 ```
 
-## Visualization on `Sphere{2,ℝ}`
-You can visualize both points and tangent vectors on the sphere.
+## Visualization of data on spheres
 
-!!! note
-    There seems to be no unified way to draw spheres in the backends of [Plots.jl](http://docs.juliaplots.org/latest/).
-    This recipe currently uses the `seriestype` `wireframe` and `surface`, which does not yet work with the default backend [`GR`](https://github.com/jheinen/GR.jl).
+For the 2-sphere and the 1-sphere, i.e. data on the embedded Circle on the plane,
+data can be visualized using [`ManifoldMakie.jl`](https://juliamanifolds.github.io/ManifoldMakie.jl/stable/), see [here](https://juliamanifolds.github.io/ManifoldMakie.jl/stable/sphere/).
 
-In general you can plot the surface of the hyperboloid either as wireframe (`wireframe=true`) additionally specifying `wires` (or `wires_x` and `wires_y`) to change the density of the wires and a `wireframe_color` for their color. The same holds for the plot as a `surface` (which is `false` by default) and its `surface_resolution` (or `surface_resolution_lat` or `surface_resolution_lon`) and a `surface_color`.
-
-```@example sphereplot1
-using Manifolds, Plots
-M = Sphere(2)
-pts = [ [1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0] ]
-scene = plot(M, pts; wireframe_color=colorant"#CCCCCC", markersize=10)
-```
-
-which scatters our points. We can also draw connecting geodesics, which here is a geodesic triangle. Here we discretize each geodesic with 100 points along the geodesic.
-The default value is `geodesic_interpolation=-1` which switches to scatter plot of the data.
-
-```@example sphereplot1
-plot!(scene, M, pts; wireframe=false, geodesic_interpolation=100, linewidth=2)
-```
-
-And we can also add tangent vectors, for example tangents pointing towards the geometric center of given points.
-
-```@example sphereplot1
-pts2 =  [ [1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0] ]
-p3 = 1/sqrt(3) .* [1.0, -1.0, 1.0]
-vecs = log.(Ref(M), pts2, Ref(p3))
-plot!(scene, M, pts2, vecs; wireframe = false, linewidth=1.5)
-```
+`Manifold.jl` has a legacy extension to [`Plots.jl`](http://docs.juliaplots.org/latest/)
+using the recipes for `seriestype` `wireframe` and `surface`.
+Since the backends for [`Plots.jl`](http://docs.juliaplots.org/latest/) are not consistent, this only works some backends and for example not with their default backend [`GR.jl`](https://github.com/jheinen/GR.jl).
 
 ## Literature
 
