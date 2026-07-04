@@ -1047,12 +1047,10 @@ for d in 2:16
         K1[N] = :n
         K2 = [Symbol(:k, n) for n in 1:d]
         K2[N] = :j
-        rhs = :(core1[$(K1...)] * core2[$(K2...)] * Σ_inv[j])
-        lhs = :(result[n, j])
         ex = quote
             # for d = 3, N = 1: computes result[n1, r1] = core1[n1, i2, i3] * core2[r1, i2, i3] * Σ_inv[r1]
             function _contract_core_with_ginv!(result::Matrix{T}, core1::Array{T, $(d)}, core2::Array{T, $(d)}, Σ_inv::Vector{T}, ::Val{$N}) where {T}
-                return @tullio $lhs = $rhs
+                return @tullio result[n, j] = core1[$(K1...)] * core2[$(K2...)] * Σ_inv[j]
             end
         end
         eval(ex)
@@ -1061,12 +1059,10 @@ for d in 2:16
         K[N] = :k
         R = copy(K)
         R[N] = :r
-        rhs = :(core[$(K...)] * F[k, r])
-        lhs = :(result[$(R...)])
         ex = quote
             # for d = 3, N = 1: computes result[k, r2, r3] = core[r, r2, r3] * F[k, r]
             function _contract_with_factor!(result::Array{T, $(d)}, core::Array{T, $(d)}, F::Matrix{T}, ::Val{$N}) where {T}
-                return @tullio $lhs = $rhs
+                return @tullio result[$(R...)] = core[$(K...)] * F[k, r]
             end
         end
         eval(ex)
