@@ -315,7 +315,18 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                     name = "injectivity_radius(M, p, $rm)", # shorten name within large suite
                 )
             end
-
+            for irm in inverse_retraction_methods
+                ismissing(irm) && continue
+                expected_irm = get_expectation(expectations, (injectivity_radius, points[1], irm))
+                expected_irm_global = get_expectation(expectations, (injectivity_radius, irm))
+                Manifolds.Test.test_injectivity_radius(
+                    M, points[1];
+                    expected_value = expected_irm,
+                    expected_global_value = expected_irm_global,
+                    retraction_method = irm,
+                    name = "injectivity_radius(M, p, $irm)",
+                )
+            end
         end
         if (inner in functions) && !ismissing(vector)
             expected_inner = get_expectation(expectations, inner)
