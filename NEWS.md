@@ -5,6 +5,15 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.30] Unreleased
+
+### Added
+
+* `injectivity_radius(M, p, m)` and `injectivity_radius(M, m)` where `m` is an `AbstractInverseRetractionMethod` and `M` is a `Sphere` are introduced.
+* `injectivity_radius(M, m)` where `M` is a `Sphere` and `m` is a `LogarithmicInverseRetraction` or a `ProjectionInverseRetraction`.
+* `bijectivity_radius(M, p, m)` and `bijectivity_radius(M, m)` are defined for `Sphere`s.
+* `Manifolds.Test.test_manifold` now tests injectivity radii for inverse retractions.
+
 ## [0.11.29] Unreleased
 
 ### Fixed
