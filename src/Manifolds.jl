@@ -570,6 +570,14 @@ Note that volume density is well-defined only for `X` for which `exp(M, p, X)` i
 """
 volume_density(::AbstractManifold, p, X)
 
+# TODO: Move this to ManifoldsBase.jl once testing is successful.
+function injectivity_radius(M::AbstractManifold, m::StabilizedRetraction)
+    return injectivity_radius(M, m.retraction)
+end
+function injectivity_radius(M::AbstractManifold, p, m::StabilizedRetraction)
+    return injectivity_radius(M, p, m.retraction)
+end
+
 # functions populated with methods by extensions
 
 function solve_chart_log_bvp end
