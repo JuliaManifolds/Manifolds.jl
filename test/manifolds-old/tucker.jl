@@ -197,6 +197,50 @@ include("../header.jl")
             "Tucker((4, 5, 6), (2, 3, 4), ℝ; parameter=:field)"
     end
 
+    @testset "projection transport" begin
+        key = Xoshiro(42)
+        atol = 5eps(Float64)
+        rtol = sqrt(eps(Float64))
+        approx(A, B) = isapprox(A, B, atol = atol, rtol = rtol)
+
+        for d in 2:5 # test for order 2, …, 5
+            if d == 2
+                ranks = (3, 3)
+            else
+                ranks = Tuple(2:(2 + d - 1))
+            end
+            dims = Tuple(10:-1:(10 - d + 1))
+            M = Tucker(dims, ranks)
+
+            # test transport for out-of-place update
+            p1 = rand(key, M)
+            X = rand(key, M, vector_at = p1)
+            p2 = rand(key, M)
+
+            Y_manual = rand(key, M, vector_at = p2)
+            Y = rand(key, M, vector_at = p2)
+
+            Y_manual = project!(M, Y_manual, p2, embed(M, p1, X))
+            Y = vector_transport_to!(M, Y, p1, X, p2, ProjectionTransport())
+            @test approx(Y_manual.Ċ, Y.Ċ)
+            @test all(approx(Y_manual.U̇[i], Y.U̇[i]) for i in eachindex(Y_manual.U̇))
+            @test approx(embed(M, p2, Y_manual), embed(M, p2, Y))
+
+            # test transport for in-place update
+            p1 = rand(key, M)
+            X = rand(key, M, vector_at = p1)
+            p2 = rand(key, M)
+
+            Y_manual = rand(key, M, vector_at = p2)
+            Y_manual = project!(M, Y_manual, p2, embed(M, p1, X))
+
+            vector_transport_to!(M, X, p1, X, p2, ProjectionTransport())
+            @test approx(Y_manual.Ċ, X.Ċ)
+            @test all(approx(Y_manual.U̇[i], X.U̇[i]) for i in eachindex(Y_manual.U̇))
+            @test approx(embed(M, p2, Y_manual), embed(M, p2, X))
+        end
+    end
+
     @testset "product of Tucker manifolds" begin
         M = ProductManifold(
             Tucker((18, 16, 14), (4, 3, 3)),
