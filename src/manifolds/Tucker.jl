@@ -399,13 +399,46 @@ as the default vector transport method for the [`Tucker`](@ref) manifold.
 """
 default_vector_transport_method(::Tucker) = ProjectionTransport()
 
+@doc raw""" 
+     vector_transport_to(M::Tucker, Y, p, X, q, ::ProjectionTransport) 
+  
+Compute the projection vector transport on the [`Tucker`](@ref) manifold by projecting 
+the tangent vector `X` onto the tangent space of `M` at `q`. 
 
-@doc raw"""
-    vector_transport_to_project!(M::Tucker, Y, p, X, q)
+Let 
+````math 
+p = (C_p, U_p^1, …, U_p^D), \qquad X = (C_X, U_X^1, …, U_X^D) ∈ T_p M, \qquad q = (C_q, U_q^1, …, U_q^1).
+```` 
 
-Compute the vector transport of the tangent vector `X` at `p` to `q` using the orthogonal projection onto the tangent space at q.
+This means that
+````math 
+    X = C_X ×_{j = 1, …, D} U_p^j + \sum_{k = 1}^D C_p ×_{j ≠ k} U_p^j ×_k U_X^k
+```` 
+as an embedded vector.
+Let
+````math 
+C_Y = X ×_{j} (U_q^j)^T =  C_X ×_{j = 1, …, D} U_p^j (U_q^j)^T + \sum_{k = 1}^D C_p ×_{j ≠ k} U_p^j (U_q^j)^T ×_k U_X^k(U_q^k)^T
+```` 
+and
+````math 
+U_Y^i 
+= P_{U_q^i}^⊥ \left[X ×_{j ≠ i} (U_q^j)^T\right]_{(i)} (C_q)_{(i)}^+ \\
+= \left[C_X ×_{j ≠ i} U_p^j (U_q^j)^T ×_i U_p^i (I - U_q^i (U_q^i)^T)\right]_{(i)} (C_q)_{(i)}^+
++ \sum_{k ≠ i} \left[ C_p ×_{j ≠ k ≠ i} U_p^j (U_q^j)^T ×_k U_X^k(U_q^k)^T ×_i U_p^i (I - U_q^i (U_q^i)^T)\right]_{(i)} (C_q)_{(i)}^+
++ \left[ C_p ×_{j ≠ i} U_p^j (U_q^j)^T ×_i U_X^i (I - U_q^i (U_q^i)^T)\right]_{(i)} (C_q)_{(i)}^+ 
+```` 
+
+Note that ``(C_q)_{(i)}^+ = ((C_q)_{(i)}^∗ (C_q)_{(i)})^{-1} (C_q)_{(i)}^∗ = Σ_{(i)}^{-2} (C_q)_{(i)}^∗``,
+where ``Σ_{(i)}`` is the diagonal Matrix containing the singular values of the mode-``i`` unfolding of ``C_q``.
+
+Then the transported tangent vector is represented by
+````math
+Y = (C_Y, U_Y^1, …, U_Y^D).
+````
 For details, see [KressnerSteinlechnerVandereycken:2013](@cite).
 """
+vector_transport_to(M::Tucker{𝔽, T, D}, Y::TuckerTangentVector{T, D}, p::TuckerPoint{T, D}, X::TuckerTangentVector{T, D}, q::TuckerPoint{T, D}, ::ProjectionTransport) where Tucker{𝔽, T, D}
+
 function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T, D}, p::TuckerPoint{T, D}, X::TuckerTangentVector{T, D}, q::TuckerPoint{T, D}) where {T, D}
     dims, ranks = Manifolds.get_parameter(M.size)
 
@@ -983,7 +1016,17 @@ function ManifoldsBase.allocate_result(M::Tucker, ::typeof(embed), p, args...)
     return Array{number_eltype(p), length(dims)}(undef, dims)
 end
 
-# Helper functions for vector_transport_to_project!
+""" Helper function for the computation of summands in vector_transport_to_project!
+Let 
+``
+q = (C_q, U_q^1, …, U_q^D)
+``
+Computes 
+``
+[core ×_{j ≠ i} factors[j] ×_i Ui (I - U_q^i (U_q^i)^T)]_{(i)} * (C_q)_{(i)}^T * Σ_inv
+``
+and adds to or overwrites `result`, depending on whether `add_to_result == true`.
+"""
 function _compute_projection_summand!(
         result::Matrix{T},
         vars::NTuple{5, Array{T}},
@@ -1010,8 +1053,13 @@ function _compute_projection_summand!(
     return result
 end
 
-
-# for D = 3, k = 1: computes result[n1, r2, r3] = core[k1, k2, k3] * factors[2][k2, r2] * factors[3][k3, r3]
+"""
+Compute the tensor contraction
+``
+    result[n_1, …, n_{k-1}, r_k, n_{k+1}, …, n_D] = result[r_1, …, r_D] * factors[r_1, n_1] * … * factors[r_{k-1}, n_{k-1}] * factors[r_{k+1}, n_{k+1}] *  … * factors[r_D, n_D]
+``
+For D = 3, k = 1, e.g. result[r1, n2, n3] = core[r1, r2, r3] * factors[2][r2, n2] * factors[3][r3, n3]
+"""
 function _contract_with_partial_factors!(result::Array{T, D}, T1::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64) where {T, D}
     T2 = result
 
@@ -1026,7 +1074,14 @@ function _contract_with_partial_factors!(result::Array{T, D}, T1::Array{T, D}, c
     return result
 end
 
-# for D = 3: computes result[r1, r2, r3] = core[k1, k2, k3] * factors[1][k1, r1] * factors[2][k2, r2] * factors[3][k3, r3]
+"""
+Compute the tensor contraction
+``
+    result[n_1, …, n_D] = result[r_1, …, r_D] * factors[r_1, n_1] * … * factors[r_D, n_D]
+``
+For D = 3, e.g. result[n1, n2, n3] = core[r1, r2, r3] * factors[1][r1, n1] * factors[2][r2, n2] * factors[3][r3, n3]
+If `add_to_result == true`, adds to the result array, otherwise overwrites the result array.
+"""
 function _contract_with_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result::Bool) where {T, D}
     _contract_with_factor!(T1, core, factors[1], Val(1))
     for i in 2:D
@@ -1042,27 +1097,41 @@ function _contract_with_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array
 end
 
 for d in 2:16
-    for N in 1:d
-        K1 = [Symbol(:k, n) for n in 1:d]
-        K1[N] = :n
-        K2 = [Symbol(:k, n) for n in 1:d]
-        K2[N] = :j
+    for J in 1:d
+        N = [Symbol(:n, i) for i in 1:d]
+        N[J] = :n
+        R = [Symbol(:n, i) for i in 1:d]
+        R[J] = :r
+        """
+        Computes the in-place contraction of `core1` with the Moore-Penrose inverse of core2, which is given by 
+        `core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D] * Σ_inv[r]` because `core2` is all-orthogonal.
+        Altogether, the computed contraction is
+        ``
+            result[n, r] = core1[n_1, …, n_{k-1}, n, n_{k_1}, n_D] * core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D] * Σ_inv[r]
+        ``
+        For D=3, J=1 e.g. result[n, r] = core1[n, n_2, n_3] * core2[r, n_2, n_3] * Σ_inv[r]
+        """
         ex = quote
-            # for d = 3, N = 1: computes result[n1, r1] = core1[n1, i2, i3] * core2[r1, i2, i3] * Σ_inv[r1]
-            function _contract_core_with_ginv!(result::Matrix{T}, core1::Array{T, $(d)}, core2::Array{T, $(d)}, Σ_inv::Vector{T}, ::Val{$N}) where {T}
-                return @tullio result[n, j] = core1[$(K1...)] * core2[$(K2...)] * Σ_inv[j]
+            function _contract_core_with_ginv!(result::Matrix{T}, core1::Array{T, $(d)}, core2::Array{T, $(d)}, Σ_inv::Vector{T}, ::Val{$J}) where {T}
+                return @tullio result[n, r] = core1[$(N...)] * core2[$(R...)] * Σ_inv[r]
             end
         end
         eval(ex)
 
-        K = [Symbol(:k, n) for n in 1:d]
-        K[N] = :k
-        R = copy(K)
-        R[N] = :r
+        N = [Symbol(:n, i) for i in 1:d]
+        N[J] = :n
+        R = copy(N)
+        R[J] = :r
+        """
+        Computes the mode-J contration of core with F, that is, 
+        ``
+            result[n_1, …, n_{k-1}, n, n_{k+1}, …, n_D] = core[n_1, …, n_{k-1}, r, n_{k+1}, …, n_D] * F[r, n]
+        ``
+        For D=3, N = 1 e.g. result[n, n_2, n_3] = core[r, n_2, n_3] * F[r, n]
+        """
         ex = quote
-            # for d = 3, N = 1: computes result[k, r2, r3] = core[r, r2, r3] * F[k, r]
-            function _contract_with_factor!(result::Array{T, $(d)}, core::Array{T, $(d)}, F::Matrix{T}, ::Val{$N}) where {T}
-                return @tullio result[$(R...)] = core[$(K...)] * F[k, r]
+            function _contract_with_factor!(result::Array{T, $(d)}, core::Array{T, $(d)}, F::Matrix{T}, ::Val{$J}) where {T}
+                return @tullio result[$(N...)] = core[$(R...)] * F[r, n]
             end
         end
         eval(ex)
