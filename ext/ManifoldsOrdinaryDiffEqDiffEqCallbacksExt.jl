@@ -11,7 +11,9 @@ import Manifolds: solve_chart_exp_ode, solve_chart_parallel_transport_ode
 using ManifoldsBase
 
 using DiffEqCallbacks
-using OrdinaryDiffEq: OrdinaryDiffEq, SciMLBase, Rodas5P, AutoVern9, ODEProblem, solve
+using OrdinaryDiffEqRosenbrock: Rodas5P
+using OrdinaryDiffEqVerner: AutoVern9
+using SciMLBase: SciMLBase, ODEProblem, solve
 
 using RecursiveArrayTools: ArrayPartition
 
