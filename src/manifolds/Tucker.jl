@@ -437,7 +437,7 @@ Y = (C_Y, U_Y^1, …, U_Y^D).
 ````
 For details, see [KressnerSteinlechnerVandereycken:2013](@cite).
 """
-vector_transport_to(M::Tucker{𝔽, T, D}, Y::TuckerTangentVector{T, D}, p::TuckerPoint{T, D}, X::TuckerTangentVector{T, D}, q::TuckerPoint{T, D}, ::ProjectionTransport) where Tucker{𝔽, T, D}
+vector_transport_to(M::Tucker{𝔽, T, D}, Y::TuckerTangentVector{T, D}, p::TuckerPoint{T, D}, X::TuckerTangentVector{T, D}, q::TuckerPoint{T, D}, ::ProjectionTransport) where {𝔽, T, D}
 
 function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T, D}, p::TuckerPoint{T, D}, X::TuckerTangentVector{T, D}, q::TuckerPoint{T, D}) where {T, D}
     dims, ranks = Manifolds.get_parameter(M.size)
@@ -1123,7 +1123,7 @@ for d in 2:16
         R = copy(N)
         R[J] = :r
         """
-        Computes the mode-J contration of core with F, that is, 
+        Computes the mode-J contraction of core with F, that is, 
         ``
             result[n_1, …, n_{k-1}, n, n_{k+1}, …, n_D] = core[n_1, …, n_{k-1}, r, n_{k+1}, …, n_D] * F[r, n]
         ``
