@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.29] Unreleased
 
+### Changed
+
+* SciML-related extensions now import interfaces and solvers from their owner packages and explicitly trigger on the required SciML weak dependencies.
+
 ### Fixed
 
 * PythonPlot was replaced with GR to fix documentation building on CI.
