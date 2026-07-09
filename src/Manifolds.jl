@@ -203,11 +203,7 @@ import StatsBase: mean_and_var
 
 using ADTypes:
     AbstractADType,
-    AutoFiniteDiff,
-    AutoFiniteDifferences,
-    AutoForwardDiff,
-    AutoReverseDiff,
-    AutoZygote
+    AutoForwardDiff
 import DifferentiationInterface as DI
 
 using Base.Iterators: repeated
