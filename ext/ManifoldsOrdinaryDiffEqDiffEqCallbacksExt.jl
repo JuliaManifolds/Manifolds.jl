@@ -339,10 +339,9 @@ function solve_chart_jacobi_field(
     return sols
 end
 
-function _jacobi_endpoint_coordinates(M, A, solution, final_time)
-    p, _, Y, _ = solution(final_time)
-    B = induced_basis(M, A, solution.sols[end][2])
-    return get_coordinates(M, p, Y, B)
+function _jacobi_endpoint_coordinates(solution, final_time)
+    sol, _ = solution.sols[end]
+    return sol(final_time).x[3]
 end
 
 function _jacobi_exp_argument_matrix(M, a, Xc, A, i0, c; kwargs...)
@@ -353,7 +352,7 @@ function _jacobi_exp_argument_matrix(M, a, Xc, A, i0, c; kwargs...)
         ej = zero(c)
         ej[j] = one(eltype(c))
         solution = solve_chart_jacobi_field(M, a, Xc, A, i0, zero(c), ej; kwargs...)
-        E[:, j] .= _jacobi_endpoint_coordinates(M, A, solution, final_time)
+        E[:, j] .= _jacobi_endpoint_coordinates(solution, final_time)
     end
     return E
 end
@@ -408,7 +407,7 @@ function solve_chart_differential_log_basepoint(
     baseline = solve_chart_jacobi_field(M, a, Xc, A, i0, Yc, zero(Yc); kwargs...)
     E = _jacobi_exp_argument_matrix(M, a, Xc, A, i0, Yc; kwargs...)
     final_time = get(kwargs, :final_time, 1.0)
-    dYc = -E \ _jacobi_endpoint_coordinates(M, A, baseline, final_time)
+    dYc = -E \ _jacobi_endpoint_coordinates(baseline, final_time)
     return solve_chart_jacobi_field(M, a, Xc, A, i0, Yc, dYc; kwargs...)
 end
 
