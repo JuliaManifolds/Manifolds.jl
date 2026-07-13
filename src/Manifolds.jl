@@ -573,6 +573,7 @@ function estimate_distance_from_bvp end
 function solve_chart_exp_ode end
 function solve_chart_parallel_transport_ode end
 function solve_chart_jacobi_field end
+function solve_chart_volume_density end
 function solve_chart_differential_exp_basepoint end
 function solve_chart_differential_exp_argument end
 function solve_chart_differential_log_basepoint end

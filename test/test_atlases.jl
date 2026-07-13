@@ -15,6 +15,9 @@ using DiffEqCallbacks, OrdinaryDiffEq, RecursiveArrayTools
     X = get_vector(M, p, Xc, B)
     Y = get_vector(M, p, Yc, B)
 
+    @test Manifolds.solve_chart_volume_density(M, a, Xc, A, i) ≈
+        volume_density(M, p, X) atol = 1.0e-8
+
     solution = Manifolds.solve_chart_differential_exp_basepoint(
         M, a, Xc, A, i, Yc; final_time = 1.0
     )

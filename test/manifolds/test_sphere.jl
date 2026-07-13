@@ -223,13 +223,13 @@ using ManifoldDiff
             A = Manifolds.StereographicAtlas()
             @testset "chart index from coordinates" begin
                 for (i, a, expected) in [
-                    (:north, [0.5, 0.0], :north),
-                    (:north, [1.0, 0.0], :north),
-                    (:north, [2.0, 0.0], :south),
-                    (:south, [0.5, 0.0], :south),
-                    (:south, [1.0, 0.0], :north),
-                    (:south, [2.0, 0.0], :north),
-                ]
+                        (:north, [0.5, 0.0], :north),
+                        (:north, [1.0, 0.0], :north),
+                        (:north, [2.0, 0.0], :south),
+                        (:south, [0.5, 0.0], :south),
+                        (:south, [1.0, 0.0], :north),
+                        (:south, [2.0, 0.0], :north),
+                    ]
                     @test Manifolds.get_chart_index(M, A, i, a) === expected
                 end
             end

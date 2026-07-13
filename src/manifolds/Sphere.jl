@@ -793,23 +793,31 @@ function get_vector_induced_basis!(
     return Y
 end
 
-@doc raw"""
-    local_metric(M::Sphere, p, B::InducedBasis{<:Any, <:Any, StereographicAtlas})
 
-Return the local representation of the spherical metric at `p` in the stereographic
- induced basis `B`. At coordinates ``a``, it is the conformal metric
+@doc raw"""
+    local_metric(M::Sphere{ℝ}, A::StereographicAtlas, i, a)
+
+Return the local representation of the spherical metric in the stereographic atlas
+at coordinates ``a``. The formula reads
 
 ````math
 g_a = \frac{4}{(1 + \lVert a \rVert^2)^2} I.
 ````
 """
+function local_metric(M::Sphere{ℝ}, A::StereographicAtlas, i, a)
+    return (4 / (1 + dot(a, a))^2) * I
+end
+function det_local_metric(M::Sphere{ℝ}, ::StereographicAtlas, i, a)
+    return (4 / (1 + dot(a, a))^2)^manifold_dimension(M)
+end
+# The InducedBasis variant of `local_metric` is deprecated, kept for compatibility with older versions of Manifolds.jl
 function local_metric(
         M::Sphere{ℝ},
         p,
         B::InducedBasis{ℝ, TangentSpaceType, StereographicAtlas, Symbol},
     )
     a = get_parameters(M, B.A, B.i, p)
-    return (4 / (1 + dot(a, a))^2) * I
+    return local_metric(M, B.A, B.i, a)
 end
 
 @doc raw"""

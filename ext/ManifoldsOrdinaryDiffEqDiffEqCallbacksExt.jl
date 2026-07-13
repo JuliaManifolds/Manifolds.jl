@@ -15,7 +15,8 @@ import Manifolds:
     solve_chart_differential_log_basepoint,
     solve_chart_exp_ode,
     solve_chart_jacobi_field,
-    solve_chart_parallel_transport_ode
+    solve_chart_parallel_transport_ode,
+    solve_chart_volume_density
 using ManifoldsBase
 
 using DiffEqCallbacks
@@ -369,6 +370,27 @@ function _jacobi_exp_argument_matrix(M, a, Xc, A, i0, c; kwargs...)
         E[:, j] .= _jacobi_endpoint_coordinates(solution, final_time)
     end
     return E
+end
+
+raw"""
+    solve_chart_volume_density(
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...
+    )
+
+Compute the volume density of the exponential map in chart coordinates. The coordinates `a`
+and `Xc` are represented in the induced basis of chart `i0` from atlas `A`.
+"""
+function solve_chart_volume_density(
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...
+    )
+    E = _jacobi_exp_argument_matrix(M, a, Xc, A, i0, Xc; kwargs...)
+    final_time = get(kwargs, :final_time, 1.0)
+    solution = solve_chart_jacobi_field(M, a, Xc, A, i0, zero(Xc), zero(Xc); kwargs...)
+    sol, final_i = solution.sols[end]
+    a_final = sol(final_time).x[1]
+    return abs(det(E)) * sqrt(
+        det_local_metric(M, A, final_i, a_final) / det_local_metric(M, A, i0, a)
+    )
 end
 
 raw"""
