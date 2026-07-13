@@ -661,6 +661,14 @@ point (1, 0, ..., 0) (called `:north`).
 """
 struct StereographicAtlas <: AbstractAtlas{ℝ} end
 
+@doc raw"""
+    get_chart_index(M::Sphere, A::StereographicAtlas, p)
+    get_chart_index(M::Sphere, A::StereographicAtlas, i, a)
+
+Return the preferred chart index for a point `p` on `M`, or for coordinates `a` in
+chart `i`. The `:south` chart is selected for points with a negative first coordinate;
+the equator belongs to the `:north` chart.
+"""
 function get_chart_index(::Sphere{ℝ}, ::StereographicAtlas, p)
     if p[1] < 0
         return :south
@@ -668,11 +676,27 @@ function get_chart_index(::Sphere{ℝ}, ::StereographicAtlas, p)
         return :north
     end
 end
-function get_chart_index(M::Sphere{ℝ}, A::StereographicAtlas, i::Symbol, a)
-    # TODO: optimize and test
-    return get_chart_index(M, A, get_point(M, A, i, a))
+function get_chart_index(::Sphere{ℝ}, ::StereographicAtlas, i::Symbol, a)
+    anorm2 = dot(a, a)
+    if i === :north
+        return anorm2 > 1 ? :south : :north
+    else
+        return anorm2 < 1 ? :south : :north
+    end
 end
 
+@doc raw"""
+    get_parameters!(M::Sphere, x, A::StereographicAtlas, i, p)
+
+Store in `x` the stereographic coordinates of the point `p` in chart `i` of `A`.
+For ``p = (p_1,p_{2:n+1})``, the coordinate maps are
+
+````math
+\varphi_{\mathrm{north}}(p) = \frac{p_{2:n+1}}{1+p_1},
+\qquad
+\varphi_{\mathrm{south}}(p) = \frac{p_{2:n+1}}{1-p_1}.
+````
+"""
 function get_parameters!(::Sphere{ℝ}, x, ::StereographicAtlas, i::Symbol, p)
     if i === :north
         return x .= p[2:end] ./ (1 + p[1])
@@ -681,6 +705,20 @@ function get_parameters!(::Sphere{ℝ}, x, ::StereographicAtlas, i::Symbol, p)
     end
 end
 
+@doc raw"""
+    get_point!(M::Sphere, p, A::StereographicAtlas, i, x)
+
+Store in `p` the point on `M` represented by stereographic coordinates `x` in chart
+`i` of `A`. For ``r^2 = \lVert x \rVert^2``, the inverse coordinate maps are
+
+````math
+\varphi_{\mathrm{north}}^{-1}(x) =
+\left(\frac{1-r^2}{1+r^2}, \frac{2x}{1+r^2}\right),
+\qquad
+\varphi_{\mathrm{south}}^{-1}(x) =
+\left(\frac{r^2-1}{1+r^2}, \frac{2x}{1+r^2}\right).
+````
+"""
 function get_point!(::Sphere{ℝ}, p, ::StereographicAtlas, i::Symbol, x)
     xnorm2 = dot(x, x)
     if i === :north
@@ -692,6 +730,12 @@ function get_point!(::Sphere{ℝ}, p, ::StereographicAtlas, i::Symbol, x)
     return p
 end
 
+"""
+    get_coordinates_induced_basis!(M::Sphere, Y, p, X, B::InducedBasis{<:Any, <:Any, <:StereographicAtlas})
+
+Store in `Y` the stereographic coordinate representation of the tangent vector `X`
+at `p` with respect to the induced basis `B`.
+"""
 function get_coordinates_induced_basis!(
         M::Sphere{ℝ},
         Y,
@@ -712,6 +756,12 @@ function get_coordinates_induced_basis!(
     return Y
 end
 
+"""
+    get_vector_induced_basis!(M::Sphere, Y, p, X, B::InducedBasis{<:Any, <:Any, <:StereographicAtlas})
+
+Store in `Y` the tangent vector at `p` represented by stereographic coordinates `X`
+with respect to the induced basis `B`.
+"""
 function get_vector_induced_basis!(
         M::Sphere{ℝ},
         Y,
@@ -743,6 +793,16 @@ function get_vector_induced_basis!(
     return Y
 end
 
+@doc raw"""
+    local_metric(M::Sphere, p, B::InducedBasis{<:Any, <:Any, StereographicAtlas})
+
+Return the local representation of the spherical metric at `p` in the stereographic
+ induced basis `B`. At coordinates ``a``, it is the conformal metric
+
+````math
+g_a = \frac{4}{(1 + \lVert a \rVert^2)^2} I.
+````
+"""
 function local_metric(
         M::Sphere{ℝ},
         p,
@@ -752,6 +812,19 @@ function local_metric(
     return (4 / (1 + dot(a, a))^2) * I
 end
 
+@doc raw"""
+    affine_connection!(M::Sphere, Zc, A::StereographicAtlas, i, a, Xc, Yc)
+
+Store in `Zc` the covariant derivative of the coordinate vector field `Yc` in the
+coordinate direction `Xc` at stereographic coordinates `a` in chart `i` of `A`. Its
+coordinate expression is
+
+````math
+\nabla_{X_c}Y_c = -\frac{2}{1 + \lVert a \rVert^2}
+\left(X_c\langle a,Y_c\rangle + Y_c\langle a,X_c\rangle
+- a\langle X_c,Y_c\rangle\right).
+````
+"""
 function affine_connection!(
         M::Sphere{ℝ}, Zc, A::StereographicAtlas, i, a, Xc, Yc
     )

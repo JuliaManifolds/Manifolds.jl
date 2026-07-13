@@ -221,6 +221,18 @@ using ManifoldDiff
         @testset "StereographicAtlas" begin
             M = Sphere(2)
             A = Manifolds.StereographicAtlas()
+            @testset "chart index from coordinates" begin
+                for (i, a, expected) in [
+                    (:north, [0.5, 0.0], :north),
+                    (:north, [1.0, 0.0], :north),
+                    (:north, [2.0, 0.0], :south),
+                    (:south, [0.5, 0.0], :south),
+                    (:south, [1.0, 0.0], :north),
+                    (:south, [2.0, 0.0], :north),
+                ]
+                    @test Manifolds.get_chart_index(M, A, i, a) === expected
+                end
+            end
             p = [1 / sqrt(3), 1 / sqrt(3), 1 / sqrt(3)]
             for k in [1, -1]
                 p *= k
