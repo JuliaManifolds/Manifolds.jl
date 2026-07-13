@@ -656,8 +656,8 @@ end
     StereographicAtlas()
 
 The stereographic atlas of ``S^n`` with two charts: one with the singular
-point (-1, 0, ..., 0) (called `:north`) and one with the singular
-point (1, 0, ..., 0) (called `:south`).
+point (-1, 0, ..., 0) (called `:south`) and one with the singular
+point (1, 0, ..., 0) (called `:north`).
 """
 struct StereographicAtlas <: AbstractAtlas{ℝ} end
 
@@ -667,6 +667,10 @@ function get_chart_index(::Sphere{ℝ}, ::StereographicAtlas, p)
     else
         return :north
     end
+end
+function get_chart_index(M::Sphere{ℝ}, A::StereographicAtlas, i::Symbol, a)
+    # TODO: optimize and test
+    return get_chart_index(M, A, get_point(M, A, i, a))
 end
 
 function get_parameters!(::Sphere{ℝ}, x, ::StereographicAtlas, i::Symbol, p)
@@ -746,4 +750,12 @@ function local_metric(
     )
     a = get_parameters(M, B.A, B.i, p)
     return (4 / (1 + dot(a, a))^2) * I
+end
+
+function affine_connection!(
+        M::Sphere{ℝ}, Zc, A::StereographicAtlas, i, a, Xc, Yc
+    )
+    factor = -2 / (1 + dot(a, a))
+    Zc .= factor .* (Xc .* dot(a, Yc) .+ Yc .* dot(a, Xc) .- a .* dot(Xc, Yc))
+    return Zc
 end

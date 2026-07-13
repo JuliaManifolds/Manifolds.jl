@@ -5,9 +5,13 @@ using Manifolds:
     IntegratorTerminatorNearChartBoundary,
     affine_connection,
     get_chart_index,
+    riemann_tensor,
     transition_map!,
     transition_map_diff!
-import Manifolds: solve_chart_exp_ode, solve_chart_parallel_transport_ode
+import Manifolds:
+    solve_chart_exp_ode,
+    solve_chart_jacobi_field,
+    solve_chart_parallel_transport_ode
 using ManifoldsBase
 
 using DiffEqCallbacks
@@ -97,6 +101,27 @@ function (scs::StitchedChartSolution{:PT})(t::Real)
             X = get_vector(scs.M, p, solt.x[2], B)
             Y = get_vector(scs.M, p, solt.x[3], B)
             return (p, X, Y)
+        end
+    end
+    throw(
+        DomainError(
+            "Time $t is outside of the solution (solution time range is [$(scs.sols[1][1].t[1]), $(scs.sols[end][1].t[end])]).",
+        ),
+    )
+end
+function (scs::StitchedChartSolution{:Jacobi})(t::Real)
+    if t < scs.sols[1][1].t[1]
+        throw(DomainError("Time $t is outside of the solution."))
+    end
+    for (sol, i) in scs.sols
+        if t <= sol.t[end]
+            B = induced_basis(scs.M, scs.A, i)
+            solt = sol(t)
+            p = get_point(scs.M, scs.A, i, solt.x[1])
+            X = get_vector(scs.M, p, solt.x[2], B)
+            Y = get_vector(scs.M, p, solt.x[3], B)
+            dY = get_vector(scs.M, p, solt.x[4], B)
+            return (p, X, Y, dY)
         end
     end
     throw(
@@ -235,6 +260,76 @@ function solve_chart_parallel_transport_ode(
             M, u0.x[3], A, cur_i, a_final, sol.u[end].x[3]::typeof(Yc), new_i
         )
         cur_i = new_i
+    end
+    return sols
+end
+
+function chart_jacobi_field_problem(u, params, t)
+    M, A, i = params
+    a = u.x[1]
+    dx = u.x[2]
+    Y = u.x[3]
+    dY = u.x[4]
+
+    ddx = -affine_connection(M, A, i, a, dx, dx)
+    dYdt = dY - affine_connection(M, A, i, a, dx, Y)
+    ddY =
+        -affine_connection(M, A, i, a, dx, dY) - riemann_tensor(M, A, i, a, Y, dx, dx)
+    return ArrayPartition(dx, ddx, dYdt, ddY)
+end
+
+"""
+    solve_chart_jacobi_field(
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc, dYc;
+        solver=AutoVern9(Rodas5P()), final_time=1.0,
+        check_chart_switch_kwargs =NamedTuple(), kwargs...
+    )
+
+Solve the Jacobi equation along the geodesic starting at parameters `a` in chart `i0` with
+initial velocity coordinates `Xc`. `Yc` and `dYc` are, respectively, the coordinates of the
+initial Jacobi field and its initial covariant derivative in the induced basis of the chart.
+
+The returned `StitchedChartSolution{:Jacobi}` returns `(p, X, Y, dY)` at time `t`, where `p`
+is the point on the geodesic, `X` its velocity, `Y` the Jacobi field, and `dY` its covariant
+derivative.
+"""
+function solve_chart_jacobi_field(
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc, dYc;
+        solver = AutoVern9(Rodas5P()), final_time::Real = 1.0,
+        check_chart_switch_kwargs = NamedTuple(), kwargs...
+    )
+    u0 = ArrayPartition(copy(a), copy(Xc), copy(Yc), copy(dYc))
+    cur_i = i0
+    cb = FunctionCallingCallback(
+        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs); func_start = false
+    )
+    retcode = SciMLBase.ReturnCode.Terminated
+    init_time = zero(final_time)
+    sols = StitchedChartSolution(M, A, :Jacobi, typeof(i0))
+    while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
+        params = (M, A, cur_i)
+        prob = ODEProblem(
+            chart_jacobi_field_problem, u0, (init_time, final_time), params; callback = cb
+        )
+        sol = solve(prob, solver; kwargs...)
+        retcode = sol.retcode
+        init_time = sol.t[end]::typeof(final_time)
+        push!(sols.sols, (sol, cur_i))
+        a_final = sol.u[end].x[1]::typeof(a)
+        new_i = get_chart_index(M, A, cur_i, a_final)
+        if new_i !== cur_i
+            transition_map!(M, u0.x[1], A, cur_i, new_i, a_final)
+            transition_map_diff!(
+                M, u0.x[2], A, cur_i, a_final, sol.u[end].x[2]::typeof(Xc), new_i
+            )
+            transition_map_diff!(
+                M, u0.x[3], A, cur_i, a_final, sol.u[end].x[3]::typeof(Yc), new_i
+            )
+            transition_map_diff!(
+                M, u0.x[4], A, cur_i, a_final, sol.u[end].x[4]::typeof(dYc), new_i
+            )
+            cur_i = new_i
+        end
     end
     return sols
 end
