@@ -140,12 +140,14 @@ function (scs::StitchedChartSolution)(t::AbstractArray)
     return map(scs, t)
 end
 
-function chart_exp_problem(u, params, t)
+function chart_exp_problem!(du, u, params, t)
     M, A, i = params
     a = u.x[1]
     dx = u.x[2]
-    ddx = -affine_connection(M, A, i, a, dx, dx)
-    return ArrayPartition(dx, ddx)
+    copyto!(du.x[1], dx)
+    affine_connection!(M, du.x[2], A, i, a, dx, dx)
+    du.x[2] .*= -1
+    return nothing
 end
 
 """
@@ -190,8 +192,9 @@ function solve_chart_exp_ode(
     sols = StitchedChartSolution(M, A, :Exp, typeof(i0))
     while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
         params = (M, A, cur_i)
-        prob =
-            ODEProblem(chart_exp_problem, u0, (init_time, final_time), params; callback = cb)
+        prob = ODEProblem{true}(
+            chart_exp_problem!, u0, (init_time, final_time), params; callback = cb
+        )
         sol = solve(prob, solver; kwargs...)
         retcode = sol.retcode
         init_time = sol.t[end]::typeof(final_time)
@@ -210,15 +213,18 @@ function solve_chart_exp_ode(
     return sols
 end
 
-function chart_pt_problem(u, params, t)
+function chart_pt_problem!(du, u, params, t)
     M, A, i = params
     a = u.x[1]
     dx = u.x[2]
     dY = u.x[3]
 
-    ddx = -affine_connection(M, A, i, a, dx, dx)
-    ddY = -affine_connection(M, A, i, a, dx, dY)
-    return ArrayPartition(dx, ddx, ddY)
+    copyto!(du.x[1], dx)
+    affine_connection!(M, du.x[2], A, i, a, dx, dx)
+    du.x[2] .*= -1
+    affine_connection!(M, du.x[3], A, i, a, dx, dY)
+    du.x[3] .*= -1
+    return nothing
 end
 
 """
@@ -248,8 +254,9 @@ function solve_chart_parallel_transport_ode(
     sols = StitchedChartSolution(M, A, :PT, typeof(i0))
     while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
         params = (M, A, cur_i)
-        prob =
-            ODEProblem(chart_pt_problem, u0, (init_time, final_time), params; callback = cb)
+        prob = ODEProblem{true}(
+            chart_pt_problem!, u0, (init_time, final_time), params; callback = cb
+        )
         sol = solve(prob, solver; kwargs...)
         retcode = sol.retcode
         init_time = sol.t[end]::typeof(final_time)
@@ -269,18 +276,25 @@ function solve_chart_parallel_transport_ode(
     return sols
 end
 
-function chart_jacobi_field_problem(u, params, t)
+function chart_jacobi_field_problem!(du, u, params, t)
     M, A, i = params
     a = u.x[1]
     dx = u.x[2]
     Y = u.x[3]
     dY = u.x[4]
 
-    ddx = -affine_connection(M, A, i, a, dx, dx)
-    dYdt = dY - affine_connection(M, A, i, a, dx, Y)
-    ddY =
-        -affine_connection(M, A, i, a, dx, dY) - riemann_tensor(M, A, i, a, Y, dx, dx)
-    return ArrayPartition(dx, ddx, dYdt, ddY)
+    copyto!(du.x[1], dx)
+    affine_connection!(M, du.x[2], A, i, a, dx, dx)
+    du.x[2] .*= -1
+    affine_connection!(M, du.x[4], A, i, a, dx, dY)
+    du.x[4] .*= -1
+    # temporarily save Riemann tensor value in du.x[3], then overwrite it with the final value later
+    riemann_tensor!(M, du.x[3], A, i, a, Y, dx, dx)
+    du.x[4] .-= du.x[3]
+    affine_connection!(M, du.x[3], A, i, a, dx, Y)
+    du.x[3] .*= -1
+    du.x[3] .+= dY
+    return nothing
 end
 
 """
@@ -313,8 +327,8 @@ function solve_chart_jacobi_field(
     sols = StitchedChartSolution(M, A, :Jacobi, typeof(i0))
     while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
         params = (M, A, cur_i)
-        prob = ODEProblem(
-            chart_jacobi_field_problem, u0, (init_time, final_time), params; callback = cb
+        prob = ODEProblem{true}(
+            chart_jacobi_field_problem!, u0, (init_time, final_time), params; callback = cb
         )
         sol = solve(prob, solver; kwargs...)
         retcode = sol.retcode

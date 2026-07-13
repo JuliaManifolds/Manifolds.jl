@@ -1127,7 +1127,7 @@ This function returns the vector `W (in induced-chart coordinates) given by
 
 # See also
 - `riemann_tensor(M, A, i, a)` which returns the full 4-tensor
-- []`affine_connection`](@ref) used to obtain connection coefficients (see [`levi_civita_affine_connection!`](@ref) for a generic implementation)
+- [`affine_connection`](@ref) used to obtain connection coefficients (see [`levi_civita_affine_connection!`](@ref) for a generic implementation)
 """
 function riemann_tensor(
         M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc, Zc;
