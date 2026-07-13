@@ -16,7 +16,6 @@ end
 @testset "Manifolds.jl" begin
     (TEST_SET ∈ ["all", "utilities", "manifolds"]) && Test.@testset "Utilities" begin
         include_test("test_ambiguities.jl")
-        include_test("test_atlases.jl")
         include_test("test_deprecated.jl")
         include_test("test_differentiation.jl")
         include_test("test_notation.jl")
@@ -25,6 +24,7 @@ end
         include_test("test_statistics.jl")
     end
     if TEST_SET ∈ ["all", "integration"]
+        include_test("test_atlases.jl")
         include_test("approx_inverse_retraction.jl")
         # manifolds requiring ODE solvers
         include_test("manifolds-old/embedded_torus.jl")
