@@ -359,17 +359,76 @@ function _jacobi_endpoint_coordinates(solution, final_time)
     return sol(final_time).x[3]
 end
 
-function _jacobi_exp_argument_matrix(M, a, Xc, A, i0, c; kwargs...)
-    n = length(c)
-    E = Matrix{eltype(c)}(undef, n, n)
-    final_time = get(kwargs, :final_time, 1.0)
-    for j in 1:n
-        ej = zero(c)
-        ej[j] = one(eltype(c))
-        solution = solve_chart_jacobi_field(M, a, Xc, A, i0, zero(c), ej; kwargs...)
-        E[:, j] .= _jacobi_endpoint_coordinates(solution, final_time)
+function _chart_jacobi_field_matrix_problem!(du, u, params, t)
+    M, A, i = params
+    a = u.x[1]
+    dx = u.x[2]
+    Y = u.x[3]
+    dY = u.x[4]
+
+    copyto!(du.x[1], dx)
+    affine_connection!(M, du.x[2], A, i, a, dx, dx)
+    du.x[2] .*= -1
+    for j in axes(Y, 2)
+        affine_connection!(M, view(du.x[4], :, j), A, i, a, dx, view(dY, :, j))
+        view(du.x[4], :, j) .*= -1
+        riemann_tensor!(M, view(du.x[3], :, j), A, i, a, view(Y, :, j), dx, dx)
+        view(du.x[4], :, j) .-= view(du.x[3], :, j)
+        affine_connection!(M, view(du.x[3], :, j), A, i, a, dx, view(Y, :, j))
+        view(du.x[3], :, j) .*= -1
+        view(du.x[3], :, j) .+= view(dY, :, j)
     end
-    return E
+    return nothing
+end
+
+function _transition_map_diff_matrix!(M, C_out, A, i_from, a, C_in, i_to)
+    for j in axes(C_in, 2)
+        transition_map_diff!(M, view(C_out, :, j), A, i_from, a, view(C_in, :, j), i_to)
+    end
+    return C_out
+end
+
+function _jacobi_exp_argument_matrix(
+        M,
+        a,
+        Xc,
+        A,
+        i0;
+        solver = AutoVern9(Rodas5P()),
+        final_time::Real = 1.0,
+        check_chart_switch_kwargs = NamedTuple(),
+        kwargs...,
+    )
+    n = length(Xc)
+    u0 = ArrayPartition(copy(a), copy(Xc), zeros(eltype(Xc), n, n), Matrix{eltype(Xc)}(I, n, n))
+    cur_i = i0
+    cb = FunctionCallingCallback(
+        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
+        func_start = false,
+    )
+    retcode = SciMLBase.ReturnCode.Terminated
+    init_time = zero(final_time)
+    while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
+        params = (M, A, cur_i)
+        prob = ODEProblem{true}(
+            _chart_jacobi_field_matrix_problem!, u0, (init_time, final_time), params; callback = cb
+        )
+        sol = solve(prob, solver; kwargs...)
+        retcode = sol.retcode
+        init_time = sol.t[end]::typeof(final_time)
+        a_final = sol.u[end].x[1]::typeof(a)
+        new_i = get_chart_index(M, A, cur_i, a_final)
+        if new_i !== cur_i
+            transition_map!(M, u0.x[1], A, cur_i, new_i, a_final)
+            transition_map_diff!(M, u0.x[2], A, cur_i, a_final, sol.u[end].x[2]::typeof(Xc), new_i)
+            _transition_map_diff_matrix!(M, u0.x[3], A, cur_i, a_final, sol.u[end].x[3], new_i)
+            _transition_map_diff_matrix!(M, u0.x[4], A, cur_i, a_final, sol.u[end].x[4], new_i)
+            cur_i = new_i
+        elseif retcode !== SciMLBase.ReturnCode.Terminated
+            return sol.u[end].x[3], cur_i, a_final
+        end
+    end
+    return u0.x[3], cur_i, u0.x[1]
 end
 
 raw"""
@@ -383,11 +442,7 @@ and `Xc` are represented in the induced basis of chart `i0` from atlas `A`.
 function solve_chart_volume_density(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...
     )
-    E = _jacobi_exp_argument_matrix(M, a, Xc, A, i0, Xc; kwargs...)
-    final_time = get(kwargs, :final_time, 1.0)
-    solution = solve_chart_jacobi_field(M, a, Xc, A, i0, zero(Xc), zero(Xc); kwargs...)
-    sol, final_i = solution.sols[end]
-    a_final = sol(final_time).x[1]
+    E, final_i, a_final = _jacobi_exp_argument_matrix(M, a, Xc, A, i0; kwargs...)
     return abs(det(E)) * sqrt(
         det_local_metric(M, A, final_i, a_final) / det_local_metric(M, A, i0, a)
     )
@@ -441,7 +496,7 @@ function solve_chart_differential_log_basepoint(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
     baseline = solve_chart_jacobi_field(M, a, Xc, A, i0, Yc, zero(Yc); kwargs...)
-    E = _jacobi_exp_argument_matrix(M, a, Xc, A, i0, Yc; kwargs...)
+    E, _, _ = _jacobi_exp_argument_matrix(M, a, Xc, A, i0; kwargs...)
     final_time = get(kwargs, :final_time, 1.0)
     dYc = -E \ _jacobi_endpoint_coordinates(baseline, final_time)
     return solve_chart_jacobi_field(M, a, Xc, A, i0, Yc, dYc; kwargs...)
@@ -460,7 +515,7 @@ chart-induced basis at `q`; the differential is the covariant derivative in
 function solve_chart_differential_log_argument(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
-    E = _jacobi_exp_argument_matrix(M, a, Xc, A, i0, Yc; kwargs...)
+    E, _, _ = _jacobi_exp_argument_matrix(M, a, Xc, A, i0; kwargs...)
     dYc = E \ Yc
     return solve_chart_jacobi_field(M, a, Xc, A, i0, zero(Yc), dYc; kwargs...)
 end
