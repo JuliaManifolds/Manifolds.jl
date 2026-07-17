@@ -63,7 +63,7 @@ Possible entries of the `expectations` dictionary are
 * for `injectivity_radius`
     - you can provide the global test for just the function,
     - you can provide the radius for a specific point with `(injectivity_radius, p)`
-    - you can provide a global or local one for retractions as well usinr `(injectivity_radius, rm)` and `injectivity_radius, p, rm`, respectively
+    - you can provide a global or local one for retractions as well using `(injectivity_radius, rm)` and `injectivity_radius, p, rm`, respectively
 * for `get_basis`, the key is a tuple of the function and the basis, e.g. `(get_basis, B) => ...` to the expected basis
 * for `get_coordinates` the key is a tuple of the function and the basis, e.g. `(get_coordinates, B) => c`
 * for `get_vector` the key is a tuple of the function, the coordinate vector, and the basis, e.g. `(get_vector, c, B) => X`
@@ -315,7 +315,18 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                     name = "injectivity_radius(M, p, $rm)", # shorten name within large suite
                 )
             end
-
+            for irm in inverse_retraction_methods
+                ismissing(irm) && continue
+                expected_irm = get_expectation(expectations, (injectivity_radius, points[1], irm))
+                expected_irm_global = get_expectation(expectations, (injectivity_radius, irm))
+                Manifolds.Test.test_injectivity_radius(
+                    M, points[1];
+                    expected_value = expected_irm,
+                    expected_global_value = expected_irm_global,
+                    retraction_method = irm,
+                    name = "injectivity_radius(M, p, $irm)",
+                )
+            end
         end
         if (inner in functions) && !ismissing(vector)
             expected_inner = get_expectation(expectations, inner)

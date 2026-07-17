@@ -286,7 +286,7 @@ function get_vector_orthonormal!(M::AbstractSphere{ℝ}, Y, p, c, ::RealNumbers)
 end
 
 _doc_injectivity_radius_sphere = raw"""
-    injectivity_radius(M::AbstractSphere[, p, ::ExponentialRetraction])
+    injectivity_radius(M::AbstractSphere[, p, ::StabilizedRetraction])
 
 Return the injectivity radius for the [`AbstractSphere`](@ref) `M`, which is globally ``π``.
 """
@@ -301,12 +301,11 @@ _doc_injectivity_radius_sphere_projection = raw"""
     injectivity_radius(M::Sphere, p, ::ProjectionRetraction)
 
 Return the injectivity radius for the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) on the
-[`AbstractSphere`](@ref), which is globally ``\frac{π}{2}``.
+[`AbstractSphere`](@ref), which is globally ``\infty``.
 """
 
 @doc "$(_doc_injectivity_radius_sphere_projection)"
 injectivity_radius(::AbstractSphere, ::ProjectionRetraction)
-
 @doc "$(_doc_injectivity_radius_sphere_projection)"
 injectivity_radius(::AbstractSphere, p, ::ProjectionRetraction)
 
@@ -317,8 +316,8 @@ end
 function injectivity_radius(M::AbstractSphere, p, m::AbstractRetractionMethod)
     return _injectivity_radius(M, p, m)
 end
-_injectivity_radius(::AbstractSphere, ::ExponentialRetraction) = π
-_injectivity_radius(::AbstractSphere, ::ProjectionRetraction) = π / 2
+_injectivity_radius(::AbstractSphere, ::StabilizedRetraction) = π
+_injectivity_radius(::AbstractSphere, ::ProjectionRetraction) = Inf
 
 @doc raw"""
     inverse_retract(M::AbstractSphere, p, q, ::ProjectionInverseRetraction)
@@ -335,6 +334,62 @@ inverse_retract(::AbstractSphere, ::Any, ::Any, ::ProjectionInverseRetraction)
 
 function inverse_retract_project!(::AbstractSphere, X, p, q)
     return (X .= q ./ real(dot(p, q)) .- p)
+end
+
+_doc_injectivity_radius_sphere_inverse_projection = raw"""
+    injectivity_radius(M::AbstractSphere, p, ::ProjectionInverseRetraction)
+
+Return the injectivity radius for the [`ProjectionInverseRetraction`](@extref `ManifoldsBase.ProjectionInverseRetraction`) on the [`AbstractSphere`](@ref), which is the largest geodesic distance ``ξ`` such that the inverse projection retraction from `p` is invertible whenever ``d_{𝕊^{d-1}}(p,q) ≤ ξ``. This is globally ``\frac{\pi}{2}``.
+"""
+
+@doc "$(_doc_injectivity_radius_sphere_inverse_projection)"
+injectivity_radius(::AbstractSphere, ::ProjectionInverseRetraction)
+
+@doc "$(_doc_injectivity_radius_sphere_inverse_projection)"
+injectivity_radius(::AbstractSphere, p, ::ProjectionInverseRetraction)
+
+function injectivity_radius(M::AbstractSphere, m::AbstractInverseRetractionMethod)
+    return _injectivity_radius(M, m)
+end
+function injectivity_radius(M::AbstractSphere, p, m::AbstractInverseRetractionMethod)
+    return _injectivity_radius(M, p, m)
+end
+
+function _injectivity_radius(M::AbstractSphere, m::LogarithmicInverseRetraction)
+    return injectivity_radius(M, StabilizedRetraction())
+end
+function _injectivity_radius(M::AbstractSphere, p, m::LogarithmicInverseRetraction)
+    return injectivity_radius(M, p, StabilizedRetraction())
+end
+_injectivity_radius(::AbstractSphere, ::ProjectionInverseRetraction) = π / 2
+function _injectivity_radius(M::AbstractSphere, p, m::ProjectionInverseRetraction)
+    return _injectivity_radius(M, m)
+end
+
+_doc_bijectivity_radius_sphere = raw"""
+    bijectivity_radius(M::AbstractSphere[, p, m::Union{AbstractRetractionMethod, AbstractInverseRetractionMethod}])
+
+Return the bijectivity radius for the abstract sphere `M` endowed with (inverse) retraction method `m`, which is the smallest radius applicable to both the tangent spaces and the Riemannian metric for which the (inverse) retraction `m` has a well-defined inverse. This radius is computed as the minimum between the injectivity radius of `M` endowed with (inverse) retraction method `m` (at `p`), and the injectivity radius of the inverse of `m` (at `p`).
+"""
+
+@doc "$(_doc_bijectivity_radius_sphere)"
+bijectivity_radius(::AbstractSphere, ::Union{AbstractRetractionMethod, AbstractInverseRetractionMethod})
+@doc"$(_doc_bijectivity_radius_sphere)"
+bijectivity_radius(::AbstractSphere, p, ::Union{AbstractRetractionMethod, AbstractInverseRetractionMethod})
+
+function bijectivity_radius(M::AbstractSphere, m::Union{AbstractRetractionMethod, AbstractInverseRetractionMethod})
+    if m ∈ (StabilizedRetraction(), StabilizedInverseRetraction())
+        return injectivity_radius(M)
+    elseif m ∈ (ProjectionRetraction(), ProjectionInverseRetraction())
+        return injectivity_radius(M, ProjectionInverseRetraction())
+    end
+end
+function bijectivity_radius(M::AbstractSphere, p, m::Union{AbstractRetractionMethod, AbstractInverseRetractionMethod})
+    if m ∈ (StabilizedRetraction(), StabilizedInverseRetraction())
+        return injectivity_radius(M, p)
+    elseif m ∈ (ProjectionRetraction(), ProjectionInverseRetraction())
+        return injectivity_radius(M, p, ProjectionInverseRetraction())
+    end
 end
 
 """

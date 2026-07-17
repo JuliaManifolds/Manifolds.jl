@@ -33,7 +33,7 @@ using ManifoldDiff
             :InvalidVectors => [p],
             :NormalVectors => [V],
             :Covectors => [ξ],
-            :RetractionMethods => [ExponentialRetraction(), ProjectionRetraction()],
+            :RetractionMethods => [StabilizedRetraction(), ProjectionRetraction()],
             :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
         ),
         # Expectations
@@ -48,7 +48,9 @@ using ManifoldDiff
             (get_vectors, DefaultOrthonormalBasis()) => :Orthonormal,
             (get_vectors, DefaultOrthogonalBasis()) => :Orthogonal,
             injectivity_radius => π,
-            (injectivity_radius, ProjectionRetraction()) => π / 2,
+            (injectivity_radius, ProjectionRetraction()) => Inf,
+            (injectivity_radius, LogarithmicInverseRetraction()) => π,
+            (injectivity_radius, ProjectionInverseRetraction()) => π / 2,
             is_default_metric => EuclideanMetric(),
             log => X, norm => π / 4,
             parallel_transport_to => parallel_transport_to(M, p, X, q),
