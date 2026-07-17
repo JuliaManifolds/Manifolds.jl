@@ -60,7 +60,7 @@ RetractionAtlas() = RetractionAtlas(ExponentialRetraction(), LogarithmicInverseR
 Calculate the affine connection on manifold `M` at point with parameters `a` in chart `i` of
 [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Xc` and `Yc` in induced basis.
 """
-function affine_connection(M::AbstractManifold, A, i, a, Xc, Yc)
+function affine_connection(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
     Zc = similar(Xc, Base.promote_type(eltype(Xc), eltype(Yc), eltype(a)))
     return affine_connection!(M, Zc, A, i, a, Xc, Yc)
 end

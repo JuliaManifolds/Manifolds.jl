@@ -578,6 +578,7 @@ function solve_chart_differential_exp_basepoint end
 function solve_chart_differential_exp_argument end
 function solve_chart_differential_log_basepoint end
 function solve_chart_differential_log_argument end
+function _jacobi_exp_argument_matrix end
 
 # TODO: Remove once the new interface is done
 function find_eps end

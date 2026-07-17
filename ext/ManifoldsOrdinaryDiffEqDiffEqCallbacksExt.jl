@@ -16,7 +16,8 @@ import Manifolds:
     solve_chart_exp_ode,
     solve_chart_jacobi_field,
     solve_chart_parallel_transport_ode,
-    solve_chart_volume_density
+    solve_chart_volume_density,
+    _jacobi_exp_argument_matrix
 using ManifoldsBase
 
 using DiffEqCallbacks
@@ -298,16 +299,33 @@ function chart_jacobi_field_problem!(du, u, params, t)
     return nothing
 end
 
-"""
+@doc raw"""
     solve_chart_jacobi_field(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc, dYc;
-        solver=AutoVern9(Rodas5P()), final_time=1.0,
-        check_chart_switch_kwargs =NamedTuple(), kwargs...
+        solver=AutoVern9(Rodas5P()), final_time::Real = 1.0,
+        check_chart_switch_kwargs = NamedTuple(), kwargs...
     )
 
 Solve the Jacobi equation along the geodesic starting at parameters `a` in chart `i0` with
 initial velocity coordinates `Xc`. `Yc` and `dYc` are, respectively, the coordinates of the
 initial Jacobi field and its initial covariant derivative in the induced basis of the chart.
+
+In chart coordinates, this solves the system
+```math
+\begin{aligned}
+\dot a^k &= X^k, &
+\dot X^k &= -\Gamma^k_{ij}(a)X^iX^j, \\
+\dot Y^k &= dY^k - \Gamma^k_{ij}(a)X^iY^j, &
+\dot{dY}^k &= -\Gamma^k_{ij}(a)X^i dY^j - R^k_{\ell ij}(a)Y^\ell X^iX^j,
+\end{aligned}
+```
+with initial conditions ``a(0) = a``, ``X(0)`` is equal to `Xc`, ``Y(0)`` is equal to `Yc`, and
+``dY(0) = dYc``. Here, `dY` represents the coordinates of
+``\nabla_{\dot\gamma}Y``. ``\Gamma^k_{ij}`` are the Christoffel symbols of the affine
+connection calculated using the mutating variant of
+[`affine_connection`](@ref affine_connection(::AbstractManifold, ::AbstractAtlas, ::Any, ::Any, ::Any, ::Any))
+and ``R^k_{\ell ij}`` are the components of the Riemann curvature tensor calculated using
+the mutating variant of [`riemann_tensor`](@ref riemann_tensor(::AbstractManifold, ::AbstractAtlas, ::Any, ::Any, ::Any, ::Any, ::Any)).
 
 The returned `StitchedChartSolution{:Jacobi}` returns `(p, X, Y, dY)` at time `t`, where `p`
 is the point on the geodesic, `X` its velocity, `Y` the Jacobi field, and `dY` its covariant
@@ -381,18 +399,44 @@ function _chart_jacobi_field_matrix_problem!(du, u, params, t)
     return nothing
 end
 
-function _transition_map_diff_matrix!(M, C_out, A, i_from, a, C_in, i_to)
+function _transition_map_diff_matrix!(M::AbstractManifold, C_out, A::AbstractAtlas, i_from, a, C_in, i_to)
     for j in axes(C_in, 2)
         transition_map_diff!(M, view(C_out, :, j), A, i_from, a, view(C_in, :, j), i_to)
     end
     return C_out
 end
 
+@doc raw"""
+    _jacobi_exp_argument_matrix(M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...)
+
+Solve the chart-coordinate geodesic and a matrix-valued Jacobi equation to compute the
+coordinate matrix of the differential of the exponential map with respect to its argument.
+
+The geodesic coordinates satisfy
+```math
+\dot a^k = X^k,
+\qquad
+\dot X^k = -\Gamma^k_{ij}(a)X^iX^j.
+```
+For the matrices ``Y`` and ``dY``, whose columns are Jacobi fields and their covariant
+derivatives, respectively, the system is
+```math
+\begin{aligned}
+\dot Y^k{}_r &= dY^k{}_r - \Gamma^k_{ij}(a)X^iY^j{}_r, \\
+\dot{dY}^k{}_r &= -\Gamma^k_{ij}(a)X^i dY^j{}_r
+    - R^k_{\ell ij}(a)Y^\ell{}_rX^iX^j.
+\end{aligned}
+```
+The initial conditions are ``a(0) = a``, ``X(0)`` is set to `Xc`, ``Y(0)`` is set to `0`, and
+``dY(0) = I``. Thus, the returned matrix ``Y(1)`` represents
+``D_X\exp_p(X)`` in the chart-induced bases. The function also returns the final chart index
+and the final point coordinates.
+"""
 function _jacobi_exp_argument_matrix(
-        M,
+        M::AbstractManifold,
         a,
         Xc,
-        A,
+        A::AbstractAtlas,
         i0;
         solver = AutoVern9(Rodas5P()),
         final_time::Real = 1.0,
@@ -431,7 +475,7 @@ function _jacobi_exp_argument_matrix(
     return u0.x[3], cur_i, u0.x[1]
 end
 
-raw"""
+@doc raw"""
     solve_chart_volume_density(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...
     )
@@ -448,13 +492,15 @@ function solve_chart_volume_density(
     )
 end
 
-raw"""
+@doc raw"""
     solve_chart_differential_exp_basepoint(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
 
 Solve the Jacobi equation for ``D_p\exp_p(X)[Y]``. The coordinate vectors
 `Xc` and `Yc` are represented in the chart-induced basis at `p`.
+
+The ODE is solved by `solve_chart_jacobi_field` with `dYc` set to `0`.
 """
 function solve_chart_differential_exp_basepoint(
         M::AbstractManifold,
@@ -468,7 +514,7 @@ function solve_chart_differential_exp_basepoint(
     return solve_chart_jacobi_field(M, a, Xc, A, i0, Yc, zero(Yc); kwargs...)
 end
 
-raw"""
+@doc raw"""
     solve_chart_differential_exp_argument(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
@@ -482,7 +528,7 @@ function solve_chart_differential_exp_argument(
     return solve_chart_jacobi_field(M, a, Xc, A, i0, zero(Yc), Yc; kwargs...)
 end
 
-raw"""
+@doc raw"""
     solve_chart_differential_log_basepoint(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
@@ -502,7 +548,7 @@ function solve_chart_differential_log_basepoint(
     return solve_chart_jacobi_field(M, a, Xc, A, i0, Yc, dYc; kwargs...)
 end
 
-raw"""
+@doc raw"""
     solve_chart_differential_log_argument(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
