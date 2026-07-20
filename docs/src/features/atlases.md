@@ -55,6 +55,10 @@ Order = [:type, :function]
 ```@docs
 Manifolds.IntegratorTerminatorNearChartBoundary
 Manifolds.estimate_distance_from_bvp
+Manifolds.solve_chart_adjoint_differential_exp_argument
+Manifolds.solve_chart_adjoint_differential_exp_basepoint
+Manifolds.solve_chart_adjoint_differential_log_argument
+Manifolds.solve_chart_adjoint_differential_log_basepoint
 Manifolds.solve_chart_differential_exp_argument
 Manifolds.solve_chart_differential_exp_basepoint
 Manifolds.solve_chart_differential_log_argument
@@ -65,4 +69,5 @@ Manifolds.solve_chart_log_bvp
 Manifolds.solve_chart_parallel_transport_ode
 Manifolds.solve_chart_volume_density
 Manifolds._jacobi_exp_argument_matrix
+Manifolds._jacobi_exp_basepoint_matrix
 ```

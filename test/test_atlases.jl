@@ -90,4 +90,21 @@ using DiffEqCallbacks, OrdinaryDiffEq, RecursiveArrayTools
         ManifoldDiff.βdifferential_log_argument,
     )
     @test dY_initial ≈ expected atol = 1.0e-8
+
+    Yq = get_vector(M, q, Yc, Bq)
+    Zc = Manifolds.solve_chart_adjoint_differential_exp_basepoint(M, a, Xc, A, i, Yc)
+    Z = get_vector(M, p, Zc, B)
+    @test isapprox(M, p, Z,  ManifoldDiff.adjoint_differential_exp_basepoint(M, p, X, Yq); atol = 1.0e-8)
+
+    Zc = Manifolds.solve_chart_adjoint_differential_exp_argument(M, a, Xc, A, i, Yc)
+    Z = get_vector(M, p, Zc, B)
+    @test isapprox(M, p, Z, ManifoldDiff.adjoint_differential_exp_argument(M, p, X, Yq); atol = 1.0e-8)
+
+    Zc = Manifolds.solve_chart_adjoint_differential_log_basepoint(M, a, Xc, A, i, Yc)
+    Z = get_vector(M, p, Zc, B)
+    @test isapprox(M, p, Z, ManifoldDiff.adjoint_differential_log_basepoint(M, p, q, Y); atol = 1.0e-8)
+
+    Zc = Manifolds.solve_chart_adjoint_differential_log_argument(M, a, Xc, A, i, Yc)
+    Z = get_vector(M, q, Zc, Bq)
+    @test isapprox(M, q, Z, ManifoldDiff.adjoint_differential_log_argument(M, p, q, Y); atol = 1.0e-8)
 end

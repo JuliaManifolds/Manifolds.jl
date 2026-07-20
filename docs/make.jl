@@ -89,6 +89,8 @@ if run_quarto || run_on_CI
     Pkg.instantiate()
     Pkg.activate(@__DIR__) # but return to the docs one before
     run(`quarto render $(tutorials_folder)`)
+    # Info to know in the event of stalling if quarto is the culprit
+    @info "Finished rendering Quarto"
 end
 
 # (d) load necessary packages for the docs
