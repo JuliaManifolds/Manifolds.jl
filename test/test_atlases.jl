@@ -94,7 +94,7 @@ using DiffEqCallbacks, OrdinaryDiffEq, RecursiveArrayTools
     Yq = get_vector(M, q, Yc, Bq)
     Zc = Manifolds.solve_chart_adjoint_differential_exp_basepoint(M, a, Xc, A, i, Yc)
     Z = get_vector(M, p, Zc, B)
-    @test isapprox(M, p, Z,  ManifoldDiff.adjoint_differential_exp_basepoint(M, p, X, Yq); atol = 1.0e-8)
+    @test isapprox(M, p, Z, ManifoldDiff.adjoint_differential_exp_basepoint(M, p, X, Yq); atol = 1.0e-8)
 
     Zc = Manifolds.solve_chart_adjoint_differential_exp_argument(M, a, Xc, A, i, Yc)
     Z = get_vector(M, p, Zc, B)
