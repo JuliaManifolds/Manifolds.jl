@@ -238,7 +238,7 @@ end
 """
     solve_chart_parallel_transport_ode(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
-        solver=AutoVern9(Rodas5P()), check_chart_switch_kwargs=NamedTuple(), final_time=1.0,
+        solver=AutoVern9(Rodas5P()), check_chart_switch_kwargs=NamedTuple(), final_time::Real=1.0,
         kwargs...
     )
 
@@ -248,7 +248,7 @@ coordinates `Xc` in the induced basis.
 """
 function solve_chart_parallel_transport_ode(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
-        solver = AutoVern9(Rodas5P()), final_time = 1.0, check_chart_switch_kwargs = NamedTuple(),
+        solver = AutoVern9(Rodas5P()), final_time::Real = 1.0, check_chart_switch_kwargs = NamedTuple(),
         kwargs...
     )
     u0 = ArrayPartition(copy(a), copy(Xc), copy(Yc))
