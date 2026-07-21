@@ -400,7 +400,7 @@ as the default vector transport method for the [`Tucker`](@ref) manifold.
 default_vector_transport_method(::Tucker) = ProjectionTransport()
 
 @doc raw""" 
-     vector_transport_to(M::Tucker, Y, p, X, q, ::ProjectionTransport) 
+    vector_transport_to(M::Tucker, Y, p, X, q, ::ProjectionTransport) 
   
 Compute the projection vector transport on the [`Tucker`](@ref) manifold by projecting 
 the tangent vector `X` onto the tangent space of `M` at `q`. 
@@ -464,32 +464,32 @@ function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T, D}, p
 
     # compute Y.U[i]
     for i in 1:D
-        vars = (Vi[i], Ui[i], Ci[i], T1, T2)
+        buffer = (Vi[i], Ui[i], Ci[i], T1, T2)
 
-        Σ_inv = (1 ./ (q.hosvd.σ[i] .^ 2))
+        Σ⁻¹ = (1 ./ (q.hosvd.σ[i] .^ 2))
 
         # first compute summand for k = i, so we can then directly write into Y.U[i] (this is only a problem if X === Y)
-        _compute_projection_summand!(Y.U̇[i], vars, p.hosvd.core, X.U̇[i], q, Σ_inv, pUi_qUi, i, false)
+        compute_projection_summand!(Y.U̇[i], buffer, p.hosvd.core, X.U̇[i], q, Σ⁻¹, pUi_qUi, i, false)
 
         # compute summand for core
-        _compute_projection_summand!(Y.U̇[i], vars, X.Ċ, p.hosvd.U[i], q, Σ_inv, pUi_qUi, i, true)
+        compute_projection_summand!(Y.U̇[i], buffer, X.Ċ, p.hosvd.U[i], q, Σ⁻¹, pUi_qUi, i, true)
 
         # compute remaining summands
         for k in 1:D
             if k ≠ i
                 factors .= pUi_qUi
                 factors[k] = XUi_qUi[k]
-                _compute_projection_summand!(Y.U̇[i], vars, p.hosvd.core, p.hosvd.U[i], q, Σ_inv, factors, i, true)
+                compute_projection_summand!(Y.U̇[i], buffer, p.hosvd.core, p.hosvd.U[i], q, Σ⁻¹, factors, i, true)
             end
         end
     end
 
     # compute Y.Ċ
-    _contract_with_factors!(Y.Ċ, T1, T2, X.Ċ, pUi_qUi, false)
+    contract_with_factors!(Y.Ċ, T1, T2, X.Ċ, pUi_qUi, false)
     for k in 1:D
         factors .= pUi_qUi
         factors[k] = XUi_qUi[k]
-        _contract_with_factors!(Y.Ċ, T1, T2, p.hosvd.core, factors, true)
+        contract_with_factors!(Y.Ċ, T1, T2, p.hosvd.core, factors, true)
     end
 
     return Y
@@ -1016,33 +1016,43 @@ function ManifoldsBase.allocate_result(M::Tucker, ::typeof(embed), p, args...)
     return Array{number_eltype(p), length(dims)}(undef, dims)
 end
 
-""" Helper function for the computation of summands in vector_transport_to_project!
+@doc raw""" 
+    compute_projection_summand!(result::Matrix{T}, buffer::NTuple{5, Array{T}}, core::Array{T, D}, Uᵢ::Matrix{T}, q::TuckerPoint{T, D}, Σ⁻¹::Vector{T}, factors::Vector{Matrix{T}}, i::Int64, add_to_result::Bool)
+
+Helper function for the computation of summands in `vector_transport_to_project!`
 Let 
 ``
-q = (C_q, U_q^1, …, U_q^D)
+q = (C_q, U_q^1, …, U_q^D)\, .
 ``
-Computes 
+and
+`` 
+\mathrm{factors} = (F_1, F_2, \ldots, F_D)\, ,
 ``
-[core ×_{j ≠ i} factors[j] ×_i Ui (I - U_q^i (U_q^i)^T)]_{(i)} * (C_q)_{(i)}^T * Σ_inv
-``
-and adds to or overwrites `result`, depending on whether `add_to_result == true`.
+This function computes 
+```math
+[\mathrm{core} ×_{j ≠ i} F_j ×_i U_i (I - U_q^i (U_q^i)^T)]_{(i)} \cdot (C_q)_{(i)}^T \cdot Σ^{-1}\, .
+```
+If `add_to_result == true`, the result is added to the matrix `result`, otherwise, `result` is overwritten.
+Note that `buffer` is a 5-tuple of arrays that are used only to store intermediate results of the computation.
+Let `dims` be the dimensions of `q` and `ranks` its ranks. Then the contents of `buffer` must be arrays with sizes: 
+
+`(dims[i], ranks[i]), (dims[i], ranks[i]), (ranks[i], ranks[i]), (ranks...), (ranks...)`.
 """
-function _compute_projection_summand!(
+function compute_projection_summand!(
         result::Matrix{T},
-        vars::NTuple{5, Array{T}},
+        buffer::NTuple{5, Array{T}},
         core::Array{T, D},
-        Ui::Matrix{T},
+        Uᵢ::Matrix{T},
         q::TuckerPoint{T, D},
-        Σ_inv::Vector{T},
+        Σ⁻¹::Vector{T},
         factors::Vector{Matrix{T}},
         i::Int64,
         add_to_result::Bool
     ) where {T, D}
-
-    V, U, E, T1, T2 = vars
-    _contract_with_partial_factors!(T1, T2, core, factors, i)
-    _contract_core_with_ginv!(E, T1, q.hosvd.core, Σ_inv, Val(i))
-    mul!(U, Ui, E)
+    V, U, E, T1, T2 = buffer
+    contract_with_partial_factors!(T1, T2, core, factors, i)
+    _contract_core_with_ginv!(E, T1, q.hosvd.core, Σ⁻¹, Val(i))
+    mul!(U, Uᵢ, E)
     V .= U
     @tullio V[n, r] += (-1) * U[j, r] * q.hosvd.U[$i][j, k] * q.hosvd.U[$i][n, k]
     if add_to_result
@@ -1053,36 +1063,54 @@ function _compute_projection_summand!(
     return result
 end
 
-"""
-Compute the tensor contraction
-``
-    result[n_1, …, n_{k-1}, r_k, n_{k+1}, …, n_D] = result[r_1, …, r_D] * factors[r_1, n_1] * … * factors[r_{k-1}, n_{k-1}] * factors[r_{k+1}, n_{k+1}] *  … * factors[r_D, n_D]
-``
-For D = 3, k = 1, e.g. result[r1, n2, n3] = core[r1, r2, r3] * factors[2][r2, n2] * factors[3][r3, n3]
-"""
-function _contract_with_partial_factors!(result::Array{T, D}, T1::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64) where {T, D}
-    T2 = result
+@doc raw"""
+    contract_with_partial_factors!(result::Array{T, D}, B::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64)
 
-    T1 .= core
+Computes the contraction of the order-``D`` tensor `core` with the factor matrices `factors` in all except the `k`-th mode.
+That is, if 
+`` 
+\mathrm{factors} = (F_1, F_2, \ldots, F_D)\, ,
+``
+this computes
+```math
+\mathrm{result} = \mathrm{core} \times_{j ≠ k} F_j \, .
+```
+For D = 3, k = 1, e.g.
+
+`result[r1, n1, n2] = core[r1, r2, r3] * factors[2][r2, n2] * factors[3][r3, n3]`.
+"""
+function contract_with_partial_factors!(result::Array{T, D}, B::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64) where {T, D}
+    T2 = result
+    B .= core
     for i in 1:D
         if i ≠ k
-            _contract_with_factor!(T2, T1, factors[i], Val(i))
-            T1, T2 = T2, T1
+            _contract_with_factor!(T2, B, factors[i], Val(i))
+            B, T2 = T2, B
         end
     end
-    result .= T1
+    result .= B
     return result
 end
 
-"""
-Compute the tensor contraction
+@doc raw"""
+    contract_with_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result::Bool)
+
+This function compute the contraction of the order-`D` tensor `core` with the factor matrices `factors`.
+That is, if 
 ``
-    result[n_1, …, n_D] = result[r_1, …, r_D] * factors[r_1, n_1] * … * factors[r_D, n_D]
+\mathrm{factors} = (F_1, F_2, \ldots, F_D)\, ,
 ``
-For D = 3, e.g. result[n1, n2, n3] = core[r1, r2, r3] * factors[1][r1, n1] * factors[2][r2, n2] * factors[3][r3, n3]
+this function computes
+```math
+\mathrm{result}= \mathrm{core} \times_{j = 1, \ldots, D} F_j
+```
+For D = 3, e.g. 
+
+`result[n1, n2, n3] = core[r1, r2, r3] * factors[1][r1, n1] * factors[2][r2, n2] * factors[3][r3, n3]`.
+
 If `add_to_result == true`, adds to the result array, otherwise overwrites the result array.
 """
-function _contract_with_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result::Bool) where {T, D}
+function contract_with_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result::Bool) where {T, D}
     _contract_with_factor!(T1, core, factors[1], Val(1))
     for i in 2:D
         _contract_with_factor!(T2, T1, factors[i], Val(i))
@@ -1104,16 +1132,16 @@ for d in 2:16
         R[J] = :r
         """
         Computes the in-place contraction of `core1` with the Moore-Penrose inverse of core2, which is given by 
-        `core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D] * Σ_inv[r]` because `core2` is all-orthogonal.
+        `core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D] * Σ⁻¹[r]` because `core2` is all-orthogonal.
         Altogether, the computed contraction is
         ``
-            result[n, r] = core1[n_1, …, n_{k-1}, n, n_{k_1}, n_D] * core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D] * Σ_inv[r]
+            result[n, r] = core1[n_1, …, n_{k-1}, n, n_{k_1}, n_D] * core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D] * Σ⁻¹[r]
         ``
-        For D=3, J=1 e.g. result[n, r] = core1[n, n_2, n_3] * core2[r, n_2, n_3] * Σ_inv[r]
+        For D=3, J=1 e.g. result[n, r] = core1[n, n_2, n_3] * core2[r, n_2, n_3] * Σ⁻¹[r]
         """
         ex = quote
-            function _contract_core_with_ginv!(result::Matrix{T}, core1::Array{T, $(d)}, core2::Array{T, $(d)}, Σ_inv::Vector{T}, ::Val{$J}) where {T}
-                return @tullio result[n, r] = core1[$(N...)] * core2[$(R...)] * Σ_inv[r]
+            function _contract_core_with_ginv!(result::Matrix{T}, core1::Array{T, $(d)}, core2::Array{T, $(d)}, Σ⁻¹::Vector{T}, ::Val{$J}) where {T}
+                return @tullio result[n, r] = core1[$(N...)] * core2[$(R...)] * Σ⁻¹[r]
             end
         end
         eval(ex)
