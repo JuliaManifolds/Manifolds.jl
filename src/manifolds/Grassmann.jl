@@ -82,6 +82,26 @@ function Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symb
     return Grassmann{field, typeof(size)}(size)
 end
 
+@doc raw"""
+    GrassmannAtlas()
+
+The standard atlas of the real Grassmann manifold ``\mathrm{Gr}(n,k)``. Its
+``\binom{n}{k}`` charts are indexed by ordered tuples `i` of `k` row indices.
+The chart indexed by `i` contains the subspaces whose corresponding `k`-by-`k`
+minor in the rows `i` is invertible.
+
+For a Stiefel representative `p`, let `pᵢ` denote this minor and let `j` be
+the complementary row indices. The coordinate map is
+
+````math
+\varphi_i([p]) = \operatorname{vec}\left((p p_i^{-1})_j\right).
+````
+
+Its inverse inserts the reshaped coordinates into the rows `j`, inserts the
+identity into the rows `i`, and orthonormalizes the resulting matrix.
+"""
+struct GrassmannAtlas <: AbstractAtlas{ℝ} end
+
 function allocation_promotion_function(::Grassmann{ℂ}, f, args::Tuple)
     return complex
 end
@@ -239,3 +259,100 @@ Return the default vector transport method for the [`Grassmann`](@ref) manifold,
 which is `ParallelTransport``()`.
 """
 default_vector_transport_method(::Grassmann) = ParallelTransport()
+
+function _grassmann_chart_rows(M::Grassmann, i::AbstractVector)
+    n, k = get_parameter(M.size)
+    rows = collect(i)
+    if length(rows) != k || !all(row -> 1 <= row <= n, rows) || length(unique(rows)) != k
+        throw(ArgumentError("A Grassmann chart index must contain $k distinct row indices in 1:$n."))
+    end
+    return rows
+end
+
+function _grassmann_chart_complement(M::Grassmann, i::AbstractVector)
+    n, _ = get_parameter(M.size)
+    return setdiff(collect(1:n), _grassmann_chart_rows(M, i))
+end
+
+@doc raw"""
+    inner(M::Grassmann, A::GrassmannAtlas, i::AbstractVector, a, Xc, Yc)
+
+Compute the Riemannian inner product of coordinate vectors `Xc` and `Yc` at
+coordinates `a` in the chart `i` of the standard [`GrassmannAtlas`](@ref).
+Writing `Z = reshape(a, n-k, k)`, `U = reshape(Xc, n-k, k)`,
+`V = reshape(Yc, n-k, k)`, and `G = I + ZᵀZ`, the formula is
+
+````math
+g_Z(U,V) = \operatorname{tr}\left(G^{-1} U^\mathsf{T}
+\left(I - ZG^{-1}Z^\mathsf{T}\right)V\right).
+````
+"""
+function inner(M::Grassmann{ℝ}, ::GrassmannAtlas, i::AbstractVector, a, Xc, Yc)
+    _grassmann_chart_rows(M, i)
+    n, k = get_parameter(M.size)
+    coordinate_dimension = k * (n - k)
+    length(a) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension chart coordinates."))
+    length(Xc) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension vector coordinates."))
+    length(Yc) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension vector coordinates."))
+    Z = reshape(a, n - k, k)
+    U = reshape(Xc, n - k, k)
+    V = reshape(Yc, n - k, k)
+    G = I + transpose(Z) * Z
+    return dot(U / G, V - Z * (G \ (transpose(Z) * V)))
+end
+
+@doc raw"""
+    affine_connection!(M::Grassmann, Zc, A::GrassmannAtlas, i, a, Xc, Yc)
+
+Store the Levi-Civita covariant derivative of `Yc` in direction `Xc` in
+`Zc`, using the standard [`GrassmannAtlas`](@ref). Writing
+`Z = reshape(a, n-k, k)`, `U = reshape(Xc, n-k, k)`,
+`V = reshape(Yc, n-k, k)`, and `G = I + ZᵀZ`, the coordinate expression is
+
+````math
+\nabla_U V = -UG^{-1}Z^\mathsf{T}V - VG^{-1}Z^\mathsf{T}U.
+````
+"""
+function affine_connection!(
+        M::Grassmann{ℝ},
+        Zc,
+        ::GrassmannAtlas,
+        i::AbstractVector,
+        a,
+        Xc,
+        Yc,
+    )
+    _grassmann_chart_rows(M, i)
+    n, k = get_parameter(M.size)
+    coordinate_dimension = k * (n - k)
+    length(a) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension chart coordinates."))
+    length(Xc) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension vector coordinates."))
+    length(Yc) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension vector coordinates."))
+    length(Zc) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension output coordinates."))
+    Z = reshape(a, n - k, k)
+    U = reshape(Xc, n - k, k)
+    V = reshape(Yc, n - k, k)
+    G = I + transpose(Z) * Z
+    Zc .= vec(-(U * (G \ (transpose(Z) * V)) + V * (G \ (transpose(Z) * U))))
+    return Zc
+end
+
+@doc raw"""
+    det_local_metric(M::Grassmann, A::GrassmannAtlas, i::AbstractVector, a)
+
+Return the determinant of the local metric in the standard
+[`GrassmannAtlas`](@ref) at coordinates `a` in chart `i`.
+"""
+function det_local_metric(M::Grassmann{ℝ}, A::GrassmannAtlas, i::AbstractVector, a)
+    return det(local_metric(M, A, i, a))
+end
+
+@doc raw"""
+    inverse_chart_injectivity_radius(M::Grassmann, A::GrassmannAtlas, i)
+
+Return the injectivity radius of an affine chart in the standard
+[`GrassmannAtlas`](@ref), which is infinite.
+"""
+function inverse_chart_injectivity_radius(M::Grassmann{ℝ}, ::GrassmannAtlas, i::AbstractVector)
+    return Inf
+end

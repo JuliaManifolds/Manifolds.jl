@@ -1,4 +1,6 @@
 include("../header.jl")
+using DiffEqCallbacks, OrdinaryDiffEq
+using ForwardDiff
 
 @testset "Grassmann" begin
     @testset "Real" begin
@@ -408,5 +410,66 @@ include("../header.jl")
         p2 = convert(ProjectorPoint, p)
         @test get_embedding(M, typeof(p2)) == Euclidean(3, 3; parameter = :field)
         @test get_total_space(M) == Stiefel(3, 2; parameter = :field)
+    end
+
+    @testset "GrassmannAtlas" begin
+        M = Grassmann(4, 2)
+        A = GrassmannAtlas()
+        charts = ([1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4])
+        a = [0.1, -0.2, 0.3, -0.4]
+        c = [0.2, -0.1, 0.4, 0.3]
+        d = [-0.3, 0.5, 0.1, -0.2]
+
+        @test Manifolds.get_chart_index(M, A, [1, 2], 3 * a) == [1, 4]
+        for i in charts
+            @testset "chart $i" begin
+                p = get_point(M, A, i, a)
+                @test is_point(M, p; error = :error)
+                @test get_parameters(M, A, i, p) ≈ a
+                @test Manifolds.get_chart_index(M, A, i, a) ==
+                    Manifolds.get_chart_index(M, A, p)
+                @test Manifolds.inverse_chart_injectivity_radius(M, A, i) == Inf
+
+                selected_i = Manifolds.get_chart_index(M, A, p)
+                @test selected_i in charts
+                selected_a = get_parameters(M, A, selected_i, p)
+                @test isapprox(M, p, get_point(M, A, selected_i, selected_a))
+
+                B = induced_basis(M, A, i)
+                X = get_vector(M, p, c, B)
+                Y = get_vector(M, p, d, B)
+                @test is_vector(M, p, X; error = :error, atol = 1.0e-14)
+                @test get_coordinates(M, p, X, B) ≈ c
+                @test Manifolds.inner(M, A, i, a, c, c) ≈ Manifolds.inner(M, p, X, X)
+                @test Manifolds.inner(M, A, i, a, c, d) ≈ Manifolds.inner(M, p, X, Y)
+                @test Manifolds.det_local_metric(M, A, i, a) > 0
+
+                # TODO: check against the embedding-based implementation of the Levi-Civita connection
+                Zc = affine_connection(M, A, i, a, c, d)
+                @test Zc ≈ Manifolds.levi_civita_affine_connection(M, A, i, a, c, d)
+                affine_connection!(M, Zc, A, i, a, c, d)
+                @test Zc ≈ Manifolds.levi_civita_affine_connection(M, A, i, a, c, d)
+            end
+        end
+
+        @test_throws DomainError get_parameters(M, A, [1, 2], [0.0 0.0; 0.0 0.0; 1.0 0.0; 0.0 1.0])
+        @test_throws ArgumentError get_point(M, A, [1, 1], a)
+
+        @testset "chart integration" begin
+            i = [1, 2]
+            Xc = [0.04, -0.03, 0.02, 0.01]
+            Yc = [-0.02, 0.03, 0.01, -0.04]
+            p = get_point(M, A, i, a)
+            B = induced_basis(M, A, i)
+            X = get_vector(M, p, Xc, B)
+            Y = get_vector(M, p, Yc, B)
+            q = exp(M, p, X)
+
+            exp_solution = Manifolds.solve_chart_exp_ode(
+                M, a, Xc, A, i; final_time = 1.0, abstol = 1.0e-10, reltol = 1.0e-10,
+            )
+            q_chart, X_chart = exp_solution(1.0)
+            @test isapprox(M, q_chart, q; atol = 1.0e-8)
+        end
     end
 end

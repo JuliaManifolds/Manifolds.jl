@@ -736,7 +736,7 @@ export AbstractMetric,
     RiemannianMetric,
     StiefelSubmersionMetric,
     WarpedMetric
-export AbstractAtlas, RetractionAtlas
+export AbstractAtlas, GrassmannAtlas, RetractionAtlas
 # Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 # Retraction types
