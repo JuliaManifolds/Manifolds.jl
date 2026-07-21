@@ -1017,16 +1017,16 @@ function ManifoldsBase.allocate_result(M::Tucker, ::typeof(embed), p, args...)
 end
 
 @doc raw""" 
-    compute_projection_summand!(result::Matrix{T}, buffer::NTuple{5, Array{T}}, core::Array{T, D}, Uᵢ::Matrix{T}, q::TuckerPoint{T, D}, Σ⁻¹::Vector{T}, factors::Vector{Matrix{T}}, i::Int64, add_to_result::Bool)
+    compute_projection_summand!(result::Matrix{T}, buffer::NTuple{5, Array{T}}, core::Array{T, D}, Uᵢ::Matrix{T}, q::TuckerPoint{T, D}, Σ⁻¹::Vector{T}, factors::Vector{Matrix{T}}, i::Int64, add_to_result::Bool) where {T, D}
 
 Helper function for the computation of summands in `vector_transport_to_project!`
 Let 
 ``
-q = (C_q, U_q^1, …, U_q^D)\, .
+q = (C_q, U_q^1, …, U_q^D)
 ``
 and
 `` 
-\mathrm{factors} = (F_1, F_2, \ldots, F_D)\, ,
+\mathrm{factors} = (F_1, F_2, \ldots, F_D)\, .
 ``
 This function computes 
 ```math
@@ -1064,9 +1064,9 @@ function compute_projection_summand!(
 end
 
 @doc raw"""
-    contract_with_partial_factors!(result::Array{T, D}, B::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64)
+    contract_with_partial_factors!(result::Array{T, D}, B::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64) where {T, D}
 
-Computes the contraction of the order-``D`` tensor `core` with the factor matrices `factors` in all except the `k`-th mode.
+Computes the contraction of the order-``D`` tensor `core` with the quadratic factor matrices `factors` in all except the `k`-th mode.
 That is, if 
 `` 
 \mathrm{factors} = (F_1, F_2, \ldots, F_D)\, ,
@@ -1078,6 +1078,7 @@ this computes
 For D = 3, k = 1, e.g.
 
 `result[r1, n1, n2] = core[r1, r2, r3] * factors[2][r2, n2] * factors[3][r3, n3]`.
+The array `B` is a buffer array used to store intermediate results and must have the same size as `core`.
 """
 function contract_with_partial_factors!(result::Array{T, D}, B::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64) where {T, D}
     T2 = result
@@ -1093,9 +1094,9 @@ function contract_with_partial_factors!(result::Array{T, D}, B::Array{T, D}, cor
 end
 
 @doc raw"""
-    contract_with_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result::Bool)
+    contract_with_factors!(result::Array{T, D}, B1::Array{T, D}, B2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result::Bool) where {T, D}
 
-This function compute the contraction of the order-`D` tensor `core` with the factor matrices `factors`.
+This function compute the contraction of the order-`D` tensor `core` with the quadratic factor matrices `factors`.
 That is, if 
 ``
 \mathrm{factors} = (F_1, F_2, \ldots, F_D)\, ,
@@ -1109,17 +1110,18 @@ For D = 3, e.g.
 `result[n1, n2, n3] = core[r1, r2, r3] * factors[1][r1, n1] * factors[2][r2, n2] * factors[3][r3, n3]`.
 
 If `add_to_result == true`, adds to the result array, otherwise overwrites the result array.
+The arrays `B1` and `B2` are buffer arrays used to store intermediate results and must have the same size as `core`.
 """
-function contract_with_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result::Bool) where {T, D}
-    _contract_with_factor!(T1, core, factors[1], Val(1))
+function contract_with_factors!(result::Array{T, D}, B1::Array{T, D}, B2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result::Bool) where {T, D}
+    _contract_with_factor!(B1, core, factors[1], Val(1))
     for i in 2:D
-        _contract_with_factor!(T2, T1, factors[i], Val(i))
-        T1, T2 = T2, T1
+        _contract_with_factor!(B2, B1, factors[i], Val(i))
+        B1, B2 = B2, B1
     end
     if add_to_result
-        result .+= T1
+        result .+= B1
     else
-        result .= T1
+        result .= B1
     end
     return result
 end
