@@ -68,6 +68,5 @@ Manifolds.solve_chart_jacobi_field
 Manifolds.solve_chart_log_bvp
 Manifolds.solve_chart_parallel_transport_ode
 Manifolds.solve_chart_volume_density
-Manifolds._jacobi_exp_argument_matrix
-Manifolds._jacobi_exp_basepoint_matrix
+Manifolds._jacobi_exp_matrix
 ```
