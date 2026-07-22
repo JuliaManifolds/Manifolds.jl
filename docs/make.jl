@@ -88,7 +88,7 @@ if run_quarto || run_on_CI
     # For a breaking release -> also set the tutorials folder to the most recent version
     Pkg.instantiate()
     Pkg.activate(@__DIR__) # but return to the docs one before
-    run(`quarto render $(tutorials_folder)`)
+    run(`quarto render $(tutorials_folder) --log-level debug`)
     # Info to know in the event of stalling if quarto is the culprit
     @info "Finished rendering Quarto"
 end
