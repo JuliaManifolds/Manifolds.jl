@@ -197,6 +197,124 @@ include("../header.jl")
             "Tucker((4, 5, 6), (2, 3, 4), ℝ; parameter=:field)"
     end
 
+    @testset "projection transport" begin
+        atol = eps(Float64)
+        rtol = sqrt(eps(Float64))
+
+        dims = (4, 4, 4)
+        ranks = (2, 3, 4)
+        M = Tucker(dims, ranks)
+
+        p_U1 = 1 / sqrt(2) * Float64[
+            1 0
+            1  0
+            0 -1
+            0  1
+        ]
+        p_U2 = 1 / sqrt(2) * Float64[
+            1 0 1
+            0 1 0
+            -1 0 1
+            0 1 0
+        ]
+        p_U3 = 1 / sqrt(3) * Float64[
+            1 0 -1 1
+            1  1 1 0
+            -1 1 0 1
+            0 1 -1 -1
+        ]
+        p_core = reshape(
+            Float64[
+                0.0 0.0 1.0 0.0
+                1.0 1 / √2 0.0 0.0
+                1.0 -1 / √2 0.0 0.0
+                0.0 0.0 0.0 0.0
+                0.0 0.0 0.0 1.0
+                0.0 0.0 0.0 0.0
+            ],
+            ranks,
+        )
+        p̃ = TuckerPoint(p_core, p_U1, p_U2, p_U3)
+
+        q_U1 = 1 / sqrt(2) * Float64[
+            0 1
+            1 0
+            0 -1
+            1 0
+        ]
+        q_U2 = 1 / sqrt(3) * Float64[
+            -1 1 1
+            1 0 1
+            0 1 -1
+            -1 -1 0
+        ]
+        q_U3 = Matrix{Float64}(I, 4, 4)
+        q_core = reshape(
+            Float64[
+                0.0 0.0 -1 / √2 1 / √2
+                -1 / √2 -0.5 0.0 0.0
+                1.0 -1 / √2 0.0 0.0
+                0.0 0.0 0.0 0.0
+                0.0 0.0 1 / √2 1 / √2
+                1 / √2 0.5 0.0 0.0
+            ],
+            ranks,
+        )
+        q̃ = TuckerPoint(q_core, q_U1, q_U2, q_U3)
+
+        X_U1 = 1 / sqrt(2) * Float64[
+            0 -1
+            0 1
+            1 0
+            1 0
+        ]
+        X_U2 = 1 / sqrt(2) * Float64[
+            0 0 0
+            -1 0 0
+            0 0 0
+            1 0 0
+        ]
+        X_U3 = zeros(Float64, 4, 4)
+        X_core = reshape(
+            Float64[
+                1 / √2 0.5 1 / √2 0.0
+                1 / √2 0.5 -1 / √2 0.0
+                1 / √2 -0.5 0.0 0.0
+                -1 / √2 0.5 0.0 0.0
+                0.0 0.0 0.0 1 / √2
+                0.0 0.0 0.0 -1 / √2
+            ],
+            ranks,
+        )
+
+        X̃ = TuckerTangentVector(X_core, (X_U1, X_U2, X_U3))
+
+        # test for out-of-place update
+        p = allocate(p̃)
+        copyto!(p, p̃)
+        q = allocate(q̃)
+        copyto!(q, q̃)
+        X = copy(X̃)
+        Y_manual = allocate(X)
+        Y = allocate(X)
+
+        Y_manual = project!(M, Y_manual, q, embed(M, p, X))
+        Y = vector_transport_to!(M, Y, p, X, q, ProjectionTransport())
+        @test isapprox(M, q, Y_manual, Y, atol = atol, rtol = rtol)
+
+        # test transport for in-place update
+        p = allocate(p̃)
+        copyto!(p, p̃)
+        q = allocate(q̃)
+        copyto!(q, q̃)
+        X = copy(X̃)
+        Y_manual = allocate(X)
+
+        Y_manual = project!(M, Y_manual, q, embed(M, p, X))
+        vector_transport_to!(M, X, p, X, q, ProjectionTransport())
+        @test isapprox(M, q, Y_manual, X, atol = atol, rtol = rtol)
+    end
+
     @testset "product of Tucker manifolds" begin
         M = ProductManifold(
             Tucker((18, 16, 14), (4, 3, 3)),
