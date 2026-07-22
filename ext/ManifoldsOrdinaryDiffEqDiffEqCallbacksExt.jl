@@ -22,8 +22,7 @@ import Manifolds:
     solve_chart_parallel_transport_ode,
     solve_chart_volume_density,
     _adjoint_coordinate_map,
-    _jacobi_exp_argument_matrix,
-    _jacobi_exp_basepoint_matrix
+    _jacobi_exp_matrix
 using ManifoldsBase
 
 using DiffEqCallbacks
@@ -413,10 +412,11 @@ function _transition_map_diff_matrix!(M::AbstractManifold, C_out, A::AbstractAtl
 end
 
 @doc raw"""
-    _jacobi_exp_argument_matrix(M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...)
+    _jacobi_exp_matrix(M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...)
 
 Solve the chart-coordinate geodesic and a matrix-valued Jacobi equation to compute the
-coordinate matrix of the differential of the exponential map with respect to its argument.
+coordinate matrix of the differential of the exponential map with respect to either its
+argument (if `wrt` is set to `:argument`) or its basepoint (if `wrt` is set to `:basepoint`).
 
 The geodesic coordinates satisfy
 ```math
@@ -433,12 +433,15 @@ derivatives, respectively, the system is
     - R^k_{\ell ij}(a)Y^\ell{}_rX^iX^j.
 \end{aligned}
 ```
-The initial conditions are ``a(0) = a``, ``X(0)`` is set to `Xc`, ``Y(0)`` is set to `0`, and
-``dY(0) = I``. Thus, the returned matrix ``Y(1)`` represents
-``D_X\exp_p(X)`` in the chart-induced bases. The function also returns the final chart index
-and the final point coordinates.
+The initial conditions are ``a(0) = a``, ``X(0)`` is set to `Xc`.
+If the keyword argument `wrt` is set to `:basepoint`, then ``Y(0)`` is set to `0`, and
+``dY(0) = I``. If the keyword argument `wrt` is set to `:argument`, then ``Y(0) = I``, and ``dY(0) = 0``.
+Thus, the returned matrix ``Y(1)`` represents
+``D_X\exp_p(X)`` in the chart-induced bases if `wrt` is set to `:argument` and
+``D_p\exp_p(X)`` if `wrt` is set to `:basepoint`. The function also returns the final chart
+index and the final point coordinates.
 """
-function _jacobi_exp_argument_matrix(
+function _jacobi_exp_matrix(
         M::AbstractManifold,
         a,
         Xc,
@@ -447,65 +450,17 @@ function _jacobi_exp_argument_matrix(
         solver = AutoVern9(Rodas5P()),
         final_time::Real = 1.0,
         check_chart_switch_kwargs = NamedTuple(),
+        wrt::Symbol,
         kwargs...,
     )
     n = length(Xc)
-    u0 = ArrayPartition(copy(a), copy(Xc), zeros(eltype(Xc), n, n), Matrix{eltype(Xc)}(I, n, n))
-    cur_i = i0
-    cb = FunctionCallingCallback(
-        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
-        func_start = false,
-    )
-    retcode = SciMLBase.ReturnCode.Terminated
-    init_time = zero(final_time)
-    while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
-        params = (M, A, cur_i)
-        prob = ODEProblem{true}(
-            _chart_jacobi_field_matrix_problem!, u0, (init_time, final_time), params; callback = cb
-        )
-        sol = solve(prob, solver; kwargs...)
-        retcode = sol.retcode
-        init_time = sol.t[end]::typeof(final_time)
-        a_final = sol.u[end].x[1]::typeof(a)
-        new_i = get_chart_index(M, A, cur_i, a_final)
-        if new_i !== cur_i
-            transition_map!(M, u0.x[1], A, cur_i, new_i, a_final)
-            transition_map_diff!(M, u0.x[2], A, cur_i, a_final, sol.u[end].x[2]::typeof(Xc), new_i)
-            _transition_map_diff_matrix!(M, u0.x[3], A, cur_i, a_final, sol.u[end].x[3], new_i)
-            _transition_map_diff_matrix!(M, u0.x[4], A, cur_i, a_final, sol.u[end].x[4], new_i)
-            cur_i = new_i
-        elseif retcode !== SciMLBase.ReturnCode.Terminated
-            return sol.u[end].x[3], cur_i, a_final
-        end
+    if wrt === :argument
+        u0 = ArrayPartition(copy(a), copy(Xc), zeros(eltype(Xc), n, n), Matrix{eltype(Xc)}(I, n, n))
+    elseif wrt === :basepoint
+        u0 = ArrayPartition(copy(a), copy(Xc), Matrix{eltype(Xc)}(I, n, n), zeros(eltype(Xc), n, n))
+    else
+        throw(ArgumentError("`wrt` must be either `:basepoint` or `:argument`."))
     end
-    return u0.x[3], cur_i, u0.x[1]
-end
-
-@doc raw"""
-    _jacobi_exp_basepoint_matrix(M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...)
-
-Solve the chart-coordinate geodesic and a matrix-valued Jacobi equation to compute the
-coordinate matrix of the differential of the exponential map with respect to its base point.
-
-The geodesic and Jacobi equations are the same as in
-[`_jacobi_exp_argument_matrix`](@ref). The initial conditions are ``a(0) = a``,
-``X(0) = Xc``, ``Y(0) = I``, and ``dY(0) = 0``. Thus, the returned matrix ``Y(1)``
-represents ``D_p\exp_p(X)`` in the chart-induced bases. The function also returns the final
-chart index and the final point coordinates.
-"""
-function _jacobi_exp_basepoint_matrix(
-        M::AbstractManifold,
-        a,
-        Xc,
-        A::AbstractAtlas,
-        i0;
-        solver = AutoVern9(Rodas5P()),
-        final_time::Real = 1.0,
-        check_chart_switch_kwargs = NamedTuple(),
-        kwargs...,
-    )
-    n = length(Xc)
-    u0 = ArrayPartition(copy(a), copy(Xc), Matrix{eltype(Xc)}(I, n, n), zeros(eltype(Xc), n, n))
     cur_i = i0
     cb = FunctionCallingCallback(
         IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
@@ -567,7 +522,7 @@ and `Xc` are represented in the induced basis of chart `i0` from atlas `A`.
 function solve_chart_volume_density(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...
     )
-    E, final_i, a_final = _jacobi_exp_argument_matrix(M, a, Xc, A, i0; kwargs...)
+    E, final_i, a_final = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
     return abs(det(E)) * sqrt(
         det_local_metric(M, A, final_i, a_final) / det_local_metric(M, A, i0, a)
     )
@@ -623,7 +578,7 @@ function solve_chart_differential_log_basepoint(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
     baseline = solve_chart_jacobi_field(M, a, Xc, A, i0, Yc, zero(Yc); kwargs...)
-    E, _, _ = _jacobi_exp_argument_matrix(M, a, Xc, A, i0; kwargs...)
+    E, _, _ = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
     final_time = get(kwargs, :final_time, 1.0)
     dYc = -E \ _jacobi_endpoint_coordinates(baseline, final_time)
     return solve_chart_jacobi_field(M, a, Xc, A, i0, Yc, dYc; kwargs...)
@@ -642,7 +597,7 @@ chart-induced basis at `q`; the differential is the covariant derivative in
 function solve_chart_differential_log_argument(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
-    E, _, _ = _jacobi_exp_argument_matrix(M, a, Xc, A, i0; kwargs...)
+    E, _, _ = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
     dYc = E \ Yc
     return solve_chart_jacobi_field(M, a, Xc, A, i0, zero(Yc), dYc; kwargs...)
 end
@@ -661,7 +616,7 @@ at `p`.
 function solve_chart_adjoint_differential_exp_basepoint(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
-    B, final_i, a_final = _jacobi_exp_basepoint_matrix(M, a, Xc, A, i0; kwargs...)
+    B, final_i, a_final = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :basepoint, kwargs...)
     return _adjoint_coordinate_map(M, A, i0, a, B, final_i, a_final, Yc)
 end
 
@@ -679,7 +634,7 @@ at `p`.
 function solve_chart_adjoint_differential_exp_argument(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
-    E, final_i, a_final = _jacobi_exp_argument_matrix(M, a, Xc, A, i0; kwargs...)
+    E, final_i, a_final = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
     return _adjoint_coordinate_map(M, A, i0, a, E, final_i, a_final, Yc)
 end
 
@@ -696,8 +651,8 @@ basis of the initial chart. `p` is the point with coordinates `a` in chart `i0`.
 function solve_chart_adjoint_differential_log_basepoint(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
-    E, _, _ = _jacobi_exp_argument_matrix(M, a, Xc, A, i0; kwargs...)
-    B, _, _ = _jacobi_exp_basepoint_matrix(M, a, Xc, A, i0; kwargs...)
+    E, _, _ = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
+    B, _, _ = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :basepoint, kwargs...)
     return _adjoint_coordinate_map(M, A, i0, a, -(E \ B), i0, a, Yc)
 end
 
@@ -715,7 +670,7 @@ coordinates `Xc` in the induced basis of chart `i0` at `p`.
 function solve_chart_adjoint_differential_log_argument(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
     )
-    E, final_i, a_final = _jacobi_exp_argument_matrix(M, a, Xc, A, i0; kwargs...)
+    E, final_i, a_final = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
     return _adjoint_coordinate_map(M, A, final_i, a_final, E \ I, i0, a, Yc)
 end
 

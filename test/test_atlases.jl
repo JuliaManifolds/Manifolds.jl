@@ -108,12 +108,12 @@ using LinearAlgebra
         Z = get_vector(M, q, Zc, Bq)
         @test isapprox(M, q, Z, ManifoldDiff.adjoint_differential_log_argument(M, p, q, Y); atol = 1.0e-8)
 
-        (m_jebm, i_jebm, a_jebm) = Manifolds._jacobi_exp_basepoint_matrix(M, a, Xc, A, i; final_time = 0.0)
+        (m_jebm, i_jebm, a_jebm) = Manifolds._jacobi_exp_matrix(M, a, Xc, A, i; wrt = :basepoint, final_time = 0.0)
         @test m_jebm ≈ I
         @test i_jebm == i
         @test a_jebm ≈ a
 
-        (m_jeam, i_jeam, a_jeam) = Manifolds._jacobi_exp_argument_matrix(M, a, Xc, A, i; final_time = 0.0)
+        (m_jeam, i_jeam, a_jeam) = Manifolds._jacobi_exp_matrix(M, a, Xc, A, i; wrt = :argument, final_time = 0.0)
         @test norm(m_jeam) < 1.0e-16
         @test i_jeam == i
         @test a_jeam ≈ a

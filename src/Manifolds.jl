@@ -582,8 +582,7 @@ function solve_chart_adjoint_differential_exp_basepoint end
 function solve_chart_adjoint_differential_exp_argument end
 function solve_chart_adjoint_differential_log_basepoint end
 function solve_chart_adjoint_differential_log_argument end
-function _jacobi_exp_argument_matrix end
-function _jacobi_exp_basepoint_matrix end
+function _jacobi_exp_matrix end
 function _adjoint_coordinate_map end
 
 # TODO: Remove once the new interface is done
