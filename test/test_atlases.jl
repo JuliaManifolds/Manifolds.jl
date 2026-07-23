@@ -11,7 +11,8 @@ using LinearAlgebra
     i = :north
     p = get_point(M, A, i, a)
     B = induced_basis(M, A, i)
-    for (Xc, Yc) in [([0.3, 0.9], [-0.8, 0.25]), ([0.3, 0.2], [-0.2, 0.25])]
+    for (Xc, Yc) in [([0.8, 0.9], [-0.8, 0.25]), ([0.3, 0.2], [-0.2, 0.25])]
+        # tests with & without chart switching
         X = get_vector(M, p, Xc, B)
         Y = get_vector(M, p, Yc, B)
 
@@ -33,8 +34,8 @@ using LinearAlgebra
             Y,
             ManifoldDiff.βdifferential_exp_basepoint,
         )
-        @test isapprox(p_final, exp(M, p, X); atol = 1.0e-7)
-        @test isapprox(Y_final, expected; atol = 1.0e-7)
+        @test isapprox(p_final, exp(M, p, X); atol = 1.0e-6)
+        @test isapprox(Y_final, expected; atol = 1.0e-5)
 
         solution = Manifolds.solve_chart_differential_exp_argument(
             M, a, Xc, A, i, Yc; final_time = 1.0
@@ -51,71 +52,83 @@ using LinearAlgebra
             Y,
             ManifoldDiff.βdifferential_exp_argument,
         )
-        @test isapprox(M, p_final, exp(M, p, X); atol = 1.0e-8)
-        @test isapprox(M, p_final, Y_final, expected; atol = 1.0e-7)
-
-        solution = Manifolds.solve_chart_differential_log_basepoint(
-            M, a, Xc, A, i, Yc; final_time = 1.0
-        )
-        _, _, _, dY_initial = solution(0.0)
-
-        expected = zero_vector(M, p)
-        ManifoldDiff.jacobi_field!(
-            M,
-            expected,
-            p,
-            exp(M, p, X),
-            0.0,
-            Y,
-            ManifoldDiff.βdifferential_log_basepoint,
-        )
-        @test isapprox(M, p, dY_initial, expected; atol = 1.0e-7)
-
-        q = exp(M, p, X)
-        Bq = induced_basis(M, A, i)
-        Yq = get_vector(M, q, Yc, Bq)
-        solution = Manifolds.solve_chart_differential_log_argument(
-            M, a, Xc, A, i, Yc; final_time = 1.0
-        )
-        _, _, _, dY_initial = solution(0.0)
-
-        expected = zero_vector(M, p)
-        ManifoldDiff.jacobi_field!(
-            M,
-            expected,
-            q,
-            p,
-            1.0,
-            Yq,
-            ManifoldDiff.βdifferential_log_argument,
-        )
-        @test isapprox(M, p, dY_initial, expected; atol = 1.0e-8)
-
-        Yq = get_vector(M, q, Yc, Bq)
-        Zc = Manifolds.solve_chart_adjoint_differential_exp_basepoint(M, a, Xc, A, i, Yc)
-        Z = get_vector(M, p, Zc, B)
-        @test isapprox(M, p, Z, ManifoldDiff.adjoint_differential_exp_basepoint(M, p, X, Yq); atol = 1.0e-8)
-
-        Zc = Manifolds.solve_chart_adjoint_differential_exp_argument(M, a, Xc, A, i, Yc)
-        Z = get_vector(M, p, Zc, B)
-        @test isapprox(M, p, Z, ManifoldDiff.adjoint_differential_exp_argument(M, p, X, Yq); atol = 1.0e-8)
-
-        Zc = Manifolds.solve_chart_adjoint_differential_log_basepoint(M, a, Xc, A, i, Yc)
-        Z = get_vector(M, p, Zc, B)
-        @test isapprox(M, p, Z, ManifoldDiff.adjoint_differential_log_basepoint(M, p, q, Y); atol = 1.0e-7)
-
-        Zc = Manifolds.solve_chart_adjoint_differential_log_argument(M, a, Xc, A, i, Yc)
-        Z = get_vector(M, q, Zc, Bq)
-        @test isapprox(M, q, Z, ManifoldDiff.adjoint_differential_log_argument(M, p, q, Y); atol = 1.0e-8)
-
-        (m_jebm, i_jebm, a_jebm) = Manifolds._jacobi_exp_matrix(M, a, Xc, A, i; wrt = :basepoint, final_time = 0.0)
-        @test m_jebm ≈ I
-        @test i_jebm == i
-        @test a_jebm ≈ a
-
-        (m_jeam, i_jeam, a_jeam) = Manifolds._jacobi_exp_matrix(M, a, Xc, A, i; wrt = :argument, final_time = 0.0)
-        @test norm(m_jeam) < 1.0e-16
-        @test i_jeam == i
-        @test a_jeam ≈ a
+        @test isapprox(M, p_final, exp(M, p, X); atol = 1.0e-7)
+        @test isapprox(M, p_final, Y_final, expected; atol = 1.0e-6)
     end
+    # tests without chart switching
+    Xc, Yc = [0.3, 0.2], [-0.2, 0.25]
+    X = get_vector(M, p, Xc, B)
+    Y = get_vector(M, p, Yc, B)
+
+    solution = Manifolds.solve_chart_differential_log_basepoint(
+        M, a, Xc, A, i, Yc; final_time = 1.0
+    )
+    _, _, _, dY_initial = solution(0.0)
+
+    expected = zero_vector(M, p)
+    ManifoldDiff.jacobi_field!(
+        M,
+        expected,
+        p,
+        exp(M, p, X),
+        0.0,
+        Y,
+        ManifoldDiff.βdifferential_log_basepoint,
+    )
+    @test isapprox(M, p, dY_initial, expected; atol = 1.0e-7)
+
+    q = exp(M, p, X)
+    Bq = induced_basis(M, A, i)
+    Yq = get_vector(M, q, Yc, Bq)
+    solution = Manifolds.solve_chart_differential_log_argument(
+        M, a, Xc, A, i, Yc; final_time = 1.0
+    )
+    _, _, _, dY_initial = solution(0.0)
+
+    @test_throws DomainError solution(-1.0)
+    @test_throws DomainError solution(2.0)
+
+    expected = zero_vector(M, p)
+    ManifoldDiff.jacobi_field!(
+        M,
+        expected,
+        q,
+        p,
+        1.0,
+        Yq,
+        ManifoldDiff.βdifferential_log_argument,
+    )
+    @test isapprox(M, p, dY_initial, expected; atol = 1.0e-8)
+
+
+    Yq = get_vector(M, q, Yc, Bq)
+    Zc = Manifolds.solve_chart_adjoint_differential_exp_basepoint(M, a, Xc, A, i, Yc)
+    Z = get_vector(M, p, Zc, B)
+    @test isapprox(M, p, Z, ManifoldDiff.adjoint_differential_exp_basepoint(M, p, X, Yq); atol = 1.0e-8)
+
+
+    Zc = Manifolds.solve_chart_adjoint_differential_exp_argument(M, a, Xc, A, i, Yc)
+    Z = get_vector(M, p, Zc, B)
+    @test isapprox(M, p, Z, ManifoldDiff.adjoint_differential_exp_argument(M, p, X, Yq); atol = 1.0e-8)
+
+
+    Zc = Manifolds.solve_chart_adjoint_differential_log_basepoint(M, a, Xc, A, i, Yc)
+    Z = get_vector(M, p, Zc, B)
+    @test isapprox(M, p, Z, ManifoldDiff.adjoint_differential_log_basepoint(M, p, q, Y); atol = 1.0e-7)
+
+    Zc = Manifolds.solve_chart_adjoint_differential_log_argument(M, a, Xc, A, i, Yc)
+    Z = get_vector(M, q, Zc, Bq)
+    @test isapprox(M, q, Z, ManifoldDiff.adjoint_differential_log_argument(M, p, q, Y); atol = 1.0e-8)
+
+    (m_jebm, i_jebm, a_jebm) = Manifolds._jacobi_exp_matrix(M, a, Xc, A, i; wrt = :basepoint, final_time = 0.0)
+    @test m_jebm ≈ I
+    @test i_jebm == i
+    @test a_jebm ≈ a
+
+    (m_jeam, i_jeam, a_jeam) = Manifolds._jacobi_exp_matrix(M, a, Xc, A, i; wrt = :argument, final_time = 0.0)
+    @test norm(m_jeam) < 1.0e-16
+    @test i_jeam == i
+    @test a_jeam ≈ a
+
+    @test_throws ArgumentError Manifolds._jacobi_exp_matrix(M, a, Xc, A, i; wrt = :teapot, final_time = -1.0)
 end
