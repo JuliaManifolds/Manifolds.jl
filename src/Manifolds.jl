@@ -464,6 +464,7 @@ include("manifolds/FlagOrthogonal.jl")
 include("manifolds/FlagStiefel.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
+include("manifolds/GramianDetOneMatrices.jl")
 include("manifolds/HeisenbergMatrices.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/Hyperrectangle.jl")
@@ -619,6 +620,7 @@ export Euclidean,
     Flag,
     GeneralizedGrassmann,
     GeneralizedStiefel,
+    GramianDetOneMatrices,
     Grassmann,
     HamiltonianMatrices,
     HeisenbergMatrices,
