@@ -483,6 +483,7 @@ include("manifolds/StiefelCanonicalMetric.jl")
 include("manifolds/StiefelSubmersionMetric.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
+include("manifolds/Submersion.jl")
 include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
 include("manifolds/SPDFixedDeterminant.jl")
@@ -649,6 +650,7 @@ export Euclidean,
     Sphere,
     SphereSymmetricMatrices,
     Stiefel,
+    SubmersionManifold,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
     SPDFixedDeterminant,
