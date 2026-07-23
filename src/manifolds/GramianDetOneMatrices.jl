@@ -22,16 +22,16 @@ struct GramianDetOneMatrices{T} <: AbstractManifold{ℝ}
 end
 
 function GramianDetOneMatrices(n::Int, k::Int; parameter::Symbol = :type)
-    size = ManifoldsBase.wrap_type_parameter(parameter, (n,k))
+    size = ManifoldsBase.wrap_type_parameter(parameter, (n, k))
     return GramianDetOneMatrices{typeof(size)}(size)
 end
 
 function representation_size(M::GramianDetOneMatrices{Tuple{Int, Int}})
-    return (get_parameter(M.size)[1],get_parameter(M.size)[2])
+    return (get_parameter(M.size)[1], get_parameter(M.size)[2])
 end
 
 function representation_size(::GramianDetOneMatrices{ManifoldsBase.TypeParameter{Tuple{n, k}}}) where {n, k}
-    return (n,k)
+    return (n, k)
 end
 
 
@@ -44,10 +44,10 @@ whether `p'*p` has a determinant of ``1``.
 The check is performed with `isapprox` and all keyword arguments are passed to this
 """
 function check_point(M::GramianDetOneMatrices, p; kwargs...)
-    if !isapprox(det(p'*p), 1; kwargs...)
+    if !isapprox(det(p' * p), 1; kwargs...)
         return DomainError(
-            det(p'*p),
-            "The point $(p) does not lie on $(M), since its determinant is $(det(p'*p)) and not 1.",
+            det(p' * p),
+            "The point $(p) does not lie on $(M), since its determinant is $(det(p' * p)) and not 1.",
         )
     end
     return nothing
@@ -61,16 +61,16 @@ Check whether `X` is a tangent vector to manifold point `p` on the
 with `trace(inv(p'*p)*p'*X)=0` .
 """
 function check_vector(M::GramianDetOneMatrices, p, X; kwargs...)
-    if !isapprox(tr(inv(p'*p)*p'*X), 0; kwargs...)
+    if !isapprox(tr(inv(p' * p) * p' * X), 0; kwargs...)
         return DomainError(
-            tr(inv(p'*p)*p'*X),
-            "The tangent vector $(X) does not lie in the Tangent space at $(p) of $(M), since $(tr(inv(p'*p)*p'*X)) is not zero.",
+            tr(inv(p' * p) * p' * X),
+            "The tangent vector $(X) does not lie in the Tangent space at $(p) of $(M), since $(tr(inv(p' * p) * p' * X)) is not zero.",
         )
     end
     return nothing
 end
 
-	
+
 embed(::GramianDetOneMatrices, p) = p
 embed(::GramianDetOneMatrices, p, X) = X
 
@@ -88,15 +88,15 @@ end
 
 function ManifoldsBase.get_embedding_type(::GramianDetOneMatrices)
     return ManifoldsBase.EmbeddedSubmanifoldType()
- end
-	
+end
+
 function manifold_dimension(M::GramianDetOneMatrices{Tuple{Int, Int}})
-    return get_parameter(M.size)[1]*get_parameter(M.size)[2]-1
+    return get_parameter(M.size)[1] * get_parameter(M.size)[2] - 1
 end
 
 #Todo: Doku
 function manifold_dimension(::GramianDetOneMatrices{ManifoldsBase.TypeParameter{Tuple{n, k}}}) where {n, k}
-    return n*k-1
+    return n * k - 1
 end
 
 @doc raw"""
@@ -109,17 +109,17 @@ project(::GramianDetOneMatrices, p)
 
 function project!(M::GramianDetOneMatrices, q, p)
     k = get_parameter(M.size)[2]
-    grdetp = det(p'*p)
+    grdetp = det(p' * p)
     isapprox(grdetp, 1) && return copyto!(q, p)
-    q .= p./(grdetp^(1/2/k))
+    q .= p ./ (grdetp^(1 / 2 / k))
     return q
 end
 
 #Todo: Doku
 function retract_project!(M::GramianDetOneMatrices, q, p, X)
-    q .= p+X
-    qq = copy(M,q)
-    return project!(M,q,qq)
+    q .= p + X
+    qq = copy(M, q)
+    return project!(M, q, qq)
 end
 # Todo: Doku
 default_retraction_method(::GramianDetOneMatrices) = ProjectionRetraction()
@@ -139,16 +139,16 @@ project(::GramianDetOneMatrices, p, X)
 function project!(G::GramianDetOneMatrices, Y, p, X)
 
     n, k = get_parameter(M.size)
-    A = inv(p'*p)
-	Y.=p*A
- 	alpha = dot(X,Y)/sum(A)# inner(get_embedding(G),p,X,Y)/ inner(get_embedding(G),p,Y,Y)
-	Y .*= -alpha
-	Y .+= X
-	return Y
+    A = inv(p' * p)
+    Y .= p * A
+    alpha = dot(X, Y) / sum(A) # inner(get_embedding(G),p,X,Y)/ inner(get_embedding(G),p,Y,Y)
+    Y .*= -alpha
+    Y .+= X
+    return Y
 end
 
-function inner(G::GramianDetOneMatrices,p,X,Y)
-    return inner(get_embedding(G),p,X,Y)
+function inner(G::GramianDetOneMatrices, p, X, Y)
+    return inner(get_embedding(G), p, X, Y)
 end
 
 #distance(::GramianDetOneMatrices, p, q, r::Real = 2) = norm(p - reshape(q,size(p)), r)
@@ -160,20 +160,19 @@ function get_vectors(
         kwargs...,
     )
     n, k = get_parameter(M.size)
-    pp = copy(M,p)
-    A = pp'*pp
-    q = pp/A
-    pperp = nullspace([reshape(q,n*k,1) zeros(n*k, n*k-1)]')
-    V=[reshape(pperp[:,i],n,k) for i in 1:n*k-1]
+    pp = copy(M, p)
+    A = pp' * pp
+    q = pp / A
+    pperp = nullspace([reshape(q, n * k, 1) zeros(n * k, n * k - 1)]')
+    V = [reshape(pperp[:, i], n, k) for i in 1:(n * k - 1)]
     return V
 end
 
 zero_vector!(::GramianDetOneMatrices, X, p) = fill!(X, 0.0)
 
-
 function get_vector_orthonormal!(M::GramianDetOneMatrices, Y, p, c, N::RealNumbers)
     V = get_vectors(M, p, DefaultOrthonormalBasis())
-    fill!(Y,0.0)
+    fill!(Y, 0.0)
     length(c) < length(V) && error(
         "Coordinate vector too short. Expected $(length(V)), but only got $(length(c)) entries.",
     )
@@ -183,7 +182,7 @@ function get_vector_orthonormal!(M::GramianDetOneMatrices, Y, p, c, N::RealNumbe
     return Y
 end
 
-# TODO: brauchen wir das?
+# TODO: brauchen wir das? (RB: Nö, das sollte als Default existieren, die nachfolgende ist die wichtige)
 function Random.rand!(M::GramianDetOneMatrices, pX; kwargs...)
     return rand!(Random.default_rng(), M, pX; kwargs...)
 end
@@ -195,6 +194,7 @@ function Random.rand!(
         vector_at = nothing,
         kwargs...,
     )
+    #TODO: Also distignuish point p and tangent vector X (vector_at is set)
     rand!(rng, get_embedding(M), pX; kwargs...)
     return pX
 end
