@@ -3,6 +3,7 @@ project:
   output-dir: ../docs/src/tutorials
   render:
     - "*.qmd"
+    - "!working-in-charts.qmd"
 
 crossref:
   fig-prefix: Figure

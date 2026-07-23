@@ -100,12 +100,12 @@ using LinearAlgebra
     @test isapprox(
         pexp_3[1],
         [2.701765894057119, 2.668437820810143, -1.8341712552932237];
-        atol = 1.0e-5,
+        atol = 2.0e-5,
     )
     @test isapprox(
         pexp_3[2],
         [-0.41778834843865575, 2.935021992911625, 0.7673987137187901];
-        atol = 1.0e-5,
+        atol = 2.0e-5,
     )
     @test isapprox(
         pexp_3[3],

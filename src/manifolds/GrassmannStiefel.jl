@@ -518,3 +518,126 @@ which is given by a zero matrix the same size as `p`.
 zero_vector(::Grassmann, ::Any...)
 
 zero_vector!(::Grassmann, X, p) = fill!(X, 0)
+
+# GrassmannAtlas
+
+function _grassmann_largest_minor_rows(p, k)
+    n = size(p, 1)
+    rows = collect(1:k)
+    best_rows = copy(rows)
+    best_minor = zero(real(eltype(p)))
+    while true
+        minor = abs(det(p[rows, :]))
+        if minor > best_minor
+            best_minor = minor
+            best_rows .= rows
+        end
+
+        position = k
+        while position >= 1 && rows[position] == n - k + position
+            position -= 1
+        end
+        position == 0 && break
+        rows[position] += 1
+        for next_position in (position + 1):k
+            rows[next_position] = rows[next_position - 1] + 1
+        end
+    end
+    iszero(best_minor) && throw(DomainError(p, "The point has no invertible $k-by-$k row minor."))
+    return best_rows
+end
+
+@doc raw"""
+    get_chart_index(M::Grassmann, A::GrassmannAtlas, p)
+    get_chart_index(M::Grassmann, A::GrassmannAtlas, i, a)
+
+Return a chart index suitable for a point `p` or coordinates `a` in chart `i`.
+For a point, the index of the row minor with the largest absolute determinant is
+returned, breaking ties lexicographically. For coordinates, the represented
+point is reconstructed and the same selection rule is applied.
+"""
+function get_chart_index(M::Grassmann{ℝ}, ::GrassmannAtlas, p)
+    _, k = get_parameter(M.size)
+    return _grassmann_largest_minor_rows(p, k)
+end
+function get_chart_index(M::Grassmann{ℝ}, A::GrassmannAtlas, i::AbstractVector, a)
+    return get_chart_index(M, A, get_point(M, A, i, a))
+end
+
+@doc raw"""
+    get_parameters!(M::Grassmann, a, A::GrassmannAtlas, i, p)
+
+Store the standard affine coordinates of `p` in `a` for the chart indexed by
+the row tuple `i`. The selected row minor of `p` must be invertible.
+"""
+function get_parameters!(M::Grassmann{ℝ}, a, ::GrassmannAtlas, i::AbstractVector, p)
+    rows = _grassmann_chart_rows(M, i)
+    complement = _grassmann_chart_complement(M, i)
+    p_rows = p[rows, :]
+    iszero(det(p_rows)) && throw(DomainError(p, "The point does not belong to chart $i."))
+    a .= vec((p / p_rows)[complement, :])
+    return a
+end
+
+@doc raw"""
+    get_point!(M::Grassmann, p, A::GrassmannAtlas, i::AbstractVector, a)
+
+Store in `p` the point represented by affine coordinates `a` in the chart of
+the standard [`GrassmannAtlas`](@ref) indexed by `i`.
+"""
+function get_point!(M::Grassmann{ℝ}, p, ::GrassmannAtlas, i::AbstractVector, a)
+    rows = _grassmann_chart_rows(M, i)
+    complement = _grassmann_chart_complement(M, i)
+    n, k = get_parameter(M.size)
+    length(a) == k * (n - k) || throw(DimensionMismatch("Expected $(k * (n - k)) chart coordinates."))
+    fill!(p, zero(eltype(p)))
+    p[rows, :] .= Matrix{eltype(p)}(I, k, k)
+    p[complement, :] .= reshape(a, n - k, k)
+    return project!(M, p, p)
+end
+
+@doc raw"""
+    get_coordinates_induced_basis!(M::Grassmann, c, p, X, B::InducedBasis{<:Any, <:Any, <:GrassmannAtlas})
+
+Store in `c` the coordinates of a tangent vector `X` at `p` with respect to
+the basis induced by the standard [`GrassmannAtlas`](@ref).
+"""
+function get_coordinates_induced_basis!(
+        M::Grassmann{ℝ},
+        c,
+        p,
+        X,
+        B::InducedBasis{ℝ, TangentSpaceType, <:GrassmannAtlas},
+    )
+    rows = _grassmann_chart_rows(M, B.i)
+    complement = _grassmann_chart_complement(M, B.i)
+    p_rows = p[rows, :]
+    normalized_p = p / p_rows
+    normalized_X = X / p_rows
+    c .= vec(normalized_X[complement, :] .- normalized_p[complement, :] * normalized_X[rows, :])
+    return c
+end
+
+@doc raw"""
+    get_vector_induced_basis!(M::Grassmann, X, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:GrassmannAtlas})
+
+Store in `X` the tangent vector at `p` represented by coordinates `c` with
+respect to the basis induced by the standard [`GrassmannAtlas`](@ref).
+"""
+function get_vector_induced_basis!(
+        M::Grassmann{ℝ},
+        X,
+        p,
+        c,
+        B::InducedBasis{ℝ, TangentSpaceType, <:GrassmannAtlas},
+    )
+    rows = _grassmann_chart_rows(M, B.i)
+    complement = _grassmann_chart_complement(M, B.i)
+    n, k = get_parameter(M.size)
+    length(c) == k * (n - k) || throw(DimensionMismatch("Expected $(k * (n - k)) basis coordinates."))
+    fill!(X, zero(eltype(X)))
+    X[complement, :] .= reshape(c, n - k, k)
+    X .= X * p[rows, :]
+    project!(M, X, p, X)
+    return X
+end

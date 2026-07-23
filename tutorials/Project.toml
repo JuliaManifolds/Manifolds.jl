@@ -1,5 +1,5 @@
 [deps]
-BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d"
+BoundaryValueDiffEqMIRK = "1a22d4ce-7765-49ea-b6f2-13c8438986a6"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -20,7 +20,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 path = ".."
 
 [compat]
-BoundaryValueDiffEq = "4, 5"
+BoundaryValueDiffEqMIRK = "1.17"
 CSV = "0.10"
 CairoMakie = "0.15"
 DataFrames = "1"

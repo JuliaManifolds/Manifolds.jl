@@ -572,6 +572,18 @@ function estimate_distance_from_bvp end
 
 function solve_chart_exp_ode end
 function solve_chart_parallel_transport_ode end
+function solve_chart_jacobi_field end
+function solve_chart_volume_density end
+function solve_chart_differential_exp_basepoint end
+function solve_chart_differential_exp_argument end
+function solve_chart_differential_log_basepoint end
+function solve_chart_differential_log_argument end
+function solve_chart_adjoint_differential_exp_basepoint end
+function solve_chart_adjoint_differential_exp_argument end
+function solve_chart_adjoint_differential_log_basepoint end
+function solve_chart_adjoint_differential_log_argument end
+function _jacobi_exp_matrix end
+function _adjoint_coordinate_map end
 
 # TODO: Remove once the new interface is done
 function find_eps end
@@ -723,7 +735,7 @@ export AbstractMetric,
     RiemannianMetric,
     StiefelSubmersionMetric,
     WarpedMetric
-export AbstractAtlas, RetractionAtlas
+export AbstractAtlas, GrassmannAtlas, RetractionAtlas
 # Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 # Retraction types
