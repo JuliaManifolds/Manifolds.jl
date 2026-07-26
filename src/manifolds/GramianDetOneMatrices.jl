@@ -1,8 +1,9 @@
+#TODO: Maybe discuss name and use “UnitVolumeMatrices”?
 @doc raw"""
     GramianDetOneMatrices{T} <: AbstractDecoratorManifold{ℝ}
 
 The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
-consisting of the real- or complex-valued matrices of gramian determinant one,
+consisting of the real- or complex-valued matrices of Gramian determinant one,
 that is the set
 
 ```math
@@ -13,32 +14,22 @@ The tangent space at any point `p` is the set of matrices `X` satisfying `tr(p(p
 
 # Constructor
 
-    GramianDetOneMatrices(n::Int)
+    GramianDetOneMatrices(n, k; parameter = :type)
 
 Generate the manifold of ``n×k`` matrices of gramian determinant one.
 """
 struct GramianDetOneMatrices{T} <: AbstractManifold{ℝ}
     size::T
 end
-
 function GramianDetOneMatrices(n::Int, k::Int; parameter::Symbol = :type)
     size = ManifoldsBase.wrap_type_parameter(parameter, (n, k))
     return GramianDetOneMatrices{typeof(size)}(size)
 end
 
-function representation_size(M::GramianDetOneMatrices{Tuple{Int, Int}})
-    return (get_parameter(M.size)[1], get_parameter(M.size)[2])
-end
-
-function representation_size(::GramianDetOneMatrices{ManifoldsBase.TypeParameter{Tuple{n, k}}}) where {n, k}
-    return (n, k)
-end
-
-
 @doc raw"""
     check_point(M::GramianDetOneMatrices{n}, p; kwargs...)
 
-Check whether `p` is a valid manifold point on the [`DeterminantOneMatrices`](@ref) `M`, i.e.
+Check whether `p` is a valid manifold point on the [`GramianDetOneMatrices`](@ref) `M`, i.e.
 whether `p'*p` has a determinant of ``1``.
 
 The check is performed with `isapprox` and all keyword arguments are passed to this
@@ -53,12 +44,12 @@ function check_point(M::GramianDetOneMatrices, p; kwargs...)
     return nothing
 end
 
-"""
+@doc raw"""
     check_vector(M::GramianDetOneMatrices{n,k}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`DeterminantOneMatrices`](@ref) `M`, which are all matrices `X`of size ``n×k``
-with `trace(inv(p'*p)*p'*X)=0` .
+[`GramianDetOneMatrices`](@ref) `M`, which are all matrices `X`of size ``n×k``
+with ``\mathrm{tr}((p'*p)^{-1} p' X)=0``.
 """
 function check_vector(M::GramianDetOneMatrices, p, X; kwargs...)
     if !isapprox(tr(inv(p' * p) * p' * X), 0; kwargs...)
@@ -70,16 +61,28 @@ function check_vector(M::GramianDetOneMatrices, p, X; kwargs...)
     return nothing
 end
 
+"""
+    default_retraction_method(M::GramianDetOneMatrices)
+
+Return the default retraction method for the [`GramianDetOneMatrices`](@ref) manifold `M`,
+which is the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`)
+"""
+default_retraction_method(::GramianDetOneMatrices) = ProjectionRetraction()
 
 embed(::GramianDetOneMatrices, p) = p
 embed(::GramianDetOneMatrices, p, X) = X
 
-#Todo: Doku
+"""
+    get_embedding(M::GramianDetOneMatrices{(n,k)})
+
+Return the embedding manifold of the [`GramianDetOneMatrices`](@ref) `M`,
+which is the space of matrices ``ℝ^{n×k}``, see [`Euclidean`](@ref)`(n, k)`.
+"""
+get_embedding(::GramianDetOneMatrices)
+
 function get_embedding(::GramianDetOneMatrices{ManifoldsBase.TypeParameter{Tuple{n, k}}}) where {n, k}
     return Euclidean(n, k)
 end
-
-#Todo: Doku
 function get_embedding(M::GramianDetOneMatrices{Tuple{Int, Int}})
     n = get_parameter(M.size)[1]
     k = get_parameter(M.size)[2]
@@ -90,13 +93,21 @@ function ManifoldsBase.get_embedding_type(::GramianDetOneMatrices)
     return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
-function manifold_dimension(M::GramianDetOneMatrices{Tuple{Int, Int}})
-    return get_parameter(M.size)[1] * get_parameter(M.size)[2] - 1
+# TODO: Check whether necessary, the submanifold should pass this on I think?
+# otherwise switch to embedding_type `IsometricallyEmbeddedManifoldType`, cf. `Sphere`,
+# which is the way to specify we inherthe the inner product from the embedding manifold
+function inner(G::GramianDetOneMatrices, p, X, Y)
+    return inner(get_embedding(G), p, X, Y)
 end
 
-#Todo: Doku
-function manifold_dimension(::GramianDetOneMatrices{ManifoldsBase.TypeParameter{Tuple{n, k}}}) where {n, k}
-    return n * k - 1
+"""
+    manifold_dimension(M::GramianDetOneMatrices{(n, k)})
+
+Return the dimension of the [`GramianDetOneMatrices`](@ref) manifold `M`, which is
+given by ``n*k - 1`` for ``n×k`` matrices.
+"""
+function manifold_dimension(M::GramianDetOneMatrices)
+    return manifold_dimension(get_embedding(M)) - 1
 end
 
 @doc raw"""
@@ -115,30 +126,18 @@ function project!(M::GramianDetOneMatrices, q, p)
     return q
 end
 
-#Todo: Doku
-function retract_project!(M::GramianDetOneMatrices, q, p, X)
-    q .= p + X
-    qq = copy(M, q)
-    return project!(M, q, qq)
-end
-# Todo: Doku
-default_retraction_method(::GramianDetOneMatrices) = ProjectionRetraction()
-
 @doc raw"""
     project(G::GramianDetOneMatrices, p, X)
     project!(G::GramianDetOneMatrices, Y, p, X)
 
 Orthogonally project ``X ∈ ℝ^{n×k}`` onto the tangent space of ``p`` to the
-[`DeterminantOneMatrices`](@ref).
+[`GramianDetOneMatrices`](@ref).
 TODO Dokumentiere Formel
 
 """
 project(::GramianDetOneMatrices, p, X)
 
-
-function project!(G::GramianDetOneMatrices, Y, p, X)
-
-    n, k = get_parameter(M.size)
+function project!(M::GramianDetOneMatrices, Y, p, X)
     A = inv(p' * p)
     Y .= p * A
     alpha = dot(X, Y) / sum(A) # inner(get_embedding(G),p,X,Y)/ inner(get_embedding(G),p,Y,Y)
@@ -147,17 +146,29 @@ function project!(G::GramianDetOneMatrices, Y, p, X)
     return Y
 end
 
-function inner(G::GramianDetOneMatrices, p, X, Y)
-    return inner(get_embedding(G), p, X, Y)
+"""
+    representation_size(M::GramianDetOneMatrices)
+
+Return the size of points on the [`GramianDetOneMatrices`](@ref) manifold `M`.
+"""
+function representation_size(M::GramianDetOneMatrices{Tuple{Int, Int}})
+    return (get_parameter(M.size)[1], get_parameter(M.size)[2])
+end
+function representation_size(::GramianDetOneMatrices{ManifoldsBase.TypeParameter{Tuple{n, k}}}) where {n, k}
+    return (n, k)
+end
+
+# TODO: Necessary? With project (see above) this should be available automatically?
+function retract_project!(M::GramianDetOneMatrices, q, p, X)
+    q .= p + X
+    qq = copy(M, q)
+    return project!(M, q, qq)
 end
 
 #distance(::GramianDetOneMatrices, p, q, r::Real = 2) = norm(p - reshape(q,size(p)), r)
 
 function get_vectors(
-        M::GramianDetOneMatrices,
-        p,
-        B::DefaultOrthonormalBasis{ℝ, TangentSpaceType};
-        kwargs...,
+        M::GramianDetOneMatrices, p, ::DefaultOrthonormalBasis; kwargs...,
     )
     n, k = get_parameter(M.size)
     pp = copy(M, p)
@@ -167,8 +178,6 @@ function get_vectors(
     V = [reshape(pperp[:, i], n, k) for i in 1:(n * k - 1)]
     return V
 end
-
-zero_vector!(::GramianDetOneMatrices, X, p) = fill!(X, 0.0)
 
 function get_vector_orthonormal!(M::GramianDetOneMatrices, Y, p, c, N::RealNumbers)
     V = get_vectors(M, p, DefaultOrthonormalBasis())
@@ -182,11 +191,7 @@ function get_vector_orthonormal!(M::GramianDetOneMatrices, Y, p, c, N::RealNumbe
     return Y
 end
 
-# TODO: brauchen wir das? (RB: Nö, das sollte als Default existieren, die nachfolgende ist die wichtige)
-function Random.rand!(M::GramianDetOneMatrices, pX; kwargs...)
-    return rand!(Random.default_rng(), M, pX; kwargs...)
-end
-# TODO: gescheit implementieren:
+# TODO: gescheit implementieren – und dokumentieren...aktuell gibt dies auch noch Dinge zurück, die nicht GramianDetOne sind
 function Random.rand!(
         rng::AbstractRNG,
         M::GramianDetOneMatrices,
@@ -207,3 +212,5 @@ function Base.show(io::IO, M::GramianDetOneMatrices{Tuple{Int, Int}})
     k = get_parameter(M.size)[2]
     return print(io, "GramianDetOneMatrices($(n), $(k); parameter=:field)")
 end
+
+zero_vector!(::GramianDetOneMatrices, X, p) = fill!(X, 0.0)

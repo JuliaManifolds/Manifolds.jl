@@ -187,6 +187,7 @@ makedocs(;
                 "Flag" => "manifolds/flag.md",
                 "Generalized Stiefel" => "manifolds/generalizedstiefel.md",
                 "Generalized Grassmann" => "manifolds/generalizedgrassmann.md",
+                "Gramian Determinant One" => "manifolds/gramiandetonematrices.md",
                 "Grassmann" => "manifolds/grassmann.md",
                 "Hamiltonian" => "manifolds/hamiltonian.md",
                 "Heisenberg matrices" => "manifolds/heisenberg.md",

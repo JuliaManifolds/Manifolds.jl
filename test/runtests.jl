@@ -35,6 +35,7 @@ end
         include_test("manifolds/test_determinant_one_matrices.jl")
         include_test("manifolds/test_cholesky_space.jl")
         include_test("manifolds/test_circle.jl")
+        include_test("manifolds/test_gram_det_one_matrices.jl")
         include_test("manifolds/test_orthogonal_matrices.jl")
         include_test("manifolds/test_sphere.jl")
         include_test("manifolds/test_general_unitary.jl")
