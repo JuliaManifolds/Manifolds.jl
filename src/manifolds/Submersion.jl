@@ -1,3 +1,4 @@
+# TODO : Check whether it is a good idea to store the manifold dimension k
 @doc raw"""
     SubmersionManifold{F1, F2, F3} <: AbstractManifold{ℝ}
 
@@ -25,6 +26,10 @@ See also [Boumal:2023, Section 8.14](@cite), which is here simplified to a singl
 * `Dh::DH`: The differential ``Dh(p)[X]`` of the submersion function ``h`` with signature `(N, p, X) -> a`.
 * `D²h::DDH`: The second differential of the submersion function ``h``.
 * `embedding::M`: The manifold ``\mathcal N`` into which the submersion is defined.
+
+## Constructor
+
+    SubmersionManifold(h, Dh, embedding; D²h = nothing)
 """
 struct SubmersionManifold{M<:AbstractManifold{ℝ}, H, DH, DDH} <: AbstractManifold{ℝ}
     h::H
