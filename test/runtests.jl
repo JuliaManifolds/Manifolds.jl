@@ -37,6 +37,7 @@ end
         include_test("manifolds/test_circle.jl")
         include_test("manifolds/test_orthogonal_matrices.jl")
         include_test("manifolds/test_sphere.jl")
+        include_test("manifolds/test_submersion_manifold.jl")
         include_test("manifolds/test_general_unitary.jl")
         include_test("manifolds/test_heisenberg_matrices.jl")
         include_test("manifolds/test_stiefel.jl")

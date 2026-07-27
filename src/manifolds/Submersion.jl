@@ -1,64 +1,74 @@
 # TODO: doku
 struct SubmersionManifold{F1, F2, F3} <: AbstractManifold{ℝ}
-    c::F1
-    c_prime::F2
-    c_prime_2::F3
+    c::F1 #TODO: Following Boumal I would probably call it h?
+    c_prime::F2 # TODO: Domain unclear: A differential? Dc(p) is a matrix? or is Dc(p)[X] a linear operator?
+    c_prime_2::F3 # TODO: and how is this meant to be implemented? It is also not used at all?
     n::Int
     dim_domain::Int
     dim_codomain::Int
 end
 
 # n ist dim(M) = (dim_domain - dim_codomain). Muss eigentlich nicht übergeben werden, aber der Konstruktor funktioniert in der Datei, in welcher diese Included wird, nur mit n (auch nach mehrmaligem Neustart)
+#TODO: Without seeing that script, I can not comment in this.
 
-function check_point(M::Submersion, p; kwargs...)
+#TODO: Docs
+function check_point(M::SubmersionManifold, p; kwargs...)
     if !isapprox(M.c(p), 0; kwargs...)
         return DomainError(
             M.c(p),
-            "Punkt liegt nicht auf der Untermannigfaltigkeit"
+            "The point $(p) does not lie on $(M), since c(p) is not 0.",
         )
     end
     return nothing
 end
 
-function check_vector(M::Submersion, p, v; kwargs...)
-    is_point(M, p; kwargs...)
+#TODO: Docs
+function check_vector(M::SubmersionManifold, p, v; kwargs...)
+    #TODO: Why just the very first entry? Dc(p)[X] should be the zero vector (the kernel of the differential is the tangent space)
     if !isapprox((M.c_prime(p) * v)[1], 0; kwargs...)
         return DomainError(
-            M.c(p),
-            "Vektor liegt nicht in T_p_M"
+            M.c(p), # TODO: This is the wrong term?
+            "The vector $(v) does not lie in the tangent space at $(p) of $(M), since Dc(p)[v](p) is not 0.",
         )
     end
     return nothing
 end
 
-function get_embedding(M::Submersion)
+#TODO: Docs
+function get_embedding(M::SubmersionManifold)
+    #TODO: One could actually submerse into _any_ manifold if we wanted to.
+    #...we would just have to store the manifold in the type (and would no longer need dim_codomain?)
     return Euclidean(manifold_dimension(M); field = ℝ)
 end
 
-
-function representation_size(M::Submersion)
+#TODO: Docs
+function representation_size(M::SubmersionManifold)
+    # TODO: Not sure why this would be the case? We would represent them in the manifold we submerse into.
     return (M.dim_domain,)
 end
 
-
-function manifold_dimension(M::Submersion)
-    return M.dim_domain - M.dim_codomain
+#TODO: Docs
+function manifold_dimension(M::SubmersionManifold)
+    return M.dim_domain - M.dim_codomain #TODO: When storing n we could also return n
 end
 
-function inner(M::Submersion, p, v, w)
+#TODO: Docs – but we could also just set the right embedding mode as for the sphere?
+function inner(M::SubmersionManifold, p, v, w)
     return dot(v, w)
 end
 
 
 #Hilsmethode: Erstellt die Matrix für das Sattelpunktprobelm für die nichtlineare Projektion
-function erstelle_Matrix_Sattel(M::Submersion, p)
+#TODO: Docs – approach unclear, source unclear
+function erstelle_Matrix_Sattel(M::SubmersionManifold, p)
     A = zeros(M.dim_domain + M.dim_codomain, M.dim_domain + M.dim_codomain)
     A = vcat(hcat(Matrix(I, M.dim_domain, M.dim_domain), transpose(M.c_prime(p))), hcat(M.c_prime(p), zeros(M.dim_codomain, M.dim_codomain)))
     return A
 end
 
 #Punkt aus R^n wird auf M projiziert (nichtlineare Projektion)
-function project!(M::Submersion, q, p)
+#TODO: Docs – especially where it is from and that we should probably add keywords?
+function project!(M::SubmersionManifold, q, p)
     p_curr = p
     c_val = M.c(p_curr)
     while LinearAlgebra.norm(c_val) > 1.0e-10
@@ -73,42 +83,34 @@ function project!(M::Submersion, q, p)
     return q
 end
 
-#lineare Projektion eines Vektors v \in R^n nach  T_p_M --> Vektortransport
-function project!(M::Submersion, w, p, v)
+#lineare Projektion eines Vektors v \in R^n nach  T_p_M --> Vektortransport (RB: Wieso ist das ein VT?)
+#TODO: Docs
+function project!(M::SubmersionManifold, w, p, v)
     a = v - (transpose(M.c_prime(p)) * inv(M.c_prime(p) * transpose(M.c_prime(p))) * M.c_prime(p) * v)
     w .= vec(a)
     return w
 end
 
-# Setze die Retraktion default auf pr(M,p+x)
-default_retraction_method(::Submersion) = ProjectionRetraction()
+#TODO: Docs
+default_retraction_method(::SubmersionManifold) = ProjectionRetraction()
 
-function retract_project!(M::Submersion, q, p, v)
-    q .= project(M, p .+ v)
-    return q
-end
-
-function inverse_retract_project!(M::Submersion, v, p, q)
+# TODO: Docs – also this would only work for the Euclidean case, when we do it more general we should probably have
+# either a kwyord to specify an inverse retraction in the embedding or so.
+function inverse_retract_project!(M::SubmersionManifold, v, p, q)
     w = q .- p
     v .= project(M, p, w)
     return v
 end
 
-#Methoden für Basis
-
-function get_basis(M::Submersion, p, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType}; kwargs...)
-    return CachedBasis(B, get_vectors(M, p, B))
-end
-
-
-function get_vectors(M::Submersion, p, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
-    is_point(M, p; kwargs...)
+#TODO: Docs
+function get_vectors(M::SubmersionManifold, p, ::DefaultOrthonormalBasis)
     N = nullspace(M.c_prime(p))
     return [N[:, j] for j in axes(N, 2)]
 end
 
-#berechnet nur die Linearkombination eines Koordinatenvektors bzgl. einer Basis von T_p_M
-function get_vector_orthonormal!(M::Submersion, v, p, c, ::ManifoldsBase.RealNumbers)
+#TODO: Docs
+# also: We could use the vectors from the previous function.
+function get_vector_orthonormal!(M::SubmersionManifold, v, p, c, ::ManifoldsBase.RealNumbers)
     N = nullspace(M.c_prime(p))
     v .= 0.0
     for i in 1:length(c)
@@ -117,27 +119,16 @@ function get_vector_orthonormal!(M::Submersion, v, p, c, ::ManifoldsBase.RealNum
     return v
 end
 
-# TODO: use get_vector!
-
-function get_vector(M::Submersion, p, c, B::DefaultOrthonormalBasis)
-    basis_vec = get_vectors(M, p, B)
-    n = length(T)
-    v = [zeros(3) for i in 1:length(p)]
-    for i in 1:n
-        v .+= c[i] .* basis_vec[i]
-    end
-    return v
-end
-
-#Methoden die nicht im Newton verwendet werden, jedoch implementiert werden müssen
-#(log! ist nur ein Versuch)
-function rand!(M::Submersion, x; vector_at = nothing, atol = 1.0e-8, rtol = 1.0e-8)
+# TODO: Docs
+# also: why the atol and rtol? They are not used. We should also provide the case where `vector_at` is a point and produce a valid random tangent vector then.
+function rand!(M::SubmersionManifold, x; vector_at = nothing, atol = 1.0e-8, rtol = 1.0e-8)
     x = vcat([1], zeros(M.dim_domain - 1))
     x = project(M, x)
     return x
 end
 
-function log!(M::Submersion, X, p, q)
+# TODO: This should become ab ApproximateInverseRetraction and we should set the default_inverse_retraction_method to that.
+function log!(M::SubmersionManifold, X, p, q)
     i = 0
     v_list = []
     x = []
@@ -155,4 +146,10 @@ function log!(M::Submersion, X, p, q)
     end
     X .= v_list[end]
     return X
+end
+
+#TODO: Docs
+# ... and adapt one we have the points above discussed
+function Base.show(io::IO, M::SubmersionManifold)
+    return print(io, "SubmersionManifold($(M.c), $(M.c_prime), $(M.c_prime_2), $(M.n), $(M.dim_domain), $(M.dim_codomain))")
 end

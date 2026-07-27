@@ -210,6 +210,7 @@ makedocs(;
                 "Spectrahedron" => "manifolds/spectrahedron.md",
                 "Sphere" => "manifolds/sphere.md",
                 "Stiefel" => "manifolds/stiefel.md",
+                "Submersion manifold" => "manifolds/submersion.md",
                 "Symmetric matrices" => "manifolds/symmetric.md",
                 "Symmetric positive definite" => "manifolds/symmetricpositivedefinite.md",
                 "SPD, fixed determinant" => "manifolds/spdfixeddeterminant.md",
