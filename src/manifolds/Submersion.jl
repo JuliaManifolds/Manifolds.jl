@@ -1,51 +1,96 @@
-# TODO: doku
-struct SubmersionManifold{F1, F2, F3} <: AbstractManifold{ℝ}
-    c::F1 #TODO: Following Boumal I would probably call it h?
-    c_prime::F2 # TODO: Domain unclear: A differential? Dc(p) is a matrix? or is Dc(p)[X] a linear operator?
-    c_prime_2::F3 # TODO: and how is this meant to be implemented? It is also not used at all?
-    n::Int
-    dim_domain::Int
-    dim_codomain::Int
+@doc raw"""
+    SubmersionManifold{F1, F2, F3} <: AbstractManifold{ℝ}
+
+Model a manifold ``\mathcal M`` as a submersion and another manifold ``\mathcal N`` as the domain of the submersion, i.e.
+we have a function $h: \mathcal N \to ℝ^k`` such that
+
+```math
+\mathcal M := \bigl\{ p \in \mathcal N : h(p) = 0_k \bigr\},
+````
+
+where ``0_k`` is the zero vector in ``ℝ^k``.
+The function ``h`` is called a submersion if its differential is surjective at every point,
+i.e. for every point ``p ∈ \mathcal N`` the linear map ``D h(p)`` is surjective.
+
+And the tangent spaces for any point ``p ∈ \mathcal M`` are given by the kernel of the differential of ``h`` at ``p``, i.e.
+
+```math
+T_p \mathcal M := \bigl\{ X \in T_p \mathcal N : D h(p)[X] = 0 \bigr\}.
+```
+
+See also [Boumal:2023, Section 8.14](@cite), which is here simplified to a single submersion function ``h``.
+
+## Fields
+* `h::H`: The submersion function ``h`` with signature `(N, p) -> a`, where `N` is the `embedding`.
+* `Dh::DH`: The differential ``Dh(p)[X]`` of the submersion function ``h`` with signature `(N, p, X) -> a`.
+* `D²h::DDH`: The second differential of the submersion function ``h``.
+* `embedding::M`: The manifold ``\mathcal N`` into which the submersion is defined.
+"""
+struct SubmersionManifold{M<:AbstractManifold{ℝ}, H, DH, DDH} <: AbstractManifold{ℝ}
+    h::H
+    Dh::DH
+    D²h::DDH
+    embedding::M
+    function SubmersionManifold(h, Dh, embedding; D²h = nothing)
+        return new{typeof(embedding), typeof(h), typeof(Dh), typeof(D²h)}(
+            h, Dh, D²h, embedding,
+        )
+    end
 end
 
-# n ist dim(M) = (dim_domain - dim_codomain). Muss eigentlich nicht übergeben werden, aber der Konstruktor funktioniert in der Datei, in welcher diese Included wird, nur mit n (auch nach mehrmaligem Neustart)
-#TODO: Without seeing that script, I can not comment in this.
+"""
+    check_point(M::SubmersionManifold, p; kwargs...)
 
-#TODO: Docs
+Check if the point `p` lies on the submersion manifold `M`, i.e. fulfills ``h(p) = 0_k``.
+"""
 function check_point(M::SubmersionManifold, p; kwargs...)
-    if !isapprox(M.c(p), 0; kwargs...)
+    a = M.h(M.embedding, p)
+    if !isapprox(norm(a), 0; kwargs...)
         return DomainError(
-            M.c(p),
-            "The point $(p) does not lie on $(M), since c(p) is not 0.",
+            a, "The point $(p) does not lie on $(M), since h(p) is not the zero vector.",
         )
     end
     return nothing
 end
 
-#TODO: Docs
-function check_vector(M::SubmersionManifold, p, v; kwargs...)
+
+"""
+    check_vector(M::SubmersionManifold, p, X; kwargs...)
+
+Check if the vector `X` lies in the tangent space of the submersion manifold `M` at the point `p`,
+i.e. fulfills ``Dh(p)[X] = 0_k``.
+"""
+function check_vector(M::SubmersionManifold, p, X; kwargs...)
     #TODO: Why just the very first entry? Dc(p)[X] should be the zero vector (the kernel of the differential is the tangent space)
-    if !isapprox((M.c_prime(p) * v)[1], 0; kwargs...)
+    a = M.Dh(M.embedding, p, X)
+    if !isapprox(norm(a), 0; kwargs...)
         return DomainError(
-            M.c(p), # TODO: This is the wrong term?
-            "The vector $(v) does not lie in the tangent space at $(p) of $(M), since Dc(p)[v](p) is not 0.",
+            a, "The vector $(X) does not lie in the tangent space at $(p) of $(M), since Dh(p)[X] is not the zero vector.",
         )
     end
     return nothing
 end
 
-#TODO: Docs
+"""
+    get_embedding(M::SubmersionManifold)
+
+Returns the embedding manifold ``\mathcal N`` of the submersion manifold ``\mathcal M``.
+"""
 function get_embedding(M::SubmersionManifold)
-    #TODO: One could actually submerse into _any_ manifold if we wanted to.
-    #...we would just have to store the manifold in the type (and would no longer need dim_codomain?)
-    return Euclidean(manifold_dimension(M); field = ℝ)
+    return M.embedding
 end
 
-#TODO: Docs
+"""
+    representation_size(M::SubmersionManifold)
+
+Returns the size of the representation of points on the submersion manifold ``\mathcal M``,
+which is the same as the size of the representation of points on the embedding manifold ``\mathcal N``.
+"""
 function representation_size(M::SubmersionManifold)
-    # TODO: Not sure why this would be the case? We would represent them in the manifold we submerse into.
-    return (M.dim_domain,)
+    return representation_size(M.embedding)
 end
+
+# TODO: Continue here
 
 #TODO: Docs
 function manifold_dimension(M::SubmersionManifold)
@@ -58,7 +103,7 @@ function inner(M::SubmersionManifold, p, v, w)
 end
 
 
-#Hilsmethode: Erstellt die Matrix für das Sattelpunktprobelm für die nichtlineare Projektion
+#Hilsmethode: Erstellt die Matrix für das Sattelpunktprobelm für die nichtlineare Projection
 #TODO: Docs – approach unclear, source unclear
 function erstelle_Matrix_Sattel(M::SubmersionManifold, p)
     A = zeros(M.dim_domain + M.dim_codomain, M.dim_domain + M.dim_codomain)
@@ -66,7 +111,7 @@ function erstelle_Matrix_Sattel(M::SubmersionManifold, p)
     return A
 end
 
-#Punkt aus R^n wird auf M projiziert (nichtlineare Projektion)
+#Punkt aus R^n wird auf M projiziert (nichtlineare Projection)
 #TODO: Docs – especially where it is from and that we should probably add keywords?
 function project!(M::SubmersionManifold, q, p)
     p_curr = p
@@ -95,7 +140,7 @@ end
 default_retraction_method(::SubmersionManifold) = ProjectionRetraction()
 
 # TODO: Docs – also this would only work for the Euclidean case, when we do it more general we should probably have
-# either a kwyord to specify an inverse retraction in the embedding or so.
+# either a keyword to specify an inverse retraction in the embedding or so.
 function inverse_retract_project!(M::SubmersionManifold, v, p, q)
     w = q .- p
     v .= project(M, p, w)
