@@ -252,7 +252,7 @@ jacobi_dYc = [0.3, -0.6]
       0.3
      -0.6
 
-[`solve_chart_jacobi_field`](@ref) solves the geodesic and a Jacobi field simultaneously.
+[`Manifolds.solve_chart_jacobi_field`](@ref) solves the geodesic and a Jacobi field simultaneously.
 Its last two arguments are the initial coordinates of the field, `Yc`, and of its covariant
 derivative, `dYc`. Evaluating the returned solution yields `(p, X, Y, dY)`: the geodesic point
 and velocity, followed by the Jacobi field and its covariant derivative, all in the embedding.
@@ -393,7 +393,7 @@ chart_volume_density = solve_chart_volume_density(
 
     0.3284565916319668
 
-The volume density is a scalar, so represent it by coloring the geodesic according to the
+The volume density is a scalar, so we can represent it by coloring the geodesic according to the
 volume density computed for scaled initial velocities $tX$.
 
 ``` julia
@@ -420,11 +420,10 @@ fig_volume
 
 ### Differentials and adjoints of the logarithmic map
 
-Let $q=\exp_p(X)$. The logarithmic-map helpers return Jacobi-field solutions whose covariant
-derivative at time `0.0` is the requested differential. For the base-point differential,
+Let $q=\exp_p(X)$. The logarithmic map helpers return Jacobi field solutions whose covariant
+derivative at time `0.0` is the requested differential. For the base point differential,
 `jacobi_Yc` represents a vector at $p$; for the argument differential it represents a vector
-at $q$ in the final chart. Since the short geodesic above does not switch charts, both use
-the same induced basis here.
+at $q$ in the final chart.
 
 ``` julia
 dlog_basepoint_solution = Manifolds.solve_chart_differential_log_basepoint(
@@ -440,8 +439,8 @@ _, _, _, differential_log_argument = dlog_argument_solution(0.0)
 
     ([3.4663173674875574, -3.466317367487557, 0.6180339887498948], [3.479917982573146, 6.225770646392013, 5.975664329483111], [0.0, 0.0, 0.0], [-2.358741417864044, 0.04797577357628602, 5.237620452672789])
 
-The logarithmic-map fields are fixed at the endpoint and evaluated backwards along the same
-geodesic. The arrows at the base point show their values, which are the two requested
+The logarithmic map fields are fixed at the endpoint and evaluated backwards along the same geodesic.
+The arrows at the base point show their values, which are the two requested
 differentials of `log`.
 
 ``` julia
@@ -458,9 +457,8 @@ jacobi_figure(
 
 ![](working-in-charts_files/figure-commonmark/cell-19-output-1.png)
 
-The adjoint helpers return coordinates directly, rather than a time-dependent Jacobi-field
-solution. The adjoints of the exponential-map differentials map a vector at $q$ back to $p$.
-The adjoints of the logarithmic-map differentials have the converse domain and codomain.
+The adjoints of the exponential map differentials map a vector at $q$ back to $p$.
+The adjoints of the logarithmic map differentials have the converse domain and codomain.
 
 ``` julia
 adjoint_differential_exp_basepoint = Manifolds.solve_chart_adjoint_differential_exp_basepoint(
@@ -480,36 +478,6 @@ adjoint_differential_log_argument = Manifolds.solve_chart_adjoint_differential_l
     2-element Vector{Float64}:
      -3.2305681718289687
      -0.7236225323940885
-
-Visualize the adjoints at their respective source and target points. Blue arrows are the input
-coordinates interpreted at their source point; orange arrows are the returned coordinates at
-the target point. This makes the direction reversal of each adjoint explicit.
-
-``` julia
-q = dexp_basepoint_solution(1.0)[1]
-Bp = induced_basis(M, A, jacobi_i)
-Bq = induced_basis(M, A, jacobi_i)
-adjoint_pairs = [
-    (q, get_vector(M, q, jacobi_Yc, Bq), p0, get_vector(M, p0, adjoint_differential_exp_basepoint, Bp)),
-    (q, get_vector(M, q, jacobi_Yc, Bq), p0, get_vector(M, p0, adjoint_differential_exp_argument, Bp)),
-    (p0, get_vector(M, p0, jacobi_Yc, Bp), p0, get_vector(M, p0, adjoint_differential_log_basepoint, Bp)),
-    (p0, get_vector(M, p0, jacobi_Yc, Bp), q, get_vector(M, q, adjoint_differential_log_argument, Bq)),
-]
-adjoint_labels = ["adjoint d exp base point", "adjoint d exp argument", "adjoint d log base point", "adjoint d log argument"]
-
-fig_adjoint = Figure(size=(1400, 1000), fontsize=16)
-for (k, (source, input, target, output)) in enumerate(adjoint_pairs)
-    row, column = div(k - 1, 2) + 1, mod(k - 1, 2) + 1
-    grid = GridLayout(fig_adjoint[row, column])
-    Label(grid[1, 1], adjoint_labels[k])
-    ax = LScene(grid[2, 1], show_axis=true)
-    arrows3d!(ax, [Point3f(source)], [Point3f(input)]; color=:dodgerblue, shaftradius=0.05)
-    arrows3d!(ax, [Point3f(target)], [Point3f(output)]; color=:darkorange, shaftradius=0.05)
-end
-fig_adjoint
-```
-
-![](working-in-charts_files/figure-commonmark/cell-21-output-1.png)
 
 For a geodesic that crosses a chart boundary, the returned `StitchedChartSolution` still
 evaluates to embedding-space points and tangent vectors. When supplying or interpreting raw
@@ -544,7 +512,7 @@ This tutorial is cached. It was last run on the following package versions.
       [d6f4376e] Markdown v1.11.0
     Info Packages marked with ⌃ have new versions available and may be upgradable.
 
-This tutorial was last rendered August 12, 2026, 13:58:54.
+This tutorial was last rendered August 12, 2026, 20:53:15.
 
 ```@raw html
 </details>
