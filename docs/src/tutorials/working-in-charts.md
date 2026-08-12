@@ -72,17 +72,17 @@ function torus_figure()
     return ax, fig
 end
 
-function jacobi_figure(geodesic, vector_fields; colors, auxillary_geodesics = [], support_geodesics = [])
+function jacobi_figure(geodesic, vector_fields; colors, auxiliary_geodesics = [], support_geodesics = [])
     ax, fig = torus_figure()
     times = 0.0:0.02:1.0
     curve = geodesic.(times)
     points = Point3f.(first.(curve))
     lines!(ax, points; linewidth=4.0, color=:green, label="geodesic")
 
-    for (t, ag) in auxillary_geodesics
+    for (t, ag) in auxiliary_geodesics
         ag_curve = ag.(times)
         ag_points = Point3f.(first.(ag_curve))
-        lines!(ax, ag_points; linewidth=3.0, color=:gray, linestyle=:dash, label="auxillary geodesic (t = $t)")
+        lines!(ax, ag_points; linewidth=3.0, color=:gray, linestyle=:dash, label="auxiliary geodesic (t = $t)")
     end
 
     for sg in support_geodesics
@@ -284,7 +284,7 @@ jacobi_times = 0.0:0.05:1.0
 jacobi_values = jacobi_solution(jacobi_times)
 jacobi_vectors = [(value[1], value[3]) for value in jacobi_values]
 jacobi_derivatives = [(value[1], value[4]) for value in jacobi_values]
-auxillary_geodesics = [
+auxiliary_geodesics = [
     (aux_t, solve_for([θₚ, φₚ], jacobi_Xc + aux_t * jacobi_dYc, jacobi_Yc, 1.0)) for aux_t in 0.2:0.2:1.0
 ]
 
@@ -294,7 +294,7 @@ jacobi_figure(
     t -> jacobi_solution(t)[1:2],
     [jacobi_vectors, jacobi_derivatives];
     colors = [:dodgerblue, :darkorange],
-    auxillary_geodesics = auxillary_geodesics,
+    auxiliary_geodesics = auxiliary_geodesics,
     support_geodesics = support_geodesics
 )
 ```
@@ -326,7 +326,7 @@ jacobi_times = 0.0:0.05:1.0
 jacobi_values = jacobi_solution(jacobi_times)
 jacobi_vectors = [(value[1], value[3]) for value in jacobi_values]
 jacobi_derivatives = [(value[1], value[4]) for value in jacobi_values]
-auxillary_geodesics = [
+auxiliary_geodesics = [
     (aux_t, solve_for([θₚ, φₚ] + aux_t * jacobi_Yc, jacobi_Xc, jacobi_Yc, 1.0)) for aux_t in 0.2:0.2:1.0
 ]
 support_geodesics = [solve_geodesic(sg_init[1], sg_init[2], 1.0) for sg_init in jacobi_vectors]
@@ -335,7 +335,7 @@ jacobi_figure(
     t -> jacobi_solution(t)[1:2],
     [jacobi_vectors, jacobi_derivatives];
     colors = [:dodgerblue, :darkorange],
-    auxillary_geodesics = auxillary_geodesics,
+    auxiliary_geodesics = auxiliary_geodesics,
     support_geodesics = support_geodesics
 )
 ```
