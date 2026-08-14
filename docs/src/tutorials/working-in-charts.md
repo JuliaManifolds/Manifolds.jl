@@ -420,10 +420,11 @@ fig_volume
 
 ### Differentials and adjoints of the logarithmic map
 
-Let $q=\exp_p(X)$. The logarithmic map helpers return Jacobi field solutions whose covariant
-derivative at time `0.0` is the requested differential. For the base point differential,
-`jacobi_Yc` represents a vector at $p$; for the argument differential it represents a vector
+Let $X=\log_p(q)$. The logarithmic map helpers return Jacobi field solutions whose covariant
+derivative at time `0.0` is the requested differential of the logarithmic map with respect to either base point or the argument.
+For the base point differential, `jacobi_Yc` represents coordinates of a vector at $p$; for the argument differential it represents coordinates of a vector
 at $q$ in the final chart.
+In both cases the induced basis is used (see [`induced_basis`](@ref)).
 
 ``` julia
 dlog_basepoint_solution = Manifolds.solve_chart_differential_log_basepoint(
@@ -459,6 +460,8 @@ jacobi_figure(
 
 The adjoints of the exponential map differentials map a vector at $q$ back to $p$.
 The adjoints of the logarithmic map differentials have the converse domain and codomain.
+In other words, we want the [pullback](https://en.wikipedia.org/wiki/Pullback_(differential_geometry)) of the exponential of a logarithmic map but instead of transforming cotangent vectors, we want it to work on tangent vectors.
+We thus use the isomorphism between tangent and cotangent spaces established by the Riemannian metric, and we call the entire operation “adjoint differentials”.
 
 ``` julia
 adjoint_differential_exp_basepoint = Manifolds.solve_chart_adjoint_differential_exp_basepoint(
@@ -481,8 +484,7 @@ adjoint_differential_log_argument = Manifolds.solve_chart_adjoint_differential_l
 
 For a geodesic that crosses a chart boundary, the returned `StitchedChartSolution` still
 evaluates to embedding-space points and tangent vectors. When supplying or interpreting raw
-coordinates to the logarithmic or adjoint routines, use the induced basis of the initial chart
-at $p$ or of the final chart at $q$, as specified by the corresponding function.
+coordinates to the logarithmic or adjoint routines, use the induced basis of the respective chart as specified by the corresponding function.
 
 ```@raw html
 <details>
@@ -512,7 +514,7 @@ This tutorial is cached. It was last run on the following package versions.
       [d6f4376e] Markdown v1.11.0
     Info Packages marked with ⌃ have new versions available and may be upgradable.
 
-This tutorial was last rendered August 12, 2026, 20:53:15.
+This tutorial was last rendered August 14, 2026, 17:10:55.
 
 ```@raw html
 </details>
