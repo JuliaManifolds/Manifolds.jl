@@ -5,6 +5,21 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.30] 2026-08-20
+
+### Added
+
+* Chart-based solvers for Jacobi fields, exponential- and logarithmic map differentials and their adjoints, as well as exponential map volume density: `solve_chart_jacobi_field`,
+`solve_chart_volume_density`,  `solve_chart_differential_exp_basepoint`, `solve_chart_differential_exp_argument`,`solve_chart_differential_log_basepoint`,`solve_chart_differential_log_argument`,`solve_chart_adjoint_differential_exp_basepoint`,`solve_chart_adjoint_differential_exp_argument`,`solve_chart_adjoint_differential_log_basepoint`,`solve_chart_adjoint_differential_log_argument`.
+* `GrassmannAtlas` and `StiefelAtlas` (with `StiefelChart`) for real Grassmann and Stiefel manifolds.
+* Chart operations and induced-basis support for the stereographic atlas on spheres.
+* Extended the "Working in Charts" tutorial covering new additions.
+
+### Changed
+
+* More atlas and chart-related operations are now exported: `get_chart_index`, `transition_map`, `transition_map!`, `transition_map_diff` and `transition_map_diff!`.
+* Chart-based geodesic and parallel-transport ODE solvers use in-place problem definitions for performance.
+
 ## [0.11.29] 2026-07-22
 
 ### Added
