@@ -148,7 +148,11 @@ using LinearAlgebra
     )
     @test length(p_exp_switch.sols) < length(p_exp.sols)
 
-    Manifolds.transition_map_diff(M, A, i_p0x, [0.0, 0.0], X_p0x, (-1.0, -0.3))
+    i_to = (-1.0, -0.3)
+    @test transition_map_diff(M, A, i_p0x, [0.0, 0.0], X_p0x, i_to) ≈ X_p0x
+    X_i_to = similar(X_p0x)
+    @test transition_map_diff!(M, X_i_to, A, i_p0x, [0.0, 0.0], X_p0x, i_to) === X_i_to
+    @test X_i_to ≈ X_p0x
 
     a2 = [-0.5, 0.3]
     sol_log = Manifolds.solve_chart_log_bvp(M, p0x, a2, A, (0, 0))
