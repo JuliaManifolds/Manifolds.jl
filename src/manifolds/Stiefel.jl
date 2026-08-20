@@ -40,6 +40,34 @@ function Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symbol
     return Stiefel{field, typeof(size)}(size)
 end
 
+@doc raw"""
+    StiefelAtlas()
+
+The Cayley atlas of the real Stiefel manifold. A chart is indexed by a
+[`StiefelChart`](@ref), consisting of its center `U` and a set `I` of row
+indices for which `U[I, :]` is invertible. Its coordinates are the coefficients
+of a skew-symmetric matrix ``Ω`` supported in the rows and columns touching
+`I`. The parametrization is
+
+````math
+\varphi_{U,I}(Ω) = (I_n + Ω)(I_n - Ω)^{-1}U.
+````
+
+This construction follows Section 2 of [BirteaCaşuComănescu:2019](@cite).
+"""
+struct StiefelAtlas <: AbstractAtlas{ℝ} end
+
+"""
+    StiefelChart(center, rows)
+
+The index of a chart in [`StiefelAtlas`](@ref), consisting of its center and
+the row indices of one of the center's invertible square minors.
+"""
+struct StiefelChart{TU <: AbstractMatrix, TI <: AbstractVector}
+    center::TU
+    rows::TI
+end
+
 """
     PolarLightRetraction <: AbstractRetractionMethod
 
@@ -588,6 +616,200 @@ Returns the representation size of the [`Stiefel`](@ref) `M`=``\operatorname{St}
 i.e. `(n,k)`, which is the matrix dimensions.
 """
 representation_size(M::Stiefel) = get_parameter(M.size)
+
+# StiefelAtlas
+
+function _stiefel_chart_rows(M::Stiefel, rows::AbstractVector)
+    n, k = get_parameter(M.size)
+    chart_rows = collect(rows)
+    if length(chart_rows) != k ||
+            !all(row -> 1 <= row <= n, chart_rows) ||
+            length(unique(chart_rows)) != k
+        throw(ArgumentError("A Stiefel chart index must contain $k distinct row indices in 1:$n."))
+    end
+    return chart_rows
+end
+
+function _stiefel_chart_complement(M::Stiefel, rows::AbstractVector)
+    n, _ = get_parameter(M.size)
+    return setdiff(collect(1:n), _stiefel_chart_rows(M, rows))
+end
+
+function _stiefel_largest_minor_rows(p, k)
+    n = size(p, 1)
+    rows = collect(1:k)
+    best_rows = copy(rows)
+    best_minor = zero(real(eltype(p)))
+    while true
+        minor = abs(det(p[rows, :]))
+        if minor > best_minor
+            best_minor = minor
+            best_rows .= rows
+        end
+        position = k
+        while position >= 1 && rows[position] == n - k + position
+            position -= 1
+        end
+        position == 0 && break
+        rows[position] += 1
+        for next_position in (position + 1):k
+            rows[next_position] = rows[next_position - 1] + 1
+        end
+    end
+    iszero(best_minor) && throw(DomainError(p, "The point has no invertible $k-by-$k row minor."))
+    return best_rows
+end
+
+function _stiefel_chart_data(M::Stiefel, i::StiefelChart)
+    rows = _stiefel_chart_rows(M, i.rows)
+    center_rows = i.center[rows, :]
+    iszero(det(center_rows)) && throw(DomainError(i.center, "The chart center does not have an invertible row minor at $(i.rows)."))
+    return rows, _stiefel_chart_complement(M, rows)
+end
+
+function _stiefel_chart_set_skew_entry!(Ω, row, column, value)
+    Ω[row, column] = value
+    Ω[column, row] = -value
+    return Ω
+end
+
+"""
+    _stiefel_chart_omega_from_coordinates(M::Stiefel, i::StiefelChart, a)
+
+Construct the skew-symmetric generator ``Ω`` for the Cayley chart `i` from
+the coordinate vector `a`. The coordinates enumerate pairs of selected rows
+first, followed by pairs consisting of a selected row and a complementary row.
+All entries whose row and column both lie in the complement are zero.
+"""
+function _stiefel_chart_omega_from_coordinates(M::Stiefel, i::StiefelChart, a)
+    rows, complement = _stiefel_chart_data(M, i)
+    n, k = get_parameter(M.size)
+    dimension = manifold_dimension(M)
+    length(a) == dimension || throw(DimensionMismatch("Expected $dimension chart coordinates."))
+    Ω = zeros(eltype(a), n, n)
+    coordinate = 1
+    for first_position in 1:(k - 1)
+        for second_position in (first_position + 1):k
+            _stiefel_chart_set_skew_entry!(Ω, rows[first_position], rows[second_position], a[coordinate])
+            coordinate += 1
+        end
+    end
+    for row in rows, column in complement
+        _stiefel_chart_set_skew_entry!(Ω, row, column, a[coordinate])
+        coordinate += 1
+    end
+    return Ω
+end
+
+function _stiefel_chart_coordinates_from_omega!(M::Stiefel, a, i::StiefelChart, Ω)
+    rows, complement = _stiefel_chart_data(M, i)
+    _, k = get_parameter(M.size)
+    coordinate = 1
+    for first_position in 1:(k - 1)
+        for second_position in (first_position + 1):k
+            a[coordinate] = Ω[rows[first_position], rows[second_position]]
+            coordinate += 1
+        end
+    end
+    for row in rows
+        for column in complement
+            a[coordinate] = Ω[row, column]
+            coordinate += 1
+        end
+    end
+    return a
+end
+
+"""
+    _stiefel_chart_omega_from_action(M::Stiefel, i::StiefelChart, V, D)
+
+Construct the skew-symmetric matrix ``Ω`` for the Cayley chart `i` satisfying
+``D = ΩV``. The selected rows of `V` must form an invertible square minor;
+otherwise the action does not determine a generator in chart `i`.
+"""
+function _stiefel_chart_omega_from_action(M::Stiefel, i::StiefelChart, V, D)
+    rows, complement = _stiefel_chart_data(M, i)
+    n, _ = get_parameter(M.size)
+    Vrows = V[rows, :]
+    iszero(det(Vrows)) && throw(DomainError(V, "The point does not belong to the Stiefel chart at $(i.rows)."))
+    Ω = zeros(promote_type(eltype(V), eltype(D)), n, n)
+    Ω[complement, rows] .= D[complement, :] / Vrows
+    Ω[rows, complement] .= -transpose(Ω[complement, rows])
+    Ω[rows, rows] .= (D[rows, :] - Ω[rows, complement] * V[complement, :]) / Vrows
+    Ω[rows, rows] .= (Ω[rows, rows] - transpose(Ω[rows, rows])) / 2
+    return Ω
+end
+
+@doc raw"""
+    get_chart_index(M::Stiefel, A::StiefelAtlas, p)
+
+Return a Cayley chart centered at `p`, using the lexicographically first row
+minor with maximal absolute determinant.
+"""
+function get_chart_index(M::Stiefel{ℝ}, ::StiefelAtlas, p)
+    _, k = get_parameter(M.size)
+    return StiefelChart(copy(p), _stiefel_largest_minor_rows(p, k))
+end
+function get_chart_index(M::Stiefel{ℝ}, A::StiefelAtlas, i::StiefelChart, a)
+    return get_chart_index(M, A, get_point(M, A, i, a))
+end
+
+@doc raw"""
+    get_parameters!(M::Stiefel, a, A::StiefelAtlas, i::StiefelChart, p)
+
+Store the Cayley coordinates of `p` in the chart centered at `i.center`.
+"""
+function get_parameters!(M::Stiefel{ℝ}, a, ::StiefelAtlas, i::StiefelChart, p)
+    length(a) == manifold_dimension(M) || throw(DimensionMismatch("Expected $(manifold_dimension(M)) chart coordinates."))
+    Ω = _stiefel_chart_omega_from_action(M, i, p + i.center, p - i.center)
+    return _stiefel_chart_coordinates_from_omega!(M, a, i, Ω)
+end
+
+@doc raw"""
+    get_point!(M::Stiefel, p, A::StiefelAtlas, i::StiefelChart, a)
+
+Store in `p` the point represented by Cayley coordinates `a` in chart `i`.
+"""
+function get_point!(M::Stiefel{ℝ}, p, ::StiefelAtlas, i::StiefelChart, a)
+    Ω = _stiefel_chart_omega_from_coordinates(M, i, a)
+    p .= ((I + Ω) / (I - Ω)) * i.center
+    return p
+end
+
+function get_coordinates_induced_basis!(
+        M::Stiefel{ℝ},
+        c,
+        p,
+        X,
+        B::InducedBasis{ℝ, TangentSpaceType, <:StiefelAtlas},
+    )
+    length(c) == manifold_dimension(M) || throw(DimensionMismatch("Expected $(manifold_dimension(M)) basis coordinates."))
+    Ω = _stiefel_chart_omega_from_action(M, B.i, p + B.i.center, p - B.i.center)
+    V = (I - Ω) \ B.i.center
+    Δ = _stiefel_chart_omega_from_action(M, B.i, V, (I - Ω) * X / 2)
+    return _stiefel_chart_coordinates_from_omega!(M, c, B.i, Δ)
+end
+
+function get_vector_induced_basis!(
+        M::Stiefel{ℝ},
+        X,
+        p,
+        c,
+        B::InducedBasis{ℝ, TangentSpaceType, <:StiefelAtlas},
+    )
+    Ω = _stiefel_chart_omega_from_action(M, B.i, p + B.i.center, p - B.i.center)
+    Δ = _stiefel_chart_omega_from_coordinates(M, B.i, c)
+    X .= 2 * ((I - Ω) \ Δ) * ((I - Ω) \ B.i.center)
+    return X
+end
+
+function inner(M::Stiefel{ℝ}, A::StiefelAtlas, i::StiefelChart, a, Xc, Yc)
+    p = get_point(M, A, i, a)
+    B = induced_basis(M, A, i)
+    X = get_vector(M, p, Xc, B)
+    Y = get_vector(M, p, Yc, B)
+    return inner(M, p, X, Y)
+end
 
 function Base.show(io::IO, ::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return print(io, "Stiefel($(n), $(k), $(𝔽))")

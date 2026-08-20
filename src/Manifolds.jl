@@ -735,7 +735,7 @@ export AbstractMetric,
     RiemannianMetric,
     StiefelSubmersionMetric,
     WarpedMetric
-export AbstractAtlas, GrassmannAtlas, RetractionAtlas
+export AbstractAtlas, GrassmannAtlas, RetractionAtlas, StiefelAtlas, StiefelChart
 # Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 # Retraction types
@@ -951,7 +951,7 @@ export get_basis,
     get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors, number_system
 
 # atlases and charts
-export get_point, get_point!, get_parameters, get_parameters!
+export get_point, get_point!, get_parameters, get_parameters!, get_chart_index
 
 # Last (not least, but _after_ exports) include the test submodule
 include("test-suite.jl")

@@ -289,6 +289,37 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
             @test typeof(get_embedding(Mf)) === Euclidean{ℝ, Tuple{Int, Int}}
             @test repr(Mf) == "Stiefel(3, 2, ℝ; parameter=:field)"
         end
+        @testset "StiefelAtlas" begin
+            M_atlas = Stiefel(4, 2)
+            A = StiefelAtlas()
+            U = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+            a = [0.1, -0.2, 0.3, -0.4, 0.2]
+            c = [0.2, -0.1, 0.4, 0.3, -0.2]
+            d = [-0.3, 0.5, 0.1, -0.2, 0.4]
+
+            i = get_chart_index(M_atlas, A, U)
+            @test i isa StiefelChart
+            @test i.center == U
+            @test i.rows == [1, 2]
+            @test get_parameters(M_atlas, A, i, U) ≈ zeros(manifold_dimension(M_atlas))
+
+            p_atlas = get_point(M_atlas, A, i, a)
+            @test is_point(M_atlas, p_atlas; error = :error)
+            @test get_parameters(M_atlas, A, i, p_atlas) ≈ a
+            @test get_chart_index(M_atlas, A, i, a).center ≈ p_atlas
+
+            B = induced_basis(M_atlas, A, i)
+            X_atlas = get_vector(M_atlas, p_atlas, c, B)
+            Y_atlas = get_vector(M_atlas, p_atlas, d, B)
+            @test is_vector(M_atlas, p_atlas, X_atlas; error = :error, atol = 1.0e-14)
+            @test get_coordinates(M_atlas, p_atlas, X_atlas, B) ≈ c
+            @test inner(M_atlas, A, i, a, c, d) ≈ inner(M_atlas, p_atlas, X_atlas, Y_atlas)
+            @test det(local_metric(M_atlas, A, i, a)) > 0
+
+            @test_throws ArgumentError StiefelChart(U, [1, 1]) |> chart ->
+            get_point(M_atlas, A, chart, a)
+            @test_throws DomainError get_parameters(M_atlas, A, i, [-1.0 0.0; 0.0 -1.0; 0.0 0.0; 0.0 0.0])
+        end
         @testset "Stiefel(2, 1) StaticArray inverse QR retraction cases" begin
             M21 = Stiefel(2, 1)
             p21 = SMatrix{2, 1}([0.0, 1.0])
