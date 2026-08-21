@@ -52,13 +52,9 @@ features:
 ---
 ```
 
-# Manifolds
-
 ```@docs
 Manifolds.Manifolds
 ```
-
-The implemented manifolds are accompanied by their mathematical formulae.
 
 The manifolds are implemented using the interface for manifolds given in [`ManifoldsBase.jl`](@extref ManifoldsBase :doc:`index`).
 You can use that interface to implement your own software on manifolds, such that all manifolds

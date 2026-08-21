@@ -1,5 +1,10 @@
 """
-`Manifolds.jl` provides a library of manifolds aiming for an easy-to-use and fast implementation.
+Manifolds.jl: Riemannian manifolds in Julia
+
+* 📚 Documentation: [juliamanifolds.github.io/Manifolds.jl/](https://juliamanifolds.github.io/Manifolds.jl/)
+* 📦 Repository: [github.com/JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl)
+* 💬 Discussions: [github.com/JuliaManifolds/Manifolds.jl/discussions](https://github.com/JuliaManifolds/Manifolds.jl/discussions)
+* 🎯 Issues: [github.com/JuliaManifolds/Manifolds.jl/issues](https://github.com/JuliaManifolds/Manifolds.jl/issues)
 """
 module Manifolds
 
