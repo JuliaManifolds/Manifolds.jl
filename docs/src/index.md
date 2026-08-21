@@ -1,3 +1,57 @@
+```@raw html
+---
+layout: home
+
+hero:
+  name: Manifolds.jl
+  text: A Library of Riemannian Manifolds
+  tagline: Numerical Differential Geometry
+  actions:
+    - theme: brand
+      text: Get started
+      link: tutorials/getstarted/index.html
+  image:
+    src: /logo.png            # primary image (light themes)
+    dark: /logo-dark.png      # primary image (dark themes)
+    alt: Manifolds.jl         # accessibility text
+
+features:
+  - icon:
+        light: /logo-manifoldsbase.png
+        dark: /logo-manifoldsbase-dark.png
+        alt: ManifoldsBase.jl
+        wrap: true
+    title: Unified implementation
+    details: All manifolds follow the interface from ManifoldsBase.jl.
+    link: https://juliamanifolds.github.io/ManifoldsBase.jl/stable/
+  - icon: 🧩
+    title: Composable
+    details: Components like a metric, the connection or different representations of points and tangent vectors are designed in a modular fashion. They can be reused and combined easily. Points and tangent vectors can be represented using arbitrary Julia types.
+  - icon: 📚
+    title: Well-documented and -tested
+    details: All manifolds are documented – both their theoretical foundation and all numerical functionality. The theoretical background also refers to further literature.
+  - icon: ⚡️
+    title: Efficient
+    link: https://github.com/JuliaManifolds/ManifoldsGPU.jl
+    details: All methods provide also in-place evaluations. The package is compatible with running on a GPU when you use ManifoldsGPU.jl.
+  - icon:
+        light: /logo-liegroups.png
+        dark: /logo-liegroups-dark.png
+        alt: LieGroups.jl
+        wrap: true
+    title: Use with LieGroups.jl
+    details: Together with a group operation, a manifold forms a Lie group. This package serves as base layer for LieGroups.jl.
+    link: https://juliamanifolds.github.io/LieGroups.jl/stable/
+  - icon:
+        src: /logo-manopt.png
+        alt: Manopt.jl
+        wrap: true
+    title: Use with Manopt.jl
+    details: All manifolds from this package can be used as the domain of a function in the optimization algorithms of Manopt.jl
+    link: https://manoptjl.org/stable/
+---
+```
+
 # Manifolds
 
 ```@docs

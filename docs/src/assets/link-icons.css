@@ -1,4 +1,4 @@
-a[href^="https://juliamanifolds.github.io/ManifoldsBase.jl/"]::before {
+a[href^="https://juliamanifolds.github.io/ManifoldsBase.jl/"]:not(.landing-feature)::before {
     content: "";
     background-image: url('logo-manifoldsbase.png');
     background-size: contain;
@@ -10,7 +10,7 @@ a[href^="https://juliamanifolds.github.io/ManifoldsBase.jl/"]::before {
     vertical-align: middle;
 }
 
-a[href^="https://manoptjl.org/"]::before {
+a[href^="https://manoptjl.org/"]:not(.landing-feature)::before {
     content: "";
     background-image: url('logo-manopt.png');
     background-size: contain;
