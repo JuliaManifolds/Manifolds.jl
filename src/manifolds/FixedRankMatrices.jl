@@ -340,11 +340,12 @@ function check_size(M::FixedRankMatrices, p, X::UMVTangentVector)
 end
 
 @doc raw"""
-    check_vector(M:FixedRankMatrices, p, X; kwargs...)
+    check_vector(M::FixedRankMatrices, p, X; kwargs...)
 
-Check whether the tangent [`UMVTangentVector`](@ref) `X` is from the tangent space of the [`SVDMPoint`](@ref) `p` on the
-[`FixedRankMatrices`](@ref) `M`, i.e. that `v.U` and `v.Vt` are (columnwise) orthogonal to `x.U` and `x.Vt`,
-respectively, and its dimensions are consistent with `p` and `X.M`, i.e. correspond to `m`-by-`n` matrices of rank `k`.
+Check whether the tangent [`UMVTangentVector`](@ref) `X` is from the tangent space of the
+[`SVDMPoint`](@ref) `p` on the [`FixedRankMatrices`](@ref) `M`.
+This means that `X.U` and `X.Vt` are (columnwise) orthogonal to `p.U` and `p.Vt`, respectively,
+and that its dimensions are consistent with `p` and `X.M`, i.e. correspond to `m`-by-`n` matrices of rank `k`.
 """
 function check_vector(
         M::FixedRankMatrices,

@@ -79,7 +79,7 @@ function change_representer!(M::GeneralizedGrassmann, Y, ::EuclideanMetric, p, X
 end
 
 @doc raw"""
-    change_metric(M::GeneralizedGrassmann, ::EuclideanMetric, p X)
+    change_metric(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
 
 Change `X` to the corresponding vector with respect to the metric of the [`GeneralizedGrassmann`](@ref) `M`,
 i.e. let ``B=LL'`` be the Cholesky decomposition of the matrix `M.B`, then the corresponding vector is ``L\X``.
@@ -328,10 +328,10 @@ end
 @doc raw"""
     rand(::GeneralizedGrassmann; vector_at=nothing, σ::Real=1.0)
 
-When `vector_at` is `nothing`, return a random (Gaussian) point `p` on the [`GeneralizedGrassmann`](@ref)
-manifold `M` by generating a (Gaussian) matrix with standard deviation `σ` and return the
-(generalized) orthogonalized version, i.e. return the projection onto the manifold of the
-Q component of the QR decomposition of the random matrix of size ``n×k``.
+When `vector_at` is `nothing`, return a random (Gaussian) point `p` on the [`GeneralizedGrassmann`](@ref) manifold `M`.
+This generates a (Gaussian) matrix of size ``n×k`` with standard deviation `σ` and returns its
+(generalized) orthogonalized version, i.e. the projection onto the manifold of the
+Q component of its QR decomposition.
 
 When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
 ``T_{vector\_at}\mathrm{St}(n,k)`` with mean zero and standard deviation `σ` by projecting a

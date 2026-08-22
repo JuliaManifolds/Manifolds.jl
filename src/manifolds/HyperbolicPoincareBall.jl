@@ -128,10 +128,10 @@ end
     convert(::Type{PoincareBallTangentVector}, p::HyperboloidPoint, X::HyperboloidTangentVector)
     convert(::Type{PoincareBallTangentVector}, p::P, X::T) where {P<:AbstractVector, T<:AbstractVector}
 
-convert a [`HyperboloidTangentVector`](@ref) `X` at `p` to a [`PoincareBallTangentVector`](@ref)
-on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` by computing the push forward ``π_*(p)[X]`` of
-the isometry ``π`` that maps from the Hyperboloid to the Poincaré ball,
-cf. [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref).
+Convert a [`HyperboloidTangentVector`](@ref) `X` at `p` to a [`PoincareBallTangentVector`](@ref)
+on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n``.
+This computes the push forward ``π_*(p)[X]`` of the isometry ``π`` that maps from the
+Hyperboloid to the Poincaré ball, cf. [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref).
 
 The formula reads
 
@@ -171,8 +171,8 @@ end
     ) where {P<:AbstractVector, T <: AbstractVector}
 
 Convert a [`HyperboloidPoint`](@ref) `p` and a [`HyperboloidTangentVector`](@ref) `X`
-to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTangentVector`](@ref) simultaneously,
-see [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref) and
+to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTangentVector`](@ref) simultaneously.
+See [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref) and
 [`convert(::Type{PoincareBallTangentVector}, ::HyperboloidPoint, ::HyperboloidTangentVector)`](@ref)
 for the formulae.
 """
@@ -196,10 +196,10 @@ end
         X::PoincareHalfSpaceTangentVector
     )
 
-convert a [`PoincareHalfSpaceTangentVector`](@ref) `X` at `p` to a [`PoincareBallTangentVector`](@ref)
-on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` by computing the push forward ``π_*(p)[X]`` of
-the isometry ``π`` that maps from the Poincaré half space to the Poincaré ball,
-cf. [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref).
+Convert a [`PoincareHalfSpaceTangentVector`](@ref) `X` at `p` to a [`PoincareBallTangentVector`](@ref)
+on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n``.
+This computes the push forward ``π_*(p)[X]`` of the isometry ``π`` that maps from the
+Poincaré half space to the Poincaré ball, cf. [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref).
 
 The formula reads
 
@@ -248,8 +248,8 @@ end
     ) where {T <: AbstractVector}
 
 Convert a [`PoincareHalfSpacePoint`](@ref) `p` and a [`PoincareHalfSpaceTangentVector`](@ref) `X`
-to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTangentVector`](@ref) simultaneously,
-see [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref) and
+to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTangentVector`](@ref) simultaneously.
+See [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref) and
 [`convert(::Type{PoincareBallTangentVector}, ::PoincareHalfSpacePoint, ::PoincareHalfSpaceTangentVector)`](@ref)
 for the formulae.
 """

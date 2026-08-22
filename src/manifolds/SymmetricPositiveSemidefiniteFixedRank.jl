@@ -80,8 +80,9 @@ end
     check_vector(M::SymmetricPositiveSemidefiniteFixedRank, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
-and its values have to be from the correct [`AbstractNumbers`](@extref ManifoldsBase number-system).
+[`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`.
+This requires `X` to be a symmetric matrix of size `(n,n)` with values from the correct
+[`AbstractNumbers`](@extref ManifoldsBase number-system).
 
 Due to the reduced representation this is fulfilled as soon as the matrix is of correct size.
 """

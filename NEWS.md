@@ -5,6 +5,23 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.30] Unreleased
+
+### Changed
+
+* The documentation now uses [`DocumenterCodeBlocks.jl`](https://github.com/fredrikekre/DocumenterCodeBlocks.jl)
+* The documentation now has a landing page using [`DocumenterLandingPage.jl`](https://github.com/JuliaManifolds/DocumenterLandingPage.jl)
+  `DocumenterCitations.jl` was bumped to version 1.5.
+* Several docstrings were rewritten to start with a short summary sentence,
+  such that `DocumenterCodeBlocks.jl` can display them in tooltips.
+
+### Fixed
+
+* the formula in the docstring of the internal `_hyperbolize(M, q)` now matches the implementation (``p_{n+1} = \sqrt{\lVert q \rVert^2 + 1}``)
+* a few typos in signatures and docstrings of the `Hyperbolic` manifold conversions, `check_vector` on `FixedRankMatrices`,
+  `change_metric` on `Stiefel` and `GeneralizedGrassmann`, and `riemannian_gradient` on `SymplecticStiefel`.
+* the docstring of `Manifolds.Test.test_log` was rendered as a code block.
+
 ## [0.11.29] 2026-07-22
 
 ### Added

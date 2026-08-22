@@ -1,9 +1,9 @@
 @doc raw"""
     AbstractMultinomialDoublyStochastic <: AbstractDecoratorManifold{ℝ}
 
-A common type for manifolds that are doubly stochastic, for example by direct constraint
-[`MultinomialDoubleStochastic`](@ref) or by symmetry [`MultinomialSymmetric`](@ref),
-or additionally by symmetric positive definiteness [`MultinomialSymmetricPositiveDefinite`](@ref)
+A common type for manifolds that are doubly stochastic.
+This can be by direct constraint [`MultinomialDoubleStochastic`](@ref), by symmetry [`MultinomialSymmetric`](@ref),
+or additionally by symmetric positive definiteness [`MultinomialSymmetricPositiveDefinite`](@ref),
 as long as they are also modeled as [`IsometricallyEmbeddedManifoldType`](@extref `ManifoldsBase.IsometricallyEmbeddedManifoldType`).
 
 That way they share the inner product (just by restriction), and even the Riemannian gradient

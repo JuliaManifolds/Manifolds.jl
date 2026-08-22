@@ -53,10 +53,8 @@ PositiveArrays(n::Vararg{Int, I}; parameter::Symbol = :type) where {I} =
 @doc raw"""
     change_representer(M::PositiveNumbers, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function with respect
-to the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) `g_E`, this function changes the representer into the one
-with respect to the positivity metric representation of
-[`PositiveNumbers`](@ref) `M`.
+Change the representer ``X ∈ T_p\mathcal M`` of a linear function from the
+[`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) `g_E` to the positivity metric of [`PositiveNumbers`](@ref) `M`.
 
 For all tangent vectors ``Y`` the result ``Z`` has to fulfill
 
@@ -78,10 +76,8 @@ end
 @doc raw"""
     change_metric(M::PositiveNumbers, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function with respect to
-the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) `g_E`,
-this function changes the representer into the one with respect to the positivity metric
-of [`PositiveNumbers`](@ref) `M`.
+Change the metric representation of the tangent vector ``X ∈ T_p\mathcal M`` from the
+[`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) `g_E` to the positivity metric of [`PositiveNumbers`](@ref) `M`.
 
 For all ``Z,Y`` we are looking for the function ``c`` on the tangent space at ``p`` such that
 

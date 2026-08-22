@@ -1,10 +1,9 @@
 """
     ArrayPowerRepresentation
 
-Representation of points and tangent vectors on a power manifold using multidimensional
-arrays where first dimensions are equal to [`representation_size`](@ref) of the
-wrapped manifold and the following ones are equal to the number of elements in each
-direction.
+Representation of points and tangent vectors on a power manifold using multidimensional arrays.
+The first dimensions are equal to [`representation_size`](@ref) of the wrapped manifold and
+the following ones are equal to the number of elements in each direction.
 
 [`Torus`](@ref) uses this representation.
 """

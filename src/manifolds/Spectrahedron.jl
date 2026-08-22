@@ -54,13 +54,11 @@ end
 @doc raw"""
     check_point(M::Spectrahedron, q; kwargs...)
 
-checks, whether `q` is a valid representation of a point ``p=qq^{\mathrm{T}}`` on the
-[`Spectrahedron`](@ref) `M`, i.e. is a matrix
-of size `(N,K)`, such that ``p`` is symmetric positive semidefinite and has unit trace,
-i.e. ``q`` has to have unit frobenius norm.
-Since by construction ``p`` is symmetric, this is not explicitly checked.
-Since ``p`` is by construction positive semidefinite, this is not checked.
-The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
+Check whether `q` is a valid representation of a point ``p=qq^{\mathrm{T}}`` on the [`Spectrahedron`](@ref) `M`.
+This requires `q` to be a matrix of size `(N,K)` such that ``p`` is symmetric positive semidefinite
+and has unit trace, i.e. ``q`` has to have unit Frobenius norm.
+Since by construction ``p`` is symmetric and positive semidefinite, these two properties are not explicitly checked.
+The tolerance for the unit trace can be set using the `kwargs...`.
 """
 function check_point(M::Spectrahedron, q; kwargs...)
     fro_n = norm(q)

@@ -14,10 +14,10 @@ end
 @doc raw"""
     change_representer(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric}, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
-space at `p` with respect to the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`)
-`g_E`, this is turned into the representer with respect to the (default) metric,
+Compute the representer of the linear function given by ``X ∈ T_p\mathcal M`` with respect to
 the [`GeneralizedBuresWassersteinMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
+Here `X` represents the linear function on the tangent space at `p` with respect to the
+[`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) `g_E`.
 
 To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)``
 it holds

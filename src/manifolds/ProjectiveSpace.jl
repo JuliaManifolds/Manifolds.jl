@@ -118,9 +118,9 @@ end
     check_vector(M::AbstractProjectiveSpace, p, X; kwargs... )
 
 Check whether `X` is a tangent vector in the tangent space of `p` on the
-[`AbstractProjectiveSpace`](@ref) `M`, i.e. that `X` has the same size as elements of the
-tangent space of the embedding and that the Frobenius inner product
-``⟨p, X⟩_{\mathrm{F}} = 0``.
+[`AbstractProjectiveSpace`](@ref) `M`.
+This requires that `X` has the same size as elements of the tangent space of the embedding
+and that the Frobenius inner product ``⟨p, X⟩_{\mathrm{F}} = 0``.
 """
 function check_vector(
         M::AbstractProjectiveSpace,
@@ -194,8 +194,9 @@ end
     get_coordinates(M::AbstractProjectiveSpace, p, X, B::DefaultOrthonormalBasis{ℝ})
 
 Represent the tangent vector ``X`` at point ``p`` from the [`AbstractProjectiveSpace`](@ref)
-``M = 𝔽ℙ^n`` in an orthonormal basis by unitarily transforming the hyperplane containing ``X``,
-whose normal is ``p``, to the hyperplane whose normal is the ``x``-axis.
+``M = 𝔽ℙ^n`` in an orthonormal basis.
+This is done by unitarily transforming the hyperplane containing ``X``, whose normal is ``p``,
+to the hyperplane whose normal is the ``x``-axis.
 
 Given ``q = p \overline{λ} + x``, where
 ``λ = \frac{⟨x, p⟩_{\mathrm{F}}}{|⟨x, p⟩_{\mathrm{F}}|}``, ``⟨⋅, ⋅⟩_{\mathrm{F}}`` denotes the
@@ -245,9 +246,9 @@ end
     get_vector(M::AbstractProjectiveSpace, p, X, B::DefaultOrthonormalBasis{ℝ})
 
 Convert a one-dimensional vector of coefficients ``X`` in the basis `B` of the tangent space
-at ``p`` on the [`AbstractProjectiveSpace`](@ref) ``M=𝔽ℙ^n`` to a tangent vector ``Y`` at ``p`` by
-unitarily transforming the hyperplane containing ``X``, whose normal is the ``x``-axis, to the
-hyperplane whose normal is ``p``.
+at ``p`` on the [`AbstractProjectiveSpace`](@ref) ``M=𝔽ℙ^n`` to a tangent vector ``Y`` at ``p``.
+This is done by unitarily transforming the hyperplane containing ``X``, whose normal is the
+``x``-axis, to the hyperplane whose normal is ``p``.
 
 Given ``q = p \overline{λ} + x``, where
 ``λ = \frac{⟨x, p⟩_{\mathrm{F}}}{|⟨x, p⟩_{\mathrm{F}}|}``, ``⟨⋅, ⋅⟩_{\mathrm{F}}`` denotes the

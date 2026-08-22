@@ -75,9 +75,9 @@ default_retraction_method(::Hyperrectangle) = ProjectionRetraction()
 """
     distance(M::Hyperrectangle, p, q, r::Real=2)
 
-Compute the euclidean distance between two points on the [`Hyperrectangle`](@ref)
-manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
-and higher order arrays, the matrix and tensor Frobenius norm, respectively.
+Compute the Euclidean distance between two points on the [`Hyperrectangle`](@ref) manifold `M`.
+For vectors this is just the norm of the difference, for matrices and higher order arrays
+the matrix and tensor Frobenius norm, respectively.
 Specifying further an `r≠2`, distance based on other norms, like the 1-norm or the ∞-norm
 can also be computed.
 """

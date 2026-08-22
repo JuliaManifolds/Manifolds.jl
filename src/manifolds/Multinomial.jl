@@ -52,9 +52,9 @@ end
 @doc raw"""
     check_point(M::MultinomialMatrices, p)
 
-Checks whether `p` is a valid point on the [`MultinomialMatrices`](@ref)`(m,n)` `M`, i.e. is a matrix
-of `m` discrete probability distributions as columns from ``ℝ^n``, i.e. each column is a point from
-[`ProbabilitySimplex`](@ref)`(n-1)`.
+Check whether `p` is a valid point on the [`MultinomialMatrices`](@ref)`(m,n)` `M`.
+This means `p` is a matrix of `m` discrete probability distributions as columns from ``ℝ^n``,
+i.e. each column is a point from [`ProbabilitySimplex`](@ref)`(n-1)`.
 """
 check_point(::MultinomialMatrices, ::Any)
 function check_point(M::MultinomialMatrices, p; kwargs...)

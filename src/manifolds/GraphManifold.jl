@@ -59,8 +59,9 @@ const VertexGraphManifold{𝔽} =
 @doc raw"""
     check_point(M::GraphManifold, p)
 
-Check whether `p` is a valid point on the [`GraphManifold`](@ref), i.e. its length equals the number of vertices
-(for [`VertexManifold`](@ref)s) or the number of edges (for [`EdgeManifold`](@ref)s) and that each element of `p`
+Check whether `p` is a valid point on the [`GraphManifold`](@ref) `M`.
+This requires that its length equals the number of vertices (for [`VertexManifold`](@ref)s)
+or the number of edges (for [`EdgeManifold`](@ref)s) and that each element of `p`
 passes the [`check_point`](@ref) test for the base manifold `M.manifold`.
 """
 check_point(::GraphManifold, ::Any...)
@@ -76,11 +77,10 @@ end
 @doc raw"""
     check_vector(M::GraphManifold, p, X; kwargs...)
 
-Check whether `p` is a valid point on the [`GraphManifold`](@ref), and
-`X` it from its tangent space, i.e. its
-length equals the number of vertices (for [`VertexManifold`](@ref)s) or
-the number of edges (for [`EdgeManifold`](@ref)s) and that each element of `X`
-together with its corresponding entry of `p` passes the
+Check whether `X` is a valid tangent vector at `p` on the [`GraphManifold`](@ref) `M`.
+This requires that `p` is a valid point, that the length of `X` equals the number of vertices
+(for [`VertexManifold`](@ref)s) or the number of edges (for [`EdgeManifold`](@ref)s), and that
+each element of `X` together with its corresponding entry of `p` passes the
 [`check_vector`](@ref) test for the base manifold `M.manifold`.
 """
 check_vector(::GraphManifold, ::Any...)

@@ -111,10 +111,9 @@ end
 @doc raw"""
     distance(M::Circle, p, q)
 
-Compute the distance on the [`Circle`](@ref) `M`, which is
-the absolute value of the symmetric remainder of `p` and `q` for the real-valued
-case and the angle between both complex numbers in the Gaussian plane for the
-complex-valued case.
+Compute the distance on the [`Circle`](@ref) `M` between `p` and `q`.
+For the real-valued case this is the absolute value of the symmetric remainder of `p` and `q`,
+for the complex-valued case it is the angle between both complex numbers in the Gaussian plane.
 """
 distance(::Circle, ::Any...)
 distance(::Circle{ℝ}, p::Real, q::Real) = abs(sym_rem(p - q))

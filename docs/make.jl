@@ -26,6 +26,8 @@ if "--help" ∈ ARGS
     exit(0)
 end
 
+using Pkg
+
 run_quarto = "--quarto" in ARGS
 run_on_CI = (get(ENV, "CI", nothing) == "true")
 tutorials_in_menu = !("--exclude-tutorials" ∈ ARGS)
@@ -74,7 +76,6 @@ end
 # (b) if docs is not the current active environment, switch to it
 # (from https://github.com/JuliaIO/HDF5.jl/pull/1020/) 
 if Base.active_project() != joinpath(@__DIR__, "Project.toml")
-    using Pkg
     Pkg.activate(@__DIR__)
     Pkg.instantiate()
 end
