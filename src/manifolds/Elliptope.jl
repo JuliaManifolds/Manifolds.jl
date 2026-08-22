@@ -192,9 +192,9 @@ function Base.show(io::IO, M::Elliptope{Tuple{Int, Int}})
 end
 
 """
-    vector_transport_to(M::Elliptope, p, X, q)
+    vector_transport_to(M::Elliptope, p, X, q, ::ProjectionTransport)
 
-transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
+Transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
 at `q`.
 """
 vector_transport_to(::Elliptope, ::Any, ::Any, ::Any, ::ProjectionTransport)

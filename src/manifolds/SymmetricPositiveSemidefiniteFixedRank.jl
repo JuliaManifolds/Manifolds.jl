@@ -240,9 +240,9 @@ function Base.show(
 end
 
 """
-    vector_transport_to(M::SymmetricPositiveSemidefiniteFixedRank, p, X, q)
+    vector_transport_to(M::SymmetricPositiveSemidefiniteFixedRank, p, X, q, ::ProjectionTransport)
 
-transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
+Transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
 at `q`.
 """
 vector_transport_to(
