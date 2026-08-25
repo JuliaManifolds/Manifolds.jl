@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* The documentation now uses [`DocumenterCodeBlocks.jl`](https://github.com/fredrikekre/DocumenterCodeBlocks.jl)
-* The documentation now has a landing page using [`DocumenterLandingPage.jl`](https://github.com/JuliaManifolds/DocumenterLandingPage.jl)
-  `DocumenterCitations.jl` was bumped to version 1.5.
+* The documentation now uses [DocumenterCodeBlocks.jl](https://github.com/fredrikekre/DocumenterCodeBlocks.jl)
+* The documentation now has a landing page using [DocumenterLandingPage.jl](https://github.com/JuliaManifolds/DocumenterLandingPage.jl)
+  [`DocumenterCitations.jl`](https://github.com/JuliaDocs/DocumenterCitations.jl) was bumped to version 1.5.
 * Several docstrings were rewritten to start with a short summary sentence, such that `DocumenterCodeBlocks.jl` can display them in tooltips.
 
 ### Fixed

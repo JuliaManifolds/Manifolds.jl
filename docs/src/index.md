@@ -5,7 +5,7 @@ layout: home
 hero:
   name: Manifolds.jl
   text: A Library of Riemannian Manifolds
-  tagline: Numerical Differential Geometry
+  tagline: Efficient Numerical Differential Geometry
   actions:
     - theme: brand
       text: Get started
