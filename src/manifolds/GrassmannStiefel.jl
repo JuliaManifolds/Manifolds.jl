@@ -591,7 +591,7 @@ function get_point!(M::Grassmann{ℝ}, p, ::GrassmannAtlas, i::AbstractVector, a
     n, k = get_parameter(M.size)
     length(a) == k * (n - k) || throw(DimensionMismatch("Expected $(k * (n - k)) chart coordinates."))
     fill!(p, zero(eltype(p)))
-    p[rows, :] .= Matrix{eltype(p)}(I, k, k)
+    copyto!(view(p, rows, :), I)
     p[complement, :] .= reshape(a, n - k, k)
     return project!(M, p, p)
 end

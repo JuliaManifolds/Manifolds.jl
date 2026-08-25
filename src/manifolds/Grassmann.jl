@@ -99,6 +99,8 @@ the complementary row indices. The coordinate map is
 
 Its inverse inserts the reshaped coordinates into the rows `j`, inserts the
 identity into the rows `i`, and orthonormalizes the resulting matrix.
+
+The construction is similar to the one presented in [UsevichMarkovsky:2014](@cite).
 """
 struct GrassmannAtlas <: AbstractAtlas{ℝ} end
 
