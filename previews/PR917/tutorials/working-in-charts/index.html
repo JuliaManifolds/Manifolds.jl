@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>work in charts · Manifolds.jl</title><meta name="title" content="work in charts · Manifolds.jl"/><meta property="og:title" content="work in charts · Manifolds.jl"/><meta property="twitter:title" content="work in charts · Manifolds.jl"/><meta name="description" content="Documentation for Manifolds.jl."/><meta property="og:description" content="Documentation for Manifolds.jl."/><meta property="twitter:description" content="Documentation for Manifolds.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/documentercitations/citations-hover.css" rel="stylesheet" type="text/css"/><link href="../../assets/documentercitations/citations.css" rel="stylesheet" type="text/css"/><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/><link href="../../assets/citations.css" rel="stylesheet" type="text/css"/><link href="../../assets/link-icons.css" rel="stylesheet" type="text/css"/><script src="../../assets/documentercitations/citations-data.js"></script><script src="../../assets/documentercitations/citations-hover.js"></script><script src="../../assets/documentercitations/citations-backlinks.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img class="docs-light-only" src="../../assets/logo.png" alt="Manifolds.jl logo"/><img class="docs-dark-only" src="../../assets/logo-dark.png" alt="Manifolds.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../">Manifolds.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">How to...</span><ul><li><a class="tocitem" href="../getstarted/">🚀 Get Started with <code>Manifolds.jl</code></a></li><li class="is-active"><a class="tocitem" href>work in charts</a><ul class="internal"><li><a class="tocitem" href="#Setup"><span>Setup</span></a></li><li><a class="tocitem" href="#Values-for-the-geodesic"><span>Values for the geodesic</span></a></li><li><a class="tocitem" href="#Jacobi-fields-and-differentials-in-charts"><span>Jacobi fields and differentials in charts</span></a></li></ul></li><li><a class="tocitem" href="../work-with-a-metric-defined-in-a-chart/">work with a metric defined in a chart</a></li><li><a class="tocitem" href="../hand-gestures/">perform Hand gesture analysis</a></li><li><a class="tocitem" href="../integration/">integrate on manifolds and handle probability densities</a></li><li><a class="tocitem" href="../exploring-curvature/">explore curvature without coordinates</a></li></ul></li><li><span class="tocitem">Manifolds</span><ul><li><input class="collapse-toggle" id="menuitem-3-1" type="checkbox"/><label class="tocitem" for="menuitem-3-1"><span class="docs-label">Basic manifolds</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../manifolds/centeredmatrices/">Centered matrices</a></li><li><a class="tocitem" href="../../manifolds/choleskyspace/">Cholesky space</a></li><li><a class="tocitem" href="../../manifolds/circle/">Circle</a></li><li><a class="tocitem" href="../../manifolds/determinantone/">Determinant one matrices</a></li><li><a class="tocitem" href="../../manifolds/elliptope/">Elliptope</a></li><li><a class="tocitem" href="../../manifolds/essentialmanifold/">Essential manifold</a></li><li><a class="tocitem" href="../../manifolds/euclidean/">Euclidean</a></li><li><a class="tocitem" href="../../manifolds/fixedrankmatrices/">Fixed-rank matrices</a></li><li><a class="tocitem" href="../../manifolds/flag/">Flag</a></li><li><a class="tocitem" href="../../manifolds/generalizedstiefel/">Generalized Stiefel</a></li><li><a class="tocitem" href="../../manifolds/generalizedgrassmann/">Generalized Grassmann</a></li><li><a class="tocitem" href="../../manifolds/grassmann/">Grassmann</a></li><li><a class="tocitem" href="../../manifolds/hamiltonian/">Hamiltonian</a></li><li><a class="tocitem" href="../../manifolds/heisenberg/">Heisenberg matrices</a></li><li><a class="tocitem" href="../../manifolds/hyperbolic/">Hyperbolic space</a></li><li><a class="tocitem" href="../../manifolds/hyperrectangle/">Hyperrectangle</a></li><li><a class="tocitem" href="../../manifolds/invertible/">Invertible matrices</a></li><li><a class="tocitem" href="../../manifolds/lorentz/">Lorentzian manifold</a></li><li><a class="tocitem" href="../../manifolds/multinomialdoublystochastic/">Multinomial doubly stochastic matrices</a></li><li><a class="tocitem" href="../../manifolds/multinomial/">Multinomial matrices</a></li><li><a class="tocitem" href="../../manifolds/multinomialsymmetric/">Multinomial symmetric matrices</a></li><li><a class="tocitem" href="../../manifolds/multinomialsymmetricpositivedefinite/">Multinomial symmetric positive definite matrices</a></li><li><a class="tocitem" href="../../manifolds/oblique/">Oblique manifold</a></li><li><a class="tocitem" href="../../manifolds/probabilitysimplex/">Probability simplex</a></li><li><a class="tocitem" href="../../manifolds/positivenumbers/">Positive numbers</a></li><li><a class="tocitem" href="../../manifolds/projectivespace/">Projective space</a></li><li><a class="tocitem" href="../../manifolds/generalunitary/">Orthogonal and Unitary Matrices</a></li><li><a class="tocitem" href="../../manifolds/rotations/">Rotations</a></li><li><a class="tocitem" href="../../manifolds/segre/">Segre</a></li><li><a class="tocitem" href="../../manifolds/shapespace/">Shape spaces</a></li><li><a class="tocitem" href="../../manifolds/skewhermitian/">Skew-Hermitian matrices</a></li><li><a class="tocitem" href="../../manifolds/spectrahedron/">Spectrahedron</a></li><li><a class="tocitem" href="../../manifolds/sphere/">Sphere</a></li><li><a class="tocitem" href="../../manifolds/stiefel/">Stiefel</a></li><li><a class="tocitem" href="../../manifolds/symmetric/">Symmetric matrices</a></li><li><a class="tocitem" href="../../manifolds/symmetricpositivedefinite/">Symmetric positive definite</a></li><li><a class="tocitem" href="../../manifolds/spdfixeddeterminant/">SPD, fixed determinant</a></li><li><a class="tocitem" href="../../manifolds/symmetricpsdfixedrank/">Symmetric positive semidefinite fixed rank</a></li><li><a class="tocitem" href="../../manifolds/symplecticgrassmann/">Symplectic Grassmann</a></li><li><a class="tocitem" href="../../manifolds/symplectic/">Symplectic matrices</a></li><li><a class="tocitem" href="../../manifolds/symplecticstiefel/">Symplectic Stiefel</a></li><li><a class="tocitem" href="../../manifolds/torus/">Torus</a></li><li><a class="tocitem" href="../../manifolds/tucker/">Tucker</a></li><li><a class="tocitem" href="../../manifolds/spheresymmetricmatrices/">Unit-norm symmetric matrices</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-2" type="checkbox"/><label class="tocitem" for="menuitem-3-2"><span class="docs-label">Combined manifolds</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../manifolds/fiber_bundle/">Fiber bundle</a></li><li><a class="tocitem" href="../../manifolds/graph/">Graph manifold</a></li><li><a class="tocitem" href="../../manifolds/power/">Power manifold</a></li><li><a class="tocitem" href="../../manifolds/product/">Product manifold</a></li><li><a class="tocitem" href="../../manifolds/vector_bundle/">Vector bundle</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-3" type="checkbox"/><label class="tocitem" for="menuitem-3-3"><span class="docs-label">Manifold decorators</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../manifolds/connection/">Connection manifold</a></li><li><a class="tocitem" href="../../manifolds/metric/">Metric manifold</a></li></ul></li></ul></li><li><span class="tocitem">Features on Manifolds</span><ul><li><a class="tocitem" href="../../features/atlases/">Atlases and charts</a></li><li><a class="tocitem" href="../../features/differentiation/">Differentiation</a></li><li><a class="tocitem" href="../../features/distributions/">Distributions</a></li><li><a class="tocitem" href="../../features/integration/">Integration</a></li><li><a class="tocitem" href="../../features/statistics/">Statistics</a></li><li><a class="tocitem" href="../../features/utilities/">Utilities</a></li></ul></li><li><span class="tocitem">Miscellanea</span><ul><li><a class="tocitem" href="../../misc/about/">About</a></li><li><a class="tocitem" href="../../misc/NEWS/">Changelog</a></li><li><a class="tocitem" href="../../misc/CONTRIBUTING/">Contributing</a></li><li><a class="tocitem" href="../../misc/internals/">Internals</a></li><li><a class="tocitem" href="../../misc/testsuite/">Test suite</a></li><li><a class="tocitem" href="../../misc/notation/">Notation</a></li><li><a class="tocitem" href="../../misc/references/">References</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">How to...</a></li><li class="is-active"><a href>work in charts</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>work in charts</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/JuliaManifolds/Manifolds.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/JuliaManifolds/Manifolds.jl/blob/master/docs/src/tutorials/working-in-charts.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Working-in-charts"><a class="docs-heading-anchor" href="#Working-in-charts">Working in charts</a><a id="Working-in-charts-1"></a><a class="docs-heading-anchor-permalink" href="#Working-in-charts" title="Permalink"></a></h1><p>In this tutorial we will learn how to use charts for basic geometric operations like exponential map, logarithmic map and parallel transport.</p><p>There are two conceptually different approaches to working on a manifold: working in charts and chart-free representations.</p><p>The first one, widespread in differential geometry textbooks, is based on defining an atlas on the manifold and performing computations in selected charts. This approach, while generic, is not ideally suitable in all circumstances. For example, working in charts that do not cover the entire manifold causes issues with having to switch charts when operating on a manifold.</p><p>The second one is beneficial if there exists a representation of points and tangent vectors for a manifold which allows for efficient closed-form formulas for standard functions like the exponential map or Riemannian distance in this representation. These computations are then chart-free. <code>Manifolds.jl</code> supports both approaches, although the chart-free approach is the main focus of the library.</p><p>In this tutorial we focus on chart-based computation.</p><pre><code class="language-julia hljs">using Manifolds, RecursiveArrayTools, OrdinaryDiffEq, DiffEqCallbacks, BoundaryValueDiffEqMIRK
+
+using Manifolds: get_chart_index, solve_chart_parallel_transport_ode, solve_chart_exp_ode, solve_chart_jacobi_field, solve_chart_differential_exp_basepoint, solve_chart_differential_exp_argument, solve_chart_log_bvp, solve_chart_volume_density</code></pre><p>The manifold we consider is the <code>M</code> is the torus in form of the <a href="https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/torus.html#Manifolds.EmbeddedTorus"><code>EmbeddedTorus</code></a>, that is the representation defined as a surface of revolution of a circle of radius 2 around a circle of radius 3. The atlas we will perform computations in is its <a href="https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/torus.html#Manifolds.DefaultTorusAtlas"><code>DefaultTorusAtlas</code></a> <code>A</code>, consisting of a family of charts indexed by two angles, that specify the base point of the chart.</p><p>We will draw geodesics time between <code>0</code> and <code>t_end</code>, and then sample the solution at multiples of <code>dt</code> and draw a line connecting sampled points.</p><pre><code class="language-julia hljs">M = Manifolds.EmbeddedTorus(3, 2)
+A = Manifolds.DefaultTorusAtlas()</code></pre><pre><code class="nohighlight hljs">Manifolds.DefaultTorusAtlas()</code></pre><h2 id="Setup"><a class="docs-heading-anchor" href="#Setup">Setup</a><a id="Setup-1"></a><a class="docs-heading-anchor-permalink" href="#Setup" title="Permalink"></a></h2><p>We will first set up our plot with an empty torus. <code>param_points</code> are points on the surface of the torus that will be used for basic surface shape in <code>Makie.jl</code>. The torus will be colored according to its Gaussian curvature stored in <code>gcs</code>. We later want to have a color scale that has negative curvature blue, zero curvature white and positive curvature red so <code>gcs_mm</code> is the largest absolute value of the curvature that will be needed to properly set range of curvature values.</p><p>In the documentation this tutorial represents a static situation (without interactivity). <code>Makie.jl</code> rendering is turned off.</p><pre><code class="language-julia hljs">using GLMakie, Makie
+GLMakie.activate!()
+
+&quot;&quot;&quot;
+    torus_figure()
+
+This function generates a simple plot of a torus and returns the new figure containing the plot.
+&quot;&quot;&quot;
+function torus_figure()
+    fig = Figure(size=(1400, 1000), fontsize=16)
+    ax = LScene(fig[1, 1], show_axis=true)
+    ϴs, φs = LinRange(-π, π, 50), LinRange(-π, π, 50)
+    param_points = [Manifolds._torus_param(M, θ, φ) for θ in ϴs, φ in φs]
+    X1, Y1, Z1 = [[p[i] for p in param_points] for i in 1:3]
+    gcs = [gaussian_curvature(M, p) for p in param_points]
+    gcs_mm = max(abs(minimum(gcs)), abs(maximum(gcs)))
+    pltobj = surface!(
+        ax,
+        X1,
+        Y1,
+        Z1;
+        shading=true,
+        backlight=1.0f0,
+        color=gcs,
+        colormap=Reverse(:RdBu),
+        colorrange=(-gcs_mm, gcs_mm),
+        transparency=true,
+    )
+    wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5)
+    zoom!(ax.scene, cameracontrols(ax.scene), 0.95)
+    Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label=&quot;Gaussian curvature&quot;)
+    return ax, fig
+end
+
+function jacobi_figure(geodesic, vector_fields; colors, auxiliary_geodesics = [], support_geodesics = [])
+    ax, fig = torus_figure()
+    times = 0.0:0.02:1.0
+    curve = geodesic.(times)
+    points = Point3f.(first.(curve))
+    lines!(ax, points; linewidth=4.0, color=:green, label=&quot;geodesic&quot;)
+
+    for (t, ag) in auxiliary_geodesics
+        ag_curve = ag.(times)
+        ag_points = Point3f.(first.(ag_curve))
+        lines!(ax, ag_points; linewidth=3.0, color=:gray, linestyle=:dash, label=&quot;auxiliary geodesic (t = $t)&quot;)
+    end
+
+    for sg in support_geodesics
+        fg_curve = sg.(times)
+        fg_points = Point3f.(first.(fg_curve))
+        lines!(ax, fg_points; linewidth=4.0, color=:black, label=&quot;geodesic&quot;)
+    end
+
+    indices = 1:4:length(vector_fields[1])
+    for (vectors, color) in zip(vector_fields, colors)
+        arrows3d!(
+            ax,
+            Point3f.(first.(vectors[indices])),
+            Point3f.(last.(vectors[indices]));
+            shaftradius=0.05,
+            color,
+        )
+    end
+    return fig
+end</code></pre><pre><code class="nohighlight hljs">jacobi_figure (generic function with 1 method)</code></pre><h2 id="Values-for-the-geodesic"><a class="docs-heading-anchor" href="#Values-for-the-geodesic">Values for the geodesic</a><a id="Values-for-the-geodesic-1"></a><a class="docs-heading-anchor-permalink" href="#Values-for-the-geodesic" title="Permalink"></a></h2><p><code>solve_for</code> is a helper function that solves a parallel transport along geodesic problem on the torus <code>M</code>. <code>p0x</code> is the <span>$(\theta, \varphi)$</span> parametrization of the point from which we will transport the vector. We first calculate the coordinates in the embedding of <code>p0x</code> and store it as <code>p</code>, and then get the initial chart from atlas <code>A</code> appropriate for starting working at point <code>p</code>. The vector we transport has coordinates <code>Y_transp</code> in the induced tangent space basis of chart <code>i_p0x</code>. The function returns the full solution to the parallel transport problem, containing the sequence of charts that was used and solutions of differential equations computed using <code>OrdinaryDiffEq</code>.</p><p><code>bvp_i</code> is needed later for a different purpose, it is the chart index we will use for solving the logarithmic map boundary value problem in.</p><p>Next we solve the vector transport problem <code>solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy])</code>, sample the result at the selected time steps and store the result in <code>geo</code>. The solution includes the geodesic which we extract and convert to a sequence of points digestible by <code>Makie.jl</code>, <code>geo_ps</code>. <code>[θₚ, φₚ]</code> is the parametrization in chart (0, 0) of the starting point of the geodesic. The direction of the geodesic is determined by <code>[θₓ, φₓ]</code>, coordinates of the tangent vector at the starting point expressed in the induced basis of chart <code>i_p0x</code> (which depends on the initial point). Finally, <code>[θy, φy]</code> are the coordinates of the tangent vector that will be transported along the geodesic, which are also expressed in same basis as <code>[θₓ, φₓ]</code>.</p><p>We won’t draw the transported vector at every point as there would be too many arrows, which is why we select every 100th point only for that purpose with <code>pt_indices</code>. Then, <code>geo_ps_pt</code> contains points at which the transported vector is tangent to and <code>geo_Ys</code> the transported vector at that point, represented in the embedding.</p><p>The logarithmic map will be solved between points with parametrization <code>bvp_a1</code> and <code>bvp_a2</code> in chart <code>bvp_i</code>. The result is assigned to variable <code>bvp_sol</code> and then sampled with time step 0.05. The result of this sampling is converted from parameters in chart <code>bvp_i</code> to point in the embedding and stored in <code>geo_r</code>.</p><pre><code class="language-julia hljs">function solve_for(p0x, X_p0x, Y_transp, T::Real)
+    p = [Manifolds._torus_param(M, p0x...)...]
+    i_p0x = get_chart_index(M, A, p)
+    p_exp = solve_chart_parallel_transport_ode(
+        M,
+        [0.0, 0.0],
+        X_p0x,
+        A,
+        i_p0x,
+        Y_transp;
+        final_time=T,
+    )
+    return p_exp
+end;
+
+function solve_geodesic(p, X, T::Real)
+    i_p0x = get_chart_index(M, A, p)
+    B = induced_basis(M, A, i_p0x)
+    X_p0x = get_coordinates(M, p, X, B)
+    p_exp = solve_chart_exp_ode(
+        M,
+        [0.0, 0.0],
+        X_p0x,
+        A,
+        i_p0x;
+        final_time=T,
+    )
+    return p_exp
+end;</code></pre><h3 id="Solving-parallel-Transport-ODE"><a class="docs-heading-anchor" href="#Solving-parallel-Transport-ODE">Solving parallel Transport ODE</a><a id="Solving-parallel-Transport-ODE-1"></a><a class="docs-heading-anchor-permalink" href="#Solving-parallel-Transport-ODE" title="Permalink"></a></h3><p>We set the end time <code>t_end</code> and time step <code>dt</code>.</p><pre><code class="language-julia hljs">t_end = 2.0
+dt = 1e-1</code></pre><pre><code class="nohighlight hljs">0.1</code></pre><p>We also parametrise the start point and direction.</p><pre><code class="language-julia hljs">θₚ = π/10
+φₚ = -π/4
+θₓ = π/2
+φₓ = 0.7
+θy = 0.2
+φy = -0.1
+
+geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy], t_end)(0.0:dt:t_end);
+geo_ps = [Point3f(s[1]) for s in geo]
+pt_indices = 1:div(length(geo), 10):length(geo)
+geo_ps_pt = [Point3f(s[1]) for s in geo[pt_indices]]
+geo_Ys = [Point3f(s[3]) for s in geo[pt_indices]]
+
+ax1, fig1 = torus_figure()
+arrows3d!(ax1, geo_ps_pt, geo_Ys, shaftradius=0.05, color=:blue)
+lines!(geo_ps; linewidth=4.0, color=:green)
+fig1</code></pre><p><img src="../working-in-charts_files/figure-commonmark/cell-8-output-1.png" alt/></p><p><img src="working-in-charts-transport.png" alt="fig-pt"/></p><p>fig-pt</p><h3 id="Solving-the-logarithmic-map-ODE"><a class="docs-heading-anchor" href="#Solving-the-logarithmic-map-ODE">Solving the logarithmic map ODE</a><a id="Solving-the-logarithmic-map-ODE-1"></a><a class="docs-heading-anchor-permalink" href="#Solving-the-logarithmic-map-ODE" title="Permalink"></a></h3><pre><code class="language-julia hljs">θ₁=π/2
+φ₁=-1.0
+θ₂=-π/8
+φ₂=π/2
+
+bvp_i = (0, 0)
+bvp_a1 = [θ₁, φ₁]
+bvp_a2 = [θ₂, φ₂]
+bvp_sol = solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i);
+pts_interp = collect(bvp_sol(0.0:0.05:1.0; idxs=1:2))
+geo_r = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in eachcol(pts_interp)]
+
+
+ax2, fig2 = torus_figure()
+lines!(geo_r; linewidth=4.0, color=:green)
+fig2</code></pre><p><img src="../working-in-charts_files/figure-commonmark/cell-9-output-1.png" alt/></p><p><img src="working-in-charts-geodesic.png" alt="fig-geodesic"/></p><p>fig-geodesic</p><h2 id="Jacobi-fields-and-differentials-in-charts"><a class="docs-heading-anchor" href="#Jacobi-fields-and-differentials-in-charts">Jacobi fields and differentials in charts</a><a id="Jacobi-fields-and-differentials-in-charts-1"></a><a class="docs-heading-anchor-permalink" href="#Jacobi-fields-and-differentials-in-charts" title="Permalink"></a></h2><p>Jacobi fields describe how a geodesic changes when its initial point or initial velocity is perturbed. The chart-based solvers below work with the coordinate vector <code>Xc</code> of the geodesic velocity and coordinate vectors <code>Yc</code> in the induced basis of the current chart. They switch charts automatically when necessary, just as the parallel-transport solver does.</p><p>To make this simple, we will consider varying initial point and initial velocity separately in this example but they can be varied together. First, let us consider the (local) effect of varying the velocity. We need to set the initial point <code>p0</code> and get the appropriate chart <code>jacobi_i</code> for this point. The initial velocity <code>jacobi_Xc</code> is twice as big as in the exponential map example to arrive at the same point at time 1.0. Variable <code>jacobi_Yc</code> is set to zero because we don’t want to vary the initial point, and <code>jacobi_dYc</code> is the initial velocity variation.</p><pre><code class="language-julia hljs">
+p0 = [Manifolds._torus_param(M, θₚ, φₚ)...]
+jacobi_i = get_chart_index(M, A, p0)
+jacobi_a = [0.0, 0.0]
+jacobi_Xc = 2*[θₓ, φₓ]
+jacobi_Yc = [0.0, 0.0]
+jacobi_dYc = [0.3, -0.6]</code></pre><pre><code class="nohighlight hljs">2-element Vector{Float64}:
+  0.3
+ -0.6</code></pre><p><a href="../../features/atlases/#Manifolds.solve_chart_jacobi_field"><code>Manifolds.solve_chart_jacobi_field</code></a> solves the geodesic and a Jacobi field simultaneously. Its last two arguments are the initial coordinates of the field, <code>Yc</code>, and of its covariant derivative, <code>dYc</code>. Evaluating the returned solution yields <code>(p, X, Y, dY)</code>: the geodesic point and velocity, followed by the Jacobi field and its covariant derivative, all in the embedding.</p><pre><code class="language-julia hljs">jacobi_solution = solve_chart_jacobi_field(
+    M,
+    jacobi_a,
+    jacobi_Xc,
+    A,
+    jacobi_i,
+    jacobi_Yc,
+    jacobi_dYc;
+    final_time=1.0,
+)
+p1, X1, J1, ∇J1 = jacobi_solution(1.0)</code></pre><pre><code class="nohighlight hljs">([1.9558356520956433, 4.585482631595611, 0.24308529503723836], [-5.902074917665517, 3.363846553587959, -6.358351943866658], [0.586328580816676, -0.48702835241309433, 1.779869562743577], [2.5079198478780884, -1.0308849731480962, -0.29155178654666647])</code></pre><p>Next we plot the geodesic and the Jacobi field. The blue arrows show the field <span>$J$</span> (pointing roughly in the direction of matching point of an perturbed geodesic) and the orange arrows show its covariant derivative <span>$\nabla_{\dot\gamma}J$</span> (representing change in the Jacobi field along the geodesic). Gray dashed lines represent the geodesics that correspond to modified initial velocity (in steps of 0.2 from 0.2 to 1.0), while solid black lines represent geodesics of length 1 starting at the initial curve in the direction of Jacobi field. We can notice that final points of these geodesics roughly lie on the furthest perturbed geodesic. This is because Jacobi field locally approximates the perturbation but global equality only holds in special cases.</p><pre><code class="language-julia hljs">jacobi_times = 0.0:0.05:1.0
+jacobi_values = jacobi_solution(jacobi_times)
+jacobi_vectors = [(value[1], value[3]) for value in jacobi_values]
+jacobi_derivatives = [(value[1], value[4]) for value in jacobi_values]
+auxiliary_geodesics = [
+    (aux_t, solve_for([θₚ, φₚ], jacobi_Xc + aux_t * jacobi_dYc, jacobi_Yc, 1.0)) for aux_t in 0.2:0.2:1.0
+]
+
+support_geodesics = [solve_geodesic(sg_init[1], sg_init[2], 1.0) for sg_init in jacobi_vectors]
+
+jacobi_figure(
+    t -&gt; jacobi_solution(t)[1:2],
+    [jacobi_vectors, jacobi_derivatives];
+    colors = [:dodgerblue, :darkorange],
+    auxiliary_geodesics = auxiliary_geodesics,
+    support_geodesics = support_geodesics
+)</code></pre><p><img src="../working-in-charts_files/figure-commonmark/cell-12-output-1.png" alt/></p><h3 id="Base-point-variation"><a class="docs-heading-anchor" href="#Base-point-variation">Base point variation</a><a id="Base-point-variation-1"></a><a class="docs-heading-anchor-permalink" href="#Base-point-variation" title="Permalink"></a></h3><p>Similarly, we can set up a variation of the initial point. This time, <code>jacobi_dYc</code> is set to zero and <code>jacobi_Yc</code> corresponds to change in the position of the initial point.</p><pre><code class="language-julia hljs">jacobi_Yc = [-0.25, 0.6]
+jacobi_dYc = [0.0, 0.0]
+
+jacobi_solution = solve_chart_jacobi_field(
+    M,
+    jacobi_a,
+    jacobi_Xc,
+    A,
+    jacobi_i,
+    jacobi_Yc,
+    jacobi_dYc;
+    final_time=1.0,
+)
+p1, X1, J1, ∇J1 = jacobi_solution(1.0)
+
+jacobi_times = 0.0:0.05:1.0
+jacobi_values = jacobi_solution(jacobi_times)
+jacobi_vectors = [(value[1], value[3]) for value in jacobi_values]
+jacobi_derivatives = [(value[1], value[4]) for value in jacobi_values]
+auxiliary_geodesics = [
+    (aux_t, solve_for([θₚ, φₚ] + aux_t * jacobi_Yc, jacobi_Xc, jacobi_Yc, 1.0)) for aux_t in 0.2:0.2:1.0
+]
+support_geodesics = [solve_geodesic(sg_init[1], sg_init[2], 1.0) for sg_init in jacobi_vectors]
+
+jacobi_figure(
+    t -&gt; jacobi_solution(t)[1:2],
+    [jacobi_vectors, jacobi_derivatives];
+    colors = [:dodgerblue, :darkorange],
+    auxiliary_geodesics = auxiliary_geodesics,
+    support_geodesics = support_geodesics
+)</code></pre><p><img src="../working-in-charts_files/figure-commonmark/cell-13-output-1.png" alt/></p><h3 id="Differentials-of-the-exponential-map"><a class="docs-heading-anchor" href="#Differentials-of-the-exponential-map">Differentials of the exponential map</a><a id="Differentials-of-the-exponential-map-1"></a><a class="docs-heading-anchor-permalink" href="#Differentials-of-the-exponential-map" title="Permalink"></a></h3><p>There are two exponential-map differential helpers select the appropriate initial conditions for common variations. <code>solve_chart_differential_exp_basepoint</code> uses <span>$Y(0)=Y_c$</span> and <span>$\nabla_{\dot\gamma}Y(0)=0$</span>, while <code>solve_chart_differential_exp_argument</code> uses <span>$Y(0)=0$</span> and <span>$\nabla_{\dot\gamma}Y(0)=Y_c$</span>. Consequently, the Jacobi field at time <code>1.0</code> is respectively <span>$D_p\exp_p(X)[Y]$</span> or <span>$D_X\exp_p(X)[Y]$</span>.</p><pre><code class="language-julia hljs">dexp_basepoint_solution = Manifolds.solve_chart_differential_exp_basepoint(
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time=1.0
+)
+dexp_argument_solution = Manifolds.solve_chart_differential_exp_argument(
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time=1.0
+)
+
+_, _, differential_exp_basepoint, _ = dexp_basepoint_solution(1.0)
+_, _, differential_exp_argument, _ = dexp_argument_solution(1.0)</code></pre><pre><code class="nohighlight hljs">([1.955835628924485, 4.585482648289362, 0.24308524387725636], [-5.902075213464096, 3.3638464563009975, -6.358351931613713], [-0.645340310014627, 0.5160195143549362, -1.8085727576991888], [-2.508574122852219, 1.0433596072804268, 0.19994095594648326])</code></pre><p>The following plot compares the two endpoint fields. The blue field corresponds to moving the base point and the orange field corresponds to changing the initial velocity.</p><pre><code class="language-julia hljs">dexp_basepoint_values = dexp_basepoint_solution(jacobi_times)
+dexp_argument_values = dexp_argument_solution(jacobi_times)
+dexp_basepoint_vectors = [(value[1], value[3]) for value in dexp_basepoint_values]
+dexp_argument_vectors = [(value[1], value[3]) for value in dexp_argument_values]
+jacobi_figure(
+    t -&gt; dexp_basepoint_solution(t)[1:2],
+    [dexp_basepoint_vectors, dexp_argument_vectors];
+    colors=[:dodgerblue, :darkorange],
+)</code></pre><p><img src="../working-in-charts_files/figure-commonmark/cell-15-output-1.png" alt/></p><p>The determinant of <span>$D_X\exp_p(X)$</span>, corrected by the local metric determinants at the start and end of the geodesic, is the volume density of the exponential map. It is available without having to construct all Jacobi fields separately.</p><pre><code class="language-julia hljs">chart_volume_density = solve_chart_volume_density(
+    M, jacobi_a, jacobi_Xc, A, jacobi_i
+)</code></pre><pre><code class="nohighlight hljs">0.3284565916319668</code></pre><p>The volume density is a scalar, so we can represent it by coloring the geodesic according to the volume density computed for scaled initial velocities <span>$tX$</span>.</p><pre><code class="language-julia hljs">volume_densities = [
+    solve_chart_volume_density(M, jacobi_a, t .* jacobi_Xc, A, jacobi_i)
+    for t in jacobi_times
+]
+volume_geodesic = solve_chart_exp_ode(M, jacobi_a, jacobi_Xc, A, jacobi_i)
+volume_points = Point3f.(first.(volume_geodesic(jacobi_times)))
+ax_volume, fig_volume = torus_figure()
+lines!(
+    ax_volume,
+    volume_points;
+    color=volume_densities,
+    colormap=:viridis,
+    colorrange=extrema(volume_densities),
+    linewidth=6.0,
+)
+Colorbar(fig_volume[1, 3], limits=extrema(volume_densities), colormap=:viridis, label=&quot;volume density&quot;)
+fig_volume</code></pre><p><img src="../working-in-charts_files/figure-commonmark/cell-17-output-1.png" alt/></p><h3 id="Differentials-and-adjoints-of-the-logarithmic-map"><a class="docs-heading-anchor" href="#Differentials-and-adjoints-of-the-logarithmic-map">Differentials and adjoints of the logarithmic map</a><a id="Differentials-and-adjoints-of-the-logarithmic-map-1"></a><a class="docs-heading-anchor-permalink" href="#Differentials-and-adjoints-of-the-logarithmic-map" title="Permalink"></a></h3><p>Let <span>$X=\log_p(q)$</span>. The logarithmic map helpers return Jacobi field solutions whose covariant derivative at time <code>0.0</code> is the requested differential of the logarithmic map with respect to either base point or the argument. For the base point differential, <code>jacobi_Yc</code> represents coordinates of a vector at <span>$p$</span>; for the argument differential it represents coordinates of a vector at <span>$q$</span> in the final chart. In both cases the induced basis is used (see <a href="../../features/atlases/#Manifolds.induced_basis-Tuple{AbstractManifold, AbstractAtlas, Any, VectorSpaceType}"><code>induced_basis</code></a>).</p><pre><code class="language-julia hljs">dlog_basepoint_solution = Manifolds.solve_chart_differential_log_basepoint(
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time=1.0
+)
+dlog_argument_solution = Manifolds.solve_chart_differential_log_argument(
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time=1.0
+)
+
+_, _, _, differential_log_basepoint = dlog_basepoint_solution(0.0)
+_, _, _, differential_log_argument = dlog_argument_solution(0.0)</code></pre><pre><code class="nohighlight hljs">([3.4663173674875574, -3.466317367487557, 0.6180339887498948], [3.479917982573146, 6.225770646392013, 5.975664329483111], [0.0, 0.0, 0.0], [-2.358741417864044, 0.04797577357628602, 5.237620452672789])</code></pre><p>The logarithmic map fields are fixed at the endpoint and evaluated backwards along the same geodesic. The arrows at the base point show their values, which are the two requested differentials of <code>log</code>.</p><pre><code class="language-julia hljs">dlog_basepoint_values = dlog_basepoint_solution(jacobi_times)
+dlog_argument_values = dlog_argument_solution(jacobi_times)
+dlog_basepoint_vectors = [(value[1], value[3]) for value in dlog_basepoint_values]
+dlog_argument_vectors = [(value[1], value[3]) for value in dlog_argument_values]
+jacobi_figure(
+    t -&gt; dlog_basepoint_solution(t)[1:2],
+    [dlog_basepoint_vectors, dlog_argument_vectors];
+    colors=[:dodgerblue, :darkorange],
+)</code></pre><p><img src="../working-in-charts_files/figure-commonmark/cell-19-output-1.png" alt/></p><p>The adjoints of the exponential map differentials map a vector at <span>$q$</span> back to <span>$p$</span>. The adjoints of the logarithmic map differentials have the converse domain and codomain. In other words, we want the <a href="https://en.wikipedia.org/wiki/Pullback_(differential_geometry)">pullback</a> of the exponential of a logarithmic map but instead of transforming cotangent vectors, we want it to work on tangent vectors. We thus use the isomorphism between tangent and cotangent spaces established by the Riemannian metric, and we call the entire operation “adjoint differentials”.</p><pre><code class="language-julia hljs">adjoint_differential_exp_basepoint = Manifolds.solve_chart_adjoint_differential_exp_basepoint(
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc
+)
+adjoint_differential_exp_argument = Manifolds.solve_chart_adjoint_differential_exp_argument(
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc
+)
+adjoint_differential_log_basepoint = Manifolds.solve_chart_adjoint_differential_log_basepoint(
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc
+)
+adjoint_differential_log_argument = Manifolds.solve_chart_adjoint_differential_log_argument(
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc
+)</code></pre><pre><code class="nohighlight hljs">2-element Vector{Float64}:
+ -3.2305681718289687
+ -0.7236225323940885</code></pre><p>For a geodesic that crosses a chart boundary, the returned <code>StitchedChartSolution</code> still evaluates to embedding-space points and tangent vectors. When supplying or interpreting raw coordinates to the logarithmic or adjoint routines, use the induced basis of the respective chart as specified by the corresponding function.</p><details>
+  <summary>Technical Details</summary><p>This tutorial is cached. It was last run on the following package versions.</p><pre><code class="nohighlight hljs">Status `~/.julia/dev/Manifolds/tutorials/Project.toml`
+⌃ [1a22d4ce] BoundaryValueDiffEqMIRK v1.17.3
+  [336ed68f] CSV v0.10.16
+  [13f3f980] CairoMakie v0.15.13
+  [a93c6f00] DataFrames v1.8.2
+⌃ [459566f4] DiffEqCallbacks v4.18.3
+⌃ [31c24e10] Distributions v0.25.129
+  [e9467ef8] GLMakie v0.13.13
+  [1baab800] HybridArrays v0.4.16
+  [ee78f7c6] Makie v0.24.13
+  [1cead3c2] Manifolds v0.11.29 `.`
+  [3362f125] ManifoldsBase v2.5.0
+  [6f286f6a] MultivariateStats v0.10.4
+⌃ [1dea7af3] OrdinaryDiffEq v7.2.0
+  [91a5bcdd] Plots v1.41.6
+⌃ [731186ca] RecursiveArrayTools v4.3.4
+⌃ [276daf66] SpecialFunctions v2.8.0
+  [90137ffa] StaticArrays v1.9.18
+  [d6f4376e] Markdown v1.11.0
+Info Packages marked with ⌃ have new versions available and may be upgradable.</code></pre><p>This tutorial was last rendered August 14, 2026, 17:10:55.</p></details></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../getstarted/">« 🚀 Get Started with <code>Manifolds.jl</code></a><a class="docs-footer-nextpage" href="../work-with-a-metric-defined-in-a-chart/">work with a metric defined in a chart »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Tuesday 25 August 2026 16:31">Tuesday 25 August 2026</span>. Using Julia version 1.12.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
