@@ -182,6 +182,7 @@ makedocs(;
                 "Cholesky space" => "manifolds/choleskyspace.md",
                 "Circle" => "manifolds/circle.md",
                 "Determinant one matrices" => "manifolds/determinantone.md",
+                "Parametric surfaces" => "manifolds/parametric.md",
                 "Elliptope" => "manifolds/elliptope.md",
                 "Essential manifold" => "manifolds/essentialmanifold.md",
                 "Euclidean" => "manifolds/euclidean.md",

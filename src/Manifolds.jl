@@ -460,6 +460,7 @@ include("manifolds/Elliptope.jl")
 include("manifolds/EmbeddedTorus.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/Flag.jl")
+include("manifolds/ParametricSurface.jl")
 include("manifolds/FlagOrthogonal.jl")
 include("manifolds/FlagStiefel.jl")
 include("manifolds/GeneralizedGrassmann.jl")
@@ -708,6 +709,7 @@ export AbstractPowerManifold,
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export TangentBundle
+export ParametricSurface, ParametricSurfaceAtlas
 export TangentSpace, VectorSpaceFiber, VectorSpaceType, VectorBundle
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport, ParallelTransport
