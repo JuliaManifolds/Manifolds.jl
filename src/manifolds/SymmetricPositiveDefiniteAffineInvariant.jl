@@ -9,12 +9,12 @@ struct AffineInvariantMetric <: RiemannianMetric end
 @doc raw"""
     change_representer(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
-space at `p` with respect to the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`)
-`g_E`, this is turned into the representer with respect to the (default) metric,
-the [`AffineInvariantMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
+Compute the representer of the linear function given by ``X ∈ T_p\mathcal M`` with respect to
+the (default) [`AffineInvariantMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
+Here `X` represents the linear function on the tangent space at `p` with respect to the
+[`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) `g_E`.
 
-To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)```
+To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)``
 it holds
 
 ```math
@@ -38,7 +38,7 @@ Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`Euclidea
 [`SymmetricPositiveDefinite`](@ref) `M`.
 
 To be precise we are looking for ``c\colon T_p\mathcal P(n) → T_p\mathcal P(n) ``
-such that for all ``Y,Z ∈ T_p\mathcal P(n)``` it holds
+such that for all ``Y,Z ∈ T_p\mathcal P(n)`` it holds
 
 ```math
 ⟨Y,Z⟩ = \operatorname{tr}(YZ) = \operatorname{tr}(p^{-1}c(Y)p^{-1}c(Z)) = g_p(c(Z),c(Y))
@@ -147,11 +147,10 @@ end
     [Ξ,κ] = get_basis_diagonalizing(M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis)
     [Ξ,κ] = get_basis_diagonalizing(M::MetricManifold{<:SymmetricPositiveDefinite,AffineInvariantMetric}, p, B::DiagonalizingOrthonormalBasis)
 
-Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
-[`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
-[`MetricManifold`](@extref ManifoldsBase.MetricManifold) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
-[`AffineInvariantMetric`](@ref) that diagonalizes the curvature tensor ``R(u,v)w``
-with eigenvalues `κ` and where the direction `B.frame_direction` ``V`` has curvature `0`.
+Return an orthonormal basis `Ξ` of the tangent space at `p` that diagonalizes the curvature tensor ``R(u,v)w``, together with its eigenvalues `κ`.
+The basis is a vector of tangent vectors (of length [`manifold_dimension`](@ref) of `M`) on the
+[`MetricManifold`](@extref ManifoldsBase.MetricManifold) of the [`SymmetricPositiveDefinite`](@ref) manifold `M` with
+[`AffineInvariantMetric`](@ref), and the direction `B.frame_direction` ``V`` has curvature `0`.
 
 The construction is based on an ONB for the symmetric matrices similar to [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
 just that the ONB here is build from the eigen vectors of ``p^{\frac{1}{2}}Vp^{\frac{1}{2}}``.

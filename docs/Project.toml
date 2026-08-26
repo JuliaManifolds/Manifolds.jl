@@ -5,7 +5,9 @@ DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 DocumenterCitations = "daee34ce-89f3-4625-b898-19384cb65244"
+DocumenterCodeBlocks = "b6400b83-267f-4b55-9fd8-bffc853bdfd8"
 DocumenterInterLinks = "d12716ef-a0f6-4df4-a9f1-a5a34e75c656"
+DocumenterLandingPage = "1c52b33b-3e2f-4e99-b3b5-a6ad63f0d6d2"
 FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
@@ -18,6 +20,9 @@ RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[sources]
+Manifolds = {path = ".."}
 
 [compat]
 BoundaryValueDiffEq = "4, 5"
@@ -38,6 +43,3 @@ Plots = "1"
 RecipesBase = "1"
 RecursiveArrayTools = "3, 4"
 StaticArrays = "1.0"
-
-[sources]
-Manifolds = {path = ".."}

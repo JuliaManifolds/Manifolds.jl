@@ -102,7 +102,7 @@ function change_representer!(M::Stiefel, Y, ::EuclideanMetric, p, X)
 end
 
 @doc raw"""
-    change_metric(M::Stiefel, ::EuclideanMetric, p X)
+    change_metric(M::Stiefel, ::EuclideanMetric, p, X)
 
 Change `X` to the corresponding vector with respect to the metric of the [`Stiefel`](@ref) `M`,
 which is just the identity, since the manifold is isometrically embedded.
@@ -379,10 +379,9 @@ end
 @doc raw"""
     rand(::Stiefel; vector_at=nothing, σ::Real=1.0)
 
-When `vector_at` is `nothing`, return a random (Gaussian) point `x` on the [`Stiefel`](@ref)
-manifold `M` by generating a (Gaussian) matrix with standard deviation `σ` and return the
-orthogonalized version, i.e. return the Q component of the QR decomposition of the random
-matrix of size ``n×k``.
+When `vector_at` is `nothing`, return a random (Gaussian) point `x` on the [`Stiefel`](@ref) manifold `M`.
+This generates a (Gaussian) matrix of size ``n×k`` with standard deviation `σ` and returns its
+orthogonalized version, i.e. the Q component of its QR decomposition.
 
 When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
 ``T_{vector\_at}\mathrm{St}(n,k)`` with mean zero and standard deviation `σ` by projecting a

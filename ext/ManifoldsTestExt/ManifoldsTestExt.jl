@@ -1579,13 +1579,14 @@ end
         name = "Logarithmic map on \$M for \$(typeof(p)) points",
         kwargs...
     )
-    Test the logarithmic map on manifold `M` at point `p` towards q
 
-    * that the result is a valid tangent vector at `p` on the manifold
-    * that the result matches `expected_value`, if given
-    * that the mutating version `log!` matches the non-mutating version, (if activated)
-    * that the exponential map inverts the logarithmic map (if activated)
-    (only performed if either `injectivity_radius` is not available or `X` is within)
+Test the logarithmic map on manifold `M` at point `p` towards `q`.
+
+* that the result is a valid tangent vector at `p` on the manifold
+* that the result matches `expected_value`, if given
+* that the mutating version `log!` matches the non-mutating version, (if activated)
+* that the exponential map inverts the logarithmic map (if activated)
+  (only performed if either `injectivity_radius` is not available or `X` is within)
 """
 function Manifolds.Test.test_log(
         M::AbstractManifold, p, q;

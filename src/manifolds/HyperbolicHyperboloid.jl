@@ -118,7 +118,8 @@ end
     convert(::Type{AbstractVector}, p::PoincareBallPoint, X::PoincareBallTangentVector)
 
 Convert the [`PoincareBallTangentVector`](@ref) `X` from the tangent space at `p` to a
-[`HyperboloidTangentVector`](@ref) by computing the push forward of the isometric map, cf.
+[`HyperboloidTangentVector`](@ref).
+This computes the push forward of the isometric map, cf.
 [`convert(::Type{HyperboloidPoint}, p::PoincareBallPoint)`](@ref).
 
 The push forward ``π_*(p)`` maps from ``ℝ^n`` to a subspace of ``ℝ^{n+1}``, the formula reads
@@ -152,7 +153,7 @@ end
 
 @doc raw"""
     convert(
-        ::Type{Tuple{HyperboloidPoint,HyperboloidTangentVector}}.
+        ::Type{Tuple{HyperboloidPoint,HyperboloidTangentVector}},
         (p,X)::Tuple{PoincareBallPoint,PoincareBallTangentVector}
     )
     convert(
@@ -161,8 +162,8 @@ end
     ) where {P<:AbstractVector, T <: AbstractVector}
 
 Convert a [`PoincareBallPoint`](@ref) `p` and a [`PoincareBallTangentVector`](@ref) `X`
-to a [`HyperboloidPoint`](@ref) and a [`HyperboloidTangentVector`](@ref) simultaneously,
-see [`convert(::Type{HyperboloidPoint}, ::PoincareBallPoint)`](@ref) and
+to a [`HyperboloidPoint`](@ref) and a [`HyperboloidTangentVector`](@ref) simultaneously.
+See [`convert(::Type{HyperboloidPoint}, ::PoincareBallPoint)`](@ref) and
 [`convert(::Type{HyperboloidTangentVector}, ::PoincareBallPoint, ::PoincareBallTangentVector)`](@ref)
 for the formulae.
 """
@@ -206,18 +207,18 @@ end
 
 @doc raw"""
     convert(
-        ::Type{Tuple{HyperboloidPoint,HyperboloidTangentVector},
+        ::Type{Tuple{HyperboloidPoint,HyperboloidTangentVector}},
         (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTangentVector}
     )
     convert(
-        ::Type{Tuple{T,T},
+        ::Type{Tuple{T,T}},
         (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTangentVector}
     ) where {T<:AbstractVector}
 
-convert a point [`PoincareHalfSpaceTangentVector`](@ref) `X` (from ``ℝ^n``) at `p` from the
-Poincaré half plane model of the [`Hyperbolic`](@ref) manifold ``\mathcal H^n``
-to a tuple of a [`HyperboloidPoint`](@ref) and a [`HyperboloidTangentVector`](@ref) ``π(p) ∈ ℝ^{n+1}``
-simultaneously.
+Convert a [`PoincareHalfSpacePoint`](@ref) `p` and a [`PoincareHalfSpaceTangentVector`](@ref) `X`
+to a [`HyperboloidPoint`](@ref) and a [`HyperboloidTangentVector`](@ref) simultaneously.
+The point `p` is from the Poincaré half plane model of the [`Hyperbolic`](@ref) manifold
+``\mathcal H^n``, the resulting point ``π(p) ∈ ℝ^{n+1}`` lies on the hyperboloid.
 
 This is done in two steps, namely transforming it to the Poincare ball model and from there
 further on to a Hyperboloid.
@@ -317,9 +318,9 @@ end
 @doc raw"""
     get_coordinates(M::Hyperbolic, p, X, ::DefaultOrthonormalBasis)
 
-Compute the coordinates of the vector `X` with respect to the orthogonalized version of
-the unit vectors from ``ℝ^n``, where ``n`` is the manifold dimension of the [`Hyperbolic`](@ref)
- `M`, putting them into the tangent space at `p` and orthonormalizing them.
+Compute the coordinates of the vector `X` with respect to an orthonormal basis of the tangent space at `p`.
+This basis is the orthogonalized version of the unit vectors from ``ℝ^n``, where ``n`` is the
+manifold dimension of the [`Hyperbolic`](@ref) `M`, put into the tangent space at `p` and orthonormalized.
 """
 get_coordinates(M::Hyperbolic, p, X, ::DefaultOrthonormalBasis)
 
@@ -344,9 +345,9 @@ end
 @doc raw"""
     get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)
 
-Compute the vector from the coordinates with respect to the orthogonalized version of
-the unit vectors from ``ℝ^n``, where ``n`` is the manifold dimension of the [`Hyperbolic`](@ref)
- `M`, putting them into the tangent space at `p` and orthonormalizing them.
+Compute the tangent vector from the coordinates `c` with respect to an orthonormal basis of the tangent space at `p`.
+This basis is the orthogonalized version of the unit vectors from ``ℝ^n``, where ``n`` is the
+manifold dimension of the [`Hyperbolic`](@ref) `M`, put into the tangent space at `p` and orthonormalized.
 """
 get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)
 
@@ -362,20 +363,18 @@ end
 @doc raw"""
     _hyperbolize(M, q)
 
-Given the [`Hyperbolic`](@ref)`(n)` manifold using the hyperboloid model, a point from the
-``q\in ℝ^n`` can be set onto the manifold by computing its last component such that for the
-resulting `p` we have that its [`minkowski_metric`](@ref) is ``⟨p,p⟩_{\mathrm{M}} = - 1``,
-i.e. ``p_{n+1} = \sqrt{\lVert q \rVert^2 - 1}``
+Lift a point ``q ∈ ℝ^n`` onto the [`Hyperbolic`](@ref)`(n)` manifold in the hyperboloid model.
+This is done by computing the last component such that for the resulting `p` the
+[`minkowski_metric`](@ref) is ``⟨p,p⟩_{\mathrm{M}} = - 1``, i.e. ``p_{n+1} = \sqrt{\lVert q \rVert^2 + 1}``.
 """
 _hyperbolize(::Hyperbolic, q) = vcat(q, sqrt(norm(q)^2 + 1))
 
 @doc raw"""
     _hyperbolize(M, p, Y)
 
-Given the [`Hyperbolic`](@ref)`(n)` manifold using the hyperboloid model and a point `p`
-thereon, we can put a vector ``Y\in ℝ^n``  into the tangent space by computing its last
-component such that for the
-resulting `p` we have that its [`minkowski_metric`](@ref) is ``⟨p,X⟩_{\mathrm{M}} = 0``,
+Lift a vector ``Y ∈ ℝ^n`` into the tangent space at `p` of the [`Hyperbolic`](@ref)`(n)` manifold in the hyperboloid model.
+This is done by computing the last component such that for the resulting `X` the
+[`minkowski_metric`](@ref) is ``⟨p,X⟩_{\mathrm{M}} = 0``,
 i.e. ``X_{n+1} = \frac{⟨\tilde p, Y⟩}{p_{n+1}}``, where ``\tilde p = (p_1,\ldots,p_n)``.
 """
 _hyperbolize(::Hyperbolic, p, Y) = vcat(Y, dot(p[1:(end - 1)], Y) / p[end])
