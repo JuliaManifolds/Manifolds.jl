@@ -1,0 +1,473 @@
+/* Stylesheet for the VitePress-style landing page rendered by
+ * DocumenterLandingPage.jl.
+ *
+ * Theming is theme-adaptive: the landing components consume only the CSS
+ * custom properties below, and the `html.theme--<name>` blocks mirror
+ * Documenter's own SCSS palette for each of its six shipped themes
+ * (documenter-light, documenter-dark, and the four catppuccin flavors), so
+ * the landing page follows the visitor's theme with no custom palette of its
+ * own. Values are transcribed from Documenter's theme SCSS:
+ *
+ *   - `--landing-surface`:   `$background`       (tiles, alt buttons)
+ *   - `--landing-surface-2`: one step further     (icon badges)
+ *   - `--landing-border`:    a step between       (tile borders)
+ *   - `--landing-accent`:    `$link`              (name, brand button)
+ *   - `--landing-accent-contrast`: text on the brand button
+ *   - `--landing-name-color-default` / `--landing-name-background-default`:
+ *                            the shipped per-theme name gradient (the theme
+ *                            accent rotating along the hue wheel, middle
+ *                            stop at the endpoints' chroma so the blend
+ *                            never desaturates)
+ *   - `--landing-glow-default`: the shipped per-theme glow disc — the
+ *                            accent and its hue-wheel neighbor split hard
+ *                            (VitePress's canonical glow shape), stops
+ *                            translucent at ~0.5 alpha in every theme so
+ *                            the halo reads soft over the page — the same
+ *                            stops read stronger on dark themes, where the
+ *                            dark background preserves the accent's chroma
+ *                            instead of washing it toward white
+ *
+ * User overrides (never defined here, so a user stylesheet wins regardless
+ * of load order — the same contract VitePress's --vp-home-hero-* variables
+ * provide; every rule below consumes the override first and falls back to
+ * the shipped default):
+ *
+ *   - `--landing-name-color`: with a gradient, set to `transparent`;
+ *                            `currentcolor` + `--landing-name-background:
+ *                            none` restores the solid accent name
+ *   - `--landing-name-background`: replaces the shipped name gradient
+ *   - `--landing-glow`: the glow disc — any `background` value
+ *   - `--landing-glow-filter`: the glow disc's filter (default `blur(40px)`)
+ *
+ * Text and headings are deliberately left to inherit from the theme; nothing
+ * here overrides Documenter's own chrome.
+ */
+
+:root {
+    --landing-surface: #f5f5f5;
+    --landing-surface-2: #dbdee0;
+    --landing-border: #e0e0e0;
+    --landing-accent: #2e63b8;
+    --landing-accent-contrast: #fff;
+    /* Default gradients: the theme accent rotating ~70° along the OKLCH hue
+     * wheel (name) and its ~60° neighbor (glow), every stop held at the
+     * accent's own chroma so the sRGB blend never passes through gray. The
+     * name gradient is fully opaque; the glow stops carry alpha (see the
+     * --landing-glow-default notes in the header) so the blurred halo stays
+     * soft over the page instead of reading as a solid paint. */
+    --landing-name-color-default: transparent;
+    --landing-name-background-default: linear-gradient(120deg, #2e63b8, #6d51b0 50%, #92418e);
+    --landing-glow-default: linear-gradient(-45deg, #2e63b880 50%, #89459980 50%);
+}
+
+html.theme--documenter-dark {
+    --landing-surface: #282f2f;
+    --landing-surface-2: #343c3d;
+    --landing-border: #343c3d;
+    --landing-accent: #1abc9c;
+    --landing-accent-contrast: #00332a;
+    --landing-name-background-default: linear-gradient(120deg, #1abc9c, #00b7ce 50%, #51aaee);
+    --landing-glow-default: linear-gradient(-45deg, #1abc9c80 50%, #38aee780 50%);
+}
+
+html.theme--catppuccin-latte {
+    --landing-surface: #e6e9ef;
+    --landing-surface-2: #bcc0cc;
+    --landing-border: #ccd0da;
+    --landing-accent: #1e66f5;
+    --landing-accent-contrast: #fff;
+    --landing-name-background-default: linear-gradient(120deg, #1e66f5, #8646e4 50%, #b927ad);
+    --landing-glow-default: linear-gradient(-45deg, #1e66f580 50%, #ad30c080 50%);
+}
+
+html.theme--catppuccin-frappe {
+    --landing-surface: #292c3c;
+    --landing-surface-2: #51576d;
+    --landing-border: #414559;
+    --landing-accent: #8caaee;
+    --landing-accent-contrast: #303446;
+    --landing-name-background-default: linear-gradient(120deg, #8caaee, #b69ce3 50%, #d592c5);
+    --landing-glow-default: linear-gradient(-45deg, #8caaee80 50%, #ce94cf80 50%);
+}
+
+html.theme--catppuccin-macchiato {
+    --landing-surface: #1e2030;
+    --landing-surface-2: #494d64;
+    --landing-border: #363a4f;
+    --landing-accent: #8aadf4;
+    --landing-accent-contrast: #24273a;
+    --landing-name-background-default: linear-gradient(120deg, #8aadf4, #b79eea 50%, #d893cb);
+    --landing-glow-default: linear-gradient(-45deg, #8aadf480 50%, #d096d680 50%);
+}
+
+html.theme--catppuccin-mocha {
+    --landing-surface: #181825;
+    --landing-surface-2: #45475a;
+    --landing-border: #313244;
+    --landing-accent: #89b4fa;
+    --landing-accent-contrast: #1e1e2e;
+    --landing-name-background-default: linear-gradient(120deg, #89b4fa, #b8a5f3 50%, #db99d5);
+    --landing-glow-default: linear-gradient(-45deg, #89b4fa80 50%, #d39cdf80 50%);
+}
+
+/* The landing page spans the same content width as a VitePress home layout
+ * (Documenter caps the content column at 52rem; the VitePress home container
+ * is 72rem). The theme files scope their rules under html.theme--<name>, so
+ * these selectors carry the same specificity to win regardless of order. */
+body:has(#landing) #documenter .docs-main,
+body:has(#landing) #documenter .docs-main > article {
+    max-width: 72rem;
+}
+
+/* Everything below sizes the hero against the landing column itself, not the
+ * viewport. This matters because the two are not proportional: Documenter's
+ * own chrome flips its sidebar on at 1056px, which steps the content column
+ * down by 320px in a single pixel of resize (below it the column is the full
+ * viewport minus padding; above it the sidebar claims 20rem plus a 1rem
+ * gutter), and caps it at the 72rem above. Viewport-keyed sizes (vw units,
+ * @media) are blind to all three facts: they kept growing while the column
+ * was capped and jumped while the type did not, which is what made the hero
+ * reflow abruptly and the name wrap mid-range. A container query makes the
+ * column the single reference frame: every fluid size below is expressed in
+ * cqi (1% of the column's inline size) and every breakpoint is a
+ * @container condition, so the hero scales proportionally with the space it
+ * actually has — the sidebar flip becomes one coherent zoom instead of a
+ * re-wrap. Container queries are supported by every browser that already
+ * renders this sheet (it already depends on :has() above), so this adds no
+ * new compatibility requirement. */
+#landing {
+    container-type: inline-size;
+}
+
+/* ---- Hero: two columns, text left, logo right, vertically centered ---- */
+#landing .landing-hero {
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+    padding: 2rem 0 2.5rem;
+    /* Deliberately no overflow clipping: the glow below spills past its box
+     * over the surrounding page (its blur is ink overflow, like a
+     * box-shadow, and can never widen the page), and clipping here would
+     * slice that halo flat. The one thing that must not spill — the
+     * no-wrap name — is clipped inside the text column below. */
+}
+#landing .landing-hero__text {
+    flex: 0 1 58%;
+    min-width: 0;
+    /* The hero's only overflow guard: an extreme no-wrap package name is
+     * clipped at its column's edge instead of pushing the page wider
+     * (content overflow scrolls; ink overflow does not). */
+    overflow-x: clip;
+}
+#landing .landing-name {
+    margin: 0 0 0.75rem;
+    /* Scaled by the column (4cqi), capped at the VitePress desktop size.
+     * `nowrap` makes the single-line name a hard invariant instead of the
+     * old tuned vw ramp, which only kept a specific name on one line by
+     * coincidence. The math: the text column is ~58% of the landing column,
+     * and at 4cqi a bold name of ~24 characters spans ~46% of it — so the
+     * name stays on one line at *every* two-column width, growing and
+     * shrinking exactly with the column. Longer names shrink toward the
+     * 1.5rem floor rather than wrap; the floor fits ~26 characters even at
+     * the narrowest stacked width. */
+    font-size: clamp(1.5rem, 4cqi, 3.25rem);
+    font-weight: 700;
+    line-height: 1.15;
+    /* Solid accent fill: the default look, and the fallback for browsers
+     * without background-clip:text (the @supports block below keeps the
+     * transparent fill out of them, so the name is never invisible). */
+    color: var(--landing-accent);
+    /* Shrink the box to the text (VitePress sets this on .name too): a
+     * clipped gradient spans the element's whole box, so a full-width block
+     * would paint the gradient far past the glyphs and the name would show
+     * only its first color. With nowrap the fit-content box is exactly the
+     * one line of text, and the gradient spans precisely the glyphs. */
+    width: fit-content;
+    white-space: nowrap;
+}
+/* Gradient package name: ON by default, in a gradient derived from the
+ * theme's own accent (see the --landing-name-*-default blocks above), with
+ * VitePress's --vp-home-hero-name-* override contract: set, in your own
+ * stylesheet,
+ *     --landing-name-color: transparent;
+ *     --landing-name-background: linear-gradient(120deg, #9558b2, #cb3c33);
+ * together (setting only the color would leave a transparent fill over a
+ * non-matching background; setting only the background leaves the default
+ * fill painted over it), or restore the solid accent name with
+ *     --landing-name-color: currentcolor; --landing-name-background: none;
+ * Per-theme variants use the same html.theme--<name> selectors the palette
+ * blocks above use. The prefixed clip declaration comes first so the
+ * standard property wins where both parse, and the OR in the feature query
+ * is required: unprefixed background-clip:text only exists from
+ * Chrome 120 / Safari 15.5, while the technique works in far older engines
+ * through the -webkit- spelling. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    #landing .landing-name {
+        background-image: var(--landing-name-background, var(--landing-name-background-default, none));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: var(--landing-name-color, var(--landing-name-color-default, currentcolor));
+    }
+}
+/* Forced-colors mode (Windows High Contrast) strips backgrounds but keeps
+ * the author's text fill: without this, a transparent-filled name renders
+ * invisible. The fill property must be reset too — it overrides `color`. */
+@media (forced-colors: active) {
+    #landing .landing-name {
+        background-image: none;
+        color: CanvasText;
+        -webkit-text-fill-color: CanvasText;
+    }
+}
+/* Print/PDF: browsers commonly skip background graphics, and a clipped
+ * gradient IS a background — restore the solid fill on paper. */
+@media print {
+    #landing .landing-name {
+        background-image: none;
+        -webkit-text-fill-color: var(--landing-accent);
+    }
+}
+/* Selecting the gradient name can swallow the glyphs (the selection
+ * highlight covers the clipped background while the fill stays
+ * transparent), so selection gets an explicit visible pair. */
+#landing .landing-name::selection {
+    background: var(--landing-accent);
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+}
+#landing .landing-title {
+    margin: 0 0 1.25rem;
+    /* The ramps below interpolate between the same anchors the old vw clamps
+     * were tuned to — 2rem at the stacking width, 3.25rem at the 72rem column
+     * cap — but keyed to the column, so the step is continuous through every
+     * viewport flip and stops growing when the column stops. */
+    font-size: clamp(2rem, calc(3.906cqi + 7px), 3.25rem);
+    font-weight: 700;
+    line-height: 1.15;
+}
+#landing .landing-tagline {
+    margin: 0 0 1.75rem;
+    font-size: clamp(1.05rem, calc(0.625cqi + 12.8px), 1.25rem);
+    line-height: 1.6;
+}
+#landing .landing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+#landing .landing-btn {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--landing-border);
+}
+#landing .landing-btn--brand {
+    background-color: var(--landing-accent);
+    border-color: transparent;
+    color: var(--landing-accent-contrast);
+}
+#landing .landing-btn--alt {
+    background-color: var(--landing-surface);
+    color: inherit;
+}
+#landing .landing-btn:hover {
+    text-decoration: none;
+}
+#landing .landing-btn--alt:hover {
+    background-color: var(--landing-surface-2);
+}
+#landing .landing-hero__image {
+    flex: 0 1 42%;
+    display: flex;
+    justify-content: center;
+}
+/* The logo rides in a fixed square box (VitePress's .image-container) whose
+ * size steps with the column; only the box itself has to fit the column
+ * (each step below is derived from the 42% image column's width), so a step
+ * never crowds the text. The logo fills ~2/3 of the box (75% on wide
+ * columns); `contain` keeps a small logo upscaling to fill its share and
+ * letterboxes a wide one instead of overflowing. */
+#landing .landing-hero__image-container {
+    width: 240px;
+    height: 240px;
+    flex: none;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#landing .landing-hero__image-container img {
+    width: 65%;
+    height: 65%;
+    object-fit: contain;
+    position: relative;
+    z-index: 1;
+}
+/* Glow behind the logo, in the theme's accent hue: a translucent accent
+ * disc as wide as the box itself (see the --landing-glow-default stops in
+ * the palette blocks above — ~0.5 alpha in every theme, reading stronger
+ * on dark where the background preserves the chroma), its soft falloff
+ * provided by the 40px blur over the page background (a pre-faded radial
+ * gradient on top of a blur reads dim and small).
+ * The halo is meant to spill past the box over whatever surrounds the hero
+ * — column gutters, padding, the page background — the way VitePress's own
+ * home hero glow does: nothing between here and the viewport clips
+ * overflow, and because the blur is ink overflow (not content overflow) it
+ * can never introduce a scrollbar, so the aura reads as one seamless layer
+ * over the page instead of a box-enclosed effect. On the stacked phone
+ * layout the disc steps back to 65% of the box so the halo stays on-screen
+ * (VitePress's mobile glow is contained the same way). */
+#landing .landing-hero__image-container::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--landing-glow, var(--landing-glow-default));
+    filter: var(--landing-glow-filter, blur(40px));
+    z-index: 0;
+}
+
+/* ---- Features: 3x2 grid of tiles with emoji badges ---- */
+#landing .landing-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    padding: 0.5rem 0 2rem;
+}
+#landing .landing-feature {
+    background-color: var(--landing-surface);
+    border: 1px solid var(--landing-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+}
+#landing .landing-feature:hover {
+    border-color: var(--landing-accent);
+}
+#landing .landing-feature__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background-color: var(--landing-surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+/* A wrapped image icon sits in the badge box with breathing room: cap it at
+ * 80% of the box so even a 1:1 icon does not crowd the edges, and an
+ * oversized width/height cannot overflow it. An unwrapped image icon renders
+ * directly as a tile child; cap it at the tile width so a large asset never
+ * overruns the column. */
+#landing .landing-feature__icon img {
+    max-width: 80%;
+    max-height: 80%;
+}
+#landing .landing-feature__icon-img {
+    max-width: 100%;
+}
+#landing .landing-feature__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+#landing .landing-feature__details {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+}
+
+/* ---- Responsive: keyed to the landing column, not the viewport ---- */
+
+/* Wide columns step the box up, mirroring VitePress's own steps (240 → 320
+ * at 52rem, 320 → 392 at 64rem, where the logo's share of the box grows to
+ * 75%). Each threshold is where the 42% image column first fits the larger
+ * box with room for the text column beside it (0.42 × 832 − 27 ≈ 322px ≥
+ * 320; 0.42 × 1024 − 27 ≈ 404px ≥ 392), so a step never crowds the name.
+ * Only the logo share changes here — the glow disc stays the full width of
+ * the box at every step, so the spilled halo stays proportional to it. */
+@container (min-width: 52rem) {
+    #landing .landing-hero__image-container {
+        width: 320px;
+        height: 320px;
+    }
+}
+@container (min-width: 64rem) {
+    #landing .landing-hero__image-container {
+        width: 392px;
+        height: 392px;
+    }
+    #landing .landing-hero__image-container img {
+        width: 75%;
+    }
+}
+
+/* Below 40rem the column cannot fit two comfortable columns, so the hero
+ * stacks (logo above, text below). Only the direction, spacing, and the
+ * text column's width change here — the type ramps and the logo box are
+ * already column-keyed and continuous across this boundary, so nothing
+ * pops when it flips. The name keeps its nowrap single line: stacked, it
+ * has the full column width, which is strictly wider than the 58% it had
+ * beside the logo. */
+@container (max-width: 40rem) {
+    #landing .landing-hero {
+        flex-direction: column-reverse;
+        align-items: center;
+        text-align: left;
+        gap: 2rem;
+    }
+    #landing .landing-hero__text {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+    /* The image column needs a definite width too: with align-items: center
+     * it would shrink-wrap its content, and the box's min(320px, 100%)
+     * would resolve against an indefinite width and collapse. */
+    #landing .landing-hero__image {
+        width: 100%;
+    }
+    /* Contained glow on phones: the disc steps back to 65% of the box so
+     * the halo hugs the logo instead of running off the narrow screen. */
+    #landing .landing-hero__image-container::before {
+        width: 65%;
+    }
+    /* Stacked, the box no longer shares the row with the text column, so it
+     * takes VitePress's mobile size (320px, capped by the column) — the
+     * halo is just as prominent on a phone as on a desktop. */
+    #landing .landing-hero__image-container {
+        width: min(320px, 100%);
+        height: auto;
+        aspect-ratio: 1 / 1;
+    }
+    #landing .landing-name {
+        margin-bottom: 0.5rem;
+    }
+    #landing .landing-title {
+        margin-bottom: 0.75rem;
+    }
+    #landing .landing-tagline {
+        margin-bottom: 1.25rem;
+    }
+}
+
+/* The tile grid is the one piece left on a viewport media query: the tiles
+ * are a fixed 3-column grid (they do not scale with the column like the
+ * hero does), and a viewport tablet width is a fine proxy for when three
+ * tiles no longer fit side by side. */
+@media (max-width: 768px) {
+    #landing .landing-features {
+        grid-template-columns: 1fr;
+    }
+}
