@@ -255,7 +255,7 @@ get_default_atlas(M::AbstractPowerManifold) = PowerAtlas(get_default_atlas(M.man
 @inline _set_power_index!(i, j::Int, value) = (i[j] = value; i)
 
 function get_chart_index(M::AbstractPowerManifold, A::PowerAtlas, p)
-    indices = Array{Any}(undef, get_parameter(M.size)...)
+    indices = Array{Any}(undef, power_dimensions(M)...)
     rep_size = representation_size(M.manifold)
     for j in get_iterator(M)
         _set_power_index!(indices, j, get_chart_index(M.manifold, A.atlas, _read(M, rep_size, p, j)))
@@ -264,7 +264,7 @@ function get_chart_index(M::AbstractPowerManifold, A::PowerAtlas, p)
 end
 
 function get_chart_index(M::AbstractPowerManifold, A::PowerAtlas, i, a)
-    indices = Array{Any}(undef, get_parameter(M.size)...)
+    indices = Array{Any}(undef, power_dimensions(M)...)
     dim, offset = manifold_dimension(M.manifold), 0
     for j in get_iterator(M)
         _set_power_index!(indices, j, get_chart_index(M.manifold, A.atlas, _power_index(i, j), view(a, (offset + 1):(offset + dim))))

@@ -7,7 +7,7 @@ using RecursiveArrayTools
     R, r = 3.0, 2.0
     M_torus = Manifolds.EmbeddedTorus(R, r)
     M = ParametricSurface(
-        Euclidean(2),
+        Torus(2),
         Euclidean(3),
         (q, p) -> (q .= Manifolds._torus_param(M_torus, p...)),
         (p, q) -> (p .= Manifolds._torus_theta_phi(M_torus, q)),
