@@ -40,8 +40,8 @@ end
 
 for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
     @eval begin
-        function allocate_result(::$PowerRepr, ::typeof(get_point), a)
-            return error("Operation unsupported")
+        function allocate_result(M::$PowerRepr, ::typeof(get_point), a)
+            return ManifoldsBase.allocate_on(M)
         end
         function allocate_result(M::$PowerRepr, f::typeof(get_parameters), p)
             return invoke(
@@ -224,4 +224,162 @@ end
         i::Tuple,
     )
     return view(x, rep_size_to_colons(rep_size)..., i...)
+end
+
+
+"""
+    PowerAtlas(atlas)
+
+Atlas on an [`AbstractPowerManifold`](@extref `ManifoldsBase.AbstractPowerManifold`)
+obtained by using `atlas` independently on every component. Chart indices have the power
+dimensions of the manifold and coordinates concatenate the coordinates of its components.
+"""
+struct PowerAtlas{TA <: AbstractAtlas{ℝ}} <: AbstractAtlas{ℝ}
+    atlas::TA
+end
+
+"""
+    get_default_atlas(M::AbstractPowerManifold)
+
+Return the power atlas induced by the default atlas of the underlying manifold of `M`.
+
+# See also
+
+[`PowerAtlas`](@ref)
+"""
+get_default_atlas(M::AbstractPowerManifold) = PowerAtlas(get_default_atlas(M.manifold))
+
+@inline _power_index(i, j::Tuple) = i[j...]
+@inline _power_index(i, j::Int) = i[j]
+@inline _set_power_index!(i, j::Tuple, value) = (i[j...] = value; i)
+@inline _set_power_index!(i, j::Int, value) = (i[j] = value; i)
+
+function get_chart_index(M::AbstractPowerManifold, A::PowerAtlas, p)
+    indices = Array{Any}(undef, get_parameter(M.size)...)
+    rep_size = representation_size(M.manifold)
+    for j in get_iterator(M)
+        _set_power_index!(indices, j, get_chart_index(M.manifold, A.atlas, _read(M, rep_size, p, j)))
+    end
+    return indices
+end
+
+function get_chart_index(M::AbstractPowerManifold, A::PowerAtlas, i, a)
+    indices = Array{Any}(undef, get_parameter(M.size)...)
+    dim, offset = manifold_dimension(M.manifold), 0
+    for j in get_iterator(M)
+        _set_power_index!(indices, j, get_chart_index(M.manifold, A.atlas, _power_index(i, j), view(a, (offset + 1):(offset + dim))))
+        offset += dim
+    end
+    return indices
+end
+
+function get_parameters!(M::AbstractPowerManifold, a, A::PowerAtlas, i, p)
+    rep_size = representation_size(M.manifold)
+    dim = manifold_dimension(M.manifold)
+    offset = 0
+    for j in get_iterator(M)
+        get_parameters!(M.manifold, view(a, (offset + 1):(offset + dim)), A.atlas, _power_index(i, j), _read(M, rep_size, p, j))
+        offset += dim
+    end
+    return a
+end
+
+function get_point!(M::AbstractPowerManifold, p, A::PowerAtlas, i, a)
+    rep_size = representation_size(M.manifold)
+    dim = manifold_dimension(M.manifold)
+    offset = 0
+    for j in get_iterator(M)
+        get_point!(M.manifold, _write(M, rep_size, p, j), A.atlas, _power_index(i, j), view(a, (offset + 1):(offset + dim)))
+        offset += dim
+    end
+    return p
+end
+
+function get_point!(M::PowerManifoldNestedReplacing, p, A::PowerAtlas, i, a)
+    dim, offset = manifold_dimension(M.manifold), 0
+    for j in get_iterator(M)
+        _set_power_index!(p, j, get_point(M.manifold, A.atlas, _power_index(i, j), view(a, (offset + 1):(offset + dim))))
+        offset += dim
+    end
+    return p
+end
+
+function get_coordinates_induced_basis!(
+        M::AbstractPowerManifold,
+        c,
+        p,
+        X,
+        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+    )
+    rep_size = representation_size(M.manifold)
+    dim, offset = manifold_dimension(M.manifold), 0
+    for j in get_iterator(M)
+        get_coordinates_induced_basis!(
+            M.manifold,
+            view(c, (offset + 1):(offset + dim)),
+            _read(M, rep_size, p, j),
+            _read(M, rep_size, X, j),
+            induced_basis(M.manifold, B.A.atlas, _power_index(B.i, j)),
+        )
+        offset += dim
+    end
+    return c
+end
+
+function get_vector_induced_basis!(
+        M::AbstractPowerManifold,
+        Y,
+        p,
+        c,
+        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+    )
+    rep_size = representation_size(M.manifold)
+    dim, offset = manifold_dimension(M.manifold), 0
+    for j in get_iterator(M)
+        get_vector_induced_basis!(
+            M.manifold,
+            _write(M, rep_size, Y, j),
+            _read(M, rep_size, p, j),
+            view(c, (offset + 1):(offset + dim)),
+            induced_basis(M.manifold, B.A.atlas, _power_index(B.i, j)),
+        )
+        offset += dim
+    end
+    return Y
+end
+
+function get_coordinates(
+        M::AbstractPowerManifold,
+        p,
+        X,
+        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+    )
+    return get_coordinates_induced_basis(M, p, X, B)
+end
+function get_coordinates!(
+        M::AbstractPowerManifold,
+        c,
+        p,
+        X,
+        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+    )
+    return get_coordinates_induced_basis!(M, c, p, X, B)
+end
+
+function get_vector(
+        M::AbstractPowerManifold,
+        p,
+        c,
+        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+    )
+    return get_vector_induced_basis(M, p, c, B)
+end
+function get_vector!(
+        M::AbstractPowerManifold,
+        Y,
+        p,
+        c,
+        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+    )
+    return get_vector_induced_basis!(M, Y, p, c, B)
 end

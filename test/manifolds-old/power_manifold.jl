@@ -340,7 +340,38 @@ end
         A2 = TestExponentialAtlas()
         a2 = get_parameters(M, A2, p, p)
         @test isapprox(a, a2)
-        @test_throws ErrorException get_point(M, A2, p, a2)
+    end
+    @testset "power atlas" begin
+        A = get_default_atlas(Ms1)
+        @test A isa PowerAtlas
+        @test A.atlas == get_default_atlas(Ms)
+        p = [1.0 0.0 0.0 0.0 0.0; 0.0 1.0 0.0 0.0 0.0; 0.0 0.0 1.0 1.0 1.0]
+        i = get_chart_index(Ms1, A, p)
+        @test i == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]]
+        a = get_parameters(Ms1, A, i, p)
+        @test length(a) == manifold_dimension(Ms1)
+        @test isapprox(Ms1, get_point(Ms1, A, i, a), p)
+
+        Mn = PowerManifold(Ms, NestedReplacingPowerRepresentation(), 2)
+        An = get_default_atlas(Mn)
+        pn = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        indices_n = get_chart_index(Mn, An, pn)
+        coordinates_n = get_parameters(Mn, An, indices_n, pn)
+        @test isapprox(Mn, get_point(Mn, An, indices_n, coordinates_n), pn)
+    end
+
+    @testset "power induced basis" begin
+        for M in (
+                PowerManifold(Sphere(2), 2),
+                PowerManifold(Sphere(2), NestedPowerRepresentation(), 2),
+            )
+            A = PowerAtlas(StereographicAtlas())
+            p = rand(M)
+            X = rand(M; vector_at = p)
+            B = induced_basis(M, A, get_chart_index(M, A, p))
+            c = get_coordinates(M, p, X, B)
+            @test isapprox(M, p, get_vector(M, p, c, B), X)
+        end
     end
 
     @testset "metric conversion" begin

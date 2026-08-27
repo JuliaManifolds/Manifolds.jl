@@ -1157,29 +1157,3 @@ function riemann_tensor!(
 
     return Wc
 end
-
-for mf in [
-        christoffel_symbols_first,
-        christoffel_symbols_second,
-        det_local_metric,
-        einstein_tensor,
-        flat!,
-        gaussian_curvature,
-        inverse_local_metric,
-        local_metric,
-        log_local_metric_density,
-        mean,
-        mean!,
-        median,
-        median!,
-        ricci_curvature,
-        ricci_tensor,
-        riemann_tensor,
-        riemannian_gradient,
-        riemannian_gradient!,
-        riemannian_Hessian,
-        riemannian_Hessian!,
-        sharp!,
-    ]
-    @eval is_metric_function(::typeof($mf)) = true
-end

@@ -411,6 +411,9 @@ function uniform_distribution(M::AbstractManifold)
     return uniform_distribution(M, allocate_result(M, uniform_distribution))
 end
 
+# Atlases (required by most other things)
+include("atlases.jl")
+
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
@@ -438,7 +441,6 @@ METAMANIFOLDS = [
 ]
 
 # Features II: That require MetaManifolds
-include("atlases.jl")
 include("differentiation/ode_callback.jl")
 include("cotangent_space.jl")
 
@@ -737,7 +739,14 @@ export AbstractMetric,
     RiemannianMetric,
     StiefelSubmersionMetric,
     WarpedMetric
-export AbstractAtlas, GrassmannAtlas, RetractionAtlas, StereographicAtlas, StiefelAtlas, StiefelChart
+export AbstractAtlas,
+    GrassmannAtlas,
+    PowerAtlas,
+    ProductAtlas,
+    RetractionAtlas,
+    StereographicAtlas,
+    StiefelAtlas,
+    StiefelChart
 # Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 # Retraction types
