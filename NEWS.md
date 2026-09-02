@@ -5,7 +5,7 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.11.30] 2026-08-20
+## [0.11.30] 2026-09-02
 
 ### Added
 
@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `GrassmannAtlas` and `StiefelAtlas` (with `StiefelChart`) for real Grassmann and Stiefel manifolds.
 * Chart operations and induced-basis support for the stereographic atlas on spheres.
 * Extended the "Working in Charts" tutorial covering new additions.
+* `PowerAtlas` and `ProductAtlas` for `PowerManifold` and `ProductManifold`, respectively, with induced-basis support.
+* `ParametricSurface` manifold for handling parametric surfaces (with or without boundaries and corners) in Euclidean space with the metric induced by the embedding.
 
 ### Changed
 
@@ -23,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Several docstrings were rewritten to start with a short summary sentence, such that `DocumenterCodeBlocks.jl` can display them in tooltips.
 * More atlas and chart-related operations are now exported: `get_chart_index`, `transition_map`, `transition_map!`, `transition_map_diff` and `transition_map_diff!`.
 * Chart-based geodesic and parallel-transport ODE solvers use in-place problem definitions for performance.
+* `get_default_atlas` for `PowerManifold` and `ProductManifold` now return `PowerAtlas` and `ProductAtlas` of default atlases of wrapped manifolds instead of the `RetractionAtlas`.
 
 ### Fixed
 
