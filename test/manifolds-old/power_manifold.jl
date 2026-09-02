@@ -364,6 +364,7 @@ end
         for M in (
                 PowerManifold(Sphere(2), 2),
                 PowerManifold(Sphere(2), NestedPowerRepresentation(), 2),
+                PowerManifold(Sphere(2), NestedReplacingPowerRepresentation(), 2),
             )
             A = PowerAtlas(StereographicAtlas())
             p = rand(M)

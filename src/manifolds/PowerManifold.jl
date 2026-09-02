@@ -346,7 +346,21 @@ function get_vector_induced_basis!(
     end
     return Y
 end
-
+function get_vector_induced_basis!(M::PowerManifoldNestedReplacing, Y, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas})
+    dim = manifold_dimension(M.manifold)
+    rep_size = representation_size(M.manifold)
+    v_iter = 1
+    for j in get_iterator(M)
+        Y[j...] = get_vector(
+            M.manifold,
+            _read(M, rep_size, p, j),
+            view(c, v_iter:(v_iter + dim - 1)),
+            induced_basis(M.manifold, B.A.atlas, _power_index(B.i, j)),
+        )
+        v_iter += dim
+    end
+    return Y
+end
 function get_coordinates(
         M::AbstractPowerManifold,
         p,
