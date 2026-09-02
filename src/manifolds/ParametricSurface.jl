@@ -1,5 +1,5 @@
 @doc raw"""
-    ParametricSurface{TMP<:AbstractManifold{ℝ},TME<:Euclidean,TF,TIF,TDF} <: AbstractDecoratorManifold{ℝ}
+    ParametricSurface{TMP<:AbstractManifold{ℝ},TE<:Euclidean,TF,TIF,TDF} <: AbstractDecoratorManifold{ℝ}
 
 Surface in ℝⁿ described by a parametric function `f` defined on a parameter space `M_param`.
 The embedding ℝⁿ is described by a Euclidean manifold `M_embed`. The metric is the
@@ -15,13 +15,13 @@ Jacobian of `f`, respectively.
 """
 struct ParametricSurface{
         TMP <: AbstractManifold{ℝ},
-        TME <: Euclidean,
+        TE <: Euclidean,
         TF,
         TIF,
         TDF,
     } <: AbstractDecoratorManifold{ℝ}
     M_param::TMP
-    M_embed::TME
+    M_embed::TE
     f!::TF
     inverse_f!::TIF
     jacobian_f!::TDF

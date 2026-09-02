@@ -20,8 +20,8 @@ function adjoint_Jacobi_field(::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
     return X
 end
 
-ManifoldsBase.allocate_on(::Circle{ℝ}) = Array{Float64,0}(undef)
-ManifoldsBase.allocate_on(::Circle{ℂ}) = Array{ComplexF64,0}(undef)
+ManifoldsBase.allocate_on(::Circle{ℝ}) = Array{Float64, 0}(undef)
+ManifoldsBase.allocate_on(::Circle{ℂ}) = Array{ComplexF64, 0}(undef)
 
 @doc raw"""
     check_point(M::Circle, p)

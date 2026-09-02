@@ -382,3 +382,6 @@ function get_vector!(
     )
     return get_vector_induced_basis!(M, Y, p, c, B)
 end
+function get_vector!(M::PowerManifoldNestedReplacing, Y, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas})
+    return get_vector_induced_basis!(M, Y, p, c, B)
+end
