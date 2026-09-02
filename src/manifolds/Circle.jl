@@ -20,8 +20,8 @@ function adjoint_Jacobi_field(::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
     return X
 end
 
-ManifoldsBase.allocate_on(::Circle{ℝ}) = Float64[]
-ManifoldsBase.allocate_on(::Circle{ℂ}) = ComplexF64[]
+ManifoldsBase.allocate_on(::Circle{ℝ}) = Array{Float64,0}(undef)
+ManifoldsBase.allocate_on(::Circle{ℂ}) = Array{ComplexF64,0}(undef)
 
 @doc raw"""
     check_point(M::Circle, p)
@@ -345,7 +345,7 @@ function Base.log(M::Circle{ℂ}, p::Number, q::Number)
     return project(M, p, X)
 end
 
-log!(::Circle{ℝ}, X, p, q) = (X .= sym_rem(q - p))
+log!(::Circle{ℝ}, X, p, q) = (X .= sym_rem(q[] - p[]))
 function log!(M::Circle{ℂ}, X, p, q)
     cosθ = complex_dot(p, q)
     if cosθ ≈ -1

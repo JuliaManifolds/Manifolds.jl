@@ -312,7 +312,7 @@ end
 
 function allocate_result(M::AbstractManifold, f::typeof(get_point), a)
     T = allocate_result_type(M, f, (a,))
-    return allocate(a, T, representation_size(M)...)
+    return allocate(a, T, representation_size(M))
 end
 # disambiguation
 @invoke_maker 1 AbstractManifold allocate_result(

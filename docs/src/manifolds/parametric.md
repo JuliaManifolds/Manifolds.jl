@@ -19,6 +19,7 @@ using Manifolds, Plots, RecursiveArrayTools, ForwardDiff
 
 half_width = 0.35
 M_param = ProductManifold(Hyperrectangle([-half_width], [half_width]), Circle())
+M_embed = Euclidean(3)
 
 function mobius!(q, p)
     u, θ = p.x[1][1], p.x[2][]
@@ -40,11 +41,11 @@ function inverse_mobius!(p, q)
 end
 
 function jacobian_mobius!(J, p)
-    ForwardDiff.jacobian!(J, x -> mobius!(similar(x), x), p)
+    ForwardDiff.jacobian!(J, x -> mobius!(Vector{eltype(x)}(undef, manifold_dimension(M_embed)), x), p)
     return J
 end
 
-M = ParametricSurface(M_param, Euclidean(3), mobius!, inverse_mobius!, jacobian_mobius!)
+M = ParametricSurface(M_param, M_embed, mobius!, inverse_mobius!, jacobian_mobius!)
 ```
 
 Sampling its parametrization can be used to produce a three-dimensional view of the band.
@@ -58,7 +59,8 @@ y = [p[2] for p in xyz]
 z = [p[3] for p in xyz]
 ```
 
-Which can then be visualized using for example `GLMakie.jl`.
+Which can then be visualized using for example `GLMakie.jl`:
+`GLMakie.surface(x, y, z)`.
 
 All the usual tools still work as in the [embedded torus example](../tutorials/working-in-charts.md).
 
