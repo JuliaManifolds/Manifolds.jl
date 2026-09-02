@@ -245,4 +245,8 @@ Test.@testset "The circle manifold" begin
         get_vector!(M, rrcv2, 0.0, 1.0, B_cot)
         @test isapprox(rrcv.X, rrcv2.X[])
     end
+    @testset "allocate_on" begin
+        @test ManifoldsBase.allocate_on(M) isa Array{Float64, 0}
+        @test ManifoldsBase.allocate_on(Mc) isa Array{ComplexF64, 0}
+    end
 end

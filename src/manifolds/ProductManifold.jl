@@ -113,7 +113,7 @@ function volume_density(M::ProductManifold, p, X)
 end
 
 """
-    ProductAtlas(atlases)
+    ProductAtlas(atlases::NTuple{N, AbstractAtlas{𝔽}}) where {N, 𝔽}
 
 Atlas on a [`ProductManifold`](@extref `ManifoldsBase.ProductManifold`) obtained by
 taking the product of the factor atlases in `atlases`. Chart indices are tuples of the
@@ -122,6 +122,7 @@ corresponding factor chart indices and coordinates are concatenated factor coord
 struct ProductAtlas{𝔽, TA <: NTuple{N, AbstractAtlas{𝔽}} where {N}} <: AbstractAtlas{𝔽}
     atlases::TA
 end
+ProductAtlas(atlases::AbstractAtlas{𝔽}...) where {𝔽} = ProductAtlas{𝔽, typeof(atlases)}(atlases)
 
 """
     get_default_atlas(M::ProductManifold)
@@ -185,6 +186,11 @@ function get_coordinates_induced_basis!(
     return c
 end
 
+function get_coordinates!(M::ProductManifold, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:ProductAtlas})
+    return get_coordinates_induced_basis!(M, c, p, X, B)
+end
+
+
 function get_vector_induced_basis!(
         M::ProductManifold,
         Y,
@@ -205,4 +211,8 @@ function get_vector_induced_basis!(
         offset += dim
     end
     return Y
+end
+
+function get_vector!(M::ProductManifold, X, p, Xⁱ, B::InducedBasis{ℝ, TangentSpaceType, <:ProductAtlas})
+    return get_vector_induced_basis!(M, X, p, Xⁱ, B)
 end

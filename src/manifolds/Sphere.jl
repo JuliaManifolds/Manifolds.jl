@@ -731,14 +731,14 @@ function get_point!(::Sphere{ℝ}, p, ::StereographicAtlas, i::Symbol, x)
 end
 
 """
-    get_coordinates_induced_basis!(M::Sphere, Y, p, X, B::InducedBasis{<:Any, <:Any, <:StereographicAtlas})
+    get_coordinates_induced_basis!(M::Sphere, cX, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas})
 
-Store in `Y` the stereographic coordinate representation of the tangent vector `X`
+Store in `cX` the stereographic coordinate representation of the tangent vector `X`
 at `p` with respect to the induced basis `B`.
 """
 function get_coordinates_induced_basis!(
         M::Sphere{ℝ},
-        Y,
+        cX,
         p,
         X,
         B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas},
@@ -746,51 +746,51 @@ function get_coordinates_induced_basis!(
     n = get_parameter(M.size)[1]
     if B.i === :north
         for i in 1:n
-            Y[i] = X[i + 1] / (1 + p[1]) - X[1] * p[i + 1] / (1 + p[1])^2
+            cX[i] = X[i + 1] / (1 + p[1]) - X[1] * p[i + 1] / (1 + p[1])^2
         end
     else
         for i in 1:n
-            Y[i] = X[i + 1] / (-1 + p[1]) - X[1] * p[i + 1] / (-1 + p[1])^2
+            cX[i] = X[i + 1] / (-1 + p[1]) - X[1] * p[i + 1] / (-1 + p[1])^2
         end
     end
-    return Y
+    return cX
 end
 
 """
-    get_vector_induced_basis!(M::Sphere, Y, p, X, B::InducedBasis{<:Any, <:Any, <:StereographicAtlas})
+    get_vector_induced_basis!(M::Sphere, X, p, cX, B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas})
 
-Store in `Y` the tangent vector at `p` represented by stereographic coordinates `X`
+Store in `X` the tangent vector at `p` represented by stereographic coordinates `cX`
 with respect to the induced basis `B`.
 """
 function get_vector_induced_basis!(
         M::Sphere{ℝ},
-        Y,
-        p,
         X,
+        p,
+        cX,
         B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas},
     )
     n = get_parameter(M.size)[1]
     a = get_parameters(M, B.A, B.i, p)
     mult = inv(1 + dot(a, a))^2
 
-    Y[1] = 0
+    X[1] = 0
     for j in 1:n
-        Y[1] -= 4 * a[j] * mult * X[j]
+        X[1] -= 4 * a[j] * mult * cX[j]
     end
     for i in 2:(n + 1)
-        Y[i] = 0
+        X[i] = 0
         for j in 1:n
             if i == j + 1
-                Y[i] += 2 * (1 + dot(a, a) - 2 * a[i - 1]^2) * mult * X[j]
+                X[i] += 2 * (1 + dot(a, a) - 2 * a[i - 1]^2) * mult * cX[j]
             else
-                Y[i] -= 4 * a[i - 1] * a[j] * mult * X[j]
+                X[i] -= 4 * a[i - 1] * a[j] * mult * cX[j]
             end
         end
         if B.i === :south
-            Y[i] *= -1
+            X[i] *= -1
         end
     end
-    return Y
+    return X
 end
 
 

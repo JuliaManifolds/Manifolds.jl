@@ -368,9 +368,16 @@ end
             A = PowerAtlas(StereographicAtlas())
             p = rand(M)
             X = rand(M; vector_at = p)
-            B = induced_basis(M, A, get_chart_index(M, A, p))
+            i_p = get_chart_index(M, A, p)
+            B = induced_basis(M, A, i_p)
+            # here we go enough in the chart to reach a new chart
+            get_chart_index(M, A, i_p, [3.0, 0.0, 0.0, 3.0]) != i_p
+
             c = get_coordinates(M, p, X, B)
             @test isapprox(M, p, get_vector(M, p, c, B), X)
+            Y = allocate(M, X)
+            get_vector!(M, Y, p, c, B)
+            @test isapprox(M, p, Y, X)
         end
     end
 

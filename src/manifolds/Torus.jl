@@ -40,7 +40,7 @@ function get_coordinates_induced_basis!(
         c,
         p,
         X,
-        ::InducedBasis{ℝ, TangentSpaceType, <:RetractionAtlas},
+        ::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
     )
     copyto!(c, vec(X))
     return c
@@ -48,7 +48,7 @@ end
 
 get_iterator(::Torus{N}) where {N} = 1:N
 
-function get_vector_induced_basis!(::Torus, Y, ::Any, c, ::InducedBasis{ℝ, TangentSpaceType, <:RetractionAtlas})
+function get_vector_induced_basis!(::Torus, Y, ::Any, c, ::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas})
     copyto!(Y, c)
     return Y
 end

@@ -455,15 +455,28 @@ using RecursiveArrayTools: ArrayPartition
         a = get_parameters(Mse, A, i, p)
         @test length(a) == manifold_dimension(Mse)
         @test isapprox(Mse, get_point(Mse, A, i, a), p)
+
+        A2 = ProductAtlas(StereographicAtlas(), get_default_atlas(M2))
+        i2 = get_chart_index(Mse, A2, p)
+        @test i2 == (:north, p.x[2])
+        i3 = get_chart_index(Mse, A2, i2, [3.0, 3.0, 3.0, 3.0])
+        @test i3 == (:south, [5.0, 6.0])
     end
 
     @testset "product induced basis" begin
         M = ProductManifold(Sphere(2), Sphere(2))
-        A = ProductAtlas((StereographicAtlas(), StereographicAtlas()))
+        A = ProductAtlas(StereographicAtlas(), StereographicAtlas())
         p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
         X = ArrayPartition([0.0, 1.0, 0.0], [1.0, 0.0, 0.0])
         B = induced_basis(M, A, get_chart_index(M, A, p))
         c = get_coordinates(M, p, X, B)
         @test get_vector(M, p, c, B) ≈ X
+        Y = similar(X)
+        get_vector!(M, Y, p, c, B)
+        @test isapprox(M, p, X, Y)
+
+        c2 = similar(c)
+        get_coordinates!(M, c2, p, X, B)
+        @test isapprox(c, c2)
     end
 end
