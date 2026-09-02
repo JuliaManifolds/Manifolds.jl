@@ -14,10 +14,10 @@ end
 @doc raw"""
     check_vector(M::SymplecticGrassmann, p, X; kwargs...)
 
-Check whether `X` is a valid tangent vector at `p` on the [`SymplecticGrassmann`](@ref),
-``\operatorname{SpGr}(2n, 2k)`` manifold by verifying that it
-is a valid representer of an equivalence class of the corresponding
-[`SymplecticStiefel`](@ref) manifolds tangent space at `p`.
+Check whether `X` is a valid tangent vector at `p` on the [`SymplecticGrassmann`](@ref)
+``\operatorname{SpGr}(2n, 2k)`` manifold `M`.
+This is done by verifying that it is a valid representer of an equivalence class of the
+tangent space of the corresponding [`SymplecticStiefel`](@ref) manifold at `p`.
 """
 function check_vector(M::SymplecticGrassmann, p, X; kwargs...)
     n, k = get_parameter(M.size)
@@ -143,9 +143,12 @@ end
 @doc raw"""
     riemannian_gradient(M::SymplecticGrassmann, p, Y)
 
-Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^{2n×2k}`` or at
-least around the [`SymplecticGrassmann`](@ref) `M` where `p` (the embedding of) a point on `M`,
-and the restriction ``\tilde f`` to the [`SymplecticStiefel`](@ref) be invariant for the equivalence classes.
+Compute the Riemannian gradient ``X = \operatorname{grad} f(p)`` on the [`SymplecticGrassmann`](@ref) `M`
+from the gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding.
+
+Here ``Y`` is the gradient in the embedding ``ℝ^{2n×2k}``, or at least in a neighbourhood of `M`,
+where `p` is (the embedding of) a point on `M`, and the restriction of ``\tilde f`` to the
+[`SymplecticStiefel`](@ref) is assumed to be invariant on the equivalence classes.
 In other words ``f(p) = f(qp)`` for ``q \in \mathrm{Sp}(2k, ℝ)``,
 where ``\mathrm{Sp}(2k, ℝ)`` denotes the [`SymplecticMatrices`](@ref) manifold.
 Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by

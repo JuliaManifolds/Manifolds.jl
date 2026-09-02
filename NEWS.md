@@ -17,8 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* The documentation now uses [DocumenterCodeBlocks.jl](https://github.com/fredrikekre/DocumenterCodeBlocks.jl)
+* The documentation now has a landing page using [DocumenterLandingPage.jl](https://github.com/JuliaManifolds/DocumenterLandingPage.jl)
+  [`DocumenterCitations.jl`](https://github.com/JuliaDocs/DocumenterCitations.jl) was bumped to version 1.5.
+* Several docstrings were rewritten to start with a short summary sentence, such that `DocumenterCodeBlocks.jl` can display them in tooltips.
 * More atlas and chart-related operations are now exported: `get_chart_index`, `transition_map`, `transition_map!`, `transition_map_diff` and `transition_map_diff!`.
 * Chart-based geodesic and parallel-transport ODE solvers use in-place problem definitions for performance.
+
+### Fixed
+
+* edited several doc strings to have a first sentence / line with less than 200 characters to fit the new Doc string tooltips
 
 ## [0.11.29] 2026-07-22
 

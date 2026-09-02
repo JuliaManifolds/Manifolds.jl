@@ -171,9 +171,9 @@ function Base.show(io::IO, M::HamiltonianMatrices{𝔽, Tuple{Int}}) where {𝔽
     return print(io, "HamiltonianMatrices($(2n), $(𝔽); parameter=:field)")
 end
 
-@doc raw"""
+_doc_rand_hamiltonian = raw"""
     pX = rand(M::HamiltonianMatrices; σ::Real=1.0, vector_at=nothing)
-    rand!(M::HamiltonianMatrices, pX; σ::Real=1.0, vector_at=nothing)
+    rand!(rng::AbstractRNG, M::HamiltonianMatrices, pX; σ::Real=1.0, vector_at=nothing)
 
 Generate a random Hamiltonian matrix. Since these are a submanifold of ``ℝ^{2n×2n}``,
 the same method applies for points and tangent vectors.
@@ -187,8 +187,10 @@ p = \begin{pmatrix} A & B\\ C & -A^{\mathrm{T}} \end{pmatrix}
 ```
 
 """
+@doc "$(_doc_rand_hamiltonian)"
 rand(M::HamiltonianMatrices; σ::Real = 1.0)
 
+@doc "$(_doc_rand_hamiltonian)"
 function rand!(
         rng::AbstractRNG,
         M::HamiltonianMatrices{ℝ},

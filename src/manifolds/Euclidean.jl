@@ -130,9 +130,9 @@ end
 """
     distance(M::Euclidean, p, q, r::Real=2)
 
-Compute the Euclidean distance between two points on the [`Euclidean`](@ref)
-manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
-and higher order arrays, the matrix and tensor Frobenius norm, respectively.
+Compute the Euclidean distance between two points on the [`Euclidean`](@ref) manifold `M`.
+For vectors this is just the norm of the difference, for matrices and higher order arrays
+the matrix and tensor Frobenius norm, respectively.
 Specifying further an `r≠2`, other norms, like the 1-norm or the ∞-norm can also be computed.
 """
 Base.@propagate_inbounds function distance(M::Euclidean, p, q)

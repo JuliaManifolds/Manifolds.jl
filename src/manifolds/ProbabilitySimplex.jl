@@ -54,8 +54,8 @@ end
     FisherRaoMetric <: AbstractMetric
 
 The Fisher-Rao metric or Fisher information metric is a particular Riemannian metric which
-can be defined on a smooth statistical manifold, i.e., a smooth manifold whose points are
-probability measures defined on a common probability space.
+can be defined on a smooth statistical manifold.
+Such a manifold is a smooth manifold whose points are probability measures defined on a common probability space.
 
 See for example the [`ProbabilitySimplex`](@ref).
 """
@@ -80,9 +80,17 @@ end
 @doc raw"""
     change_metric(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
+Change the metric representation of the tangent vector `X` from the
+[`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) to the [`FisherRaoMetric`](@ref) on the [`ProbabilitySimplex`](@ref) `M`.
+
 To change the metric, we are looking for a function ``c\colon T_pΔ^n → T_pΔ^n`` such that for all ``X,Y ∈ T_pΔ^n``
-This can be achieved by rewriting representer change in matrix form as `(Diagonal(p) - p * p') * X`
-and taking square root of the matrix
+
+```math
+⟨X, Y⟩ = g_p(c(X), c(Y)).
+```
+
+This can be achieved by rewriting the representer change in matrix form as `(Diagonal(p) - p * p') * X`
+and taking the square root of the matrix.
 """
 change_metric(::ProbabilitySimplex, ::EuclideanMetric, ::Any, ::Any)
 
@@ -368,8 +376,9 @@ end
     rand(::ProbabilitySimplex; vector_at=nothing, σ::Real=1.0)
 
 
-When `vector_at` is `nothing`, return a random (uniform over the Fisher-Rao metric; that is, uniform with respect to the `n`-sphere whose positive orthant is mapped to the simplex).
-point `x` on the [`ProbabilitySimplex`](@ref) manifold `M` according to the isometric embedding into
+When `vector_at` is `nothing`, return a random point `x` on the [`ProbabilitySimplex`](@ref) manifold `M`.
+The point is uniform with respect to the Fisher-Rao metric, that is, uniform with respect to the `n`-sphere
+whose positive orthant is mapped to the simplex. It is generated according to the isometric embedding into
 the `n`-sphere by normalizing the vector length of a sample from a multivariate Gaussian. See [Marsaglia:1972](@cite).
 
 When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space

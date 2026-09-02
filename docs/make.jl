@@ -26,6 +26,8 @@ if "--help" ∈ ARGS
     exit(0)
 end
 
+using Pkg
+
 run_quarto = "--quarto" in ARGS
 run_on_CI = (get(ENV, "CI", nothing) == "true")
 tutorials_in_menu = !("--exclude-tutorials" ∈ ARGS)
@@ -74,7 +76,6 @@ end
 # (b) if docs is not the current active environment, switch to it
 # (from https://github.com/JuliaIO/HDF5.jl/pull/1020/) 
 if Base.active_project() != joinpath(@__DIR__, "Project.toml")
-    using Pkg
     Pkg.activate(@__DIR__)
     Pkg.instantiate()
 end
@@ -95,7 +96,7 @@ end
 
 # (d) load necessary packages for the docs
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter
-using DocumenterCitations, DocumenterInterLinks
+using DocumenterCitations, DocumenterCodeBlocks, DocumenterInterLinks, DocumenterLandingPage
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
 using NLsolve
@@ -144,6 +145,7 @@ end
 # (f) final step: render the docs
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style = :alpha)
 links = InterLinks(
+    "Julia" => "https://docs.julialang.org/en/v1/",
     "ManifoldsBase" => ("https://juliamanifolds.github.io/ManifoldsBase.jl/stable/"),
 )
 
@@ -165,7 +167,7 @@ end
 makedocs(;
     format = Documenter.HTML(
         prettyurls = (get(ENV, "CI", nothing) == "true") || ("--prettyurls" ∈ ARGS),
-        assets = ["assets/favicon.ico", "assets/citations.css", "assets/link-icons.css"],
+        assets = ["assets/favicon.ico", "assets/link-icons.css"],
         search_size_threshold_warn = 1000 * 2^10, # raise slightly from 500 to 1 MiB
         size_threshold_warn = 200 * 2^10, # raise slightly from 100 to 200 KiB
         size_threshold = 300 * 2^10,      # raise slightly 200 to 300 KiB
@@ -254,7 +256,7 @@ makedocs(;
             "References" => "misc/references.md",
         ],
     ],
-    plugins = [bib, links],
+    plugins = [bib, links, CodeBlocks(), LandingPage()],
 )
 deploydocs(repo = "github.com/JuliaManifolds/Manifolds.jl.git", push_preview = true)
 #back to main env

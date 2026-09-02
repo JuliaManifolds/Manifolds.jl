@@ -259,10 +259,10 @@ end
 @doc raw"""
     get_vector(M::AbstractSphere{ℝ}, p, c, B::DefaultOrthonormalBasis)
 
-Convert a one-dimensional vector of coefficients `c` with respect to an orthonormal `B` of the tangent space
-at `p` on the [`AbstractSphere`](@ref) `M` to a tangent vector `Y` at `p` by rotating the
-hyperplane containing `c`, whose normal is the ``x``-axis, to the hyperplane whose normal is
-`p`.
+Convert a one-dimensional vector of coefficients `c` with respect to an orthonormal basis `B`
+of the tangent space at `p` on the [`AbstractSphere`](@ref) `M` to a tangent vector `Y` at `p`.
+This is done by rotating the hyperplane containing `c`, whose normal is the ``x``-axis,
+to the hyperplane whose normal is `p`.
 
 Given ``q = p λ + c``, where ``λ = \operatorname{sgn}(⟨c, p⟩)``, and ``⟨⋅,⋅⟩_{\mathrm{F}}``
 denotes the Frobenius inner product, the formula for ``Y`` is
@@ -347,9 +347,9 @@ is_flat(M::AbstractSphere) = manifold_dimension(M) == 1
 @doc raw"""
     local_metric(M::Sphere{n}, p, ::DefaultOrthonormalBasis)
 
-return the local representation of the metric in a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`), namely
-the diagonal matrix of size ``n×n`` with ones on the diagonal, since the metric is obtained
-from the embedding by restriction to the tangent space ``T_p\mathcal M`` at ``p``.
+Return the local representation of the metric in a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`).
+This is the diagonal matrix of size ``n×n`` with ones on the diagonal, since the metric is
+obtained from the embedding by restriction to the tangent space ``T_p\mathcal M`` at ``p``.
 """
 function local_metric(M::Sphere{ℝ, Tuple{Int}}, p, ::DefaultOrthonormalBasis)
     n = get_parameter(M.size)[1]

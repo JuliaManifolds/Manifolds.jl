@@ -82,10 +82,10 @@ end
     check_vector(M::GeneralizedStiefel, p, X; kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
-`M`=``\operatorname{St}(n,k,B)``, i.e. the [`AbstractNumbers`](@extref ManifoldsBase number-system) fits,
-`p` is a valid point on `M` and
-it (approximately) holds that ``p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0``, where
-`kwargs...` is passed to the `isapprox`.
+`M`=``\operatorname{St}(n,k,B)``.
+This requires that the [`AbstractNumbers`](@extref ManifoldsBase number-system) fits,
+`p` is a valid point on `M` and it (approximately) holds that
+``p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0``, where `kwargs...` is passed to the `isapprox`.
 """
 function check_vector(M::GeneralizedStiefel, p, X; kwargs...)
     if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
@@ -199,10 +199,10 @@ end
 @doc raw"""
     rand(::GeneralizedStiefel; vector_at=nothing, σ::Real=1.0)
 
-When `vector_at` is `nothing`, return a random (Gaussian) point `p` on the [`GeneralizedStiefel`](@ref)
-manifold `M` by generating a (Gaussian) matrix with standard deviation `σ` and return the
-(generalized) orthogonalized version, i.e. return the projection onto the manifold of the
-Q component of the QR decomposition of the random matrix of size ``n×k``.
+When `vector_at` is `nothing`, return a random (Gaussian) point `p` on the [`GeneralizedStiefel`](@ref) manifold `M`.
+This generates a (Gaussian) matrix of size ``n×k`` with standard deviation `σ` and returns its
+(generalized) orthogonalized version, i.e. the projection onto the manifold of the
+Q component of its QR decomposition.
 
 When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
 ``T_{vector\_at}\mathrm{St}(n,k)`` with mean zero and standard deviation `σ` by projecting a
@@ -235,9 +235,9 @@ end
     retract(M::GeneralizedStiefel, p, X, ::ProjectionRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
-[`GeneralizedStiefel`](@ref) manifold `M`, which in this case is the same as
-the projection based retraction employing the exponential map in the embedding
-and projecting the result back to the manifold.
+[`GeneralizedStiefel`](@ref) manifold `M`.
+In this case this is the same as the projection based retraction, which employs the
+exponential map in the embedding and projects the result back to the manifold.
 
 The default retraction for this manifold is the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`).
 """

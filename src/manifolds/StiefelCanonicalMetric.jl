@@ -103,8 +103,8 @@ end
     X = inverse_retract(M::MetricManifold{ℝ, Stiefel{ℝ}, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
     inverse_retract!(M::MetricManifold{ℝ, Stiefel{ℝ}, X, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
 
-Compute an approximation to the logarithmic map on the [`Stiefel`](@ref)`(n, k)` manifold with respect to the [`CanonicalMetric`](@ref)
-using a matrix-algebraic based approach to an iterative inversion of the formula of the
+Compute an approximation to the logarithmic map on the [`Stiefel`](@ref)`(n, k)` manifold with respect to the [`CanonicalMetric`](@ref).
+This uses a matrix-algebraic based approach to an iterative inversion of the formula of the
 [`exp`](@ref exp(::MetricManifold{ℝ, Stiefel{ℝ}, CanonicalMetric}, ::Any...)).
 
 The algorithm is derived in [Zimmermann:2017](@cite) and it uses the `max_iterations` and the `tolerance` field
