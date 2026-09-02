@@ -379,6 +379,14 @@ end
             get_vector!(M, Y, p, c, B)
             @test isapprox(M, p, Y, X)
         end
+
+        @testset "2-index power manifold" begin
+            M22 = PowerManifold(Sphere(2), 2, 2)
+            A = PowerAtlas(StereographicAtlas())
+            p = [0.53 -0.72; -0.59 -0.68; -0.59 -0.07;;; -0.5 -0.24; 0.34 0.54; 0.79 -0.8]
+            i_p = get_chart_index(M22, A, p)
+            @test get_chart_index(M22, A, i_p, fill(3.0, 8)) == Any[:south :north; :north :north]
+        end
     end
 
     @testset "metric conversion" begin
