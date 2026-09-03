@@ -105,6 +105,19 @@ function jacobi_figure(geodesic, vector_fields; colors, auxiliary_geodesics = []
 end
 ```
 
+    Precompiling packages...
+       1419.7 ms  ✓ QuartoNotebookWorkerLaTeXStringsExt (serial)
+      1 dependency successfully precompiled in 1 seconds
+    Precompiling packages...
+        781.2 ms  ✓ QuartoNotebookWorkerJSONExt (serial)
+      1 dependency successfully precompiled in 1 seconds
+    Precompiling packages...
+        725.2 ms  ✓ QuartoNotebookWorkerTablesExt (serial)
+      1 dependency successfully precompiled in 1 seconds
+    Precompiling packages...
+       3952.5 ms  ✓ QuartoNotebookWorkerMakieExt (serial)
+      1 dependency successfully precompiled in 4 seconds
+
     jacobi_figure (generic function with 1 method)
 
 ## Values for the geodesic
@@ -271,7 +284,7 @@ jacobi_solution = solve_chart_jacobi_field(
 p1, X1, J1, ∇J1 = jacobi_solution(1.0)
 ```
 
-    ([1.9558356520956433, 4.585482631595611, 0.24308529503723836], [-5.902074917665517, 3.363846553587959, -6.358351943866658], [0.586328580816676, -0.48702835241309433, 1.779869562743577], [2.5079198478780884, -1.0308849731480962, -0.29155178654666647])
+    ([1.9558356520956433, 4.585482631595611, 0.24308529503723836], [-5.902074917665517, 3.363846553587959, -6.358351943866658], [0.586328580816676, -0.4870283524130943, 1.7798695627435768], [2.5079198478780884, -1.0308849731480962, -0.29155178654666636])
 
 Next we plot the geodesic and the Jacobi field. The blue arrows show the field $J$ (pointing roughly in the direction of matching point of an perturbed geodesic) and the orange
 arrows show its covariant derivative $\nabla_{\dot\gamma}J$ (representing change in the Jacobi field along the geodesic).
@@ -391,7 +404,7 @@ chart_volume_density = solve_chart_volume_density(
 )
 ```
 
-    0.3284565916319668
+    0.3284565916319665
 
 The volume density is a scalar, so we can represent it by coloring the geodesic according to the
 volume density computed for scaled initial velocities $tX$.
@@ -438,7 +451,7 @@ _, _, _, differential_log_basepoint = dlog_basepoint_solution(0.0)
 _, _, _, differential_log_argument = dlog_argument_solution(0.0)
 ```
 
-    ([3.4663173674875574, -3.466317367487557, 0.6180339887498948], [3.479917982573146, 6.225770646392013, 5.975664329483111], [0.0, 0.0, 0.0], [-2.358741417864044, 0.04797577357628602, 5.237620452672789])
+    ([3.4663173674875574, -3.466317367487557, 0.6180339887498948], [3.479917982573146, 6.225770646392013, 5.975664329483111], [0.0, 0.0, 0.0], [-2.3587414178640467, 0.04797577357628491, 5.237620452672792])
 
 The logarithmic map fields are fixed at the endpoint and evaluated backwards along the same geodesic.
 The arrows at the base point show their values, which are the two requested
@@ -479,8 +492,8 @@ adjoint_differential_log_argument = Manifolds.solve_chart_adjoint_differential_l
 ```
 
     2-element Vector{Float64}:
-     -3.2305681718289687
-     -0.7236225323940885
+     -3.23056817182897
+     -0.7236225323940894
 
 For a geodesic that crosses a chart boundary, the returned `StitchedChartSolution` still
 evaluates to embedding-space points and tangent vectors. When supplying or interpreting raw
@@ -494,27 +507,27 @@ coordinates to the logarithmic or adjoint routines, use the induced basis of the
 This tutorial is cached. It was last run on the following package versions.
 
     Status `~/.julia/dev/Manifolds/tutorials/Project.toml`
-    ⌃ [1a22d4ce] BoundaryValueDiffEqMIRK v1.17.3
-      [336ed68f] CSV v0.10.16
-      [13f3f980] CairoMakie v0.15.13
+      [1a22d4ce] BoundaryValueDiffEqMIRK v1.18.1
+      [336ed68f] CSV v0.10.17
+    ⌃ [13f3f980] CairoMakie v0.15.13
       [a93c6f00] DataFrames v1.8.2
-    ⌃ [459566f4] DiffEqCallbacks v4.18.3
-    ⌃ [31c24e10] Distributions v0.25.129
-      [e9467ef8] GLMakie v0.13.13
+      [459566f4] DiffEqCallbacks v4.19.3
+      [31c24e10] Distributions v0.25.131
+    ⌃ [e9467ef8] GLMakie v0.13.13
       [1baab800] HybridArrays v0.4.16
-      [ee78f7c6] Makie v0.24.13
-      [1cead3c2] Manifolds v0.11.29 `.`
-      [3362f125] ManifoldsBase v2.5.0
-      [6f286f6a] MultivariateStats v0.10.4
-    ⌃ [1dea7af3] OrdinaryDiffEq v7.2.0
-      [91a5bcdd] Plots v1.41.6
-    ⌃ [731186ca] RecursiveArrayTools v4.3.4
-    ⌃ [276daf66] SpecialFunctions v2.8.0
-      [90137ffa] StaticArrays v1.9.18
+    ⌅ [ee78f7c6] Makie v0.24.13
+      [1cead3c2] Manifolds v0.11.30 `.`
+      [3362f125] ManifoldsBase v2.5.1
+      [6f286f6a] MultivariateStats v0.10.5
+      [1dea7af3] OrdinaryDiffEq v7.8.1
+      [91a5bcdd] Plots v1.41.7
+      [731186ca] RecursiveArrayTools v4.5.1
+      [276daf66] SpecialFunctions v2.9.0
+      [90137ffa] StaticArrays v1.9.20
       [d6f4376e] Markdown v1.11.0
-    Info Packages marked with ⌃ have new versions available and may be upgradable.
+    Info Packages marked with ⌃ and ⌅ have new versions available. Those with ⌃ may be upgradable, but those with ⌅ are restricted by compatibility constraints from upgrading. To see why use `status --outdated`
 
-This tutorial was last rendered August 14, 2026, 17:10:55.
+This tutorial was last rendered September 3, 2026, 16:21:59.
 
 ```@raw html
 </details>
