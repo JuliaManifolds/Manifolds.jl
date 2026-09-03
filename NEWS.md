@@ -29,7 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* edited several doc strings to have a first sentence / line with less than 200 characters to fit the new Doc string tooltips
+* Edited several doc strings to have a first sentence / line with less than 200 characters to fit the new Doc string tooltips.
+* `ricci_tensor` now uses the correct contraction for the Ricci tensor in terms of the Riemann curvature tensor, fixing a bug in the `ricci_tensor` that could lead to wrong sign of the result.
 
 ## [0.11.29] 2026-07-22
 

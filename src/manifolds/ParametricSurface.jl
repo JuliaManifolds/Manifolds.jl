@@ -182,7 +182,7 @@ function gaussian_curvature(M::ParametricSurface, p; kwargs...)
     A = get_default_atlas(M)
     i = get_chart_index(M, A, p)
     a = get_parameters(M, A, i, p)
-    return -ricci_curvature(M, A, i, a; kwargs...) / 2
+    return ricci_curvature(M, A, i, a; kwargs...) / 2
 end
 
 """
@@ -192,16 +192,13 @@ Return the pullback Euclidean inner product of chart-coordinate vectors `Xc` and
 """
 function inner(M::ParametricSurface, A::ParametricSurfaceAtlas, i, a, Xc, Yc)
     parameters = get_point(M.M_param, A.A, i, a)
-    B = induced_basis(M.M_param, A.A, i)
-    X = get_vector(M.M_param, parameters, Xc, B)
-    Y = get_vector(M.M_param, parameters, Yc, B)
-    J = Matrix{promote_type(eltype(parameters), eltype(X), eltype(Y))}(
+    J = Matrix{promote_type(eltype(parameters), eltype(Xc), eltype(Yc))}(
         undef,
         manifold_dimension(M.M_embed),
         manifold_dimension(M.M_param),
     )
     M.jacobian_f!(J, parameters)
-    return dot(J * X, J * Y)
+    return dot(J * Xc, J * Yc)
 end
 
 """
@@ -254,18 +251,18 @@ end
 """
     get_coordinates_induced_basis!(
         M::ParametricSurface,
-        Y,
+        cX,
         p,
         X,
         B::InducedBasis{ℝ, TangentSpaceType, <:ParametricSurfaceAtlas}
     )
 
-Store in `Y` the coordinates of embedded tangent vector `X` at `p` in the basis induced by
+Store in `cX` the coordinates of embedded tangent vector `X` at `p` in the basis induced by
 forwarded atlas `B`.
 """
 function get_coordinates_induced_basis!(
         M::ParametricSurface,
-        Y,
+        cX,
         p,
         X,
         B::InducedBasis{ℝ, TangentSpaceType, <:ParametricSurfaceAtlas},
@@ -279,38 +276,38 @@ function get_coordinates_induced_basis!(
     )
     M.jacobian_f!(J, parameters)
     B_param = induced_basis(M.M_param, B.A.A, B.i)
-    return get_coordinates!(M.M_param, Y, parameters, J \ X, B_param)
+    return get_coordinates!(M.M_param, cX, parameters, J \ X, B_param)
 end
 
 """
     get_vector_induced_basis!(
         M::ParametricSurface,
-        Y,
-        p,
         X,
+        p,
+        cX,
         B::InducedBasis{ℝ, TangentSpaceType, <:ParametricSurfaceAtlas},
     )
 
-Store in `Y` the embedded tangent vector at `p` represented by coordinates `X` in the basis
+Store in `X` the embedded tangent vector at `p` represented by coordinates `cX` in the basis
 induced by forwarded atlas `B`.
 """
 function get_vector_induced_basis!(
         M::ParametricSurface,
-        Y,
-        p,
         X,
+        p,
+        cX,
         B::InducedBasis{ℝ, TangentSpaceType, <:ParametricSurfaceAtlas},
     )
     parameters = ManifoldsBase.allocate_on(M.M_param)
     M.inverse_f!(parameters, p)
     B_param = induced_basis(M.M_param, B.A.A, B.i)
-    X_param = get_vector(M.M_param, parameters, X, B_param)
+    X_param = get_vector(M.M_param, parameters, cX, B_param)
     J = Matrix{promote_type(eltype(p), eltype(X_param))}(
         undef,
         manifold_dimension(M.M_embed),
         manifold_dimension(M.M_param),
     )
     M.jacobian_f!(J, parameters)
-    Y .= J * X_param
-    return Y
+    X .= J * X_param
+    return X
 end

@@ -46,9 +46,10 @@ using LinearAlgebra
 
     Ric = ricci_tensor(M, A, i_p0x, p0x)
     Ric_ref = zeros(2, 2)
-    @einsum Ric_ref[i, j] = RR[k, i, k, j]
+    @einsum Ric_ref[i, j] = RR[k, k, i, j]
     @test Ric ≈ Ric_ref
     @test ricci_curvature(M, A, i_p0x, p0x) ≈ sum(inverse_local_metric(M, A, i_p0x, p0x) .* Ric)
+    @test ricci_curvature(M, A, i_p0x, p0x) / 2 ≈ gaussian_curvature(M, p)
     @test Manifolds.kretschmann_scalar(M, A, i_p0x, p0x) ≈ 0.0005794816008357242
 
     einstein_tensor_ref = ricci_tensor(M, A, i_p0x, p0x) - local_metric(M, A, i_p0x, p0x) * ricci_curvature(M, A, i_p0x, p0x) / 2

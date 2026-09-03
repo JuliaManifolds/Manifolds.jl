@@ -957,7 +957,7 @@ in chart `i` of atlas `A`.
 The Ricci tensor is the contraction of the Riemann tensor:
 
 ````math
-    Ric_{p q} = R^u_{p u q}
+    Ric_{p q} = R^u_{u p q}
 ````
 
 # Arguments
@@ -990,14 +990,14 @@ function ricci_tensor!(
         M::AbstractManifold, Ric, A::AbstractAtlas, i, a;
         backend::AbstractADType = AutoForwardDiff()
     )
-    # compute full Riemann tensor and contract: Ric_{ij} = R^u_{i u j}
+    # Compute the full Riemann tensor and contract: Ric_{pq} = R^u_{u p q}.
     R = riemann_tensor(M, A, i, a; backend = backend)
     n = length(a)
     fill!(Ric, zero(eltype(R)))
     for p in 1:n, q in 1:n
         s = zero(eltype(R))
         for u in 1:n
-            s += R[u, p, u, q]
+            s += R[u, u, p, q]
         end
         Ric[p, q] = s
     end
