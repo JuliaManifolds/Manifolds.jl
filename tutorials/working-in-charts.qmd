@@ -58,8 +58,8 @@ GLMakie.activate!()
 This function generates a simple plot of a torus and returns the new figure containing the plot.
 """
 function torus_figure()
-    fig = Figure(size=(1400, 1000), fontsize=16)
-    ax = LScene(fig[1, 1], show_axis=true)
+    fig = Figure(size = (1400, 1000), fontsize = 16)
+    ax = LScene(fig[1, 1], show_axis = true)
     ϴs, φs = LinRange(-π, π, 50), LinRange(-π, π, 50)
     param_points = [Manifolds._torus_param(M, θ, φ) for θ in ϴs, φ in φs]
     X1, Y1, Z1 = [[p[i] for p in param_points] for i in 1:3]
@@ -70,16 +70,16 @@ function torus_figure()
         X1,
         Y1,
         Z1;
-        shading=true,
-        backlight=1.0f0,
-        color=gcs,
-        colormap=Reverse(:RdBu),
-        colorrange=(-gcs_mm, gcs_mm),
-        transparency=true,
+        shading = true,
+        backlight = 1.0f0,
+        color = gcs,
+        colormap = Reverse(:RdBu),
+        colorrange = (-gcs_mm, gcs_mm),
+        transparency = true,
     )
-    wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5)
+    wireframe!(ax, X1, Y1, Z1; transparency = true, color = :gray, linewidth = 0.5)
     zoom!(ax.scene, cameracontrols(ax.scene), 0.95)
-    Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label="Gaussian curvature")
+    Colorbar(fig[1, 2], pltobj, height = Relative(0.5), label = "Gaussian curvature")
     return ax, fig
 end
 
@@ -88,18 +88,18 @@ function jacobi_figure(geodesic, vector_fields; colors, auxiliary_geodesics = []
     times = 0.0:0.02:1.0
     curve = geodesic.(times)
     points = Point3f.(first.(curve))
-    lines!(ax, points; linewidth=4.0, color=:green, label="geodesic")
+    lines!(ax, points; linewidth = 4.0, color = :green, label = "geodesic")
 
     for (t, ag) in auxiliary_geodesics
         ag_curve = ag.(times)
         ag_points = Point3f.(first.(ag_curve))
-        lines!(ax, ag_points; linewidth=3.0, color=:gray, linestyle=:dash, label="auxiliary geodesic (t = $t)")
+        lines!(ax, ag_points; linewidth = 3.0, color = :gray, linestyle = :dash, label = "auxiliary geodesic (t = $t)")
     end
 
     for sg in support_geodesics
         fg_curve = sg.(times)
         fg_points = Point3f.(first.(fg_curve))
-        lines!(ax, fg_points; linewidth=4.0, color=:black, label="geodesic")
+        lines!(ax, fg_points; linewidth = 4.0, color = :black, label = "geodesic")
     end
 
     indices = 1:4:length(vector_fields[1])
@@ -108,7 +108,7 @@ function jacobi_figure(geodesic, vector_fields; colors, auxiliary_geodesics = []
             ax,
             Point3f.(first.(vectors[indices])),
             Point3f.(last.(vectors[indices]));
-            shaftradius=0.05,
+            shaftradius = 0.05,
             color,
         )
     end
@@ -149,7 +149,7 @@ function solve_for(p0x, X_p0x, Y_transp, T::Real)
         A,
         i_p0x,
         Y_transp;
-        final_time=T,
+        final_time = T,
     )
     return p_exp
 end;
@@ -164,7 +164,7 @@ function solve_geodesic(p, X, T::Real)
         X_p0x,
         A,
         i_p0x;
-        final_time=T,
+        final_time = T,
     )
     return p_exp
 end;
@@ -177,15 +177,15 @@ We set the end time `t_end` and time step `dt`.
 
 ```{julia}
 t_end = 2.0
-dt = 1e-1
+dt = 1.0e-1
 ```
 
 We also parametrise the start point and direction.
 
 ```{julia}
-θₚ = π/10
-φₚ = -π/4
-θₓ = π/2
+θₚ = π / 10
+φₚ = -π / 4
+θₓ = π / 2
 φₓ = 0.7
 θy = 0.2
 φy = -0.1
@@ -197,8 +197,8 @@ geo_ps_pt = [Point3f(s[1]) for s in geo[pt_indices]]
 geo_Ys = [Point3f(s[3]) for s in geo[pt_indices]]
 
 ax1, fig1 = torus_figure()
-arrows3d!(ax1, geo_ps_pt, geo_Ys, shaftradius=0.05, color=:blue)
-lines!(geo_ps; linewidth=4.0, color=:green)
+arrows3d!(ax1, geo_ps_pt, geo_Ys, shaftradius = 0.05, color = :blue)
+lines!(geo_ps; linewidth = 4.0, color = :green)
 fig1
 ```
 
@@ -207,21 +207,21 @@ fig1
 ### Solving the logarithmic map ODE
 
 ```{julia}
-θ₁=π/2
-φ₁=-1.0
-θ₂=-π/8
-φ₂=π/2
+θ₁ = π / 2
+φ₁ = -1.0
+θ₂ = -π / 8
+φ₂ = π / 2
 
 bvp_i = (0, 0)
 bvp_a1 = [θ₁, φ₁]
 bvp_a2 = [θ₂, φ₂]
 bvp_sol = solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i);
-pts_interp = collect(bvp_sol(0.0:0.05:1.0; idxs=1:2))
+pts_interp = collect(bvp_sol(0.0:0.05:1.0; idxs = 1:2))
 geo_r = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in eachcol(pts_interp)]
 
 
 ax2, fig2 = torus_figure()
-lines!(geo_r; linewidth=4.0, color=:green)
+lines!(geo_r; linewidth = 4.0, color = :green)
 fig2
 ```
 
@@ -245,7 +245,7 @@ Variable `jacobi_Yc` is set to zero because we don't want to vary the initial po
 p0 = [Manifolds._torus_param(M, θₚ, φₚ)...]
 jacobi_i = get_chart_index(M, A, p0)
 jacobi_a = [0.0, 0.0]
-jacobi_Xc = 2*[θₓ, φₓ]
+jacobi_Xc = 2 * [θₓ, φₓ]
 jacobi_Yc = [0.0, 0.0]
 jacobi_dYc = [0.3, -0.6]
 ```
@@ -264,7 +264,7 @@ jacobi_solution = solve_chart_jacobi_field(
     jacobi_i,
     jacobi_Yc,
     jacobi_dYc;
-    final_time=1.0,
+    final_time = 1.0,
 )
 p1, X1, J1, ∇J1 = jacobi_solution(1.0)
 ```
@@ -312,7 +312,7 @@ jacobi_solution = solve_chart_jacobi_field(
     jacobi_i,
     jacobi_Yc,
     jacobi_dYc;
-    final_time=1.0,
+    final_time = 1.0,
 )
 p1, X1, J1, ∇J1 = jacobi_solution(1.0)
 
@@ -344,10 +344,10 @@ is respectively $D_p\exp_p(X)[Y]$ or $D_X\exp_p(X)[Y]$.
 
 ```{julia}
 dexp_basepoint_solution = Manifolds.solve_chart_differential_exp_basepoint(
-    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time=1.0
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time = 1.0
 )
 dexp_argument_solution = Manifolds.solve_chart_differential_exp_argument(
-    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time=1.0
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time = 1.0
 )
 
 _, _, differential_exp_basepoint, _ = dexp_basepoint_solution(1.0)
@@ -365,7 +365,7 @@ dexp_argument_vectors = [(value[1], value[3]) for value in dexp_argument_values]
 jacobi_figure(
     t -> dexp_basepoint_solution(t)[1:2],
     [dexp_basepoint_vectors, dexp_argument_vectors];
-    colors=[:dodgerblue, :darkorange],
+    colors = [:dodgerblue, :darkorange],
 )
 ```
 
@@ -385,7 +385,7 @@ volume density computed for scaled initial velocities $tX$.
 ```{julia}
 volume_densities = [
     solve_chart_volume_density(M, jacobi_a, t .* jacobi_Xc, A, jacobi_i)
-    for t in jacobi_times
+        for t in jacobi_times
 ]
 volume_geodesic = solve_chart_exp_ode(M, jacobi_a, jacobi_Xc, A, jacobi_i)
 volume_points = Point3f.(first.(volume_geodesic(jacobi_times)))
@@ -393,12 +393,12 @@ ax_volume, fig_volume = torus_figure()
 lines!(
     ax_volume,
     volume_points;
-    color=volume_densities,
-    colormap=:viridis,
-    colorrange=extrema(volume_densities),
-    linewidth=6.0,
+    color = volume_densities,
+    colormap = :viridis,
+    colorrange = extrema(volume_densities),
+    linewidth = 6.0,
 )
-Colorbar(fig_volume[1, 3], limits=extrema(volume_densities), colormap=:viridis, label="volume density")
+Colorbar(fig_volume[1, 3], limits = extrema(volume_densities), colormap = :viridis, label = "volume density")
 fig_volume
 ```
 
@@ -412,10 +412,10 @@ In both cases the induced basis is used (see [`induced_basis`](@ref)).
 
 ```{julia}
 dlog_basepoint_solution = Manifolds.solve_chart_differential_log_basepoint(
-    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time=1.0
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time = 1.0
 )
 dlog_argument_solution = Manifolds.solve_chart_differential_log_argument(
-    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time=1.0
+    M, jacobi_a, jacobi_Xc, A, jacobi_i, jacobi_Yc; final_time = 1.0
 )
 
 _, _, _, differential_log_basepoint = dlog_basepoint_solution(0.0)
@@ -434,7 +434,7 @@ dlog_argument_vectors = [(value[1], value[3]) for value in dlog_argument_values]
 jacobi_figure(
     t -> dlog_basepoint_solution(t)[1:2],
     [dlog_basepoint_vectors, dlog_argument_vectors];
-    colors=[:dodgerblue, :darkorange],
+    colors = [:dodgerblue, :darkorange],
 )
 ```
 

@@ -29,7 +29,7 @@ It internally employs [`exp`](https://juliamanifolds.github.io/ManifoldsBase.jl/
 ```julia
 using Manifolds
 M = Sphere(2)
-γ = shortest_geodesic(M, [0., 0., 1.], [0., 1., 0.])
+γ = shortest_geodesic(M, [0.0, 0.0, 1.0], [0.0, 1.0, 0.0])
 γ(0.5)
 ```
 

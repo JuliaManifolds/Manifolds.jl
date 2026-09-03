@@ -9,7 +9,7 @@ title: 🚀 Get Started with `Manifolds.jl`
 using Pkg;
 cd(@__DIR__)
 Pkg.activate("."); # for reproducibility use the local tutorial environment.
-Pkg.develop(path="../") # a trick to work on the local dev version
+Pkg.develop(path = "../") # a trick to work on the local dev version
 using Markdown
 ```
 
@@ -46,7 +46,7 @@ Since a manifold is a type in Julia, we write it in CamelCase. Its parameters ar
 For example the above definition is the same as the real-valued case
 
 ```{julia}
-M₁ === Euclidean(3, field=ℝ)
+M₁ === Euclidean(3, field = ℝ)
 ```
 
 But we even introduced a short hand notation, since ℝ is also just a symbol/variable to use"
@@ -58,7 +58,7 @@ M₁ === ℝ^3
 And similarly here are two ways to create the manifold of vectors of length two with complex entries – or mathematically the space $\mathbb C^2$
 
 ```{julia}
-Euclidean(2, field=ℂ) === ℂ^2
+Euclidean(2, field = ℂ) === ℂ^2
 ```
 
 The easiest to check is the dimension of a manifold. Here we have three “directions to walk into” at every point $p\in \mathbb R
@@ -108,7 +108,7 @@ Note that the `LoadError:` is due to quarto, on `REPL` you would just get the `D
 
 ```{julia}
 #| error: true
-is_point(M₂, [0, 0, 1.001]; error=:error)
+is_point(M₂, [0, 0, 1.001]; error = :error)
 ```
 
 #### 3. ``[The sphere](@ref SphereSection)``{=commonmark}
@@ -123,7 +123,7 @@ If we only have a point that is approximately on the manifold, we can allow for 
 i.e. we get
 
 ```{julia}
-is_point(M₃, [0, 0, 1.001]; atol=1e-3)
+is_point(M₃, [0, 0, 1.001]; atol = 1.0e-3)
 ```
 
 Here we can show a last nice check: ``[`is_vector`](@extref `ManifoldsBase.is_vector-Tuple{AbstractManifold, Any, Any, Bool, Bool}`)``{=commonmark} to check whether a tangent vector `X` is a representation of a tangent vector $X∈T_p\mathcal M$ to a point `p` on the manifold.
@@ -153,7 +153,7 @@ and for these we again get informative error messages
 
 ```{julia}
 #| error: true
-@expect_error is_vector(M₃, [1, 0, 0], [0.1, 1, 1]; error=:error) DomainError
+@expect_error is_vector(M₃, [1, 0, 0], [0.1, 1, 1]; error = :error) DomainError
 ```
 
 To learn about how to define a manifold yourself check out the ``[How to define your own manifold](@extref ManifoldsBase :doc:`tutorials/implement-a-manifold`)``{=commonmark} tutorial of ``[`ManifoldsBase.jl`](@extref ManifoldsBase :doc:`index`)``{=commonmark}."
@@ -231,7 +231,7 @@ p₃ = ArrayPartition([0, 0, 1], [0, 1, 0])
 Here `ArrayPartition` taken from [`RecursiveArrayTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) to store the point on the product manifold efficiently in one array, still allowing efficient access to the product elements.
 
 ```{julia}
-is_point(M₆, p₃; error=:error)
+is_point(M₆, p₃; error = :error)
 ```
 
 But accessing single components still works the same."
@@ -282,12 +282,12 @@ Thinking of a generic implementation, we would like to have a way to specify one
 
 ```{julia}
 function generic_de_Casteljau(
-    M::AbstractManifold,
-    t,
-    pts::NTuple{2};
-    m::AbstractRetractionMethod=default_retraction_method(M),
-    n::AbstractInverseRetractionMethod=default_inverse_retraction_method(M),
-)
+        M::AbstractManifold,
+        t,
+        pts::NTuple{2};
+        m::AbstractRetractionMethod = default_retraction_method(M),
+        n::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+    )
     X = inverse_retract(M, pts[1], pts[2], n)
     return retract(M, pts[1], X, t, m)
 end
@@ -297,14 +297,14 @@ and for the recursion
 
 ```{julia}
 function generic_de_Casteljau(
-    M::AbstractManifold,
-    t,
-    pts::NTuple;
-    m::AbstractRetractionMethod=default_retraction_method(M),
-    n::AbstractInverseRetractionMethod=default_inverse_retraction_method(M),
-)
-    p = generic_de_Casteljau(M, t, pts[1:(end - 1)]; m=m, n=n)
-    q = generic_de_Casteljau(M, t, pts[2:end]; m=m, n=n)
+        M::AbstractManifold,
+        t,
+        pts::NTuple;
+        m::AbstractRetractionMethod = default_retraction_method(M),
+        n::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+    )
+    p = generic_de_Casteljau(M, t, pts[1:(end - 1)]; m = m, n = n)
+    q = generic_de_Casteljau(M, t, pts[2:end]; m = m, n = n)
     X = inverse_retract(M, p, q, n)
     return retract(M, p, X, t, m)
 end
@@ -332,7 +332,7 @@ We can also illustrate how to generate radnom points and tangent vectors.
 #| output: false
 M = Sphere(10000)
 p₄ = rand(M)
-X = rand(M; vector_at=p₄)
+X = rand(M; vector_at = p₄)
 ```
 
 Looking at the allocations required we get

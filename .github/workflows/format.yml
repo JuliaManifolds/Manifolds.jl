@@ -27,6 +27,7 @@ jobs:
         with:
           version: '1'
           format_files: true
+          extensions: 'jl,md,qmd'
         # Fail on next step instead
         continue-on-error: ${{ github.event_name == 'pull_request' }}
       - uses: reviewdog/action-suggester@v1
