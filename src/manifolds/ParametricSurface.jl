@@ -258,10 +258,7 @@ Store in `cX` the coordinates of embedded tangent vector `X` at `p` in the basis
 forwarded atlas `B`.
 """
 function get_coordinates_induced_basis!(
-        M::ParametricSurface,
-        cX,
-        p,
-        X,
+        M::ParametricSurface, cX, p, X,
         B::InducedBasis{ℝ, TangentSpaceType, <:ParametricSurfaceAtlas},
     )
     parameters = ManifoldsBase.allocate_on(M.M_param)
