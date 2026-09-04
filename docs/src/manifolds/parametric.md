@@ -21,27 +21,28 @@ half_width = 0.35
 M_param = ProductManifold(Hyperrectangle([-half_width], [half_width]), Circle())
 M_embed = Euclidean(3)
 
-function mobius!(q, p)
+function mobius!(v, p::ArrayPartition)
     u, θ = p.x[1][1], p.x[2][]
-    q .= [
+    v .= [
         (1 + u * cos(θ / 2)) * cos(θ),
         (1 + u * cos(θ / 2)) * sin(θ),
         u * sin(θ / 2),
     ]
-    return q
+    return v
 end
 
-function inverse_mobius!(p, q)
-    θ = atan(q[2], q[1])
+
+function inverse_mobius!(p::ArrayPartition, u)
+    θ = atan(u[2], u[1])
     p.x[1][1] =
-        (q[1] - cos(θ)) * cos(θ / 2) * cos(θ) +
-        (q[2] - sin(θ)) * cos(θ / 2) * sin(θ) + q[3] * sin(θ / 2)
+        (u[1] - cos(θ)) * cos(θ / 2) * cos(θ) +
+        (u[2] - sin(θ)) * cos(θ / 2) * sin(θ) + u[3] * sin(θ / 2)
     p.x[2][] = θ
     return p
 end
 
-function jacobian_mobius!(J, p)
-    ForwardDiff.jacobian!(J, x -> mobius!(Vector{eltype(x)}(undef, manifold_dimension(M_embed)), x), p)
+function jacobian_mobius!(J, p::ArrayPartition)
+    ForwardDiff.jacobian!(J, v -> mobius!(Vector{eltype(x)}(undef, manifold_dimension(M_embed)), v), p)
     return J
 end
 

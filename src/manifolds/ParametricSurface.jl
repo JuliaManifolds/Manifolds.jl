@@ -28,13 +28,6 @@ struct ParametricSurface{
 end
 
 """
-    decorated_manifold(M::ParametricSurface)
-
-Return the parameter-space manifold of `M`.
-"""
-decorated_manifold(M::ParametricSurface) = M.M_param
-
-"""
     get_embedding(M::ParametricSurface)
 
 Return the Euclidean embedding manifold of `M`.
@@ -70,12 +63,13 @@ Check whether the embedded point `q` lies on `M` by applying the inverse paramet
 reconstructing it with `f!`.
 """
 function check_point(M::ParametricSurface, q; kwargs...)
-    p = ManifoldsBase.allocate_on(M.M_param)
-    M.inverse_f!(p, q)
+    u = ManifoldsBase.allocate_on(M.M_param)
+    M.inverse_f!(u, q)
     q_reconstructed = similar(q)
-    M.f!(q_reconstructed, p)
+    M.f!(q_reconstructed, u)
     if !isapprox(q, q_reconstructed; kwargs...)
-        return DomainError(q, "The point $(q) does not lie on the $(M).")
+        norm_residual = norm(q - q_reconstructed)
+        return DomainError(q, "The point $(q) does not lie on the $(M). Residual: $(norm_residual)")
     end
     return nothing
 end
@@ -92,17 +86,17 @@ function check_vector(
         atol::Real = sqrt(eps(float(number_eltype(p)))),
         kwargs...,
     )
-    parameters = ManifoldsBase.allocate_on(M.M_param)
-    M.inverse_f!(parameters, p)
+    u = ManifoldsBase.allocate_on(M.M_param)
+    M.inverse_f!(u, p)
     J = Matrix{promote_type(eltype(p), eltype(X))}(
         undef,
         manifold_dimension(M.M_embed),
         manifold_dimension(M.M_param),
     )
-    M.jacobian_f!(J, parameters)
+    M.jacobian_f!(J, u)
     residual = X - J * (J \ X)
     if !isapprox(norm(residual), 0; atol = atol, kwargs...)
-        return DomainError(residual, "The vector $(X) is not tangent to $(p) from $(M).")
+        return DomainError(residual, "The vector $(X) is not tangent to $(p) from $(M). Residual norm: $(norm(residual))")
     end
     return nothing
 end
@@ -114,9 +108,9 @@ Project `p` onto `M` by applying the inverse parametrization followed by `f!` an
 result in `q`.
 """
 function project!(M::ParametricSurface, q, p)
-    parameters = ManifoldsBase.allocate_on(M.M_param)
-    M.inverse_f!(parameters, p)
-    M.f!(q, parameters)
+    u = ManifoldsBase.allocate_on(M.M_param)
+    M.inverse_f!(u, p)
+    M.f!(q, u)
     return q
 end
 
@@ -127,14 +121,14 @@ Project the ambient vector `X` orthogonally onto the tangent space of `M` at `p`
 in `Y`.
 """
 function project!(M::ParametricSurface, Y, p, X)
-    parameters = ManifoldsBase.allocate_on(M.M_param)
-    M.inverse_f!(parameters, p)
+    u = ManifoldsBase.allocate_on(M.M_param)
+    M.inverse_f!(u, p)
     J = Matrix{promote_type(eltype(p), eltype(X))}(
         undef,
         manifold_dimension(M.M_embed),
         manifold_dimension(M.M_param),
     )
-    M.jacobian_f!(J, parameters)
+    M.jacobian_f!(J, u)
     Y .= J * (J \ X)
     return Y
 end
@@ -191,13 +185,13 @@ end
 Return the pullback Euclidean inner product of chart-coordinate vectors `Xc` and `Yc`.
 """
 function inner(M::ParametricSurface, A::ParametricSurfaceAtlas, i, a, Xc, Yc)
-    parameters = get_point(M.M_param, A.A, i, a)
-    J = Matrix{promote_type(eltype(parameters), eltype(Xc), eltype(Yc))}(
+    u = get_point(M.M_param, A.A, i, a)
+    J = Matrix{promote_type(eltype(u), eltype(Xc), eltype(Yc))}(
         undef,
         manifold_dimension(M.M_embed),
         manifold_dimension(M.M_param),
     )
-    M.jacobian_f!(J, parameters)
+    M.jacobian_f!(J, u)
     return dot(J * Xc, J * Yc)
 end
 
@@ -207,9 +201,9 @@ end
 Return the chart index in `A` containing embedded point `p`.
 """
 function get_chart_index(M::ParametricSurface, A::ParametricSurfaceAtlas, p)
-    parameters = ManifoldsBase.allocate_on(M.M_param)
-    M.inverse_f!(parameters, p)
-    return get_chart_index(M.M_param, A.A, parameters)
+    u = ManifoldsBase.allocate_on(M.M_param)
+    M.inverse_f!(u, p)
+    return get_chart_index(M.M_param, A.A, u)
 end
 
 """
@@ -219,8 +213,8 @@ Return the chart index in `A` containing the point represented by local coordina
 chart `i`.
 """
 function get_chart_index(M::ParametricSurface, A::ParametricSurfaceAtlas, i, a)
-    parameters = get_point(M.M_param, A.A, i, a)
-    return get_chart_index(M.M_param, A.A, parameters)
+    u_a = get_point(M.M_param, A.A, i, a)
+    return get_chart_index(M.M_param, A.A, u_a)
 end
 
 """
@@ -230,9 +224,9 @@ Store in `a` the local parameters of embedded point `p` in chart `i` of
 [`ParametricSurfaceAtlas`](@ref) `A`.
 """
 function get_parameters!(M::ParametricSurface, a, A::ParametricSurfaceAtlas, i, p)
-    parameters = ManifoldsBase.allocate_on(M.M_param)
-    M.inverse_f!(parameters, p)
-    return get_parameters!(M.M_param, a, A.A, i, parameters)
+    u = ManifoldsBase.allocate_on(M.M_param)
+    M.inverse_f!(u, p)
+    return get_parameters!(M.M_param, a, A.A, i, u)
 end
 
 """
@@ -242,9 +236,9 @@ Store in `p` the embedded point represented by local parameters `a` in chart `i`
 [`ParametricSurfaceAtlas`](@ref) `A`.
 """
 function get_point!(M::ParametricSurface, p, A::ParametricSurfaceAtlas, i, a)
-    parameters = ManifoldsBase.allocate_on(M.M_param)
-    get_point!(M.M_param, parameters, A.A, i, a)
-    M.f!(p, parameters)
+    u = ManifoldsBase.allocate_on(M.M_param)
+    get_point!(M.M_param, u, A.A, i, a)
+    M.f!(p, u)
     return p
 end
 
@@ -267,16 +261,16 @@ function get_coordinates_induced_basis!(
         X,
         B::InducedBasis{ℝ, TangentSpaceType, <:ParametricSurfaceAtlas},
     )
-    parameters = ManifoldsBase.allocate_on(M.M_param)
-    M.inverse_f!(parameters, p)
+    u = ManifoldsBase.allocate_on(M.M_param)
+    M.inverse_f!(u, p)
     J = Matrix{promote_type(eltype(p), eltype(X))}(
         undef,
         manifold_dimension(M.M_embed),
         manifold_dimension(M.M_param),
     )
-    M.jacobian_f!(J, parameters)
+    M.jacobian_f!(J, u)
     B_param = induced_basis(M.M_param, B.A.A, B.i)
-    return get_coordinates!(M.M_param, cX, parameters, J \ X, B_param)
+    return get_coordinates!(M.M_param, cX, u, J \ X, B_param)
 end
 
 """
@@ -298,16 +292,16 @@ function get_vector_induced_basis!(
         cX,
         B::InducedBasis{ℝ, TangentSpaceType, <:ParametricSurfaceAtlas},
     )
-    parameters = ManifoldsBase.allocate_on(M.M_param)
-    M.inverse_f!(parameters, p)
+    u = ManifoldsBase.allocate_on(M.M_param)
+    M.inverse_f!(u, p)
     B_param = induced_basis(M.M_param, B.A.A, B.i)
-    X_param = get_vector(M.M_param, parameters, cX, B_param)
+    X_param = get_vector(M.M_param, u, cX, B_param)
     J = Matrix{promote_type(eltype(p), eltype(X_param))}(
         undef,
         manifold_dimension(M.M_embed),
         manifold_dimension(M.M_param),
     )
-    M.jacobian_f!(J, parameters)
+    M.jacobian_f!(J, u)
     X .= J * X_param
     return X
 end

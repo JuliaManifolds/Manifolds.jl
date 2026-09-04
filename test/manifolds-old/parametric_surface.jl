@@ -33,7 +33,6 @@ using RecursiveArrayTools
     @test manifold_dimension(M) == manifold_dimension(M_torus)
     @test representation_size(M) == representation_size(M_torus)
     @test get_embedding(M) == Euclidean(3)
-    @test decorated_manifold(M) == Torus(2)
     torus_inner = inner(M_torus, A, (0.0, 0.0), parameters, X_parameters, X_parameters)
     @test inner(M, p, X, X) ≈ torus_inner
     @test norm(M, p, X) ≈ sqrt(torus_inner)
