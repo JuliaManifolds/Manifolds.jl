@@ -9,6 +9,10 @@ The functions `f!`, `inverse_f!`, and `jacobian_f!` should be defined in-place. 
 parameters `p` to embedded points `q`, embedded points to parameters, and parameters to the
 Jacobian of `f`, respectively.
 
+Note that `inverse_f!` is required to accept any point in the embedding space, not just
+points on the surface. It should return the parameters of the closest point on the surface
+to the input point.
+
 # Constructor
 
     ParametricSurface(M_param, M_embed, f!, inverse_f!, jacobian_f!)
@@ -78,20 +82,15 @@ end
     check_vector(M::ParametricSurface, p, X; atol::Real=sqrt(eps(float(number_eltype(p)))), kwargs...)
 
 Check whether `X` is tangent to the parametric surface `M` at embedded point `p`.
+Computes Jacobian of the parametrization at the parameters corresponding to `p` and checks
+whether the difference between `X` and its projection onto the tangent space is smaller than
+`atol`.
 """
 function check_vector(
         M::ParametricSurface, p, X;
         atol::Real = sqrt(eps(float(number_eltype(p)))), kwargs...,
     )
-    u = ManifoldsBase.allocate_on(M.M_param)
-    M.inverse_f!(u, p)
-    J = Matrix{promote_type(eltype(p), eltype(X))}(
-        undef,
-        manifold_dimension(M.M_embed),
-        manifold_dimension(M.M_param),
-    )
-    M.jacobian_f!(J, u)
-    residual = X - J * (J \ X)
+    residual = X - project(M, p, X)
     if !isapprox(norm(residual), 0; atol = atol, kwargs...)
         return DomainError(residual, "The vector $(X) is not tangent to $(p) from $(M). Residual norm: $(norm(residual))")
     end
