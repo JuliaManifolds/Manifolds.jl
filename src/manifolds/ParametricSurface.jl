@@ -80,11 +80,8 @@ end
 Check whether `X` is tangent to the parametric surface `M` at embedded point `p`.
 """
 function check_vector(
-        M::ParametricSurface,
-        p,
-        X;
-        atol::Real = sqrt(eps(float(number_eltype(p)))),
-        kwargs...,
+        M::ParametricSurface, p, X;
+        atol::Real = sqrt(eps(float(number_eltype(p)))), kwargs...,
     )
     u = ManifoldsBase.allocate_on(M.M_param)
     M.inverse_f!(u, p)
@@ -255,10 +252,7 @@ Store in `cX` the coordinates of embedded tangent vector `X` at `p` in the basis
 forwarded atlas `B`.
 """
 function get_coordinates_induced_basis!(
-        M::ParametricSurface,
-        cX,
-        p,
-        X,
+        M::ParametricSurface, cX, p, X,
         B::InducedBasis{ℝ, TangentSpaceType, <:ParametricSurfaceAtlas},
     )
     u = ManifoldsBase.allocate_on(M.M_param)
