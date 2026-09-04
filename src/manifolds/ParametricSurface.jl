@@ -86,11 +86,8 @@ end
 Check whether `X` is tangent to the parametric surface `M` at embedded point `p`.
 """
 function check_vector(
-        M::ParametricSurface,
-        p,
-        X;
-        atol::Real = sqrt(eps(float(number_eltype(p)))),
-        kwargs...,
+        M::ParametricSurface, p, X;
+        atol::Real = sqrt(eps(float(number_eltype(p)))), kwargs...,
     )
     parameters = ManifoldsBase.allocate_on(M.M_param)
     M.inverse_f!(parameters, p)
