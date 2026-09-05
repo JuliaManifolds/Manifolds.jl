@@ -15,7 +15,7 @@ Torus(n::Int) = Torus{n}(Circle())
 Base.:^(M::Circle, n::Int) = Torus{n}(M)
 
 @doc raw"""
-    check_point(M::Torus{n},p)
+    check_point(M::Torus{n}, p)
 
 Checks whether `p` is a valid point on the [`Torus`](@ref) `M`, i.e. each of
 its entries is a valid point on the [`Circle`](@ref) and the length of `x` is `n`.
@@ -35,7 +35,23 @@ function check_vector(M::Torus{N}, p, X; kwargs...) where {N}
     return check_vector(PowerManifold(M.manifold, N), p, X; kwargs...)
 end
 
+function get_coordinates_induced_basis!(
+        ::Torus,
+        c,
+        p,
+        X,
+        ::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+    )
+    copyto!(c, vec(X))
+    return c
+end
+
 get_iterator(::Torus{N}) where {N} = 1:N
+
+function get_vector_induced_basis!(::Torus, Y, ::Any, c, ::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas})
+    copyto!(Y, c)
+    return Y
+end
 
 manifold_dimension(::Torus{N}) where {N} = N
 

@@ -1,6 +1,7 @@
 module ManifoldsRecursiveArrayToolsExt
 
 using Manifolds
+using ManifoldsBase
 using RecursiveArrayTools: ArrayPartition
 import RecursiveArrayTools: recursive_bottom_eltype
 using StaticArrays

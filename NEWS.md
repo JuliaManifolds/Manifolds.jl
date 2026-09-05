@@ -5,7 +5,17 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.11.30] Unreleased
+## [0.11.30] 2026-09-02
+
+### Added
+
+* Chart-based solvers for Jacobi fields, exponential- and logarithmic map differentials and their adjoints, as well as exponential map volume density: `solve_chart_jacobi_field`,
+`solve_chart_volume_density`,  `solve_chart_differential_exp_basepoint`, `solve_chart_differential_exp_argument`,`solve_chart_differential_log_basepoint`,`solve_chart_differential_log_argument`,`solve_chart_adjoint_differential_exp_basepoint`,`solve_chart_adjoint_differential_exp_argument`,`solve_chart_adjoint_differential_log_basepoint`,`solve_chart_adjoint_differential_log_argument`.
+* `GrassmannAtlas` and `StiefelAtlas` (with `StiefelChart`) for real Grassmann and Stiefel manifolds.
+* Chart operations and induced-basis support for the stereographic atlas on spheres.
+* Extended the "Working in Charts" tutorial covering new additions.
+* `PowerAtlas` and `ProductAtlas` for `PowerManifold` and `ProductManifold`, respectively, with induced-basis support.
+* `ParametricSurface` manifold for handling parametric surfaces (with or without boundaries and corners) in Euclidean space with the metric induced by the embedding.
 
 ### Changed
 
@@ -13,10 +23,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The documentation now has a landing page using [DocumenterLandingPage.jl](https://github.com/JuliaManifolds/DocumenterLandingPage.jl)
   [`DocumenterCitations.jl`](https://github.com/JuliaDocs/DocumenterCitations.jl) was bumped to version 1.5.
 * Several docstrings were rewritten to start with a short summary sentence, such that `DocumenterCodeBlocks.jl` can display them in tooltips.
+* More atlas and chart-related operations are now exported: `get_chart_index`, `transition_map`, `transition_map!`, `transition_map_diff` and `transition_map_diff!`.
+* Chart-based geodesic and parallel-transport ODE solvers use in-place problem definitions for performance.
+* `get_default_atlas` for `PowerManifold` and `ProductManifold` now return `PowerAtlas` and `ProductAtlas` of default atlases of wrapped manifolds instead of the `RetractionAtlas`.
 
 ### Fixed
 
-* edited several doc strings to have a first sentence / line with less than 200 characters to fit the new Doc string tooltips
+* Edited several doc strings to have a first sentence / line with less than 200 characters to fit the new Doc string tooltips.
+* `ricci_tensor` now uses the correct contraction for the Ricci tensor in terms of the Riemann curvature tensor, fixing a bug in the `ricci_tensor` that could lead to wrong sign of the result.
 
 ## [0.11.29] 2026-07-22
 
@@ -800,7 +814,7 @@ formula.
   For example
 
   ```{julia}
-  function Base.show(io::IO, ::CenteredMatrices{m,n}) where {m,n}
+  function Base.show(io::IO, ::CenteredMatrices{m, n}) where {m, n}
       return print(io, "CenteredMatrices($m, $n)")
   end
   ```
@@ -808,7 +822,7 @@ formula.
   needs to be replaced with
 
   ```{julia}
-  function Base.show(io::IO, ::CenteredMatrices{TypeParameter{Tuple{m,n}}}) where {m,n}
+  function Base.show(io::IO, ::CenteredMatrices{TypeParameter{Tuple{m, n}}}) where {m, n}
       return print(io, "CenteredMatrices($m, $n)")
   end
   ```
@@ -816,7 +830,7 @@ formula.
   for statically-sized groups and
 
   ```{julia}
-  function Base.show(io::IO, M::CenteredMatrices{Tuple{Int,Int}})
+  function Base.show(io::IO, M::CenteredMatrices{Tuple{Int, Int}})
       m, n = get_parameter(M.size)
       return print(io, "CenteredMatrices($m, $n; parameter=:field)")
   end

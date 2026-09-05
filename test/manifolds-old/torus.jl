@@ -37,4 +37,13 @@ include("../header.jl")
             test_inplace = true,
         )
     end
+
+    @testset "power induced basis" begin
+        A = get_default_atlas(M)
+        p = rand(M)
+        X = rand(M; vector_at = p)
+        B = induced_basis(M, A, get_chart_index(M, A, p))
+        c = get_coordinates(M, p, X, B)
+        @test isapprox(M, p, get_vector(M, p, c, B), X)
+    end
 end

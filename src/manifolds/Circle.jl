@@ -20,6 +20,9 @@ function adjoint_Jacobi_field(::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
     return X
 end
 
+ManifoldsBase.allocate_on(::Circle{ℝ}) = Array{Float64, 0}(undef)
+ManifoldsBase.allocate_on(::Circle{ℂ}) = Array{ComplexF64, 0}(undef)
+
 @doc raw"""
     check_point(M::Circle, p)
 
@@ -167,7 +170,7 @@ function exp_fused(M::Circle{ℂ}, p::Number, X::Number, t::Number)
     return cos(θ) * p + usinc(θ) * t * X
 end
 
-exp!(::Circle{ℝ}, q, p, X) = (q .= sym_rem(p + X))
+exp!(::Circle{ℝ}, q, p, X) = (q .= sym_rem(p[] + X[]))
 exp_fused!(::Circle{ℝ}, q, p, X, t::Number) = (q .= sym_rem(p[] + t * X[]))
 function exp!(M::Circle{ℂ}, q, p, X)
     θ = norm(M, p, X)
@@ -342,7 +345,7 @@ function Base.log(M::Circle{ℂ}, p::Number, q::Number)
     return project(M, p, X)
 end
 
-log!(::Circle{ℝ}, X, p, q) = (X .= sym_rem(q - p))
+log!(::Circle{ℝ}, X, p, q) = (X .= sym_rem(q[] - p[]))
 function log!(M::Circle{ℂ}, X, p, q)
     cosθ = complex_dot(p, q)
     if cosθ ≈ -1

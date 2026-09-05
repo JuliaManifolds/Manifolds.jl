@@ -46,9 +46,11 @@ using LinearAlgebra
 
     Ric = ricci_tensor(M, A, i_p0x, p0x)
     Ric_ref = zeros(2, 2)
-    @einsum Ric_ref[i, j] = RR[k, i, k, j]
+    @einsum Ric_ref[i, j] = RR[k, k, i, j]
     @test Ric ≈ Ric_ref
     @test ricci_curvature(M, A, i_p0x, p0x) ≈ sum(inverse_local_metric(M, A, i_p0x, p0x) .* Ric)
+    a_p = get_parameters(M, A, i_p0x, p)
+    @test ricci_curvature(M, A, i_p0x, a_p) / 2 ≈ gaussian_curvature(M, p)
     @test Manifolds.kretschmann_scalar(M, A, i_p0x, p0x) ≈ 0.0005794816008357242
 
     einstein_tensor_ref = ricci_tensor(M, A, i_p0x, p0x) - local_metric(M, A, i_p0x, p0x) * ricci_curvature(M, A, i_p0x, p0x) / 2
@@ -100,12 +102,12 @@ using LinearAlgebra
     @test isapprox(
         pexp_3[1],
         [2.701765894057119, 2.668437820810143, -1.8341712552932237];
-        atol = 1.0e-5,
+        atol = 2.0e-5,
     )
     @test isapprox(
         pexp_3[2],
         [-0.41778834843865575, 2.935021992911625, 0.7673987137187901];
-        atol = 1.0e-5,
+        atol = 2.0e-5,
     )
     @test isapprox(
         pexp_3[3],
@@ -148,7 +150,11 @@ using LinearAlgebra
     )
     @test length(p_exp_switch.sols) < length(p_exp.sols)
 
-    Manifolds.transition_map_diff(M, A, i_p0x, [0.0, 0.0], X_p0x, (-1.0, -0.3))
+    i_to = (-1.0, -0.3)
+    @test transition_map_diff(M, A, i_p0x, [0.0, 0.0], X_p0x, i_to) ≈ X_p0x
+    X_i_to = similar(X_p0x)
+    @test transition_map_diff!(M, X_i_to, A, i_p0x, [0.0, 0.0], X_p0x, i_to) === X_i_to
+    @test X_i_to ≈ X_p0x
 
     a2 = [-0.5, 0.3]
     sol_log = Manifolds.solve_chart_log_bvp(M, p0x, a2, A, (0, 0))

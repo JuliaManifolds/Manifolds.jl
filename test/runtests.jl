@@ -24,6 +24,7 @@ end
         include_test("test_statistics.jl")
     end
     if TEST_SET ∈ ["all", "integration"]
+        include_test("test_atlases.jl")
         include_test("approx_inverse_retraction.jl")
         # manifolds requiring ODE solvers
         include_test("manifolds-old/embedded_torus.jl")
@@ -35,6 +36,7 @@ end
         include_test("manifolds/test_determinant_one_matrices.jl")
         include_test("manifolds/test_cholesky_space.jl")
         include_test("manifolds/test_circle.jl")
+        include_test("manifolds-old/parametric_surface.jl")
         include_test("manifolds/test_orthogonal_matrices.jl")
         include_test("manifolds/test_sphere.jl")
         include_test("manifolds/test_general_unitary.jl")

@@ -60,7 +60,7 @@ RetractionAtlas() = RetractionAtlas(ExponentialRetraction(), LogarithmicInverseR
 Calculate the affine connection on manifold `M` at point with parameters `a` in chart `i` of
 [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Xc` and `Yc` in induced basis.
 """
-function affine_connection(M::AbstractManifold, A, i, a, Xc, Yc)
+function affine_connection(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
     Zc = similar(Xc, Base.promote_type(eltype(Xc), eltype(Yc), eltype(a)))
     return affine_connection!(M, Zc, A, i, a, Xc, Yc)
 end
@@ -312,7 +312,7 @@ end
 
 function allocate_result(M::AbstractManifold, f::typeof(get_point), a)
     T = allocate_result_type(M, f, (a,))
-    return allocate(a, T, representation_size(M)...)
+    return allocate(a, T, representation_size(M))
 end
 # disambiguation
 @invoke_maker 1 AbstractManifold allocate_result(
@@ -957,7 +957,7 @@ in chart `i` of atlas `A`.
 The Ricci tensor is the contraction of the Riemann tensor:
 
 ````math
-    Ric_{p q} = R^u_{p u q}
+    Ric_{p q} = R^u_{u p q}
 ````
 
 # Arguments
@@ -990,14 +990,14 @@ function ricci_tensor!(
         M::AbstractManifold, Ric, A::AbstractAtlas, i, a;
         backend::AbstractADType = AutoForwardDiff()
     )
-    # compute full Riemann tensor and contract: Ric_{ij} = R^u_{i u j}
+    # Compute the full Riemann tensor and contract: Ric_{pq} = R^u_{u p q}.
     R = riemann_tensor(M, A, i, a; backend = backend)
     n = length(a)
     fill!(Ric, zero(eltype(R)))
     for p in 1:n, q in 1:n
         s = zero(eltype(R))
         for u in 1:n
-            s += R[u, p, u, q]
+            s += R[u, u, p, q]
         end
         Ric[p, q] = s
     end
@@ -1127,7 +1127,7 @@ This function returns the vector `W (in induced-chart coordinates) given by
 
 # See also
 - `riemann_tensor(M, A, i, a)` which returns the full 4-tensor
-- []`affine_connection`](@ref) used to obtain connection coefficients (see [`levi_civita_affine_connection!`](@ref) for a generic implementation)
+- [`affine_connection`](@ref) used to obtain connection coefficients (see [`levi_civita_affine_connection!`](@ref) for a generic implementation)
 """
 function riemann_tensor(
         M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc, Zc;
@@ -1156,30 +1156,4 @@ function riemann_tensor!(
     end
 
     return Wc
-end
-
-for mf in [
-        christoffel_symbols_first,
-        christoffel_symbols_second,
-        det_local_metric,
-        einstein_tensor,
-        flat!,
-        gaussian_curvature,
-        inverse_local_metric,
-        local_metric,
-        log_local_metric_density,
-        mean,
-        mean!,
-        median,
-        median!,
-        ricci_curvature,
-        ricci_tensor,
-        riemann_tensor,
-        riemannian_gradient,
-        riemannian_gradient!,
-        riemannian_Hessian,
-        riemannian_Hessian!,
-        sharp!,
-    ]
-    @eval is_metric_function(::typeof($mf)) = true
 end
