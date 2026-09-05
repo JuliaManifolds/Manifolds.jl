@@ -5,13 +5,31 @@ Surface in ℝⁿ described by a parametric function `f` defined on a parameter 
 The embedding ℝⁿ is described by a Euclidean manifold `M_embed`. The metric is the
 restriction of the Euclidean metric to the surface.
 
+More precisely, the surface is the image
+
+```math
+\mathcal M = \bigl\{f(u) \mid u \in \mathcal M_{\mathrm{param}}\bigr\}
+\subseteq \mathbb R^n,
+```
+
+and its Riemannian metric is induced by the Euclidean inner product,
+
+```math
+g_u(\xi, \eta) = \left\langle \mathrm Df(u)[\xi], \mathrm Df(u)[\eta]\right\rangle.
+```
+
 The functions `f!`, `inverse_f!`, and `jacobian_f!` should be defined in-place. They map
 parameters `p` to embedded points `q`, embedded points to parameters, and parameters to the
 Jacobian of `f`, respectively.
 
 Note that `inverse_f!` is required to accept any point in the embedding space, not just
 points on the surface. It should return the parameters of the closest point on the surface
-to the input point.
+to the input point, i.e. parameters satisfying
+
+```math
+f\bigl(\operatorname{inverse\_f}(q)\bigr)
+\in \underset{x \in \mathcal M}{\arg\min}\ \lVert q - x \rVert.
+```
 
 # Constructor
 
@@ -60,11 +78,13 @@ Return the representation size of the Euclidean embedding of `M`.
 """
 representation_size(M::ParametricSurface) = representation_size(M.M_embed)
 
-"""
+@doc raw"""
     check_point(M::ParametricSurface, q; kwargs...)
 
 Check whether the embedded point `q` lies on `M` by applying the inverse parametrization and
 reconstructing it with `f!`.
+
+The check verifies that ``q \approx f(\operatorname{inverse\_f}(q))``.
 """
 function check_point(M::ParametricSurface, q; kwargs...)
     u = ManifoldsBase.allocate_on(M.M_param)
@@ -78,13 +98,19 @@ function check_point(M::ParametricSurface, q; kwargs...)
     return nothing
 end
 
-"""
+@doc raw"""
     check_vector(M::ParametricSurface, p, X; atol::Real=sqrt(eps(float(number_eltype(p)))), kwargs...)
 
 Check whether `X` is tangent to the parametric surface `M` at embedded point `p`.
 Computes Jacobian of the parametrization at the parameters corresponding to `p` and checks
 whether the difference between `X` and its projection onto the tangent space is smaller than
 `atol`.
+
+At ``p = f(u)``, the tangent space is
+
+```math
+T_p\mathcal M = \operatorname{range}\bigl(\mathrm Df(u)\bigr).
+```
 """
 function check_vector(
         M::ParametricSurface, p, X;
@@ -97,11 +123,12 @@ function check_vector(
     return nothing
 end
 
-"""
+@doc raw"""
     project!(M::ParametricSurface, q, p)
 
 Project `p` onto `M` by applying the inverse parametrization followed by `f!` and store the
-result in `q`.
+result in `q`. Thus, ``q = f(\operatorname{inverse\_f}(p))`` is a closest point on the
+surface.
 """
 function project!(M::ParametricSurface, q, p)
     u = ManifoldsBase.allocate_on(M.M_param)
@@ -110,11 +137,19 @@ function project!(M::ParametricSurface, q, p)
     return q
 end
 
-"""
+@doc raw"""
     project!(M::ParametricSurface, Y, p, X)
 
 Project the ambient vector `X` orthogonally onto the tangent space of `M` at `p` and store it
 in `Y`.
+
+For ``p = f(u)`` and ``J = \mathrm Df(u)``, this computes
+
+```math
+Y = J\bigl(J \backslash X\bigr),
+```
+
+where ``J \backslash X`` denotes the least-squares solution.
 """
 function project!(M::ParametricSurface, Y, p, X)
     u = ManifoldsBase.allocate_on(M.M_param)
@@ -163,10 +198,16 @@ Delegate the chart-switch condition to the parameter-space atlas wrapped by `A`.
 check_chart_switch(M::ParametricSurface, A::ParametricSurfaceAtlas, i, a; kwargs...) =
     check_chart_switch(M.M_param, A.A, i, a; kwargs...)
 
-"""
+@doc raw"""
     gaussian_curvature(M::ParametricSurface, p; kwargs...)
 
 Return the Gaussian curvature of `M` at embedded point `p`, computed in its forwarded atlas.
+
+For a surface, the Gaussian curvature is half of the Ricci scalar,
+
+```math
+K(p) = \tfrac{1}{2}\operatorname{Ric}(p).
+```
 """
 function gaussian_curvature(M::ParametricSurface, p; kwargs...)
     A = get_default_atlas(M)
@@ -175,10 +216,16 @@ function gaussian_curvature(M::ParametricSurface, p; kwargs...)
     return ricci_curvature(M, A, i, a; kwargs...) / 2
 end
 
-"""
+@doc raw"""
     inner(M::ParametricSurface, A::ParametricSurfaceAtlas, i, a, Xc, Yc)
 
 Return the pullback Euclidean inner product of chart-coordinate vectors `Xc` and `Yc`.
+
+Writing ``u`` for the parameter point and ``J = \mathrm Df(u)``, the metric is
+
+```math
+g_u(X_c, Y_c) = \langle JX_c, JY_c \rangle.
+```
 """
 function inner(M::ParametricSurface, A::ParametricSurfaceAtlas, i, a, Xc, Yc)
     u = get_point(M.M_param, A.A, i, a)
