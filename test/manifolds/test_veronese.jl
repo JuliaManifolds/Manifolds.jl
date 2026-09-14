@@ -1,9 +1,13 @@
 using LinearAlgebra, Manifolds, Random, Test
 
 @testset "Veronese Manifold" begin
-    @test Veronese(4, 3) == Veronese{4, 3}()
+    @test Veronese(4, 3) == Veronese(4, 3; parameter = :type)
+    @test typeof(Veronese(4, 3)) !== typeof(Veronese(5, 3))
+    @test typeof(Veronese(4, 3; parameter = :field)) ===
+        typeof(Veronese(5, 3; parameter = :field))
     @test_throws ArgumentError Veronese(0, 2)
     @test_throws ArgumentError Veronese(3, 0)
+    @test_throws ArgumentError Veronese(3, 2; parameter = :invalid)
 
     n = 4
 
@@ -16,8 +20,8 @@ using LinearAlgebra, Manifolds, Random, Test
     w_raw = [-0.5, 1.0, 0.5, 0.25]
     w = w_raw - dot(z, w_raw) * z
 
-    for d in 1:3
-        M = Veronese(n, d)
+    for parameter in (:type, :field), d in 1:3
+        M = Veronese(n, d; parameter)
 
         p = [[-0.7], x]
         q = [[0.9], z]
@@ -62,11 +66,13 @@ using LinearAlgebra, Manifolds, Random, Test
                 :atol => 1.0e-12,
                 :IsPointErrors => fill(DomainError, length(invalid_points)),
                 :IsVectorErrors => fill(DomainError, length(invalid_vectors)),
-                get_embedding => Euclidean(n^d),
+                get_embedding => Euclidean(n^d; parameter),
                 manifold_dimension => n,
-                repr => "Veronese($n, $d)",
+                repr => "Veronese($n, $d$(parameter === :field ? "; parameter=:field" : ""))",
             ),
         )
+
+        @test Manifolds.get_parameter_type(M) === parameter
 
         @test_throws DomainError is_vector(M, invalid_points[1], X; error = :error)
 
@@ -101,10 +107,12 @@ using LinearAlgebra, Manifolds, Random, Test
     end
 
     @testset "Float32 rand" begin
-        M = Veronese(3, 2)
-        p = [Float32[-0.5], normalize(Float32[1, 2, 3])]
-        X = rand(Random.Xoshiro(12), M; vector_at = p)
+        for parameter in (:type, :field)
+            M = Veronese(3, 2; parameter)
+            p = [Float32[-0.5], normalize(Float32[1, 2, 3])]
+            X = rand(Random.Xoshiro(12), M; vector_at = p)
 
-        @test all(eltype(Xᵢ) === Float32 for Xᵢ in X)
+            @test all(eltype(Xᵢ) === Float32 for Xᵢ in X)
+        end
     end
 end
