@@ -234,19 +234,8 @@ Generate a random point on [`Veronese`](@ref) `M`. If `vector_at` is provided,
 generate a random tangent vector there. The optional `σ` scales random tangent
 vectors.
 """
-function Random.rand(M::Veronese; vector_at = nothing, σ::Real = 1)
-    return rand(Random.default_rng(), M; vector_at, σ)
-end
-function Random.rand(rng::AbstractRNG, M::Veronese; vector_at = nothing, σ::Real = 1)
-    n, _ = get_parameter(M.size)
-    T = isnothing(vector_at) ? Float64 : number_eltype(vector_at)
-    pX = [zeros(T, 1), zeros(T, n)]
-    return rand!(rng, M, pX; vector_at, σ)
-end
+Random.rand(M::Veronese; vector_at = nothing, σ::Real = 1)
 
-function Random.rand!(M::Veronese, pX; kwargs...)
-    return rand!(Random.default_rng(), M, pX; kwargs...)
-end
 function Random.rand!(
         rng::AbstractRNG,
         M::Veronese,
@@ -258,9 +247,7 @@ function Random.rand!(
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
     if isnothing(vector_at)
         randn!(rng, pX[1])
-        while iszero(pX[1][1])
-            randn!(rng, pX[1])
-        end
+        pX[1][1] += iszero(pX[1][1])
         rand!(rng, sphere, pX[2])
     else
         randn!(rng, pX[1])

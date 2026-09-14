@@ -74,6 +74,7 @@ using LinearAlgebra, Manifolds, Random, Test
 
         @test Manifolds.get_parameter_type(M) === parameter
 
+        @test Manifolds.check_size(M, invalid_points[1], X) isa DomainError
         @test_throws DomainError is_vector(M, invalid_points[1], X; error = :error)
 
         @testset "Equivalent representatives" begin
