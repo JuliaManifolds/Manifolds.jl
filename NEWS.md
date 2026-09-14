@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.30] Unreleased
 
+### Added
+
+* The `Veronese` manifold of nonzero symmetric rank-one tensors.
+
 ### Changed
 
 * The documentation now uses [DocumenterCodeBlocks.jl](https://github.com/fredrikekre/DocumenterCodeBlocks.jl)

@@ -64,6 +64,7 @@ end
         include_test("manifolds-old/projective_space.jl")
         include_test("manifolds-old/rotations.jl")
         include_test("manifolds-old/segre.jl")
+        include_test("manifolds-old/veronese.jl")
         include_test("manifolds-old/shape_space.jl")
         include_test("manifolds-old/skewhermitian.jl")
         include_test("manifolds-old/spectrahedron.jl")
