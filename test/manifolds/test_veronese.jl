@@ -94,6 +94,45 @@ using LinearAlgebra, Manifolds, Random, Test
             @test inner(M, p, X, Y) ≈ dot(X_embedded, Y_embedded)
         end
 
+        @testset "Ambient tangent projection" begin
+            A = randn(Random.Xoshiro(100 + d), n^d)
+            P = project(M, p, A)
+
+            @test is_vector(M, p, P)
+            tangent_spanning_set = Any[[[1.0], zeros(n)]]
+            for i in 1:n
+                eᵢ = zeros(n)
+                eᵢ[i] = 1
+                push!(tangent_spanning_set, [[0.0], eᵢ - dot(x, eᵢ) .* x])
+            end
+            for W in tangent_spanning_set
+                @test inner(M, p, P, W) ≈ dot(A, embed(M, p, W))
+            end
+
+            P_inplace = [fill(NaN, 1), fill(NaN, n)]
+            @test project!(M, P_inplace, p, A) === P_inplace
+            @test P_inplace[1] ≈ P[1]
+            @test P_inplace[2] ≈ P[2]
+
+            X_projected = project(M, p, embed(M, p, X))
+            @test X_projected[1] ≈ X[1]
+            @test X_projected[2] ≈ X[2]
+
+            d == 1 && @test embed(M, p, P) ≈ A
+        end
+
+        @testset "Zero tangent vector" begin
+            X_zero = zero_vector(M, p)
+            @test is_vector(M, p, X_zero)
+            @test all(iszero, X_zero[1])
+            @test all(iszero, X_zero[2])
+
+            X_inplace = deepcopy(X)
+            @test zero_vector!(M, X_inplace, p) === X_inplace
+            @test all(iszero, X_inplace[1])
+            @test all(iszero, X_inplace[2])
+        end
+
         @testset "Embedding differential" begin
             p_embedded = embed(M, p)
             X_embedded = embed(M, p, X)
@@ -113,7 +152,13 @@ using LinearAlgebra, Manifolds, Random, Test
             p = [Float32[-0.5], normalize(Float32[1, 2, 3])]
             X = rand(Random.Xoshiro(12), M; vector_at = p)
 
+            A = randn(Random.Xoshiro(13), Float32, 9)
+            P = project(M, p, A)
+            X_zero = zero_vector(M, p)
+
             @test all(eltype(Xᵢ) === Float32 for Xᵢ in X)
+            @test all(eltype(Pᵢ) === Float32 for Pᵢ in P)
+            @test all(eltype(Xᵢ) === Float32 for Xᵢ in X_zero)
         end
     end
 end

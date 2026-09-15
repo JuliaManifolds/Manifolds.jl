@@ -48,6 +48,21 @@ function ManifoldsBase.allocate_result(M::Veronese, ::typeof(rand))
     return [zeros(1), zeros(n)]
 end
 
+function ManifoldsBase.allocate_result(M::Veronese, ::typeof(zero_vector), p)
+    n, _ = get_parameter(M.size)
+    T = number_eltype(p)
+    return [zeros(T, 1), zeros(T, n)]
+end
+
+function ManifoldsBase.allocate_result_embedding(
+        ::Veronese,
+        ::typeof(project),
+        A,
+        p,
+    )
+    return [similar(p[1]), similar(p[2])]
+end
+
 @doc raw"""
     check_point(M::Veronese, p; kwargs...)
 
@@ -191,6 +206,61 @@ function embed!(M::Veronese, Y, p, X)
 end
 
 @doc raw"""
+    project(M::Veronese, p, A)
+    project!(M::Veronese, Y, p, A)
+
+Orthogonally project an ambient tensor `A` onto the tangent space of
+[`Veronese`](@ref) `M` at `p`. The ambient tensor is represented as a vector of
+length ``N^D``, while the result uses the tangent representation `Y = [[ν], u]`.
+
+For every mode ``j``, let ``c_j`` be the contraction of `A` with ``x`` in all
+modes except ``j`` and let ``c = \sum_{j=1}^D c_j``. Then
+
+````math
+\nu = \langle A, x^{\otimes D}\rangle,
+\qquad
+u = \frac{c-D\nu x}{D\lambda}.
+````
+"""
+project(::Veronese, p, A)
+
+function project!(M::Veronese, Y, p, A)
+    n, d = get_parameter(M.size)
+    λ = p[1][1]
+    x = p[2]
+    A_tensor = reshape(A, ntuple(_ -> n, d))
+
+    T = promote_type(number_eltype(p), number_eltype(A))
+    c = zeros(T, n)
+    prefix = Vector{T}(undef, d + 1)
+    suffix = Vector{T}(undef, d + 1)
+    ν = zero(T)
+
+    for I in CartesianIndices(A_tensor)
+        prefix[1] = one(T)
+        @inbounds for j in 1:d
+            prefix[j + 1] = prefix[j] * x[I[j]]
+        end
+
+        suffix[d + 1] = one(T)
+        @inbounds for j in d:-1:1
+            suffix[j] = suffix[j + 1] * x[I[j]]
+        end
+
+        a = A_tensor[I]
+        ν += a * prefix[d + 1]
+        @inbounds for j in 1:d
+            c[I[j]] += a * prefix[j] * suffix[j + 1]
+        end
+    end
+
+    Y[1][1] = ν
+    Y[2] .= (c .- d .* ν .* x) ./ (d * λ)
+    Y[2] .-= dot(x, Y[2]) .* x
+    return Y
+end
+
+@doc raw"""
     get_embedding(M::Veronese)
 
 Return the full Euclidean tensor space containing [`Veronese`](@ref) `M`,
@@ -255,6 +325,17 @@ function Random.rand!(
         rand!(rng, sphere, pX[2]; vector_at = vector_at[2], σ)
     end
     return pX
+end
+
+@doc raw"""
+    zero_vector!(M::Veronese, X, p)
+
+Set `X` to the zero tangent vector at `p` on [`Veronese`](@ref).
+"""
+function zero_vector!(::Veronese, X, p)
+    fill!(X[1], zero(eltype(X[1])))
+    fill!(X[2], zero(eltype(X[2])))
+    return X
 end
 
 function Base.show(io::IO, M::Veronese)
