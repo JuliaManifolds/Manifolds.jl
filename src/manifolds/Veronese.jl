@@ -21,7 +21,7 @@ with ``(\lambda,x)\sim\bigl((-1)^D\lambda,-x\bigr).``
 
 The metric is induced by the Euclidean metric on the full tensor space ``(ℝ^N)^{\otimes D}``.
 Its geometry is a special case of the Segre--Veronese geometry described in
-[JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
+[JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
 
 # Constructor
 
