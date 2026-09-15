@@ -56,8 +56,8 @@ In the documentation this tutorial represents a static situation (without intera
 This function generates a simple plot of a torus and returns the new figure containing the plot.
 """
 function torus_figure()
-    fig = Figure(resolution=(1400, 1000), fontsize=16)
-    ax = LScene(fig[1, 1], show_axis=true)
+    fig = Figure(resolution = (1400, 1000), fontsize = 16)
+    ax = LScene(fig[1, 1], show_axis = true)
     ϴs, φs = LinRange(-π, π, 50), LinRange(-π, π, 50)
     param_points = [Manifolds._torus_param(M, θ, φ) for θ in ϴs, φ in φs]
     X1, Y1, Z1 = [[p[i] for p in param_points] for i in 1:3]
@@ -68,17 +68,17 @@ function torus_figure()
         X1,
         Y1,
         Z1;
-        shading=true,
-        ambient=Vec3f(0.65, 0.65, 0.65),
-        backlight=1.0f0,
-        color=gcs,
-        colormap=Reverse(:RdBu),
-        colorrange=(-gcs_mm, gcs_mm),
-        transparency=true,
+        shading = true,
+        ambient = Vec3f(0.65, 0.65, 0.65),
+        backlight = 1.0f0,
+        color = gcs,
+        colormap = Reverse(:RdBu),
+        colorrange = (-gcs_mm, gcs_mm),
+        transparency = true,
     )
-    wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5)
+    wireframe!(ax, X1, Y1, Z1; transparency = true, color = :gray, linewidth = 0.5)
     zoom!(ax.scene, cameracontrols(ax.scene), 0.98)
-    Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label="Gaussian curvature")
+    Colorbar(fig[1, 2], pltobj, height = Relative(0.5), label = "Gaussian curvature")
     return ax, fig
 end
 ```
@@ -116,7 +116,7 @@ function solve_for(p0x, X_p0x, Y_transp, T)
         A,
         i_p0x,
         Y_transp;
-        final_time=T,
+        final_time = T,
     )
     return p_exp
 end;
@@ -129,15 +129,15 @@ We set the end time `t_end` and time step `dt`.
 
 ```{julia}
 t_end = 2.0
-dt = 1e-1
+dt = 1.0e-1
 ```
 
 We also parametrise the start point and direction.
 
 ```{julia}
-θₚ = π/10
-φₚ = -π/4
-θₓ = π/2
+θₚ = π / 10
+φₚ = -π / 4
+θₓ = π / 2
 φₓ = 0.7
 θy = 0.2
 φy = -0.1
@@ -159,10 +159,10 @@ geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy], t_end)(0.0:dt:t_end)
 ### Solving the logarithmic map ODE
 
 ```{julia}
-θ₁=π/2
-φ₁=-1.0
-θ₂=-π/8
-φ₂=π/2
+θ₁ = π / 2
+φ₁ = -1.0
+θ₂ = -π / 8
+φ₂ = π / 2
 
 bvp_i = (0, 0)
 bvp_a1 = [θ₁, φ₁]

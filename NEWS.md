@@ -804,7 +804,7 @@ formula.
   For example
 
   ```{julia}
-  function Base.show(io::IO, ::CenteredMatrices{m,n}) where {m,n}
+  function Base.show(io::IO, ::CenteredMatrices{m, n}) where {m, n}
       return print(io, "CenteredMatrices($m, $n)")
   end
   ```
@@ -812,7 +812,7 @@ formula.
   needs to be replaced with
 
   ```{julia}
-  function Base.show(io::IO, ::CenteredMatrices{TypeParameter{Tuple{m,n}}}) where {m,n}
+  function Base.show(io::IO, ::CenteredMatrices{TypeParameter{Tuple{m, n}}}) where {m, n}
       return print(io, "CenteredMatrices($m, $n)")
   end
   ```
@@ -820,7 +820,7 @@ formula.
   for statically-sized groups and
 
   ```{julia}
-  function Base.show(io::IO, M::CenteredMatrices{Tuple{Int,Int}})
+  function Base.show(io::IO, M::CenteredMatrices{Tuple{Int, Int}})
       m, n = get_parameter(M.size)
       return print(io, "CenteredMatrices($m, $n; parameter=:field)")
   end
