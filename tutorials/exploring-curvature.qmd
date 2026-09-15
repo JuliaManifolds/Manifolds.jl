@@ -9,7 +9,7 @@ title: Exploring curvature without coordinates
 using Pkg;
 cd(@__DIR__)
 Pkg.activate("."); # for reproducibility use the local tutorial environment.
-Pkg.develop(PackageSpec(; path=(@__DIR__) * "/../"))
+Pkg.develop(PackageSpec(; path = (@__DIR__) * "/../"))
 using Markdown
 ```
 
@@ -35,7 +35,7 @@ cm = sectional_curvature_matrix(M, p, DefaultOrthonormalBasis())
 
 We can verify that the curvature is consistent with an approximation based on the Bertrand–Diguet–Puiseux theorem, which relies only on an ONB, exponential map and distance calculation:
 ```{julia}
-cm_bdp = Manifolds.estimated_sectional_curvature_matrix(M, p, DefaultOrthonormalBasis(); r=1e-3, N_pts=100000)
+cm_bdp = Manifolds.estimated_sectional_curvature_matrix(M, p, DefaultOrthonormalBasis(); r = 1.0e-3, N_pts = 100000)
 println(norm(cm - cm_bdp))
 ```
 
@@ -64,8 +64,8 @@ function max_curvature(M::AbstractManifold, p)
     X = zero_vector(M, p)
     Y = zero_vector(M, p)
     for _ in 1:10000
-        X_c = rand(M; vector_at=p)
-        Y_c = rand(M; vector_at=p)
+        X_c = rand(M; vector_at = p)
+        Y_c = rand(M; vector_at = p)
         sc = sectional_curvature(M, p, X_c, Y_c)
         if sc > mc
             mc = sc

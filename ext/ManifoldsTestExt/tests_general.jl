@@ -157,8 +157,8 @@ function Manifolds.test_manifold(
     else
         tv = [
             inverse_retract(
-                    M, pts[i], pts[((i + 1) % n) + 1], default_inverse_retraction_method
-                ) for i in 1:n
+                M, pts[i], pts[((i + 1) % n) + 1], default_inverse_retraction_method
+            ) for i in 1:n
         ]
     end
     Test.@testset "dimension" begin # COV_EXCL_LINE
