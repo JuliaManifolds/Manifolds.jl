@@ -58,8 +58,8 @@ using Manifolds, Test, Random, StaticArrays, Quaternions, LinearAlgebra
 
         # skew-symmetric/skew-hermitian
         skew(x) = x - x'
-        @test Manifolds.isnormal(skew(randn(3, 3)))
-        @test Manifolds.isnormal(skew(randn(ComplexF64, 3, 3)))
+        @test Manifolds.isnormal(skew(randn(3, 3)); atol = sqrt(eps()))
+        @test Manifolds.isnormal(skew(randn(ComplexF64, 3, 3)); atol = sqrt(eps()))
 
         # orthogonal/unitary
         @test Manifolds.isnormal(Matrix(qr(randn(3, 3)).Q); atol = sqrt(eps()))

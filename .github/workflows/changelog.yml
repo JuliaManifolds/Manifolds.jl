@@ -1,11 +1,13 @@
 name: Check Changelog
 on:
   pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled]
 
 jobs:
   Check-Changelog:
     name: Check Changelog Action
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'no changelog necessary') }}
     steps:
       - uses: tarides/changelog-check-action@v4
         with:
