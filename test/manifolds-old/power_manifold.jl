@@ -340,7 +340,54 @@ end
         A2 = TestExponentialAtlas()
         a2 = get_parameters(M, A2, p, p)
         @test isapprox(a, a2)
-        @test_throws ErrorException get_point(M, A2, p, a2)
+    end
+    @testset "power atlas" begin
+        A = get_default_atlas(Ms1)
+        @test A isa PowerAtlas
+        @test A.atlas == get_default_atlas(Ms)
+        p = [1.0 0.0 0.0 0.0 0.0; 0.0 1.0 0.0 0.0 0.0; 0.0 0.0 1.0 1.0 1.0]
+        i = get_chart_index(Ms1, A, p)
+        @test i == [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]]
+        a = get_parameters(Ms1, A, i, p)
+        @test length(a) == manifold_dimension(Ms1)
+        @test isapprox(Ms1, get_point(Ms1, A, i, a), p)
+
+        Mn = PowerManifold(Ms, NestedReplacingPowerRepresentation(), 2)
+        An = get_default_atlas(Mn)
+        pn = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        indices_n = get_chart_index(Mn, An, pn)
+        coordinates_n = get_parameters(Mn, An, indices_n, pn)
+        @test isapprox(Mn, get_point(Mn, An, indices_n, coordinates_n), pn)
+    end
+
+    @testset "power induced basis" begin
+        for M in (
+                PowerManifold(Sphere(2), 2),
+                PowerManifold(Sphere(2), NestedPowerRepresentation(), 2),
+                PowerManifold(Sphere(2), NestedReplacingPowerRepresentation(), 2),
+            )
+            A = PowerAtlas(StereographicAtlas())
+            p = rand(M)
+            X = rand(M; vector_at = p)
+            i_p = get_chart_index(M, A, p)
+            B = induced_basis(M, A, i_p)
+            # here we go enough in the chart to reach a new chart
+            get_chart_index(M, A, i_p, [3.0, 0.0, 0.0, 3.0]) != i_p
+
+            c = get_coordinates(M, p, X, B)
+            @test isapprox(M, p, get_vector(M, p, c, B), X)
+            Y = allocate(M, X)
+            get_vector!(M, Y, p, c, B)
+            @test isapprox(M, p, Y, X)
+        end
+
+        @testset "2-index power manifold" begin
+            M22 = PowerManifold(Sphere(2), 2, 2)
+            A = PowerAtlas(StereographicAtlas())
+            p = [0.53 -0.72; -0.59 -0.68; -0.59 -0.07;;; -0.5 -0.24; 0.34 0.54; 0.79 -0.8]
+            i_p = get_chart_index(M22, A, p)
+            @test get_chart_index(M22, A, i_p, fill(3.0, 8)) == Any[:south :north; :north :north]
+        end
     end
 
     @testset "metric conversion" begin

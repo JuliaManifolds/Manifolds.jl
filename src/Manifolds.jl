@@ -416,6 +416,9 @@ function uniform_distribution(M::AbstractManifold)
     return uniform_distribution(M, allocate_result(M, uniform_distribution))
 end
 
+# Atlases (required by most other things)
+include("atlases.jl")
+
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
@@ -443,7 +446,6 @@ METAMANIFOLDS = [
 ]
 
 # Features II: That require MetaManifolds
-include("atlases.jl")
 include("differentiation/ode_callback.jl")
 include("cotangent_space.jl")
 
@@ -465,6 +467,7 @@ include("manifolds/Elliptope.jl")
 include("manifolds/EmbeddedTorus.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/Flag.jl")
+include("manifolds/ParametricSurface.jl")
 include("manifolds/FlagOrthogonal.jl")
 include("manifolds/FlagStiefel.jl")
 include("manifolds/GeneralizedGrassmann.jl")
@@ -577,6 +580,18 @@ function estimate_distance_from_bvp end
 
 function solve_chart_exp_ode end
 function solve_chart_parallel_transport_ode end
+function solve_chart_jacobi_field end
+function solve_chart_volume_density end
+function solve_chart_differential_exp_basepoint end
+function solve_chart_differential_exp_argument end
+function solve_chart_differential_log_basepoint end
+function solve_chart_differential_log_argument end
+function solve_chart_adjoint_differential_exp_basepoint end
+function solve_chart_adjoint_differential_exp_argument end
+function solve_chart_adjoint_differential_log_basepoint end
+function solve_chart_adjoint_differential_log_argument end
+function _jacobi_exp_matrix end
+function _adjoint_coordinate_map end
 
 # TODO: Remove once the new interface is done
 function find_eps end
@@ -701,6 +716,7 @@ export AbstractPowerManifold,
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export TangentBundle
+export ParametricSurface, ParametricSurfaceAtlas
 export TangentSpace, VectorSpaceFiber, VectorSpaceType, VectorBundle
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport, ParallelTransport
@@ -728,7 +744,14 @@ export AbstractMetric,
     RiemannianMetric,
     StiefelSubmersionMetric,
     WarpedMetric
-export AbstractAtlas, RetractionAtlas
+export AbstractAtlas,
+    GrassmannAtlas,
+    PowerAtlas,
+    ProductAtlas,
+    RetractionAtlas,
+    StereographicAtlas,
+    StiefelAtlas,
+    StiefelChart
 # Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 # Retraction types
@@ -944,7 +967,15 @@ export get_basis,
     get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors, number_system
 
 # atlases and charts
-export get_point, get_point!, get_parameters, get_parameters!
+export get_chart_index,
+    get_parameters,
+    get_parameters!,
+    get_point,
+    get_point!,
+    transition_map,
+    transition_map!,
+    transition_map_diff,
+    transition_map_diff!
 
 # Last (not least, but _after_ exports) include the test submodule
 include("test-suite.jl")
