@@ -32,9 +32,8 @@ using LinearAlgebra, Manifolds, Random, Test
         invalid_points = [
             [[1.0, 2.0], x], [[0.0], x], [[Inf], x], [[1.0], x[1:3]], [[1.0], 2 .* x],
         ]
-        invalid_vectors = Any[
-            [[0.2, 0.1], u],
-            [[0.2], x],
+        invalid_vectors = [
+            [[0.2, 0.1], u], [[0.2], x],
         ]
 
         Manifolds.Test.test_manifold(
