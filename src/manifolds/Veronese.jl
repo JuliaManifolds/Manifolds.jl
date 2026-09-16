@@ -400,12 +400,7 @@ c = \begin{bmatrix}
 get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
 
 function get_coordinates_orthonormal!(
-        M::Veronese,
-        c,
-        p,
-        X,
-        ::RealNumbers;
-        kwargs...,
+        M::Veronese, c, p, X, ::RealNumbers; kwargs...,
     )
     n, d = get_parameter(M.size)
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
@@ -424,12 +419,7 @@ of ``T_pM`` are `c`. This is the inverse of [`get_coordinates`](@ref).
 get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
 
 function get_vector_orthonormal!(
-        M::Veronese,
-        X,
-        p,
-        c,
-        ::RealNumbers;
-        kwargs...,
+        M::Veronese, X, p, c, ::RealNumbers; kwargs...,
     )
     n, d = get_parameter(M.size)
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
@@ -456,11 +446,7 @@ vectors.
 Random.rand(M::Veronese; vector_at = nothing, σ::Real = 1)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::Veronese,
-        pX;
-        vector_at = nothing,
-        σ::Real = 1,
+        rng::AbstractRNG, M::Veronese, pX; vector_at = nothing, σ::Real = 1,
     )
     n, _ = get_parameter(M.size)
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
