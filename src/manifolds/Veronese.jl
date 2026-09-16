@@ -55,10 +55,7 @@ function ManifoldsBase.allocate_result(M::Veronese, ::typeof(zero_vector), p)
 end
 
 function ManifoldsBase.allocate_result_embedding(
-        ::Veronese,
-        ::typeof(project),
-        A,
-        p,
+        ::Veronese, ::typeof(project), A, p,
     )
     return [similar(p[1]), similar(p[2])]
 end
