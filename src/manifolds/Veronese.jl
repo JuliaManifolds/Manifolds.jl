@@ -387,6 +387,62 @@ function inner(M::Veronese, p, X, Y)
 end
 
 @doc raw"""
+    get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
+
+Return the coordinates of `X = [[ν], u]` in a default orthonormal basis of
+``T_pM``. If ``p = [[λ], x]`` and ``c_{\mathbb S}(u)`` are the default
+orthonormal coordinates on the sphere, the coordinates are
+
+````math
+c = \begin{bmatrix}
+    \nu \\
+    \sqrt{D}\lvert\lambda\rvert c_{\mathbb S}(u)
+\end{bmatrix}.
+````
+"""
+get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
+
+function get_coordinates_orthonormal!(
+        M::Veronese,
+        c,
+        p,
+        X,
+        ::RealNumbers;
+        kwargs...,
+    )
+    n, d = get_parameter(M.size)
+    sphere = Sphere(n - 1; parameter = get_parameter_type(M))
+    c[1] = X[1][1]
+    get_coordinates_orthonormal!(sphere, view(c, 2:n), p[2], X[2], ℝ; kwargs...)
+    c[2:n] .*= sqrt(d * one(p[1][1])) * abs(p[1][1])
+    return c
+end
+
+@doc raw"""
+    get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
+
+Return the tangent vector whose coordinates in the default orthonormal basis
+of ``T_pM`` are `c`. This is the inverse of [`get_coordinates`](@ref).
+"""
+get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
+
+function get_vector_orthonormal!(
+        M::Veronese,
+        X,
+        p,
+        c,
+        ::RealNumbers;
+        kwargs...,
+    )
+    n, d = get_parameter(M.size)
+    sphere = Sphere(n - 1; parameter = get_parameter_type(M))
+    X[1][1] = c[1]
+    get_vector_orthonormal!(sphere, X[2], p[2], view(c, 2:n), ℝ; kwargs...)
+    X[2] ./= sqrt(d * one(p[1][1])) * abs(p[1][1])
+    return X
+end
+
+@doc raw"""
     manifold_dimension(M::Veronese)
 
 Return the dimension ``N`` of [`Veronese`](@ref) `M`.

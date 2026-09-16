@@ -48,7 +48,9 @@ using LinearAlgebra, Manifolds, Random, Test
                 :Functions => [
                     distance,
                     embed,
+                    get_coordinates,
                     get_embedding,
+                    get_vector,
                     inner,
                     is_point,
                     is_vector,
@@ -56,6 +58,8 @@ using LinearAlgebra, Manifolds, Random, Test
                     rand,
                     repr,
                 ],
+                :Bases => [DefaultOrthonormalBasis()],
+                :Coordinates => [[0.2; zeros(n - 1)]],
                 :InvalidPoints => invalid_points,
                 :InvalidVectors => invalid_vectors,
                 :Points => [p, q],
@@ -160,6 +164,29 @@ using LinearAlgebra, Manifolds, Random, Test
             end
         end
 
+        @testset "Orthonormal coordinates" begin
+            basis = DefaultOrthonormalBasis()
+            cX = get_coordinates(M, p, X, basis)
+            cY = get_coordinates(M, p, Y, basis)
+
+            @test length(cX) == manifold_dimension(M)
+            @test dot(cX, cY) ≈ inner(M, p, X, Y)
+            @test norm(cX)^2 ≈ inner(M, p, X, X)
+
+            X_roundtrip = get_vector(M, p, cX, basis)
+            @test X_roundtrip[1] ≈ X[1]
+            @test X_roundtrip[2] ≈ X[2]
+
+            cX_inplace = fill(NaN, n)
+            @test get_coordinates!(M, cX_inplace, p, X, basis) === cX_inplace
+            @test cX_inplace ≈ cX
+
+            X_inplace = [fill(NaN, 1), fill(NaN, n)]
+            @test get_vector!(M, X_inplace, p, cX, basis) === X_inplace
+            @test X_inplace[1] ≈ X[1]
+            @test X_inplace[2] ≈ X[2]
+        end
+
         @testset "Embedding differential" begin
             p_embedded = embed(M, p)
             X_embedded = embed(M, p, X)
@@ -190,10 +217,14 @@ using LinearAlgebra, Manifolds, Random, Test
 
             A = randn(Random.Xoshiro(13), Float32, 9)
             P = project(M, p, A)
+            c = get_coordinates(M, p, X, DefaultOrthonormalBasis())
+            X_roundtrip = get_vector(M, p, c, DefaultOrthonormalBasis())
             X_zero = zero_vector(M, p)
 
             @test all(eltype(Xᵢ) === Float32 for Xᵢ in X)
             @test all(eltype(Pᵢ) === Float32 for Pᵢ in P)
+            @test eltype(c) === Float32
+            @test all(eltype(Xᵢ) === Float32 for Xᵢ in X_roundtrip)
             @test all(eltype(Xᵢ) === Float32 for Xᵢ in X_zero)
         end
     end
