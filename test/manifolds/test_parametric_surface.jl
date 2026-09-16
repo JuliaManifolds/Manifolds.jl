@@ -25,21 +25,33 @@ using RecursiveArrayTools
     parameters = [0.5, -1.2]
     p = [Manifolds._torus_param(M_torus, parameters...)...]
     X_parameters = [-1.2, 0.4]
+    Y_parameters = [0.3, -0.5]
     A = Manifolds.DefaultTorusAtlas()
     J = zeros(3, 2)
     M.jacobian_f!(J, parameters)
     X = J * X_parameters
+    Y = J * Y_parameters
 
-    @test manifold_dimension(M) == manifold_dimension(M_torus)
-    @test representation_size(M) == representation_size(M_torus)
-    @test get_embedding(M) == Euclidean(3)
-    torus_inner = inner(M_torus, A, (0.0, 0.0), parameters, X_parameters, X_parameters)
-    @test inner(M, p, X, X) ≈ torus_inner
-    @test norm(M, p, X) ≈ sqrt(torus_inner)
-    @test check_point(M, p) === nothing
-    @test check_point(M, [0.0, 0.0, 0.0]) isa DomainError
-    @test check_vector(M, p, X) === nothing
-    @test check_vector(M, p, [1.0, 2.0, 3.0]) isa DomainError
+    Manifolds.Test.test_manifold(
+        M,
+        Dict(
+            :Functions => [manifold_dimension, get_embedding, representation_size, check_point, check_vector],
+            :Points => [p], :Vectors => [X, Y],
+            :InvalidPoints => [[0.0, 0.0, 0.0]],
+            :InvalidVectors => [[1.0, 2.0, 3.0]],
+        ),
+        # Expectations
+        Dict(
+            :atol => 1.0e-7,
+            manifold_dimension => manifold_dimension(M_torus),
+            get_embedding => Euclidean(3),
+            representation_size => representation_size(M_torus),
+        ),
+    )
+
+    torus_inner = inner(M_torus, A, (0.0, 0.0), parameters, X_parameters, Y_parameters)
+    @test inner(M, p, X, Y) ≈ torus_inner
+    @test norm(M, p, X) ≈ sqrt(inner(M, p, X, X))
     @test project(M, p) ≈ p
     @test project(M, p, [1.0, 2.0, 3.0]) ≈ J * (J \ [1.0, 2.0, 3.0])
 
