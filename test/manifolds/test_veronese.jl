@@ -24,7 +24,7 @@ using LinearAlgebra, Manifolds, Random, Test
         M = Veronese(n, d; parameter)
 
         p = [[-0.7], x]
-        q = [[0.9], z]
+        q = [[iseven(d) ? -0.9 : 0.9], z]
         X = [[0.2], u]
         Y = [[-0.3], v]
         Z = [[0.1], w]
@@ -46,6 +46,7 @@ using LinearAlgebra, Manifolds, Random, Test
             Dict(
                 :Aliased => false,
                 :Functions => [
+                    distance,
                     embed,
                     get_embedding,
                     inner,
@@ -122,6 +123,11 @@ using LinearAlgebra, Manifolds, Random, Test
         end
 
         @testset "Zero tangent vector" begin
+            p_copy = copy(M, p)
+            X_copy = copy(M, p, X)
+            @test all(p_copy[i] !== p[i] for i in eachindex(p))
+            @test all(X_copy[i] !== X[i] for i in eachindex(X))
+
             X_zero = zero_vector(M, p)
             @test is_vector(M, p, X_zero)
             @test all(iszero, X_zero[1])
@@ -131,6 +137,27 @@ using LinearAlgebra, Manifolds, Random, Test
             @test zero_vector!(M, X_inplace, p) === X_inplace
             @test all(iszero, X_inplace[1])
             @test all(iszero, X_inplace[2])
+        end
+
+        @testset "Representatives and distance" begin
+            q_original = deepcopy(q)
+            q_closest = copy(M, q)
+            @test Manifolds.closest_representative!(M, q_closest, p) === q_closest
+            @test embed(M, q_closest) ≈ embed(M, q)
+            @test connected_by_geodesic(M, p, q)
+            @test distance(M, p, q) ≈ distance(M, q, p)
+            @test q == q_original
+
+            p_equivalent = [[(-1)^d * p[1][1]], -p[2]]
+            @test connected_by_geodesic(M, p, p_equivalent)
+            @test distance(M, p, p_equivalent) ≈ 0
+            @test isapprox(M, p, p_equivalent)
+
+            if iseven(d)
+                q_disconnected = [[-p[1][1]], q[2]]
+                @test !connected_by_geodesic(M, p, q_disconnected)
+                @test isinf(distance(M, p, q_disconnected))
+            end
         end
 
         @testset "Embedding differential" begin
@@ -144,6 +171,15 @@ using LinearAlgebra, Manifolds, Random, Test
 
             @test embedding_difference ≈ X_embedded rtol = 1.0e-6 atol = 1.0e-7
         end
+    end
+
+    @testset "Geodesic obstruction at the cone apex" begin
+        M = Veronese(2, 5)
+        p = [[1.0], [1.0, 0.0]]
+        q = [[1.0], [0.0, 1.0]]
+
+        @test !connected_by_geodesic(M, p, q)
+        @test distance(M, p, q) ≈ 2.0
     end
 
     @testset "Float32 rand" begin

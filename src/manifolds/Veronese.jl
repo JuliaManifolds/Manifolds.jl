@@ -63,6 +63,25 @@ function ManifoldsBase.allocate_result_embedding(
     return [similar(p[1]), similar(p[2])]
 end
 
+function copyto!(::Veronese, q, p)
+    copyto!(q[1], p[1])
+    copyto!(q[2], p[2])
+    return q
+end
+
+function copyto!(::Veronese, Y, p, X)
+    copyto!(Y[1], X[1])
+    copyto!(Y[2], X[2])
+    return Y
+end
+
+function _isapprox(M::Veronese, p, q; kwargs...)
+    if is_point(M, p) && is_point(M, q)
+        return isapprox(distance(M, p, q), 0; kwargs...)
+    end
+    return isapprox(p, q; kwargs...)
+end
+
 @doc raw"""
     check_point(M::Veronese, p; kwargs...)
 
@@ -140,6 +159,83 @@ function check_vector(M::Veronese, p, X; kwargs...)
     return check_vector(
         Sphere(n - 1; parameter = get_parameter_type(M)), p[2], X[2]; kwargs...,
     )
+end
+
+@doc raw"""
+    closest_representative!(M::Veronese, q, p)
+
+Replace `q` by the representative of the same embedded tensor that is closest
+to `p` in the signed parameterization of [`Veronese`](@ref).
+
+The representative change is parity-aware:
+
+````math
+(\lambda, x) \sim ((-1)^D\lambda, -x).
+````
+
+For even ``D`` only the spherical component changes sign. For odd ``D`` both
+the scale and the spherical component change sign.
+"""
+function closest_representative!(M::Veronese, q, p)
+    _, d = get_parameter(M.size)
+    should_flip =
+        iseven(d) ? dot(p[2], q[2]) < 0 : signbit(p[1][1]) != signbit(q[1][1])
+    if should_flip
+        q[1][1] *= (-1)^d
+        q[2] .*= -1
+    end
+    return q
+end
+
+@doc raw"""
+    connected_by_geodesic(M::Veronese, p, q)
+
+Return whether `p` and `q` are connected by a geodesic that does not pass
+through the excluded zero tensor. For closest representatives, this requires
+matching signs of the scale and
+
+````math
+\sqrt{D}\,d_{\mathbb S}(x,y) < \pi.
+````
+"""
+function connected_by_geodesic(M::Veronese, p, q)
+    q_closest = copy(M, q)
+    closest_representative!(M, q_closest, p)
+    signbit(p[1][1]) == signbit(q_closest[1][1]) || return false
+    n, d = get_parameter(M.size)
+    sphere = Sphere(n - 1; parameter = get_parameter_type(M))
+    return sqrt(d) * distance(sphere, p[2], q_closest[2]) < pi
+end
+
+@doc raw"""
+    distance(M::Veronese, p, q)
+
+Compute the Riemannian distance between `p` and `q`. For closest
+representatives with scale magnitudes ``r`` and ``s``, let
+
+````math
+m = \min\bigl(\sqrt{D}\,d_{\mathbb S}(x,y),\pi\bigr).
+````
+
+Then the distance is
+
+````math
+d(p,q) = \sqrt{(r-s)^2 + 4rs\sin^2(m/2)}.
+````
+
+Points in different connected components have infinite distance.
+"""
+function distance(M::Veronese, p, q)
+    q_closest = copy(M, q)
+    closest_representative!(M, q_closest, p)
+    signbit(p[1][1]) == signbit(q_closest[1][1]) || return Inf
+
+    n, d = get_parameter(M.size)
+    sphere = Sphere(n - 1; parameter = get_parameter_type(M))
+    m = min(sqrt(d) * distance(sphere, p[2], q_closest[2]), pi)
+    r = abs(p[1][1])
+    s = abs(q_closest[1][1])
+    return sqrt((r - s)^2 + 4 * r * s * sin(m / 2)^2)
 end
 
 @doc raw"""
