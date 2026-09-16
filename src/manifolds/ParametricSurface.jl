@@ -36,11 +36,7 @@ f\bigl(\operatorname{inverse\_f}(q)\bigr)
     ParametricSurface(M_param, M_embed, f!, inverse_f!, jacobian_f!)
 """
 struct ParametricSurface{
-        TMP <: AbstractManifold{ℝ},
-        TE <: Euclidean,
-        TF,
-        TIF,
-        TDF,
+        TMP <: AbstractManifold{ℝ}, TE <: Euclidean, TF, TIF, TDF,
     } <: AbstractDecoratorManifold{ℝ}
     M_param::TMP
     M_embed::TE
@@ -287,10 +283,7 @@ end
 
 """
     get_coordinates_induced_basis!(
-        M::ParametricSurface,
-        cX,
-        p,
-        X,
+        M::ParametricSurface, cX, p, X,
         B::InducedBasis{ℝ, TangentSpaceType, <:ParametricSurfaceAtlas}
     )
 
