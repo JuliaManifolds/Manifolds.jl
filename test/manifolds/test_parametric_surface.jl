@@ -35,7 +35,7 @@ using RecursiveArrayTools
     Manifolds.Test.test_manifold(
         M,
         Dict(
-            :Functions => [manifold_dimension, get_embedding, representation_size, check_point, check_vector],
+            :Functions => [manifold_dimension, get_embedding, representation_size, is_point, is_vector],
             :Points => [p], :Vectors => [X, Y],
             :InvalidPoints => [[0.0, 0.0, 0.0]],
             :InvalidVectors => [[1.0, 2.0, 3.0]],
