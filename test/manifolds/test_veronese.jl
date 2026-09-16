@@ -29,12 +29,8 @@ using LinearAlgebra, Manifolds, Random, Test
         Y = [[-0.3], v]
         Z = [[0.1], w]
 
-        invalid_points = Any[
-            [[1.0, 2.0], x],
-            [[0.0], x],
-            [[Inf], x],
-            [[1.0], x[1:3]],
-            [[1.0], 2 .* x],
+        invalid_points = [
+            [[1.0, 2.0], x], [[0.0], x], [[Inf], x], [[1.0], x[1:3]], [[1.0], 2 .* x],
         ]
         invalid_vectors = Any[
             [[0.2, 0.1], u],
