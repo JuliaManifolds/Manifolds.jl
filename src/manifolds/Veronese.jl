@@ -1,8 +1,8 @@
 @doc raw"""
     Veronese{T} <: AbstractManifold{ℝ}
 
-The manifold of nonzero symmetric rank-one tensors of order ``D`` over
-``ℝ^N``,
+The Veronese manifold of nonzero symmetric rank-one tensors of order ``D`` over
+``ℝ^N``, where ``N,D`` are positive integers,
 
 ````math
 \mathcal V_{N,D}
@@ -15,13 +15,78 @@ The manifold of nonzero symmetric rank-one tensors of order ``D`` over
 \right\}.
 ````
 
-Points are represented by `p = [[λ], x]` and tangent vectors by `X = [[ν], u]`, where ``u`` is
-orthogonal to ``x``. The parametrization ``\Phi(\lambda,x)=\lambda x^{\otimes D}`` is two-to-one,
-with ``(\lambda,x)\sim\bigl((-1)^D\lambda,-x\bigr).``
+Here
 
-The metric is induced by the Euclidean metric on the full tensor space ``(ℝ^N)^{\otimes D}``.
-Its geometry is a special case of the Segre--Veronese geometry described in
-[JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
+````math
+x^{\otimes D}
+:=
+\underbrace{x\otimes\cdots\otimes x}_{D\text{ factors}},
+````
+
+is the ``D``-fold tensor product of ``x`` with itself. In coordinates,
+
+````math
+\bigl(x^{\otimes D}\bigr)_{i_1,\ldots,i_D}
+=
+\prod_{j=1}^{D}x_{i_j}.
+````
+
+The parametrization
+
+````math
+\Phi:(\mathbb R\setminus\{0\})\times\mathbb S^{N-1}\to\mathcal V_{N,D},
+\qquad
+\Phi(\lambda,x)=\lambda x^{\otimes D},
+````
+
+is two-to-one. Every embedded tensor has the two representatives
+
+````math
+(\lambda,x)
+\sim
+\bigl((-1)^D\lambda,-x\bigr).
+````
+
+Hence, for even ``D`` the sign of ``\lambda`` is intrinsic and
+``\mathcal V_{N,D}`` has two connected components, while for odd ``D`` the sign
+can be absorbed by replacing ``x`` by ``-x`` and the manifold is connected.
+
+A point is stored in two components, with `p[1] = [λ]` and `p[2] = x`. A tangent
+vector is stored analogously, with `X[1] = [ν]` and `X[2] = u`, where
+
+````math
+u\in T_x\mathbb S^{N-1}=x^\perp.
+````
+
+The metric is induced by the Euclidean metric on the full tensor space
+``(ℝ^N)^{\otimes D}``. The differential of ``\Phi`` is
+
+````math
+D\Phi_{(\lambda,x)}(\nu,u)
+=
+\nu x^{\otimes D}
++
+\lambda\sum_{j=1}^{D}
+ x^{\otimes(j-1)}\otimes u\otimes x^{\otimes(D-j)},
+````
+
+and therefore the induced Riemannian metric is
+
+````math
+g_{(\lambda,x)}\bigl((\nu,u),(\xi,v)\bigr)
+=
+\nu\xi+D\lambda^2\langle u,v\rangle.
+````
+
+Thus the spherical directions are scaled by ``\sqrt{D}|\lambda|`` relative to
+the radial direction.
+
+The Veronese manifold is a special case of the Segre--Veronese family. It is
+not the same manifold as [`Segre`](@ref): the Veronese case uses one spherical
+factor repeated ``D`` times, whereas the Segre case uses several independent
+spherical factors, each with exponent one. See
+[JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite) for the general
+Segre--Veronese geometry.
 
 # Constructor
 
@@ -82,9 +147,9 @@ end
 @doc raw"""
     check_point(M::Veronese, p; kwargs...)
 
-Check whether `p = [[λ], x]` represents a point on [`Veronese`](@ref) `M`.
-The scale ``\lambda`` must be finite and nonzero, and ``x`` must lie on the
-unit sphere.
+Check whether `p` represents a point on [`Veronese`](@ref) `M`. Writing its two
+components mathematically as ``p\simeq(\lambda,x)``, the scale ``\lambda`` must
+be finite and nonzero and ``x`` must lie on ``\mathbb S^{N-1}``.
 """
 function check_point(M::Veronese, p; kwargs...)
     e = check_size(M, p)
@@ -102,8 +167,9 @@ end
     check_size(M::Veronese, p)
     check_size(M::Veronese, p, X)
 
-Check that a point `p` and, optionally, a tangent vector `X` use the nested
-representation `[[scalar], vector]` of sizes `(1,)` and `(N,)`.
+Check that a point `p` and, optionally, a tangent vector `X` have two nested
+components of sizes `(1,)` and `(N,)`, corresponding respectively to the radial
+and spherical parts.
 """
 function check_size(M::Veronese, p)
     p_size = only.(size.(p))
@@ -145,9 +211,15 @@ end
 @doc raw"""
     check_vector(M::Veronese, p, X; kwargs...)
 
-Check whether `X = [[ν], u]` is a tangent vector at `p = [[λ], x]` on [`Veronese`](@ref) `M`.
-The radial component ``\nu`` is unrestricted and the spherical component ``u`` must be tangent
-to the unit sphere at ``x``.
+Check whether `X` is a tangent vector at `p` on [`Veronese`](@ref) `M`. Writing
+``p\simeq(\lambda,x)`` and ``X\simeq(\nu,u)``, the radial component ``\nu`` is
+unrestricted, while the spherical component must satisfy
+
+````math
+u\in T_x\mathbb S^{N-1}=x^\perp,
+\qquad\text{equivalently}\qquad
+\langle x,u\rangle=0.
+````
 """
 function check_vector(M::Veronese, p, X; kwargs...)
     e = check_size(M, p, X)
@@ -161,17 +233,31 @@ end
 @doc raw"""
     closest_representative!(M::Veronese, q, p)
 
-Replace `q` by the representative of the same embedded tensor that is closest
-to `p` in the signed parameterization of [`Veronese`](@ref).
+Replace `q` by the representative of the same embedded tensor that is matched
+to `p` for distance and geodesic computations.
 
-The representative change is parity-aware:
+Write
 
 ````math
-(\lambda, x) \sim ((-1)^D\lambda, -x).
+p\simeq(\lambda,x),
+\qquad
+q\simeq(\mu,y).
 ````
 
-For even ``D`` only the spherical component changes sign. For odd ``D`` both
-the scale and the spherical component change sign.
+The tensor represented by ``q`` has exactly the two parameter representatives
+
+````math
+(\mu,y)
+\quad\text{and}\quad
+\bigl((-1)^D\mu,-y\bigr).
+````
+
+For even ``D``, changing representative leaves ``\mu`` unchanged, so the
+representative with the smaller spherical distance to ``x`` is chosen; this is
+equivalent to choosing the sign of ``y`` so that ``\langle x,y\rangle\geq0``.
+For odd ``D``, changing representative also flips ``\mu``. The representative
+whose scale has the same sign as ``\lambda`` is chosen, so that `p` and the
+chosen representative of `q` lie on the same nonzero radial sheet.
 """
 function closest_representative!(M::Veronese, q, p)
     _, d = get_parameter(M.size)
@@ -187,13 +273,40 @@ end
 @doc raw"""
     connected_by_geodesic(M::Veronese, p, q)
 
-Return whether `p` and `q` are connected by a geodesic that does not pass
-through the excluded zero tensor. For closest representatives, this requires
-matching signs of the scale and
+Return whether `p` and `q` are connected by a minimizing geodesic in
+[`Veronese`](@ref).
+
+Let
 
 ````math
-\sqrt{D}\,d_{\mathbb S}(x,y) < \pi.
+p\simeq(\lambda,x),
+\qquad
+q_*\simeq(\mu,y),
 ````
+
+where ``q_*`` is the representative obtained from
+[`closest_representative!`](@ref). Let
+
+````math
+d_{\mathbb S}(x,y)
+:=
+\operatorname{dist}_{\mathbb S^{N-1}}(x,y)
+=
+\arccos\langle x,y\rangle
+````
+
+be the intrinsic distance on the unit sphere. Since the induced metric weights
+spherical tangent directions by ``D\lambda^2``, the effective angular
+separation is ``\sqrt D\,d_{\mathbb S}(x,y)``. A minimizing geodesic exists if
+and only if the representatives lie in the same connected component and
+
+````math
+\sqrt D\,d_{\mathbb S}(x,y)<\pi.
+````
+
+At or beyond the threshold ``\pi``, the intrinsic distance is approached by
+curves that pass arbitrarily close to the excluded zero tensor, but the
+infimum is not attained by a minimizing geodesic inside the manifold.
 """
 function connected_by_geodesic(M::Veronese, p, q)
     q_closest = copy(M, q)
@@ -207,20 +320,45 @@ end
 @doc raw"""
     distance(M::Veronese, p, q)
 
-Compute the Riemannian distance between `p` and `q`. For closest
-representatives with scale magnitudes ``r`` and ``s``, let
+Compute the intrinsic Riemannian distance between `p` and `q`.
+
+Write
 
 ````math
-m = \min\bigl(\sqrt{D}\,d_{\mathbb S}(x,y),\pi\bigr).
+p\simeq(\lambda,x),
+\qquad
+q_*\simeq(\mu,y),
 ````
 
-Then the distance is
+where ``q_*`` is the representative obtained from
+[`closest_representative!`](@ref), and define
 
 ````math
-d(p,q) = \sqrt{(r-s)^2 + 4rs\sin^2(m/2)}.
+r=|\lambda|,
+\qquad
+s=|\mu|,
+\qquad
+\theta=d_{\mathbb S}(x,y),
+\qquad
+m=\min\bigl(\sqrt D\,\theta,\pi\bigr).
 ````
 
-Points in different connected components have infinite distance.
+If the matched representatives belong to the same connected component, then
+
+````math
+d(p,q)
+=
+\sqrt{r^2+s^2-2rs\cos m}
+=
+\sqrt{(r-s)^2+4rs\sin^2(m/2)}.
+````
+
+When ``\sqrt D\,\theta<\pi``, this distance is realized by a minimizing
+geodesic. When ``\sqrt D\,\theta\geq\pi``, the formula reduces to ``r+s``;
+this is the infimum of curve lengths obtained by approaching the excluded zero
+tensor and is not attained by a minimizing geodesic. Points in different
+connected components have infinite distance; this can occur only for even
+``D``.
 """
 function distance(M::Veronese, p, q)
     q_closest = copy(M, q)
@@ -239,13 +377,17 @@ end
     embed(M::Veronese, p)
     embed!(M::Veronese, q, p)
 
-Embed `p = [[λ], x]` into the full tensor space as
+Embed a point ``p\simeq(\lambda,x)`` into the full tensor space using the
+Veronese parametrization
 
 ````math
-\Phi(\lambda,x)=\lambda x^{\otimes D}.
+\Phi(\lambda,x)=\lambda x^{\otimes D},
+\qquad
+x^{\otimes D}=\underbrace{x\otimes\cdots\otimes x}_{D\text{ factors}}.
 ````
 
-The embedded tensor is represented as a vector of length ``N^D``.
+The embedded tensor is stored as a vector of length ``N^D`` corresponding to
+the full, rather than symmetry-compressed, tensor coordinates.
 """
 embed(::Veronese, p)
 
@@ -265,8 +407,9 @@ end
     embed(M::Veronese, p, X)
     embed!(M::Veronese, Y, p, X)
 
-Embed the tangent vector `X = [[ν], u]` at `p = [[λ], x]` using the
-differential of the Veronese parametrization,
+Embed the tangent vector ``X\simeq(\nu,u)`` at
+``p\simeq(\lambda,x)`` by applying the differential of the Veronese
+parametrization,
 
 ````math
 D\Phi_{(\lambda,x)}(\nu,u)
@@ -274,8 +417,12 @@ D\Phi_{(\lambda,x)}(\nu,u)
 \nu x^{\otimes D}
 +
 \lambda\sum_{j=1}^{D}
-x^{\otimes(j-1)}\otimes u\otimes x^{\otimes(D-j)}.
+ x^{\otimes(j-1)}\otimes u\otimes x^{\otimes(D-j)}.
 ````
+
+The first term is the radial variation and the sum contains the ``D`` ways of
+inserting the spherical variation ``u`` into one tensor mode. Since
+``u\perp x``, this differential is tangent to the embedded Veronese manifold.
 """
 embed(::Veronese, p, X)
 
@@ -303,17 +450,39 @@ end
     project!(M::Veronese, Y, p, A)
 
 Orthogonally project an ambient tensor `A` onto the tangent space of
-[`Veronese`](@ref) `M` at `p`. The ambient tensor is represented as a vector of
-length ``N^D``, while the result uses the tangent representation `Y = [[ν], u]`.
+[`Veronese`](@ref) at ``p\simeq(\lambda,x)``. The ambient tensor is stored as a
+vector of length ``N^D`` and the result is represented as
+``Y\simeq(\nu,u)`` with ``u\perp x``.
 
-For every mode ``j``, let ``c_j`` be the contraction of `A` with ``x`` in all
-modes except ``j`` and let ``c = \sum_{j=1}^D c_j``. Then
+For each mode ``j=1,\ldots,D``, let ``c_j\in\mathbb R^N`` be the contraction of
+`A` with ``x`` in every mode except mode ``j``. In coordinates,
 
 ````math
-\nu = \langle A, x^{\otimes D}\rangle,
-\qquad
-u = \frac{c-D\nu x}{D\lambda}.
+(c_j)_a
+=
+\sum_{i_1,\ldots,i_{j-1},i_{j+1},\ldots,i_D}
+A_{i_1,\ldots,i_{j-1},a,i_{j+1},\ldots,i_D}
+\prod_{k\ne j}x_{i_k},
 ````
+
+and set ``c=\sum_{j=1}^{D}c_j``. The radial coefficient is
+
+````math
+\nu=\langle A,x^{\otimes D}\rangle.
+````
+
+The spherical component is obtained from the tangent part of ``c``:
+
+````math
+u
+=
+\frac{(I-xx^\top)c}{D\lambda}
+=
+\frac{c-D\nu x}{D\lambda}.
+````
+
+The second equality uses ``\langle x,c\rangle=D\nu``. The implementation
+performs one final projection onto ``x^\perp`` to remove numerical roundoff.
 """
 project(::Veronese, p, A)
 
@@ -356,8 +525,10 @@ end
 @doc raw"""
     get_embedding(M::Veronese)
 
-Return the full Euclidean tensor space containing [`Veronese`](@ref) `M`,
-represented as ``ℝ^{N^D}``.
+Return the Euclidean ambient space containing [`Veronese`](@ref), represented
+as ``\mathbb R^{N^D}``. Although points of the manifold are symmetric tensors,
+the current embedding uses all ``N^D`` tensor coordinates rather than a
+symmetry-compressed basis.
 """
 function get_embedding(M::Veronese)
     n, d = get_parameter(M.size)
@@ -371,12 +542,28 @@ get_parameter_type(::Veronese{Tuple{Int, Int}}) = :field
     inner(M::Veronese, p, X, Y)
 
 Compute the Riemannian inner product induced by the Euclidean metric of the
-full tensor embedding. For `p = [[λ], x]`, `X = [[ν], u]`, and
-`Y = [[ξ], v]`, it is
+full tensor embedding. For
 
 ````math
-g_p(X,Y)=\nu\xi+D\lambda^2\langle u,v\rangle.
+p\simeq(\lambda,x),
+\qquad
+X\simeq(\nu,u),
+\qquad
+Y\simeq(\xi,v),
 ````
+
+with ``u,v\in x^\perp``, the differential of the embedding gives
+
+````math
+g_p(X,Y)
+=
+\left\langle D\Phi_p[X],D\Phi_p[Y]\right\rangle
+=
+\nu\xi+D\lambda^2\langle u,v\rangle.
+````
+
+The mixed radial--spherical terms vanish because ``u,v\perp x``, while the
+``D`` equal spherical contributions produce the factor ``D``.
 """
 function inner(M::Veronese, p, X, Y)
     _, d = get_parameter(M.size)
@@ -386,16 +573,24 @@ end
 @doc raw"""
     get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
 
-Return the coordinates of `X = [[ν], u]` in a default orthonormal basis of
-``T_pM``. If ``p = [[λ], x]`` and ``c_{\mathbb S}(u)`` are the default
-orthonormal coordinates on the sphere, the coordinates are
+Return the coordinates of ``X\simeq(\nu,u)`` in the
+[`DefaultOrthonormalBasis`](@ref) of ``T_p\mathcal V_{N,D}``. Write
+``p\simeq(\lambda,x)`` and let ``c_{\mathbb S}(u)`` denote the default
+orthonormal coordinates of ``u`` in ``T_x\mathbb S^{N-1}``, as returned by
+[`get_coordinates`](@ref) on [`Sphere`](@ref). Then
 
 ````math
-c = \begin{bmatrix}
+c
+=
+\begin{bmatrix}
     \nu \\
-    \sqrt{D}\lvert\lambda\rvert c_{\mathbb S}(u)
+    \sqrt D\,|\lambda|\,c_{\mathbb S}(u)
 \end{bmatrix}.
 ````
+
+The factor ``\sqrt D\,|\lambda|`` converts an orthonormal sphere basis into an
+orthonormal basis for the scaled spherical part of the Veronese metric
+``g_p=\mathrm d\lambda^2+D\lambda^2g_{\mathbb S}``.
 """
 get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
 
@@ -413,8 +608,12 @@ end
 @doc raw"""
     get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
 
-Return the tangent vector whose coordinates in the default orthonormal basis
-of ``T_pM`` are `c`. This is the inverse of [`get_coordinates`](@ref).
+Return the tangent vector whose coordinates in the
+[`DefaultOrthonormalBasis`](@ref) of ``T_p\mathcal V_{N,D}`` are `c`. This is
+the inverse of [`get_coordinates`](@ref): the first coordinate is the radial
+component, while the remaining sphere coordinates are divided by
+``\sqrt D\,|\lambda|`` before being converted back to a tangent vector on
+[`Sphere`](@ref).
 """
 get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
 
@@ -432,7 +631,16 @@ end
 @doc raw"""
     manifold_dimension(M::Veronese)
 
-Return the dimension ``N`` of [`Veronese`](@ref) `M`.
+Return the manifold dimension ``N`` of [`Veronese`](@ref). Indeed, the
+parameter space has one radial degree of freedom and ``N-1`` spherical degrees
+of freedom, hence
+
+````math
+\dim\mathcal V_{N,D}=1+(N-1)=N.
+````
+
+The finite two-to-one identification of representatives does not change this
+dimension.
 """
 manifold_dimension(M::Veronese) = get_parameter(M.size)[1]
 
