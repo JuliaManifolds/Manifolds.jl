@@ -81,7 +81,7 @@ g_{(\lambda,x)}\bigl((\nu,u),(\xi,v)\bigr)
 Thus the spherical directions are scaled by ``\sqrt{D}|\lambda|`` relative to
 the radial direction.
 
-The Veronese manifold is a special case of the Segre manifold: the Veronese case 
+The Veronese manifold is a special case of the [`Segre`](@ref) manifold: the Veronese case 
 uses one spherical factor repeated ``D`` times, whereas the Segre case uses several 
 independent spherical factors, each with exponent one. See
 [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite) for the general
