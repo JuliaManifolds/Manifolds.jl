@@ -21,7 +21,7 @@ path = ".."
 
 [compat]
 BoundaryValueDiffEq = "4, 5"
-CSV = "0.10"
+CSV = "0.10, 1.0"
 CairoMakie = "0.15"
 DataFrames = "1"
 DiffEqCallbacks = "4"
