@@ -81,10 +81,9 @@ g_{(\lambda,x)}\bigl((\nu,u),(\xi,v)\bigr)
 Thus the spherical directions are scaled by ``\sqrt{D}|\lambda|`` relative to
 the radial direction.
 
-The Veronese manifold is a special case of the Segre--Veronese family. It is
-not the same manifold as [`Segre`](@ref): the Veronese case uses one spherical
-factor repeated ``D`` times, whereas the Segre case uses several independent
-spherical factors, each with exponent one. See
+The Veronese manifold is a special case of the Segre manifold: the Veronese case 
+uses one spherical factor repeated ``D`` times, whereas the Segre case uses several 
+independent spherical factors, each with exponent one. See
 [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite) for the general
 Segre--Veronese geometry.
 
@@ -408,8 +407,7 @@ end
     embed!(M::Veronese, Y, p, X)
 
 Embed the tangent vector ``X\simeq(\nu,u)`` at
-``p\simeq(\lambda,x)`` by applying the differential of the Veronese
-parametrization,
+``p\simeq(\lambda,x)`` by applying the differential of the Veronese parametrization,
 
 ````math
 D\Phi_{(\lambda,x)}(\nu,u)
