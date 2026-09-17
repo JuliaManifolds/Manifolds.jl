@@ -51,8 +51,8 @@ Hence, for even ``D`` the sign of ``\lambda`` is intrinsic and
 ``\mathcal V_{N,D}`` has two connected components, while for odd ``D`` the sign
 can be absorbed by replacing ``x`` by ``-x`` and the manifold is connected.
 
-A point is stored in two components, with `p[1] = [λ]` and `p[2] = x`. A tangent
-vector is stored analogously, with `X[1] = [ν]` and `X[2] = u`, where
+A point is stored as the tuple `p = ([λ], x)`. A tangent vector is stored
+analogously as `X = ([ν], u)`, where
 
 ````math
 u\in T_x\mathbb S^{N-1}=x^\perp.
@@ -109,19 +109,19 @@ end
 
 function ManifoldsBase.allocate_result(M::Veronese, ::typeof(rand))
     n, _ = get_parameter(M.size)
-    return [zeros(1), zeros(n)]
+    return (zeros(1), zeros(n))
 end
 
 function ManifoldsBase.allocate_result(M::Veronese, ::typeof(zero_vector), p)
     n, _ = get_parameter(M.size)
     T = number_eltype(p)
-    return [zeros(T, 1), zeros(T, n)]
+    return (zeros(T, 1), zeros(T, n))
 end
 
 function ManifoldsBase.allocate_result_embedding(
         ::Veronese, ::typeof(project), A, p,
     )
-    return [similar(p[1]), similar(p[2])]
+    return (similar(p[1]), similar(p[2]))
 end
 
 function copyto!(::Veronese, q, p)
@@ -136,11 +136,14 @@ function copyto!(::Veronese, Y, p, X)
     return Y
 end
 
-function _isapprox(M::Veronese, p, q; kwargs...)
+function _isapprox(
+        M::Veronese, p, q; atol = sqrt(max_eps(p[1], p[2], q[1], q[2])), kwargs...,
+    )
     if is_point(M, p) && is_point(M, q)
-        return isapprox(distance(M, p, q), 0; kwargs...)
+        return isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
     end
-    return isapprox(p, q; kwargs...)
+    return length(p) == length(q) &&
+           all(isapprox(pi, qi; atol = atol, kwargs...) for (pi, qi) in zip(p, q))
 end
 
 @doc raw"""
@@ -166,14 +169,14 @@ end
     check_size(M::Veronese, p)
     check_size(M::Veronese, p, X)
 
-Check that a point `p` and, optionally, a tangent vector `X` have two nested
-components of sizes `(1,)` and `(N,)`, corresponding respectively to the radial
-and spherical parts.
+Check that a point `p` and, optionally, a tangent vector `X` use a two-component
+tuple representation with component sizes `(1,)` and `(N,)`, corresponding
+respectively to the radial and spherical parts.
 """
 function check_size(M::Veronese, p)
     p_size = only.(size.(p))
     n, _ = get_parameter(M.size)
-    M_size = [1, n]
+    M_size = (1, n)
 
     if p_size != M_size
         return DomainError(
@@ -188,7 +191,7 @@ function check_size(M::Veronese, p, X)
     p_size = only.(size.(p))
     X_size = only.(size.(X))
     n, _ = get_parameter(M.size)
-    M_size = [1, n]
+    M_size = (1, n)
 
     if p_size != M_size
         return DomainError(
