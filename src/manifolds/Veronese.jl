@@ -107,7 +107,7 @@ function Veronese(n::Int, d::Int; parameter::Symbol = :type)
     return Veronese{typeof(size)}(size)
 end
 
-function allocate_coordinates(::Veronese, p, T, n::Int)
+function allocate_coordinates(::Veronese, p::Tuple, T, n::Int)
     return zeros(T, n)
 end
 
@@ -137,35 +137,6 @@ function ManifoldsBase.allocate_result_embedding(
         ::Veronese, ::typeof(project), A, p,
     )
     return (similar(p[1]), similar(p[2]))
-end
-
-function copyto!(::Veronese, q, p)
-    copyto!(q[1], p[1])
-    copyto!(q[2], p[2])
-    return q
-end
-
-function copyto!(::Veronese, Y, p, X)
-    copyto!(Y[1], X[1])
-    copyto!(Y[2], X[2])
-    return Y
-end
-
-function _isapprox(
-        M::Veronese, p, q; atol = sqrt(max_eps(p[1], p[2], q[1], q[2])), kwargs...,
-    )
-    if is_point(M, p) && is_point(M, q)
-        return isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
-    end
-    return length(p) == length(q) &&
-        all(isapprox(pi, qi; atol = atol, kwargs...) for (pi, qi) in zip(p, q))
-end
-
-function _isapprox(
-        ::Veronese, p, X, Y; atol = sqrt(max_eps(X[1], X[2], Y[1], Y[2])), kwargs...,
-    )
-    return length(X) == length(Y) &&
-        all(isapprox(Xi, Yi; atol = atol, kwargs...) for (Xi, Yi) in zip(X, Y))
 end
 
 @doc raw"""
@@ -341,6 +312,18 @@ function connected_by_geodesic(M::Veronese, p, q)
     return sqrt(d) * distance(sphere, p[2], q_closest[2]) < pi
 end
 
+function copyto!(::Veronese, q, p)
+    copyto!(q[1], p[1])
+    copyto!(q[2], p[2])
+    return q
+end
+
+function copyto!(::Veronese, Y, p, X)
+    copyto!(Y[1], X[1])
+    copyto!(Y[2], X[2])
+    return Y
+end
+
 @doc raw"""
     distance(M::Veronese, p, q)
 
@@ -469,6 +452,145 @@ function embed!(M::Veronese, Y, p, X)
 end
 
 @doc raw"""
+    get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
+
+Return the coordinates of ``X\simeq(\nu,u)`` in the
+[`DefaultOrthonormalBasis`](@ref) of ``T_p\mathcal V_{N,D}``. Write
+``p\simeq(\lambda,x)`` and let ``c_{\mathbb S}(u)`` denote the default
+orthonormal coordinates of ``u`` in ``T_x\mathbb S^{N-1}``, as returned by
+[`get_coordinates`](@ref) on [`Sphere`](@ref). Then
+
+````math
+c
+=
+\begin{bmatrix}
+    \nu \\
+    \sqrt D\,|\lambda|\,c_{\mathbb S}(u)
+\end{bmatrix}.
+````
+
+The factor ``\sqrt D\,|\lambda|`` converts an orthonormal sphere basis into an
+orthonormal basis for the scaled spherical part of the Veronese metric
+``g_p=\mathrm d\lambda^2+D\lambda^2g_{\mathbb S}``.
+"""
+get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
+
+function get_coordinates_orthonormal!(
+        M::Veronese, c, p, X, ::RealNumbers; kwargs...,
+    )
+    n, d = get_parameter(M.size)
+    sphere = Sphere(n - 1; parameter = get_parameter_type(M))
+    c[1] = X[1][1]
+    get_coordinates_orthonormal!(sphere, view(c, 2:n), p[2], X[2], ℝ; kwargs...)
+    c[2:n] .*= sqrt(d * one(p[1][1])) * abs(p[1][1])
+    return c
+end
+
+@doc raw"""
+    get_embedding(M::Veronese)
+
+Return the Euclidean ambient space containing [`Veronese`](@ref), represented
+as ``\mathbb R^{N^D}``. Although points of the manifold are symmetric tensors,
+the current embedding uses all ``N^D`` tensor coordinates rather than a
+symmetry-compressed basis.
+"""
+function get_embedding(M::Veronese)
+    n, d = get_parameter(M.size)
+    return Euclidean(n^d; parameter = get_parameter_type(M))
+end
+
+get_parameter_type(::Veronese{<:TypeParameter}) = :type
+get_parameter_type(::Veronese{Tuple{Int, Int}}) = :field
+
+@doc raw"""
+    get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
+
+Return the tangent vector whose coordinates in the
+[`DefaultOrthonormalBasis`](@ref) of ``T_p\mathcal V_{N,D}`` are `c`. This is
+the inverse of [`get_coordinates`](@ref): the first coordinate is the radial
+component, while the remaining sphere coordinates are divided by
+``\sqrt D\,|\lambda|`` before being converted back to a tangent vector on
+[`Sphere`](@ref).
+"""
+get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
+
+function get_vector_orthonormal!(
+        M::Veronese, X, p, c, ::RealNumbers; kwargs...,
+    )
+    n, d = get_parameter(M.size)
+    sphere = Sphere(n - 1; parameter = get_parameter_type(M))
+    X[1][1] = c[1]
+    get_vector_orthonormal!(sphere, X[2], p[2], view(c, 2:n), ℝ; kwargs...)
+    X[2] ./= sqrt(d * one(p[1][1])) * abs(p[1][1])
+    return X
+end
+
+@doc raw"""
+    inner(M::Veronese, p, X, Y)
+
+Compute the Riemannian inner product induced by the Euclidean metric of the
+full tensor embedding. For
+
+````math
+p\simeq(\lambda,x),
+\qquad
+X\simeq(\nu,u),
+\qquad
+Y\simeq(\xi,v),
+````
+
+with ``u,v\in x^\perp``, the differential of the embedding gives
+
+````math
+g_p(X,Y)
+=
+\left\langle D\Phi_p[X],D\Phi_p[Y]\right\rangle
+=
+\nu\xi+D\lambda^2\langle u,v\rangle.
+````
+
+The mixed radial--spherical terms vanish because ``u,v\perp x``, while the
+``D`` equal spherical contributions produce the factor ``D``.
+"""
+function inner(M::Veronese, p, X, Y)
+    _, d = get_parameter(M.size)
+    return X[1][1] * Y[1][1] + d * p[1][1]^2 * dot(X[2], Y[2])
+end
+
+function _isapprox(
+        M::Veronese, p, q; atol = sqrt(max_eps(p[1], p[2], q[1], q[2])), kwargs...,
+    )
+    if is_point(M, p) && is_point(M, q)
+        return isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
+    end
+    return length(p) == length(q) &&
+        all(isapprox(pi, qi; atol = atol, kwargs...) for (pi, qi) in zip(p, q))
+end
+
+function _isapprox(
+        ::Veronese, p, X, Y; atol = sqrt(max_eps(X[1], X[2], Y[1], Y[2])), kwargs...,
+    )
+    return length(X) == length(Y) &&
+        all(isapprox(Xi, Yi; atol = atol, kwargs...) for (Xi, Yi) in zip(X, Y))
+end
+
+@doc raw"""
+    manifold_dimension(M::Veronese)
+
+Return the manifold dimension ``N`` of [`Veronese`](@ref). Indeed, the
+parameter space has one radial degree of freedom and ``N-1`` spherical degrees
+of freedom, hence
+
+````math
+\dim\mathcal V_{N,D}=1+(N-1)=N.
+````
+
+The finite two-to-one identification of representatives does not change this
+dimension.
+"""
+manifold_dimension(M::Veronese) = get_parameter(M.size)[1]
+
+@doc raw"""
     project(M::Veronese, p, A)
     project!(M::Veronese, Y, p, A)
 
@@ -546,128 +668,6 @@ function project!(M::Veronese, Y, p, A)
 end
 
 @doc raw"""
-    get_embedding(M::Veronese)
-
-Return the Euclidean ambient space containing [`Veronese`](@ref), represented
-as ``\mathbb R^{N^D}``. Although points of the manifold are symmetric tensors,
-the current embedding uses all ``N^D`` tensor coordinates rather than a
-symmetry-compressed basis.
-"""
-function get_embedding(M::Veronese)
-    n, d = get_parameter(M.size)
-    return Euclidean(n^d; parameter = get_parameter_type(M))
-end
-
-get_parameter_type(::Veronese{<:TypeParameter}) = :type
-get_parameter_type(::Veronese{Tuple{Int, Int}}) = :field
-
-@doc raw"""
-    inner(M::Veronese, p, X, Y)
-
-Compute the Riemannian inner product induced by the Euclidean metric of the
-full tensor embedding. For
-
-````math
-p\simeq(\lambda,x),
-\qquad
-X\simeq(\nu,u),
-\qquad
-Y\simeq(\xi,v),
-````
-
-with ``u,v\in x^\perp``, the differential of the embedding gives
-
-````math
-g_p(X,Y)
-=
-\left\langle D\Phi_p[X],D\Phi_p[Y]\right\rangle
-=
-\nu\xi+D\lambda^2\langle u,v\rangle.
-````
-
-The mixed radial--spherical terms vanish because ``u,v\perp x``, while the
-``D`` equal spherical contributions produce the factor ``D``.
-"""
-function inner(M::Veronese, p, X, Y)
-    _, d = get_parameter(M.size)
-    return X[1][1] * Y[1][1] + d * p[1][1]^2 * dot(X[2], Y[2])
-end
-
-@doc raw"""
-    get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
-
-Return the coordinates of ``X\simeq(\nu,u)`` in the
-[`DefaultOrthonormalBasis`](@ref) of ``T_p\mathcal V_{N,D}``. Write
-``p\simeq(\lambda,x)`` and let ``c_{\mathbb S}(u)`` denote the default
-orthonormal coordinates of ``u`` in ``T_x\mathbb S^{N-1}``, as returned by
-[`get_coordinates`](@ref) on [`Sphere`](@ref). Then
-
-````math
-c
-=
-\begin{bmatrix}
-    \nu \\
-    \sqrt D\,|\lambda|\,c_{\mathbb S}(u)
-\end{bmatrix}.
-````
-
-The factor ``\sqrt D\,|\lambda|`` converts an orthonormal sphere basis into an
-orthonormal basis for the scaled spherical part of the Veronese metric
-``g_p=\mathrm d\lambda^2+D\lambda^2g_{\mathbb S}``.
-"""
-get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
-
-function get_coordinates_orthonormal!(
-        M::Veronese, c, p, X, ::RealNumbers; kwargs...,
-    )
-    n, d = get_parameter(M.size)
-    sphere = Sphere(n - 1; parameter = get_parameter_type(M))
-    c[1] = X[1][1]
-    get_coordinates_orthonormal!(sphere, view(c, 2:n), p[2], X[2], ℝ; kwargs...)
-    c[2:n] .*= sqrt(d * one(p[1][1])) * abs(p[1][1])
-    return c
-end
-
-@doc raw"""
-    get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
-
-Return the tangent vector whose coordinates in the
-[`DefaultOrthonormalBasis`](@ref) of ``T_p\mathcal V_{N,D}`` are `c`. This is
-the inverse of [`get_coordinates`](@ref): the first coordinate is the radial
-component, while the remaining sphere coordinates are divided by
-``\sqrt D\,|\lambda|`` before being converted back to a tangent vector on
-[`Sphere`](@ref).
-"""
-get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
-
-function get_vector_orthonormal!(
-        M::Veronese, X, p, c, ::RealNumbers; kwargs...,
-    )
-    n, d = get_parameter(M.size)
-    sphere = Sphere(n - 1; parameter = get_parameter_type(M))
-    X[1][1] = c[1]
-    get_vector_orthonormal!(sphere, X[2], p[2], view(c, 2:n), ℝ; kwargs...)
-    X[2] ./= sqrt(d * one(p[1][1])) * abs(p[1][1])
-    return X
-end
-
-@doc raw"""
-    manifold_dimension(M::Veronese)
-
-Return the manifold dimension ``N`` of [`Veronese`](@ref). Indeed, the
-parameter space has one radial degree of freedom and ``N-1`` spherical degrees
-of freedom, hence
-
-````math
-\dim\mathcal V_{N,D}=1+(N-1)=N.
-````
-
-The finite two-to-one identification of representatives does not change this
-dimension.
-"""
-manifold_dimension(M::Veronese) = get_parameter(M.size)[1]
-
-@doc raw"""
     Random.rand(M::Veronese; vector_at=nothing, σ=1)
 
 Generate a random point on [`Veronese`](@ref) `M`. If `vector_at` is provided,
@@ -693,6 +693,12 @@ function Random.rand!(
     return pX
 end
 
+function Base.show(io::IO, M::Veronese)
+    n, d = get_parameter(M.size)
+    parameter = get_parameter_type(M) === :field ? "; parameter=:field" : ""
+    return print(io, "Veronese($n, $d$parameter)")
+end
+
 @doc raw"""
     zero_vector!(M::Veronese, X, p)
 
@@ -702,10 +708,4 @@ function zero_vector!(::Veronese, X, p)
     fill!(X[1], zero(eltype(X[1])))
     fill!(X[2], zero(eltype(X[2])))
     return X
-end
-
-function Base.show(io::IO, M::Veronese)
-    n, d = get_parameter(M.size)
-    parameter = get_parameter_type(M) === :field ? "; parameter=:field" : ""
-    return print(io, "Veronese($n, $d$parameter)")
 end
