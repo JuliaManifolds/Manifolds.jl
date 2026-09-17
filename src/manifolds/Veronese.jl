@@ -107,6 +107,10 @@ function Veronese(n::Int, d::Int; parameter::Symbol = :type)
     return Veronese{typeof(size)}(size)
 end
 
+function allocate_coordinates(::Veronese, p, T, n::Int)
+    return zeros(T, n)
+end
+
 function ManifoldsBase.allocate_result(M::Veronese, ::typeof(rand))
     n, _ = get_parameter(M.size)
     return (zeros(1), zeros(n))
@@ -116,6 +120,17 @@ function ManifoldsBase.allocate_result(M::Veronese, ::typeof(zero_vector), p)
     n, _ = get_parameter(M.size)
     T = number_eltype(p)
     return (zeros(T, 1), zeros(T, n))
+end
+
+function ManifoldsBase.allocate_result_embedding(M::Veronese, ::typeof(embed), p)
+    n, d = get_parameter(M.size)
+    return zeros(number_eltype(p), n^d)
+end
+
+function ManifoldsBase.allocate_result_embedding(M::Veronese, ::typeof(embed), X, p)
+    n, d = get_parameter(M.size)
+    T = promote_type(number_eltype(p), number_eltype(X))
+    return zeros(T, n^d)
 end
 
 function ManifoldsBase.allocate_result_embedding(
@@ -144,6 +159,13 @@ function _isapprox(
     end
     return length(p) == length(q) &&
         all(isapprox(pi, qi; atol = atol, kwargs...) for (pi, qi) in zip(p, q))
+end
+
+function _isapprox(
+        ::Veronese, p, X, Y; atol = sqrt(max_eps(X[1], X[2], Y[1], Y[2])), kwargs...,
+    )
+    return length(X) == length(Y) &&
+        all(isapprox(Xi, Yi; atol = atol, kwargs...) for (Xi, Yi) in zip(X, Y))
 end
 
 @doc raw"""
