@@ -143,7 +143,7 @@ function _isapprox(
         return isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
     end
     return length(p) == length(q) &&
-           all(isapprox(pi, qi; atol = atol, kwargs...) for (pi, qi) in zip(p, q))
+        all(isapprox(pi, qi; atol = atol, kwargs...) for (pi, qi) in zip(p, q))
 end
 
 @doc raw"""
