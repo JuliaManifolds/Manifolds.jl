@@ -352,6 +352,14 @@ function copyto!(::Veronese, Y, p, X)
 end
 
 @doc raw"""
+    default_vector_transport_method(M::Veronese)
+
+Return [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`) as
+the default vector transport method on [`Veronese`](@ref).
+"""
+default_vector_transport_method(::Veronese) = ProjectionTransport()
+
+@doc raw"""
     distance(M::Veronese, p, q)
 
 Compute the intrinsic Riemannian distance between `p` and `q`.
@@ -729,6 +737,89 @@ function Base.show(io::IO, M::Veronese)
     n, d = get_parameter(M.size)
     parameter = get_parameter_type(M) === :field ? "; parameter=:field" : ""
     return print(io, "Veronese($n, $d$parameter)")
+end
+
+@doc raw"""
+    vector_transport_to(M::Veronese, p, X, q, ::ProjectionTransport)
+
+Transport a tangent vector by orthogonally projecting its ambient embedding
+onto the tangent space at the destination point.
+
+For ``M=\mathcal V_{N,D}``, let `p = ([μ], y)` and `q = ([λ], x)` be stored
+point representatives, and let `X = ([ν], u)` represent a tangent vector at
+`p`. Its ambient embedding is
+
+````math
+A
+=
+D\Phi_{(\mu,y)}(\nu,u)
+=
+\nu y^{\otimes D}
++
+\mu\sum_{j=1}^{D}
+ y^{\otimes(j-1)}\otimes u\otimes y^{\otimes(D-j)}.
+````
+
+Projection transport returns `Y = ([ξ], v)` at `q` such that
+``D\Phi_{(\lambda,x)}(\xi,v)`` is the orthogonal projection of `A` onto the
+embedded tangent space at ``\Phi(\lambda,x)``. Set
+
+````math
+a=\langle y,x\rangle,
+\qquad
+b=\langle u,x\rangle.
+````
+
+Then
+
+````math
+\xi
+=
+\nu a^D+D\mu b a^{D-1},
+````
+
+and, with the final term omitted when ``D=1``,
+
+````math
+c
+=
+D\nu a^{D-1}y
++D\mu a^{D-1}u
++D(D-1)\mu b a^{D-2}y,
+\qquad
+v=\frac{c-D\xi x}{D\lambda}.
+````
+
+The implementation evaluates these contractions directly and does not form an
+ambient vector of length ``N^D``.
+"""
+vector_transport_to(::Veronese, p, X, q, ::ProjectionTransport)
+
+function vector_transport_to_project!(M::Veronese, Y, p, X, q)
+    _, d = get_parameter(M.size)
+    λ = q[1][1]
+    x = q[2]
+    μ = p[1][1]
+    y = p[2]
+    ν = X[1][1]
+    u = X[2]
+
+    yx = dot(y, x)
+    ux = dot(u, x)
+    yx_dm1 = yx^(d - 1)
+
+    ξ = ν * yx^d + d * μ * ux * yx_dm1
+    Y[1][1] = ξ
+
+    y_coefficient = d * ν * yx_dm1
+    if d > 1
+        y_coefficient += d * (d - 1) * μ * ux * yx^(d - 2)
+    end
+    u_coefficient = d * μ * yx_dm1
+    Y[2] .=
+        (y_coefficient .* y .+ u_coefficient .* u .- d .* ξ .* x) ./ (d * λ)
+    Y[2] .-= dot(x, Y[2]) .* x
+    return Y
 end
 
 @doc raw"""

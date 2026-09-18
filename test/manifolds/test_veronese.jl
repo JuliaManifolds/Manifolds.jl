@@ -41,6 +41,7 @@ using LinearAlgebra, Manifolds, Random, Test
             Dict(
                 :Aliased => false,
                 :Functions => [
+                    default_vector_transport_method,
                     distance,
                     embed,
                     get_coordinates,
@@ -60,12 +61,14 @@ using LinearAlgebra, Manifolds, Random, Test
                 :Points => [p, q],
                 :Rng => Random.Xoshiro(42),
                 :SecondVector => Y,
+                :VectorTransportMethods => [ProjectionTransport()],
                 :Vectors => [X, Z],
             ),
             Dict(
                 :atol => 1.0e-12,
                 :IsPointErrors => fill(DomainError, length(invalid_points)),
                 :IsVectorErrors => fill(DomainError, length(invalid_vectors)),
+                default_vector_transport_method => ProjectionTransport(),
                 get_embedding => Euclidean(n^d; parameter),
                 manifold_dimension => n,
                 repr => "Veronese($n, $d$(parameter === :field ? "; parameter=:field" : ""))",
@@ -199,6 +202,29 @@ using LinearAlgebra, Manifolds, Random, Test
             @test X_inplace[2] ≈ X[2]
         end
 
+        @testset "Projection vector transport" begin
+            transported = vector_transport_to(M, p, X, q, ProjectionTransport())
+            transported_reference = project(M, q, embed(M, p, X))
+
+            @test transported isa Tuple
+            @test is_vector(M, q, transported)
+            @test transported[1] ≈ transported_reference[1]
+            @test transported[2] ≈ transported_reference[2]
+            @test default_vector_transport_method(M) == ProjectionTransport()
+
+            transported_inplace = (fill(NaN, 1), fill(NaN, n))
+            @test vector_transport_to!(
+                M,
+                transported_inplace,
+                p,
+                X,
+                q,
+                ProjectionTransport(),
+            ) === transported_inplace
+            @test transported_inplace[1] ≈ transported[1]
+            @test transported_inplace[2] ≈ transported[2]
+        end
+
         @testset "Embedding differential" begin
             p_embedded = embed(M, p)
             X_embedded = embed(M, p, X)
@@ -231,6 +257,7 @@ using LinearAlgebra, Manifolds, Random, Test
             P = project(M, p, A)
             c = get_coordinates(M, p, X, DefaultOrthonormalBasis())
             X_roundtrip = get_vector(M, p, c, DefaultOrthonormalBasis())
+            Y = vector_transport_to(M, p, X, rand(Random.Xoshiro(14), M))
             X_zero = zero_vector(M, p)
 
             @test X isa Tuple
@@ -241,6 +268,7 @@ using LinearAlgebra, Manifolds, Random, Test
             @test all(eltype(Pᵢ) === Float32 for Pᵢ in P)
             @test eltype(c) === Float32
             @test all(eltype(Xᵢ) === Float32 for Xᵢ in X_roundtrip)
+            @test all(eltype(Yᵢ) === Float32 for Yᵢ in Y)
             @test all(eltype(Xᵢ) === Float32 for Xᵢ in X_zero)
         end
     end
