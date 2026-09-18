@@ -222,6 +222,7 @@ makedocs(;
                 "Torus" => "manifolds/torus.md",
                 "Tucker" => "manifolds/tucker.md",
                 "Unit-norm symmetric matrices" => "manifolds/spheresymmetricmatrices.md",
+                "Veronese" => "manifolds/veronese.md",
             ],
             "Combined manifolds" => [
                 "Fiber bundle" => "manifolds/fiber_bundle.md",
