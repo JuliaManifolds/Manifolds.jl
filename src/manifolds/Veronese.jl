@@ -123,6 +123,10 @@ function allocate_coordinates(::Veronese, p::Tuple, T, n::Int)
     return zeros(T, n)
 end
 
+function ManifoldsBase.allocate_result(::Veronese, ::typeof(exp), p::Tuple, X, args...)
+    return (similar(p[1]), similar(p[2]))
+end
+
 function ManifoldsBase.allocate_result(M::Veronese, ::typeof(rand))
     n, _ = get_parameter(M.size)
     return (zeros(1), zeros(n))
@@ -490,6 +494,97 @@ function embed!(M::Veronese, Y, p, X)
 end
 
 @doc raw"""
+    exp(M::Veronese, p, X)
+    exp!(M::Veronese, q, p, X)
+
+Compute the Riemannian exponential map on [`Veronese`](@ref).
+
+For ``M=\mathcal V_{N,D}``, let `p = ([λ], x)` be the stored representative of
+the base point and let `X = ([ν], u)` represent a tangent vector at `p`. With
+
+````math
+r=|\lambda|,
+\qquad
+\dot r=\operatorname{sign}(\lambda)\nu,
+\qquad
+m=\sqrt D\,\lVert u\rVert,
+````
+
+the induced metric is the warped-cone metric
+
+````math
+g=\mathrm dr^2+D r^2g_{\mathbb S^{N-1}}.
+````
+
+Suppose ``m>0`` and define
+
+````math
+\alpha=r+\dot r,
+\qquad
+\beta=rm,
+\qquad
+\rho=\sqrt{\alpha^2+\beta^2},
+\qquad
+f=\operatorname{atan}(\beta,\alpha)\in(0,\pi).
+````
+
+Then ``\exp_p(X)`` is stored using the representative
+
+````math
+\left(
+    \operatorname{sign}(\lambda)\rho,
+    \operatorname{Exp}^{\mathbb S^{N-1}}_x\!\left(\frac{f}{m}u\right)
+\right).
+````
+
+If ``m=0`` and ``r+\dot r>0``, the exponential is the radial point represented
+by ``(\lambda+\nu,x)``. If ``m=0`` and ``r+\dot r\leq0``, the radial geodesic
+reaches or crosses the excluded zero tensor, so the exponential is undefined
+and a `DomainError` is thrown.
+
+See Proposition 3.1 of
+[JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite) for the corresponding
+warped-cone exponential formula.
+"""
+exp(::Veronese, p, X)
+
+function exp!(M::Veronese, q, p, X)
+    return exp_fused!(M, q, p, X, one(number_eltype(p)))
+end
+
+function exp_fused!(M::Veronese, q, p, X, t::Number)
+    n, d = get_parameter(M.size)
+    sphere = Sphere(n - 1; parameter = get_parameter_type(M))
+    T = number_eltype(p)
+    t_point = convert(T, t)
+
+    λ = p[1][1]
+    scale_sign = sign(λ)
+    r = abs(λ)
+    radial_endpoint = r + scale_sign * t_point * X[1][1]
+    angular_speed = sqrt(d * one(λ)) * norm(X[2])
+    m = abs(t_point) * angular_speed
+
+    if iszero(m)
+        radial_endpoint > 0 || throw(
+            DomainError(
+                t,
+                "The exponential curve reaches the zero tensor, which is not part of $M.",
+            ),
+        )
+        q[1][1] = scale_sign * radial_endpoint
+        copyto!(q[2], p[2])
+        return q
+    end
+
+    radial_angular = r * m
+    f = atan(radial_angular, radial_endpoint)
+    q[1][1] = scale_sign * hypot(radial_endpoint, radial_angular)
+    exp_fused!(sphere, q[2], p[2], X[2], t_point * f / m)
+    return q
+end
+
+@doc raw"""
     get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
 
 Let `p = ([λ], x)` be the stored representative of the point and let
@@ -612,6 +707,81 @@ function _isapprox(
     )
     return length(X) == length(Y) &&
         all(isapprox(Xi, Yi; atol = atol, kwargs...) for (Xi, Yi) in zip(X, Y))
+end
+
+@doc raw"""
+    log(M::Veronese, p, q)
+    log!(M::Veronese, X, p, q)
+
+Compute the Riemannian logarithmic map from `p` to `q` on
+[`Veronese`](@ref).
+
+For ``M=\mathcal V_{N,D}``, let `p = ([λ], x)` be the stored representative of
+the base point. The representative of `q` is first matched to `p` with
+[`closest_representative!`](@ref); write the result as ``q_*=(\mu,y)`` and set
+
+````math
+r=|\lambda|,
+\qquad
+s=|\mu|,
+\qquad
+a=d_{\mathbb S^{N-1}}(x,y),
+\qquad
+m=\sqrt D\,a.
+````
+
+The logarithm exists when the matched representatives have the same scale sign
+and ``m<\pi``. Under these conditions, `log(M, p, q)` returns the tangent
+representation `X = ([ν], u)` with
+
+````math
+\nu
+=
+\operatorname{sign}(\lambda)\bigl(s\cos m-r\bigr)
+````
+
+and, for ``a>0``,
+
+````math
+u
+=
+\frac{s}{r}
+\frac{\sin m}{\sqrt D\sin a}
+\bigl(y-\cos(a)x\bigr).
+````
+
+For ``a=0``, the continuous limit gives ``u=0``. The implementation evaluates
+the ratio of sines using `sinc` for numerical stability. If the points are not
+connected by a minimizing geodesic, a `DomainError` is thrown.
+
+See Theorem 4.4 of
+[JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite) for the corresponding
+warped-cone logarithm formula.
+"""
+log(::Veronese, p, q)
+
+function log!(M::Veronese, X, p, q)
+    q_closest = copy(M, q)
+    closest_representative!(M, q_closest, p)
+    connected_by_geodesic(M, p, q_closest) || throw(
+        DomainError(q, "The points are not connected by a geodesic on $M."),
+    )
+
+    n, d = get_parameter(M.size)
+    sphere = Sphere(n - 1; parameter = get_parameter_type(M))
+    a = distance(sphere, p[2], q_closest[2])
+    m = sqrt(d * one(a)) * a
+    r = abs(p[1][1])
+    s = abs(q_closest[1][1])
+
+    X[1][1] = sign(p[1][1]) * (s * cos(m) - r)
+    cos_a = clamp(dot(p[2], q_closest[2]), -one(r), one(r))
+    πT = oftype(m, π)
+    X[2] .=
+        (q_closest[2] .- cos_a .* p[2]) .* (s / r) .* sinc(m / πT) ./
+        sinc(a / πT)
+    X[2] .-= dot(p[2], X[2]) .* p[2]
+    return X
 end
 
 @doc raw"""
@@ -745,29 +915,29 @@ end
 Transport a tangent vector by orthogonally projecting its ambient embedding
 onto the tangent space at the destination point.
 
-For ``M=\mathcal V_{N,D}``, let `p = ([μ], y)` and `q = ([λ], x)` be stored
+For ``M=\mathcal V_{N,D}``, let `p = ([λ], x)` and `q = ([μ], y)` be stored
 point representatives, and let `X = ([ν], u)` represent a tangent vector at
 `p`. Its ambient embedding is
 
 ````math
 A
 =
-D\Phi_{(\mu,y)}(\nu,u)
+D\Phi_{(\lambda,x)}(\nu,u)
 =
-\nu y^{\otimes D}
+\nu x^{\otimes D}
 +
-\mu\sum_{j=1}^{D}
- y^{\otimes(j-1)}\otimes u\otimes y^{\otimes(D-j)}.
+\lambda\sum_{j=1}^{D}
+ x^{\otimes(j-1)}\otimes u\otimes x^{\otimes(D-j)}.
 ````
 
 Projection transport returns `Y = ([ξ], v)` at `q` such that
-``D\Phi_{(\lambda,x)}(\xi,v)`` is the orthogonal projection of `A` onto the
-embedded tangent space at ``\Phi(\lambda,x)``. Set
+``D\Phi_{(\mu,y)}(\xi,v)`` is the orthogonal projection of `A` onto the
+embedded tangent space at ``\Phi(\mu,y)``. Set
 
 ````math
-a=\langle y,x\rangle,
+a=\langle x,y\rangle,
 \qquad
-b=\langle u,x\rangle.
+b=\langle u,y\rangle.
 ````
 
 Then
@@ -775,7 +945,7 @@ Then
 ````math
 \xi
 =
-\nu a^D+D\mu b a^{D-1},
+\nu a^D+D\lambda b a^{D-1},
 ````
 
 and, with the final term omitted when ``D=1``,
@@ -783,42 +953,49 @@ and, with the final term omitted when ``D=1``,
 ````math
 c
 =
-D\nu a^{D-1}y
-+D\mu a^{D-1}u
-+D(D-1)\mu b a^{D-2}y,
+D\nu a^{D-1}x
++D\lambda a^{D-1}u
++D(D-1)\lambda b a^{D-2}x,
 \qquad
-v=\frac{c-D\xi x}{D\lambda}.
+v=\frac{c-D\xi y}{D\mu}.
 ````
 
-The implementation evaluates these contractions directly and does not form an
-ambient vector of length ``N^D``.
+The implementation evaluates these contractions directly and therefore does
+not form the ambient tangent vector of length ``N^D``. It handles ``D=1``
+separately so that the vanishing final term does not evaluate ``a^{-1}``.
+Projection transport for an embedded Riemannian submanifold is described in
+Section 8.1.3 of [AbsilMahonySepulchre:2008](@cite). The formulas above
+specialize this construction to the Veronese manifold by orthogonally
+projecting the ambient tangent vector given by the Veronese differential onto
+the tangent space at the target point, using the Euclidean-induced metric
+described in [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
 """
 vector_transport_to(::Veronese, p, X, q, ::ProjectionTransport)
 
 function vector_transport_to_project!(M::Veronese, Y, p, X, q)
     _, d = get_parameter(M.size)
-    λ = q[1][1]
-    x = q[2]
-    μ = p[1][1]
-    y = p[2]
+    λ = p[1][1]
+    x = p[2]
+    μ = q[1][1]
+    y = q[2]
     ν = X[1][1]
     u = X[2]
 
-    yx = dot(y, x)
-    ux = dot(u, x)
-    yx_dm1 = yx^(d - 1)
+    xy = dot(x, y)
+    uy = dot(u, y)
+    xy_dm1 = xy^(d - 1)
 
-    ξ = ν * yx^d + d * μ * ux * yx_dm1
+    ξ = ν * xy^d + d * λ * uy * xy_dm1
     Y[1][1] = ξ
 
-    y_coefficient = d * ν * yx_dm1
+    x_coefficient = d * ν * xy_dm1
     if d > 1
-        y_coefficient += d * (d - 1) * μ * ux * yx^(d - 2)
+        x_coefficient += d * (d - 1) * λ * uy * xy^(d - 2)
     end
-    u_coefficient = d * μ * yx_dm1
+    u_coefficient = d * λ * xy_dm1
     Y[2] .=
-        (y_coefficient .* y .+ u_coefficient .* u .- d .* ξ .* x) ./ (d * λ)
-    Y[2] .-= dot(x, Y[2]) .* x
+        (x_coefficient .* x .+ u_coefficient .* u .- d .* ξ .* y) ./ (d * μ)
+    Y[2] .-= dot(y, Y[2]) .* y
     return Y
 end
 

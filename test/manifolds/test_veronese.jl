@@ -41,6 +41,8 @@ using LinearAlgebra, Manifolds, Random, Test
             Dict(
                 :Aliased => false,
                 :Functions => [
+                    default_inverse_retraction_method,
+                    default_retraction_method,
                     default_vector_transport_method,
                     distance,
                     embed,
@@ -50,15 +52,18 @@ using LinearAlgebra, Manifolds, Random, Test
                     inner,
                     is_point,
                     is_vector,
+                    log,
                     manifold_dimension,
                     rand,
                     repr,
                 ],
                 :Bases => [DefaultOrthonormalBasis()],
                 :Coordinates => [[0.2; zeros(n - 1)]],
+                :InverseRetractionMethods => [LogarithmicInverseRetraction()],
                 :InvalidPoints => invalid_points,
                 :InvalidVectors => invalid_vectors,
                 :Points => [p, q],
+                :RetractionMethods => [ExponentialRetraction()],
                 :Rng => Random.Xoshiro(42),
                 :SecondVector => Y,
                 :VectorTransportMethods => [ProjectionTransport()],
@@ -68,6 +73,8 @@ using LinearAlgebra, Manifolds, Random, Test
                 :atol => 1.0e-12,
                 :IsPointErrors => fill(DomainError, length(invalid_points)),
                 :IsVectorErrors => fill(DomainError, length(invalid_vectors)),
+                default_inverse_retraction_method => LogarithmicInverseRetraction(),
+                default_retraction_method => ExponentialRetraction(),
                 default_vector_transport_method => ProjectionTransport(),
                 get_embedding => Euclidean(n^d; parameter),
                 manifold_dimension => n,
@@ -156,12 +163,42 @@ using LinearAlgebra, Manifolds, Random, Test
             @test Manifolds.closest_representative!(M, q_closest, p) === q_closest
             @test embed(M, q_closest) ≈ embed(M, q)
             @test connected_by_geodesic(M, p, q)
+
+            X_log = log(M, p, q)
+            q_recovered = exp(M, p, X_log)
+            @test q_recovered isa Tuple
+            @test q_recovered[1] ≈ q_closest[1]
+            @test q_recovered[2] ≈ q_closest[2]
+            q_inplace = copy(M, p)
+            @test exp!(M, q_inplace, p, X_log) === q_inplace
+            @test isapprox(M, q_inplace, q_recovered)
+            q_aliased = copy(M, p)
+            @test exp!(M, q_aliased, q_aliased, X_log) === q_aliased
+            @test isapprox(M, q_aliased, q_recovered)
+            p_equivalent = ([(-1)^d * p[1][1]], -p[2])
+            X_log_equivalent = ([(-1)^d * X_log[1][1]], -X_log[2])
+            @test embed(M, exp(M, p_equivalent, X_log_equivalent)) ≈
+                embed(M, q_recovered)
+            @test norm(M, p, X_log) ≈ distance(M, p, q)
             @test distance(M, p, q) ≈ distance(M, q, p)
             @test q == q_original
 
-            p_equivalent = ([(-1)^d * p[1][1]], -p[2])
+            q_at_zero = Manifolds.exp_fused(M, p, X, 0.0)
+            @test q_at_zero[1] ≈ p[1]
+            @test q_at_zero[2] ≈ p[2]
+            t = 0.25
+            q_fused = Manifolds.exp_fused(M, p, X, t)
+            tX = (t .* X[1], t .* X[2])
+            @test isapprox(M, q_fused, exp(M, p, tX))
+            q_fused_inplace = copy(M, p)
+            @test Manifolds.exp_fused!(M, q_fused_inplace, p, X, t) === q_fused_inplace
+            @test isapprox(M, q_fused_inplace, q_fused)
+            @test isapprox(M, Manifolds.retract_fused(M, p, X, t), q_fused)
+            @test isapprox(M, p, inverse_retract(M, p, q), X_log)
+
             @test connected_by_geodesic(M, p, p_equivalent)
             @test distance(M, p, p_equivalent) ≈ 0
+            @test norm(M, p, log(M, p, p_equivalent)) ≈ 0 atol = 1.0e-12
             @test isapprox(M, p, p_equivalent)
 
             p_near = ([p[1][1] + 1.0e-10], copy(p[2]))
@@ -175,7 +212,15 @@ using LinearAlgebra, Manifolds, Random, Test
                 q_disconnected = ([-p[1][1]], q[2])
                 @test !connected_by_geodesic(M, p, q_disconnected)
                 @test isinf(distance(M, p, q_disconnected))
+                @test_throws DomainError log(M, p, q_disconnected)
             end
+            radial_to_zero = ([-p[1][1]], zeros(n))
+            @test_throws DomainError exp(M, p, radial_to_zero)
+
+            t_derivative = 1.0e-7
+            q_t = Manifolds.exp_fused(M, p, X, t_derivative)
+            embedded_derivative = (embed(M, q_t) - embed(M, p)) ./ t_derivative
+            @test embedded_derivative ≈ embed(M, p, X) rtol = 1.0e-6 atol = 1.0e-7
         end
 
         @testset "Orthonormal coordinates" begin
@@ -223,6 +268,12 @@ using LinearAlgebra, Manifolds, Random, Test
             ) === transported_inplace
             @test transported_inplace[1] ≈ transported[1]
             @test transported_inplace[2] ≈ transported[2]
+
+            q_equivalent = ([(-1)^d * q[1][1]], -q[2])
+            transported_equivalent =
+                vector_transport_to(M, p, X, q_equivalent, ProjectionTransport())
+            @test embed(M, q_equivalent, transported_equivalent) ≈
+                embed(M, q, transported)
         end
 
         @testset "Embedding differential" begin
@@ -245,6 +296,7 @@ using LinearAlgebra, Manifolds, Random, Test
 
         @test !connected_by_geodesic(M, p, q)
         @test distance(M, p, q) ≈ 2.0
+        @test_throws DomainError log(M, p, q)
     end
 
     @testset "Float32 rand" begin
@@ -257,8 +309,12 @@ using LinearAlgebra, Manifolds, Random, Test
             P = project(M, p, A)
             c = get_coordinates(M, p, X, DefaultOrthonormalBasis())
             X_roundtrip = get_vector(M, p, c, DefaultOrthonormalBasis())
-            Y = vector_transport_to(M, p, X, rand(Random.Xoshiro(14), M))
+            q = (Float32[-0.8], normalize(Float32[-1, 1, 2]))
+            Y = vector_transport_to(M, p, X, q)
             X_zero = zero_vector(M, p)
+            X_log = log(M, p, q)
+            q_exp = exp(M, p, X_log)
+            q_fused = Manifolds.exp_fused(M, p, X, 0.25)
 
             @test X isa Tuple
             @test P isa Tuple
@@ -270,6 +326,11 @@ using LinearAlgebra, Manifolds, Random, Test
             @test all(eltype(Xᵢ) === Float32 for Xᵢ in X_roundtrip)
             @test all(eltype(Yᵢ) === Float32 for Yᵢ in Y)
             @test all(eltype(Xᵢ) === Float32 for Xᵢ in X_zero)
+            @test all(eltype(Xᵢ) === Float32 for Xᵢ in X_log)
+            @test all(eltype(qᵢ) === Float32 for qᵢ in q_exp)
+            @test all(eltype(qᵢ) === Float32 for qᵢ in q_fused)
+            @test q_exp[1] ≈ q[1]
+            @test q_exp[2] ≈ q[2]
         end
     end
 end
