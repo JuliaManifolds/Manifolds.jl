@@ -49,7 +49,9 @@ is two-to-one. Every embedded tensor has the two representatives
 
 Hence, for even ``D`` the sign of ``\lambda`` is intrinsic and
 ``\mathcal V_{N,D}`` has two connected components, while for odd ``D`` the sign
-can be absorbed by replacing ``x`` by ``-x`` and the manifold is connected.
+can be absorbed by replacing ``x`` by ``-x`` and the manifold is connected
+when ``N≥2``. For ``N=1``, the manifold is ``ℝ\setminus\{0\}`` for every
+``D`` and has two connected components.
 
 An instance `M = Veronese(N, D)` represents the manifold
 ``\mathcal V_{N,D}``. In the implementation, a manifold point is stored by
@@ -279,6 +281,7 @@ The tensor represented by `q` has exactly the two parameter representatives
 For even ``D``, changing representative leaves ``\mu`` unchanged, so the
 representative with the smaller spherical distance to ``x`` is chosen; this is
 equivalent to choosing the sign of ``y`` so that ``\langle x,y\rangle\geq0``.
+If the inner product is zero, the supplied representative is retained.
 For odd ``D``, changing representative also flips ``\mu``. The representative
 whose scale has the same sign as ``\lambda`` is chosen, so that `p` and the
 chosen representative of `q` lie on the same nonzero radial sheet.
@@ -330,7 +333,8 @@ and only if the representatives lie in the same connected component and
 \sqrt D\,d_{\mathbb S}(x,y)<\pi.
 ````
 
-At or beyond the threshold ``\pi``, the intrinsic distance is approached by
+For ``N≥2`` and points in the same connected component, at or beyond the
+threshold ``\pi``, the intrinsic distance is approached by
 curves that pass arbitrarily close to the excluded zero tensor, but the
 infimum is not attained by a minimizing geodesic inside the manifold.
 """
@@ -386,7 +390,7 @@ r=|\lambda|,
 \qquad
 s=|\mu|,
 \qquad
-\theta=d_{\mathbb S}(x,y),
+\theta=\arccos\langle x,y\rangle,
 \qquad
 m=\min\bigl(\sqrt D\,\theta,\pi\bigr).
 ````
@@ -401,12 +405,14 @@ d(p,q)
 \sqrt{(r-s)^2+4rs\sin^2(m/2)}.
 ````
 
-When ``\sqrt D\,\theta<\pi``, this distance is realized by a minimizing
+For points in the same connected component, when ``\sqrt D\,\theta<\pi``,
+this distance is realized by a minimizing
 geodesic. When ``\sqrt D\,\theta\geq\pi``, the formula reduces to ``r+s``;
 this is the infimum of curve lengths obtained by approaching the excluded zero
 tensor and is not attained by a minimizing geodesic. Points in different
-connected components have infinite distance; this can occur only for even
-``D``.
+connected components have infinite distance. For ``N≥2``, this can occur
+only for even ``D``; for ``N=1``, the two components are the positive and
+negative nonzero tensors for every ``D``.
 """
 function distance(M::Veronese, p, q)
     q_closest = copy(M, q)
@@ -528,7 +534,18 @@ Suppose ``m>0`` and define
 f=\operatorname{atan}(\beta,\alpha)\in(0,\pi).
 ````
 
-Then ``\exp_p(X)`` is stored using the representative
+Here ``\operatorname{atan}(\beta,\alpha)`` is the two-argument arctangent,
+which determines the angle from both coordinates. The unit-sphere exponential
+for ``w\perp x`` is
+
+````math
+\operatorname{Exp}^{\mathbb S^{N-1}}_x(w)
+=\cos(\lVert w\rVert)x
++\frac{\sin(\lVert w\rVert)}{\lVert w\rVert}w,
+````
+
+With value ``x`` at ``w=0``, the exponential ``\exp_p(X)`` is stored using
+the representative
 
 ````math
 \left(
@@ -552,6 +569,15 @@ function exp!(M::Veronese, q, p, X)
     return exp_fused!(M, q, p, X, one(number_eltype(p)))
 end
 
+@doc raw"""
+    exp_fused!(M::Veronese, q, p, X, t::Number)
+
+Store ``\exp_p(tX)`` in `q`, where `p = ([λ], x)` and `X = ([ν], u)`.
+This is the exponential formula in [`exp`](@ref) with tangent components
+``(tν,tu)``. The time ``t`` may be negative. For a radial tangent (``u=0``),
+the domain condition is ``|λ|+\operatorname{sign}(λ)tν>0``; otherwise the
+curve reaches the excluded zero tensor and a `DomainError` is thrown.
+"""
 function exp_fused!(M::Veronese, q, p, X, t::Number)
     n, d = get_parameter(M.size)
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
@@ -725,13 +751,13 @@ r=|\lambda|,
 \qquad
 s=|\mu|,
 \qquad
-a=d_{\mathbb S^{N-1}}(x,y),
+a=\arccos\langle x,y\rangle,
 \qquad
 m=\sqrt D\,a.
 ````
 
-The logarithm exists when the matched representatives have the same scale sign
-and ``m<\pi``. Under these conditions, `log(M, p, q)` returns the tangent
+A minimizing logarithm exists when the matched representatives have the same
+scale sign and ``m<\pi``. Under these conditions, `log(M, p, q)` returns the tangent
 representation `X = ([ν], u)` with
 
 ````math
@@ -749,6 +775,12 @@ u
 \frac{\sin m}{\sqrt D\sin a}
 \bigl(y-\cos(a)x\bigr).
 ````
+
+The minimizing logarithm need not be unique. For ``D=2`` and
+``\langle x,y\rangle=0``, both ``y`` and ``-y`` are equally close matched
+representatives and yield distinct minimizing tangent vectors. The matching
+rule keeps the supplied representative at this tie, so this method returns
+one of these logarithms.
 
 For ``a=0``, the continuous limit gives ``u=0``. The implementation evaluates
 the ratio of sines using `sinc` for numerical stability. If the points are not
@@ -882,7 +914,21 @@ end
 
 Generate a random point on [`Veronese`](@ref) `M`, stored as `p = ([λ], x)`. If
 `vector_at` is provided, generate a random tangent vector there, stored as
-`X = ([ν], u)`. The optional `σ` scales random tangent vectors.
+`X = ([ν], u)`. For a random point, draw ``λ`` from a standard normal
+distribution (replacing an exactly zero draw by one) and independently draw
+``x`` uniformly on the unit sphere by normalizing a standard Gaussian vector.
+The keyword `σ` does not affect random points.
+
+At `vector_at = ([λ], x)`, independently draw a scalar ``z`` and a vector
+``g∈ℝ^N`` with independent standard normal entries, and return
+
+````math
+ν=σz,\qquad u=σ(I-xx^\top)g.
+````
+
+Thus `σ` scales both stored tangent components. Their sampling is isotropic
+in the unscaled product metric; the Veronese metric weights the spherical
+component by ``Dλ^2``.
 """
 Random.rand(M::Veronese; vector_at = nothing, σ::Real = 1)
 
