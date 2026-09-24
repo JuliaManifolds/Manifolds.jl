@@ -224,6 +224,8 @@ function get_basis_diagonalizing(
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
+get_chart_index(::Euclidean, ::RetractionAtlas, i, a) = i + a
+
 function get_coordinates_orthonormal(::Euclidean{ℝ}, p, X, ::RealNumbers)
     return vec(X)
 end
