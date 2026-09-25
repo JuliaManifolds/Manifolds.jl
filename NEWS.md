@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `PowerAtlas` and `ProductAtlas` for `PowerManifold` and `ProductManifold`, respectively, with induced-basis support.
 * `ParametricSurface` manifold for handling parametric surfaces (with or without boundaries and corners) in Euclidean space with the metric induced by the embedding.
 
+### Added
+
+* The `Veronese` manifold of nonzero symmetric rank-one tensors.
+
 ### Changed
 
 * The documentation now uses [DocumenterCodeBlocks.jl](https://github.com/fredrikekre/DocumenterCodeBlocks.jl)

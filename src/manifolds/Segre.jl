@@ -17,7 +17,7 @@ When ``𝔽 = ℝ``, the Segre manifold is a normal Riemannian covering of
 
 equipped with a [warped product metric](https://en.wikipedia.org/wiki/Warped_product). The tuple ``(n_1, \dots, n_d)`` is called the _valence_ of the manifold.
 
-The geometry of the Segre manifold is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite). It is named after [Corrado Segre](https://en.wikipedia.org/wiki/Corrado_Segre)(1863–1924).
+The geometry of the Segre manifold is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite). It is named after [Corrado Segre](https://en.wikipedia.org/wiki/Corrado_Segre)(1863–1924).
 
 # Constructor
     Segre(n::Int...; field::AbstractNumbers=ℝ)
@@ -368,7 +368,7 @@ where
 
 If ``m = 0`` and ``-λ < ν``, then ``\operatorname{exp}_p(v) = p + X``.
 
-The formula is derived in proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
+The formula is derived in proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
 """
 exp(M::Segre{ℝ, V}, p, X) where {V}
 
@@ -501,7 +501,7 @@ and assume ``(μ, y_1, …, y_d)`` is the representative of ``q`` that minimizes
     \right).
 ````
 
-The formula is derived in theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
+The formula is derived in theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
 """
 log(M::Segre{ℝ, V}, p, q) where {V}
 

@@ -501,6 +501,7 @@ include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Tucker.jl")
+include("manifolds/Veronese.jl")
 #
 include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/ProbabilitySimplexEuclideanMetric.jl")
@@ -679,7 +680,8 @@ export Euclidean,
     SymplecticElement,
     Torus,
     Tucker,
-    UnitaryMatrices
+    UnitaryMatrices,
+    Veronese
 # Point representation types
 export HyperboloidPoint,
     OrthogonalPoint,
