@@ -315,7 +315,7 @@ end
         p = hcat([[1.0, 0.0, 0.0] for i in 1:5]...)
         Bc = get_basis(Ms1, p, DefaultOrthonormalBasis())
         @test sprint(show, "text/plain", Bc) == """
-            DefaultOrthonormalBasis(ℝ) for a power manifold
+            DefaultOrthonormalBasis{ℝ, TangentSpaceType} for a power manifold
             Basis for component (1,):
             $(sprint(show, "text/plain", Bc.data.bases[1]))
             Basis for component (2,):

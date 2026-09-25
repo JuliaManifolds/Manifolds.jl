@@ -296,7 +296,7 @@ function get_embedding(M::Hyperbolic{Tuple{Int}}, ::Type{<:PoincareBallPoint})
 end
 
 function ManifoldsBase.get_embedding_type(::Hyperbolic, ::Type{<:PoincareBallPoint})
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 @doc raw"""
