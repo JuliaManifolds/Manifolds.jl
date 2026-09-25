@@ -161,16 +161,37 @@ body:has(#landing) #documenter .docs-main > article {
 }
 #landing .landing-name {
     margin: 0 0 0.75rem;
-    /* Scaled by the column (4cqi), capped at the VitePress desktop size.
-     * `nowrap` makes the single-line name a hard invariant instead of the
-     * old tuned vw ramp, which only kept a specific name on one line by
-     * coincidence. The math: the text column is ~58% of the landing column,
-     * and at 4cqi a bold name of ~24 characters spans ~46% of it — so the
-     * name stays on one line at *every* two-column width, growing and
-     * shrinking exactly with the column. Longer names shrink toward the
-     * 1.5rem floor rather than wrap; the floor fits ~26 characters even at
-     * the narrowest stacked width. */
-    font-size: clamp(1.5rem, 4cqi, 3.25rem);
+    /* Scaled by the column (4cqi), capped at the VitePress desktop size,
+     * and then capped again by what actually fits on one line.
+     *
+     * The ramp alone is not enough. `nowrap` (below) makes the single line a
+     * hard requirement, and a package name is one unbreakable word, so a name
+     * the ramp sizes too large cannot wrap — it overflows and the text
+     * column's `overflow-x: clip` truncates it. The ramp was tuned against a
+     * ~17-character name; a 24-character one ("DocumenterLandingPage.jl")
+     * overruns its column across the whole two-column range, and the failure
+     * is silent truncation of the one word a landing page must not lose.
+     *
+     * So the ramp is capped by a fit constraint. The text column is
+     * `0.58C - 37px` (its 58% basis, less its share of the 4rem gap), and a
+     * bold name of N characters is about `N * 0.62em` wide (0.62 is an upper
+     * bound on the average advance for a bold grotesque with CamelCase, so
+     * the cap errs toward a slightly small name rather than a clipped one).
+     * Solving for the size that just fits gives the second term. The
+     * generator emits N as `--landing-name-chars` on the element, since CSS
+     * cannot count characters; the fallback (18) is the longest name the
+     * bare ramp was already safe for, so a page built by an older generator
+     * behaves exactly as it did before.
+     *
+     * For names up to ~18 characters the cap never binds and the size is
+     * unchanged. Beyond that it binds, and it is allowed to go below the
+     * 1.5rem floor: a 20px name that reads is better than a 24px name with
+     * its suffix cut off. The stacked layout re-derives the cap from the
+     * full column width (see the max-width: 40rem block). */
+    font-size: min(
+        clamp(1.5rem, 4cqi, 3.25rem),
+        calc((58cqi - 37px) / (var(--landing-name-chars, 18) * 0.62))
+    );
     font-weight: 700;
     line-height: 1.15;
     /* Solid accent fill: the default look, and the fallback for browsers
@@ -453,6 +474,14 @@ body:has(#landing) #documenter .docs-main > article {
     }
     #landing .landing-name {
         margin-bottom: 0.5rem;
+        /* Stacked, the text column is the full landing column rather than
+         * the 58% share it had beside the logo, so the fit cap is re-derived
+         * against the whole column. Without this the name would keep the
+         * two-column cap and render needlessly small on a phone. */
+        font-size: min(
+            clamp(1.5rem, 4cqi, 3.25rem),
+            calc(100cqi / (var(--landing-name-chars, 18) * 0.62))
+        );
     }
     #landing .landing-title {
         margin-bottom: 0.75rem;
