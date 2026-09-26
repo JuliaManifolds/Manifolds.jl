@@ -1005,7 +1005,7 @@ function ricci_tensor!(
     return Ric
 end
 
-"""
+@doc raw"""
     riemann_tensor(M::AbstractManifold, A::AbstractAtlas, i, a;
         backend::AbstractADType = AutoForwardDiff()
 
@@ -1014,10 +1014,12 @@ chart `i` of atlas `A`.
 
 Returns a 4-dimensional array `R` of size (n,n,n,n) with components `R[u,i,j,k] = R^u_{ijk}`,
 where the first index is the contravariant (upper) index and the remaining three are covariant
-(lower) indices. The components satisfy, for coordinate vector fields e_i:
+(lower) indices. With ``Γ^u_{ij}`` denoting the Christoffel symbols of the second kind,
+the components are
 
 ````math
-    R^u_{ijk} e_u = (∇_{e_i} ∇_{e_j} - ∇_{e_j} ∇_{e_i} - ∇_{[e_i,e_j]}) e_k
+    R^u_{ijk} = ∂_i Γ^u_{jk} - ∂_j Γ^u_{ik}
+        + \sum_m \left(Γ^m_{jk} Γ^u_{im} - Γ^m_{ik} Γ^u_{jm}\right).
 ````
 
 # Arguments
