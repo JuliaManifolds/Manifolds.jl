@@ -688,7 +688,7 @@ and the inverse local metric `g^{ij}` (returned by `inverse_local_metric`) to fo
 contraction:
 
 ````math
-    K = g^{u v} g^{i p} g^{j q} g^{k r} R^u_{i j k} R^v_{p q r}
+    K = g_{u v} g^{i p} g^{j q} g^{k r} R^u_{i j k} R^v_{p q r}
 ````
 
 # Arguments
@@ -710,6 +710,7 @@ function kretschmann_scalar(
     n = length(a)
     T = eltype(a)
     R = riemann_tensor(M, A, i, a; backend = backend)   # R[u, ii, j, k] == R^u_{ijk}
+    g = local_metric(M, A, i, a)                        # g_{ij}
     ginv = inverse_local_metric(M, A, i, a)             # g^{ij}
 
     K = zero(T)
@@ -719,7 +720,7 @@ function kretschmann_scalar(
             continue
         end
         for v in 1:n, p in 1:n, q in 1:n, r in 1:n
-            K += ginv[u, v] * ginv[ii, p] * ginv[j, q] * ginv[k, r] * Ruijk * R[v, p, q, r]
+            K += g[u, v] * ginv[ii, p] * ginv[j, q] * ginv[k, r] * Ruijk * R[v, p, q, r]
         end
     end
     return K
