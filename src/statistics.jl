@@ -1066,13 +1066,13 @@ for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
                     ::ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding},
                     M::AbstractDecoratorManifold, ::typeof($mf),
                 )
-                return ManifoldsBase.EmbeddedForwardingType()
+                return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
             end
             function ManifoldsBase.get_forwarding_type_embedding(
                     ::ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding},
                     M::AbstractDecoratorManifold, ::typeof($mf),
                 )
-                return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
+                return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.IndirectEmbedding())
             end
         end,
     )
