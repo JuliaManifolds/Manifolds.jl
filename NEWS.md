@@ -5,6 +5,12 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.32] Unreleased
+
+### Added
+
+* The `Veronese` manifold of nonzero symmetric rank-one tensors. (#924)
+
 ## [0.11.31] 2026-09-25
 
 ### Fixed
@@ -22,10 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Extended the "Working in Charts" tutorial covering new additions.
 * `PowerAtlas` and `ProductAtlas` for `PowerManifold` and `ProductManifold`, respectively, with induced-basis support.
 * `ParametricSurface` manifold for handling parametric surfaces (with or without boundaries and corners) in Euclidean space with the metric induced by the embedding.
-
-### Added
-
-* The `Veronese` manifold of nonzero symmetric rank-one tensors.
 
 ### Changed
 
