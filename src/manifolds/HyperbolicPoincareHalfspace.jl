@@ -238,7 +238,7 @@ function get_embedding(M::Hyperbolic{Tuple{Int}}, ::Type{<:PoincareHalfSpacePoin
 end
 
 function ManifoldsBase.get_embedding_type(::Hyperbolic, ::Type{<:PoincareHalfSpacePoint})
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 @doc raw"""

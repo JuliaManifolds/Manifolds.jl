@@ -528,12 +528,12 @@ end
             @test ManifoldsBase.get_forwarding_type_embedding(
                 ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(),
                 M, mf
-            ) === ManifoldsBase.EmbeddedForwardingType()
+            ) === ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
 
             @test ManifoldsBase.get_forwarding_type_embedding(
                 ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding}(),
                 M, mf
-            ) === ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
+            ) === ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.IndirectEmbedding())
         end
     end
 

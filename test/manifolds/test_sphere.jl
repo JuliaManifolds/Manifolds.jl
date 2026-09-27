@@ -220,11 +220,23 @@ using ManifoldDiff
 
         @testset "StereographicAtlas" begin
             M = Sphere(2)
-            A = Manifolds.StereographicAtlas()
+            A = StereographicAtlas()
+            @testset "chart index from coordinates" begin
+                for (i, a, expected) in [
+                        (:north, [0.5, 0.0], :north),
+                        (:north, [1.0, 0.0], :north),
+                        (:north, [2.0, 0.0], :south),
+                        (:south, [0.5, 0.0], :south),
+                        (:south, [1.0, 0.0], :north),
+                        (:south, [2.0, 0.0], :north),
+                    ]
+                    @test get_chart_index(M, A, i, a) === expected
+                end
+            end
             p = [1 / sqrt(3), 1 / sqrt(3), 1 / sqrt(3)]
             for k in [1, -1]
                 p *= k
-                i = Manifolds.get_chart_index(M, A, p)
+                i = get_chart_index(M, A, p)
                 @test i === (p[1] < 0 ? :south : :north)
                 a = get_parameters(M, A, i, p)
                 q = get_point(M, A, i, a)
@@ -246,15 +258,15 @@ using ManifoldDiff
 
                 @testset "transition_map" begin
                     other_chart = i === :south ? :north : :south
-                    a_other = Manifolds.transition_map(M, A, i, other_chart, a)
+                    a_other = transition_map(M, A, i, other_chart, a)
                     @test isapprox(M, p, get_point(M, A, other_chart, a_other))
 
                     a_other2 = allocate(a_other)
-                    Manifolds.transition_map!(M, a_other2, A, i, A, other_chart, a)
+                    transition_map!(M, a_other2, A, i, A, other_chart, a)
                     @test isapprox(M, p, get_point(M, A, other_chart, a_other2))
 
                     a_other2 = allocate(a_other)
-                    Manifolds.transition_map!(M, a_other2, A, i, other_chart, a)
+                    transition_map!(M, a_other2, A, i, other_chart, a)
                     @test isapprox(M, p, get_point(M, A, other_chart, a_other2))
                 end
             end

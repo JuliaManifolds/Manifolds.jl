@@ -111,3 +111,108 @@ function volume_density(M::ProductManifold, p, X)
     )
     return prod(dens)
 end
+
+"""
+    ProductAtlas(atlases::NTuple{N, AbstractAtlas{𝔽}}) where {N, 𝔽}
+
+Atlas on a [`ProductManifold`](@extref `ManifoldsBase.ProductManifold`) obtained by
+taking the product of the factor atlases in `atlases`. Chart indices are tuples of the
+corresponding factor chart indices and coordinates are concatenated factor coordinates.
+"""
+struct ProductAtlas{𝔽, TA <: NTuple{N, AbstractAtlas{𝔽}} where {N}} <: AbstractAtlas{𝔽}
+    atlases::TA
+end
+ProductAtlas(atlases::AbstractAtlas{𝔽}...) where {𝔽} = ProductAtlas{𝔽, typeof(atlases)}(atlases)
+
+"""
+    get_default_atlas(M::ProductManifold)
+
+Return the product of the default atlases of the factor manifolds of `M`.
+"""
+get_default_atlas(M::ProductManifold) = ProductAtlas(map(get_default_atlas, M.manifolds))
+
+get_chart_index(M::ProductManifold, A::ProductAtlas, p) =
+    map(get_chart_index, M.manifolds, A.atlases, submanifold_components(M, p))
+
+function get_chart_index(M::ProductManifold, A::ProductAtlas, i::Tuple, a)
+    offset = 0
+    return map(M.manifolds, A.atlases, i) do Mj, Aj, ij
+        dim = manifold_dimension(Mj)
+        result = get_chart_index(Mj, Aj, ij, view(a, (offset + 1):(offset + dim)))
+        offset += dim
+        return result
+    end
+end
+
+function get_parameters!(M::ProductManifold, a, A::ProductAtlas, i::Tuple, p)
+    offset = 0
+    map(M.manifolds, A.atlases, i, submanifold_components(M, p)) do Mj, Aj, ij, pj
+        dim = manifold_dimension(Mj)
+        get_parameters!(Mj, view(a, (offset + 1):(offset + dim)), Aj, ij, pj)
+        offset += dim
+    end
+    return a
+end
+
+function get_point!(M::ProductManifold, p, A::ProductAtlas, i::Tuple, a)
+    offset = 0
+    map(M.manifolds, submanifold_components(M, p), A.atlases, i) do Mj, pj, Aj, ij
+        dim = manifold_dimension(Mj)
+        get_point!(Mj, pj, Aj, ij, view(a, (offset + 1):(offset + dim)))
+        offset += dim
+    end
+    return p
+end
+
+function get_coordinates_induced_basis!(
+        M::ProductManifold,
+        c,
+        p,
+        X,
+        B::InducedBasis{ℝ, TangentSpaceType, <:ProductAtlas},
+    )
+    offset = 0
+    map(M.manifolds, submanifold_components(M, p), submanifold_components(M, X), B.A.atlases, B.i) do Mj, pj, Xj, Aj, ij
+        dim = manifold_dimension(Mj)
+        get_coordinates_induced_basis!(
+            Mj,
+            view(c, (offset + 1):(offset + dim)),
+            pj,
+            Xj,
+            induced_basis(Mj, Aj, ij),
+        )
+        offset += dim
+    end
+    return c
+end
+
+function get_coordinates!(M::ProductManifold, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:ProductAtlas})
+    return get_coordinates_induced_basis!(M, c, p, X, B)
+end
+
+
+function get_vector_induced_basis!(
+        M::ProductManifold,
+        Y,
+        p,
+        c,
+        B::InducedBasis{ℝ, TangentSpaceType, <:ProductAtlas},
+    )
+    offset = 0
+    map(M.manifolds, submanifold_components(M, Y), submanifold_components(M, p), B.A.atlases, B.i) do Mj, Yj, pj, Aj, ij
+        dim = manifold_dimension(Mj)
+        get_vector_induced_basis!(
+            Mj,
+            Yj,
+            pj,
+            view(c, (offset + 1):(offset + dim)),
+            induced_basis(Mj, Aj, ij),
+        )
+        offset += dim
+    end
+    return Y
+end
+
+function get_vector!(M::ProductManifold, X, p, Xⁱ, B::InducedBasis{ℝ, TangentSpaceType, <:ProductAtlas})
+    return get_vector_induced_basis!(M, X, p, Xⁱ, B)
+end

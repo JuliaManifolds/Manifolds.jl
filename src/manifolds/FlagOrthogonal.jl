@@ -65,7 +65,7 @@ function get_embedding(M::Flag{Tuple{Int}}, ::Type{<:OrthogonalPoint})
     return OrthogonalMatrices(M.size[1]; parameter = :field)
 end
 function ManifoldsBase.get_embedding_type(::Flag, ::Type{<:OrthogonalPoint})
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 function _extract_flag(M::Flag, p::AbstractMatrix, i::Int)

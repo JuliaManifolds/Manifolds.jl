@@ -458,6 +458,9 @@ end
 function ManifoldsBase.get_embedding_type(::FixedRankMatrices)
     return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
+function ManifoldsBase.get_embedding_type(::FixedRankMatrices, ::Type{<:SVDMPoint})
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
+end
 
 """
     injectivity_radius(::FixedRankMatrices)
