@@ -615,7 +615,7 @@ end
 
 Let `p = ([λ], x)` be the stored representative of the point and let
 `X = ([ν], u)` represent a tangent vector at `p`. Return the coordinates of
-`X` in the [`DefaultOrthonormalBasis`](@ref) of ``T_p\mathcal V_{N,D}``. Let
+`X` in the [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) of ``T_p\mathcal V_{N,D}``. Let
 ``c_{\mathbb S}(u)`` denote the default orthonormal coordinates of ``u`` in
 ``T_x\mathbb S^{N-1}``, as returned by [`get_coordinates`](@ref) on
 [`Sphere`](@ref). Then
