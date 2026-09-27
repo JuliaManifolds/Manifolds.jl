@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.32] 2026-xx-xx
 
+### Added
+
+* `get_basis`, `get_coordinates` and `get_vector` on the `EssentialManifold` with an orthonormal basis of its five-dimensional horizontal space.
+
 ### Fixed
 
 * `kretschmann_scalar` now correctly uses the metric instead of the inverse for one of the contractions.

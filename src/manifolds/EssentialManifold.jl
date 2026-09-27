@@ -445,6 +445,75 @@ function project!(M::EssentialManifold, Y, p, X)
     return Y
 end
 
+@doc raw"""
+    get_coordinates(M::EssentialManifold, p, X, ::DefaultOrthonormalBasis)
+    get_coordinates!(M::EssentialManifold, c, p, X, ::DefaultOrthonormalBasis)
+
+Compute the five coordinates of the horizontal tangent vector `X` at `p` ``= (R_1, R_2)`` in an
+orthonormal basis of the horizontal space.
+
+The vertical space is spanned by the velocity of the action of ``H_z`` at ``θ = 0``, which in the
+coordinates of the two rotations reads ``(R_1^{\mathrm{T}}e_z, R_2^{\mathrm{T}}e_z)``, see
+[`vert_proj`](@ref) and [TronDaniilidis:2017](@cite). The Householder reflection that maps this
+direction to the last of the six coordinates maps the first five coordinate directions to an
+orthonormal basis of its orthogonal complement, the horizontal space.
+"""
+function get_coordinates(M::EssentialManifold, p, X, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    return get_coordinates!(M, allocate_result(M, get_coordinates, p, X, B), p, X, B)
+end
+function get_coordinates!(M::EssentialManifold, c, p, X, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    d = vcat(get_coordinates(M.manifold, p[1], X[1], B), get_coordinates(M.manifold, p[2], X[2], B))
+    return c .= view(_horizontal_reflection(p) * d, 1:5)
+end
+
+@doc raw"""
+    get_vector(M::EssentialManifold, p, c, ::DefaultOrthonormalBasis)
+    get_vector!(M::EssentialManifold, Y, p, c, ::DefaultOrthonormalBasis)
+
+Compute the horizontal tangent vector at `p` with the five coordinates `c` in the basis that
+`get_coordinates` on the [`EssentialManifold`](@ref) uses.
+"""
+function get_vector(M::EssentialManifold, p, c, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    return get_vector!(M, allocate_result(M, get_vector, p, c), p, c, B)
+end
+function get_vector!(M::EssentialManifold, Y, p, c, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    d = _horizontal_reflection(p) * vcat(c, 0)
+    get_vector!(M.manifold, Y[1], p[1], view(d, 1:3), B)
+    get_vector!(M.manifold, Y[2], p[2], view(d, 4:6), B)
+    return Y
+end
+
+@doc raw"""
+    get_basis(M::EssentialManifold, p, ::DefaultOrthonormalBasis)
+
+Return the five orthonormal basis vectors of the horizontal space at `p` that `get_coordinates`
+on the [`EssentialManifold`](@ref) uses.
+"""
+function get_basis(M::EssentialManifold, p, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    return CachedBasis(B, [get_vector(M, p, e, B) for e in eachcol(Matrix{eltype(p[1])}(I, 5, 5))])
+end
+
+const _EssentialCachedBasis = CachedBasis{ℝ, <:DefaultOrthonormalBasis{ℝ, TangentSpaceType}, <:AbstractVector}
+
+function get_coordinates(M::EssentialManifold, p, X, B::_EssentialCachedBasis)
+    return [inner(M, p, X, V) for V in B.data]
+end
+function get_coordinates!(M::EssentialManifold, c, p, X, B::_EssentialCachedBasis)
+    return map!(V -> inner(M, p, X, V), c, B.data)
+end
+function get_vector(M::EssentialManifold, p, c, B::_EssentialCachedBasis)
+    return get_vector!(M, allocate_result(M, get_vector, p, c), p, c, B)
+end
+function get_vector!(M::EssentialManifold, Y, p, c, B::_EssentialCachedBasis)
+    return copyto!(Y, sum(c .* B.data))
+end
+
+function _horizontal_reflection(p)
+    w = vcat(p[1][3, :], p[2][3, :]) ./ sqrt(2) # the vertical direction, of unit length
+    w[end] += w[end] < 0 ? -1 : 1
+    return I - 2 * w * w' / dot(w, w)
+end
+
 function Base.show(io::IO, M::EssentialManifold)
     return print(io, "EssentialManifold($(M.is_signed))")
 end

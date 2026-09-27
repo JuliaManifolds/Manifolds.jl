@@ -1,5 +1,20 @@
 include("../header.jl")
 
+@testset "the essential manifold has as many coordinates as dimensions" begin
+    M = EssentialManifold()
+    p = rand(MersenneTwister(42), M)
+    X = project(M, p, rand(MersenneTwister(44), M; vector_at = p))
+    B = DefaultOrthonormalBasis()
+    c = get_coordinates(M, p, X, B)
+    @test length(c) == manifold_dimension(M)
+    @test isapprox(M, p, get_vector(M, p, c, B), X)
+    @test norm(c) ≈ norm(M, p, X)
+    Bc = get_basis(M, p, B)
+    @test length(get_vectors(M, p, Bc)) == manifold_dimension(M)
+    @test get_coordinates(M, p, X, Bc) ≈ c
+    @test isapprox(M, p, get_vector(M, p, c, Bc), X)
+end
+
 @testset "Essential manifold" begin
     M = EssentialManifold()
     a = π / 6
