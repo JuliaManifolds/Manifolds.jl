@@ -41,18 +41,18 @@ function Euclidean(
     return Euclidean{field, typeof(size)}(size)
 end
 
-function adjoint_Jacobi_field(::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
-    return X
+function adjoint_Jacobi_field(M::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 function adjoint_Jacobi_field(
-        ::Euclidean{𝔽, TypeParameter{Tuple{}}},
+        M::Euclidean{𝔽, TypeParameter{Tuple{}}},
         p,
         q,
         t,
         X,
         β::Tβ,
     ) where {𝔽, Tβ}
-    return X
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
@@ -454,11 +454,11 @@ Return true. [`Euclidean`](@ref) is a flat manifold.
 """
 is_flat(M::Euclidean) = true
 
-function jacobi_field(::Euclidean{𝔽, TypeParameter{Tuple{}}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
-    return X
+function jacobi_field(M::Euclidean{𝔽, TypeParameter{Tuple{}}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
-function jacobi_field(::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
-    return X
+function jacobi_field(M::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 function local_metric(

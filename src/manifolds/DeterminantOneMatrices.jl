@@ -49,14 +49,19 @@ function check_point(M::DeterminantOneMatrices, p; kwargs...)
 end
 
 """
-    check_vector(M::DeterminantOneMatrices{n,𝔽}, p, X; kwargs... )
+    check_vector(M::DeterminantOneMatrices{n,𝔽}, p, X; atol=sqrt(eps(float(real(eltype(X))))), kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`DeterminantOneMatrices`](@ref) `M`, which are all matrices of size ``n×n``
 with trace 0.
+
+The trace is compared to zero with the absolute tolerance `atol`.
 """
-function check_vector(M::DeterminantOneMatrices, p, X; kwargs...)
-    if !isapprox(tr(X), 0; kwargs...)
+function check_vector(
+        M::DeterminantOneMatrices, p, X;
+        atol::Real = sqrt(eps(float(real(eltype(X))))), kwargs...,
+    )
+    if !isapprox(tr(X), 0; atol = atol, kwargs...)
         return DomainError(
             tr(X),
             "The tangent vector $(X) does not lie in the Tangent space at $(p) of $(M), since its trace is $(tr(X)) and not zero.",
@@ -83,10 +88,11 @@ end
     manifold_dimension(M::DeterminantOneMatrices{n,𝔽})
 
 Return the dimension of the [`DeterminantOneMatrices`](@ref) matrix `M` over the number system
-`𝔽`, which is one dimension less than its embedding, the [`Euclidean`](@ref)`(n, n; field=𝔽)`.
+`𝔽`, which is the dimension of its embedding, the [`Euclidean`](@ref)`(n, n; field=𝔽)`,
+reduced by the real dimension of `𝔽`, since ``\det(p) = 1`` is a single equation over ``𝔽``.
 """
-function manifold_dimension(M::DeterminantOneMatrices{<:Any, 𝔽}) where {𝔽}
-    return manifold_dimension(get_embedding(M)) - 1
+function manifold_dimension(M::DeterminantOneMatrices{𝔽}) where {𝔽}
+    return manifold_dimension(get_embedding(M)) - real_dimension(𝔽)
 end
 
 @doc raw"""

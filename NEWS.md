@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 * `kretschmann_scalar` now correctly uses the metric instead of the inverse for one of the contractions.
+* `get_coordinates` on the `CholeskySpace` divides the diagonal entries by the diagonal of the point, so that the coordinates are those of the orthonormal basis and invert `get_vector`.
+* `parallel_transport_to` on the `CholeskySpace` (and hence under the log-Cholesky metric) keeps the strictly lower part of the tangent vector, so that the transport is an isometry.
+* `jacobi_field` and `adjoint_Jacobi_field` on the `Circle` and on the number-valued `Euclidean` space apply the weight function they are given.
+* `log` on the complex `Circle` returns a tangent vector for every pair of opposite points.
+* `mid_point` on the complex `Circle` returns the midpoint of the shortest geodesic for every pair of points.
+* `check_vector` on `DeterminantOneMatrices` accepts a trace that vanishes up to rounding, with the tolerance keyword `atol`.
+* `manifold_dimension` on `DeterminantOneMatrices` over the complex numbers counts the determinant condition as the two real conditions it is.
+* `project` onto the tangent space of the `Elliptope` removes the vertical part with the right sign, so that it is a projection onto the horizontal space.
 
 ## [0.11.31] 2026-09-25
 

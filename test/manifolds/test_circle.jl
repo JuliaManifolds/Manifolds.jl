@@ -193,12 +193,12 @@ Test.@testset "The circle manifold" begin
             @test ManifoldDiff.adjoint_Jacobi_field(
                 M, 0.0, 1.0, 0.5, 2.0,
                 ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-            ) === 2.0
+            ) === 1.0
             @test ManifoldDiff.diagonalizing_projectors(M, 0.0, 2.0) == ((0.0, ManifoldDiff.ProjectorOntoVector(M, 0.0, SA[1.0])),)
             @test ManifoldDiff.jacobi_field(
                 M, 0.0, 1.0, 0.5, 2.0,
                 ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-            ) === 2.0
+            ) === 1.0
 
             # volume
             @test manifold_volume(M) ≈ 2 * π
@@ -213,6 +213,14 @@ Test.@testset "The circle manifold" begin
             X3 = fill(0.0)
             log!(Mc, X3, fill(0 + 1.0im), fill(0.0 - 1.0im))
             @test isapprox(X3[], X2[])
+        end
+        Test.@testset "Complex circle midpoint across the branch cut" begin
+            Mc = Circle(ℂ)
+            p1 = exp(3.0im)
+            p2 = exp(-3.0im)
+            m = mid_point(Mc, p1, p2)
+            @test isapprox(m, -1.0 + 0.0im)
+            @test distance(Mc, p1, m) ≈ distance(Mc, p1, p2) / 2
         end
         Test.@testset "inner special cases" begin
             @test inner(Circle(), fill(0.0), fill(1.0), fill(0.1)) == 0.1

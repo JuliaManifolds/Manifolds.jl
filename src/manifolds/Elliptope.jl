@@ -153,7 +153,7 @@ project(::Elliptope, ::Any...)
 
 function project!(::Elliptope, Z, q, Y)
     Y2 = (Y' - q' .* sum(q' .* Y', dims = 1))'
-    Z .= Y2 - q * lyap(q' * q, q' * Y2 - Y2' * q)
+    Z .= Y2 - q * lyap(q' * q, -(q' * Y2 - Y2' * q))
     return Z
 end
 

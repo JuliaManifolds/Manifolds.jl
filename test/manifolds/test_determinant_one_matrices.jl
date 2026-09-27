@@ -47,7 +47,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         ),
         # Expectations
         Dict(
-            :manifold_dimension => 7,
+            :manifold_dimension => 6,
             repr => "DeterminantOneMatrices(2, ℂ)",
             get_embedding => Euclidean(2, 2; field = ℂ),
         ),
@@ -78,5 +78,12 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             Random.default_rng(), get_embedding(M), pX,
         )
         @test abs(det(pX)) > 1.0e-8
+    end
+
+    @testset "Tangent vectors with a trace that vanishes up to rounding" begin
+        M = DeterminantOneMatrices(2)
+        p = [1.0 0.0; 0.0 1.0]
+        @test is_vector(M, p, [1.0e-17 0.5; -0.5 0.0])
+        @test !is_vector(M, p, [1.0 0.0; 0.0 0.0])
     end
 end

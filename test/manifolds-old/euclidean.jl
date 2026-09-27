@@ -378,7 +378,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
         @test ManifoldDiff.diagonalizing_projectors(M0, 0.0, 2.0) ==
             ((0.0, ManifoldDiff.IdentityProjector()),)
         @test ManifoldDiff.jacobi_field(
@@ -388,7 +388,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
     end
 
     @testset "Weingarten & Hessian" begin
@@ -428,7 +428,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
         @test ManifoldDiff.diagonalizing_projectors(M0s, 0.0, 2.0) ==
             ((0.0, ManifoldDiff.IdentityProjector()),)
         @test ManifoldDiff.jacobi_field(
@@ -438,7 +438,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
     end
 
     @testset "Mixed array dimensions for exp and PT" begin
