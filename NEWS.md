@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `check_vector` on `DeterminantOneMatrices` accepts a trace that vanishes up to rounding, with the tolerance keyword `atol`.
 * `manifold_dimension` on `DeterminantOneMatrices` over the complex numbers counts the determinant condition as the two real conditions it is.
 * `project` onto the tangent space of the `Elliptope` removes the vertical part with the right sign, so that it is a projection onto the horizontal space.
+* `distance` on a complex `Euclidean` space returns a real number.
 
 ## [0.11.31] 2026-09-25
 

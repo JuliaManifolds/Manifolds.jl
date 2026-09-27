@@ -363,6 +363,13 @@ using FiniteDifferences
         @test distance(M, 2.0, 4.0) == 2.0
     end
 
+    @testset "the distance on a complex space is a real number" begin
+        M = Euclidean(2; field = ℂ)
+        d = distance(M, [1.0 + 0im, 2.0 + 0im], [0.0im, 0.0im])
+        @test d isa Float64
+        @test d ≈ sqrt(5)
+    end
+
     @testset "errors" begin
         M = Euclidean(4)
         @test_throws DimensionMismatch distance(M, [1, 2, 3, 4], [1 2; 3 4])

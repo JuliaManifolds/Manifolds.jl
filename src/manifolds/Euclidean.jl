@@ -141,7 +141,7 @@ Base.@propagate_inbounds function distance(M::Euclidean, p, q)
     @boundscheck if axes(p) != axes(q)
         throw(DimensionMismatch("At last one of $p and $q does not belong to $M"))
     end
-    s = zero(eltype(p))
+    s = zero(real(eltype(p)))
     @inbounds begin # COV_EXCL_LINE
         @simd for I in eachindex(p, q) # COV_EXCL_LINE
             p_i = p[I]
