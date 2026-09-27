@@ -536,7 +536,8 @@ f=\operatorname{atan}(β,α)\in(0,π).
 
 Here ``\operatorname{atan}(β,α)`` is the two-argument arctangent,
 which determines the angle from both coordinates. The unit-sphere exponential
-for ``w⊥ x`` is
+at ``x``, applied to a tangent vector ``w`` at ``x`` (and hence orthogonal to
+``x``), is
 
 ````math
 \operatorname{Exp}^{\mathbb S^{N-1}}_x(w)
@@ -544,8 +545,9 @@ for ``w⊥ x`` is
 +\frac{\sin(\lVert w\rVert)}{\lVert w\rVert}w,
 ````
 
-With value ``x`` at ``w=0``, the exponential ``\exp_p(X)`` is stored using
-the representative
+At ``w=0``, the sphere exponential has the continuous value ``x``. Using this
+sphere exponential, the implementation represents the Veronese point
+``\exp_p(X)`` by the parameter pair
 
 ````math
 \left(
@@ -553,6 +555,9 @@ the representative
     \operatorname{Exp}^{\mathbb S^{N-1}}_x\!\left(\frac{f}{m}u\right)
 \right).
 ````
+
+This choice gives the scale coordinate the same sign as ``λ``, the scale of
+the base point ``p``.
 
 If ``m=0`` and ``r+\dot r>0``, the exponential is the radial point represented
 by ``(λ+ν,x)``. If ``m=0`` and ``r+\dot r≤0``, the radial geodesic
@@ -572,11 +577,14 @@ end
 @doc raw"""
     exp_fused!(M::Veronese, q, p, X, t::Number)
 
-Store ``\exp_p(tX)`` in `q`, where `p = ([λ], x)` and `X = ([ν], u)`.
-This is the exponential formula in [`exp`](@ref) with tangent components
-``(tν,tu)``. The time ``t`` may be negative. For a radial tangent (``u=0``),
-the domain condition is ``|λ|+\operatorname{sign}(λ)tν>0``; otherwise the
-curve reaches the excluded zero tensor and a `DomainError` is thrown.
+Compute ``\exp_p(tX)`` and store the result in `q`, where `p = ([λ], x)` and
+`X = ([ν], u)`. Rather than first constructing the scaled tangent vector
+``([tν],tu)``, this fused implementation incorporates ``t`` directly into the
+radial and angular formulas and calls `exp_fused!` on [`Sphere`](@ref) for the
+spherical component.
+
+The domain and `DomainError` behavior are the same as for [`exp`](@ref) applied
+to ``tX``.
 """
 function exp_fused!(M::Veronese, q, p, X, t::Number)
     n, d = get_parameter(M.size)
@@ -742,15 +750,22 @@ end
 Compute the Riemannian logarithmic map from `p` to `q` on
 [`Veronese`](@ref).
 
-For ``M=\mathcal V_{N,D}``, let `p = ([λ], x)` be the stored representative of
-the base point and write the supplied representative of `q` as ``(μ_0,y_0)``.
-The same point `q` is also represented by
-``((-1)^Dμ_0,-y_0)``. Choose between these two representatives as follows:
-for even ``D``, choose the one whose spherical component has nonnegative inner
-product with ``x``; for odd ``D``, choose the one whose scale has the same sign
-as ``λ``. If the inner product is zero in the even case, retain the
-supplied representative. This is the choice made by
-[`closest_representative!`](@ref); denote it by ``q_*=(μ,y)`` and set
+Let ``M=\mathcal V_{N,D}``, with stored representatives ``p=([λ],x)`` and
+``q=([μ_0],y_0)``. Since
+
+````math
+(μ_0,y_0)
+∼
+\bigl((-1)^Dμ_0,-y_0\bigr),
+````
+
+the representative of `q` is first matched to `p` using
+[`closest_representative!`](@ref). For even ``D``, the representative with
+``⟨x,y⟩≥0`` is chosen; for odd ``D``, the representative whose scale has the
+same sign as ``λ`` is chosen. In the even case, ``⟨x,y⟩=0`` is a tie and the
+supplied representative is retained.
+
+Write the matched stored representative as ``q_*=([μ],y)`` and define
 
 ````math
 r=|λ|,
@@ -762,11 +777,10 @@ a=\arccos⟨x,y⟩,
 m=\sqrt D\,a.
 ````
 
-A minimizing logarithm exists when ``λ`` and ``μ`` have the same sign
-and ``m<π``. If either condition fails, `log(M, p, q)` and
-`log!(M, X, p, q)` throw a `DomainError`, since no minimizing geodesic connects
-the points. Under these conditions, `log(M, p, q)` returns the tangent
-representation `X = ([ν], u)` with
+A minimizing logarithm exists if and only if ``λ`` and ``μ`` have the same
+sign and ``m<π``. Otherwise, `log` and `log!` throw a `DomainError`.
+
+When a minimizing logarithm exists, it is represented by ``X=([ν],u)`` with
 
 ````math
 ν
@@ -780,18 +794,18 @@ and, for ``a>0``,
 u
 =
 \frac{s}{r}
-\frac{\sin m}{\sqrt D\sin a}
+\frac{\sin m}{\sqrt D\,\sin a}
 \bigl(y-\cos(a)x\bigr).
 ````
 
-The minimizing logarithm need not be unique. For ``D=2`` and
-``⟨x,y⟩=0``, both ``y`` and ``-y`` are equally close matched
-representatives and yield distinct minimizing tangent vectors. The matching
-rule keeps the supplied representative at this tie, so this method returns
-one of these logarithms.
-
 For ``a=0``, the continuous limit gives ``u=0``. The implementation evaluates
 the ratio of sines using `sinc` for numerical stability.
+
+The minimizing logarithm may be nonunique. When multiple minimizing
+representatives are equally close, [`closest_representative!`](@ref) determines
+which logarithm is returned. For example, for ``D=2`` and ``⟨x,y⟩=0``, the
+representatives with spherical parts ``y`` and ``-y`` give distinct minimizing
+logarithms; the supplied representative is retained.
 
 See Theorem 4.4 of
 [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite) for the corresponding
@@ -803,7 +817,7 @@ function log!(M::Veronese, X, p, q)
     q_closest = copy(M, q)
     closest_representative!(M, q_closest, p)
     connected_by_geodesic(M, p, q_closest) || throw(
-        DomainError(q, "The points are not connected by a geodesic on $M."),
+        DomainError(q, "The points are not connected by a minimizing geodesic on $M."),
     )
 
     n, d = get_parameter(M.size)
