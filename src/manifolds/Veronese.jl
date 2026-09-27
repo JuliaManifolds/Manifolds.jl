@@ -344,7 +344,9 @@ function connected_by_geodesic(M::Veronese, p, q)
     signbit(p[1][1]) == signbit(q_closest[1][1]) || return false
     n, d = get_parameter(M.size)
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
-    return sqrt(d) * distance(sphere, p[2], q_closest[2]) < pi
+    sphere_distance = distance(sphere, p[2], q_closest[2])
+    m = sqrt(d * one(sphere_distance)) * sphere_distance
+    return m < oftype(m, π)
 end
 
 function copyto!(::Veronese, q, p)
@@ -421,7 +423,10 @@ function distance(M::Veronese, p, q)
 
     n, d = get_parameter(M.size)
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
-    m = min(sqrt(d) * distance(sphere, p[2], q_closest[2]), pi)
+    sphere_distance = distance(sphere, p[2], q_closest[2])
+    n == 1 && !iszero(sphere_distance) && return Inf
+    m = sqrt(d * one(sphere_distance)) * sphere_distance
+    m = min(m, oftype(m, π))
     r = abs(p[1][1])
     s = abs(q_closest[1][1])
     return sqrt((r - s)^2 + 4 * r * s * sin(m / 2)^2)
@@ -529,7 +534,7 @@ Suppose ``m>0`` and define
 \qquad
 β=rm,
 \qquad
-\rho=\sqrt{α^2+β^2},
+ρ=\sqrt{α^2+β^2},
 \qquad
 f=\operatorname{atan}(β,α)\in(0,π).
 ````
@@ -551,7 +556,7 @@ sphere exponential, the implementation represents the Veronese point
 
 ````math
 \left(
-    \operatorname{sign}(λ)\rho,
+    \operatorname{sign}(λ)ρ,
     \operatorname{Exp}^{\mathbb S^{N-1}}_x\!\left(\frac{f}{m}u\right)
 \right).
 ````
@@ -674,7 +679,8 @@ get_parameter_type(::Veronese{Tuple{Int, Int}}) = :field
     get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
 
 Let `p = ([λ], x)` be the stored representative of the point. Return the
-tangent vector whose coordinates in the [`DefaultOrthonormalBasis`](@ref) of
+tangent vector whose coordinates in the
+[`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) of
 ``T_p\mathcal V_{N,D}`` are `c`. This is the inverse of
 [`get_coordinates`](@ref): the first coordinate is the radial component, while
 the remaining sphere coordinates are divided by ``\sqrt D\,|λ|`` before
@@ -801,9 +807,10 @@ u
 For ``a=0``, the continuous limit gives ``u=0``. The implementation evaluates
 the ratio of sines using `sinc` for numerical stability.
 
-The minimizing logarithm may be nonunique. When multiple minimizing
-representatives are equally close, [`closest_representative!`](@ref) determines
-which logarithm is returned. For example, for ``D=2`` and ``⟨x,y⟩=0``, the
+The minimizing logarithm may be nonunique. When the two equivalent
+representatives of `q` are equally close to `p`,
+[`closest_representative!`](@ref) determines which logarithm is returned. For
+example, for ``D=2`` and ``⟨x,y⟩=0``, the
 representatives with spherical parts ``y`` and ``-y`` give distinct minimizing
 logarithms; the supplied representative is retained.
 

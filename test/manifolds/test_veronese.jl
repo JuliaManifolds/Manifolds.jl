@@ -299,6 +299,27 @@ using LinearAlgebra, Manifolds, Random, Test
         @test_throws DomainError log(M, p, q)
     end
 
+    @testset "Exact geodesic cutoff" begin
+        for T in (Float32, Float64)
+            cutoff_cases = (
+                (Veronese(2, 1), (T[1], T[1, 0]), (T[1], T[-1, 0])),
+                (Veronese(2, 4), (T[1], T[1, 0]), (T[1], T[0, 1])),
+            )
+            for (M, p, q) in cutoff_cases
+                @test !connected_by_geodesic(M, p, q)
+                @test distance(M, p, q) ≈ T(2)
+                @test_throws DomainError log(M, p, q)
+            end
+
+            M = Veronese(1, 1)
+            p = (T[1], T[1])
+            q = (T[-1], T[1])
+            @test !connected_by_geodesic(M, p, q)
+            @test isinf(distance(M, p, q))
+            @test_throws DomainError log(M, p, q)
+        end
+    end
+
     @testset "Float32 rand" begin
         for parameter in (:type, :field)
             M = Veronese(3, 2; parameter)
