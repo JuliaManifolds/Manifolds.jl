@@ -8,9 +8,9 @@ The Veronese manifold of nonzero symmetric rank-one tensors of order ``D`` over
 \mathcal V_{N,D}
 =
 \left\{
-    \lambda x^{\otimes D}
+    λ x^{⊗ D}
     \;\middle|\;
-    \lambda\in\mathbb R\setminus\{0\},\;
+    λ\in\mathbb R\setminus\{0\},\;
     x\in\mathbb S^{N-1}
 \right\}.
 ````
@@ -18,15 +18,15 @@ The Veronese manifold of nonzero symmetric rank-one tensors of order ``D`` over
 Here
 
 ````math
-x^{\otimes D}
+x^{⊗ D}
 :=
-\underbrace{x\otimes\cdots\otimes x}_{D\text{ factors}},
+\underbrace{x⊗\cdots⊗ x}_{D\text{ factors}},
 ````
 
 is the ``D``-fold tensor product of ``x`` with itself. In coordinates,
 
 ````math
-\bigl(x^{\otimes D}\bigr)_{i_1,\ldots,i_D}
+\bigl(x^{⊗ D}\bigr)_{i_1,\ldots,i_D}
 =
 \prod_{j=1}^{D}x_{i_j}.
 ````
@@ -34,20 +34,20 @@ is the ``D``-fold tensor product of ``x`` with itself. In coordinates,
 The parametrization
 
 ````math
-\Phi:(\mathbb R\setminus\{0\})\times\mathbb S^{N-1}\to\mathcal V_{N,D},
+Φ:(\mathbb R\setminus\{0\})\times\mathbb S^{N-1}\to\mathcal V_{N,D},
 \qquad
-\Phi(\lambda,x)=\lambda x^{\otimes D},
+Φ(λ,x)=λ x^{⊗ D},
 ````
 
 is two-to-one. Every embedded tensor has the two representatives
 
 ````math
-(\lambda,x)
+(λ,x)
 \sim
-\bigl((-1)^D\lambda,-x\bigr).
+\bigl((-1)^Dλ,-x\bigr).
 ````
 
-Hence, for even ``D`` the sign of ``\lambda`` is intrinsic and
+Hence, for even ``D`` the sign of ``λ`` is intrinsic and
 ``\mathcal V_{N,D}`` has two connected components, while for odd ``D`` the sign
 can be absorbed by replacing ``x`` by ``-x`` and the manifold is connected
 when ``N≥2``. For ``N=1``, the manifold is ``ℝ\setminus\{0\}`` for every
@@ -60,39 +60,39 @@ choosing one of the parameter representatives above. Thus
 ````math
 M=\mathcal V_{N,D},
 \qquad
-p\leftrightarrow(\lambda,x),
+p\leftrightarrow(λ,x),
 \qquad
-\Phi(\lambda,x)=\lambda x^{\otimes D}.
+Φ(λ,x)=λ x^{⊗ D}.
 ````
 
 Concretely, the chosen representative is stored as `p = ([λ], x)`. A tangent
 vector is stored analogously as `X = ([ν], u)`, where
 
 ````math
-u\in T_x\mathbb S^{N-1}=x^\perp.
+u\in T_x\mathbb S^{N-1}=x^⊥.
 ````
 
 The metric is induced by the Euclidean metric on the full tensor space
-``(ℝ^N)^{\otimes D}``. The differential of ``\Phi`` is
+``(ℝ^N)^{⊗ D}``. The differential of ``Φ`` is
 
 ````math
-D\Phi_{(\lambda,x)}(\nu,u)
+DΦ_{(λ,x)}(ν,u)
 =
-\nu x^{\otimes D}
+ν x^{⊗ D}
 +
-\lambda\sum_{j=1}^{D}
- x^{\otimes(j-1)}\otimes u\otimes x^{\otimes(D-j)},
+λ\sum_{j=1}^{D}
+ x^{⊗(j-1)}⊗ u⊗ x^{⊗(D-j)},
 ````
 
 and therefore the induced Riemannian metric is
 
 ````math
-g_{(\lambda,x)}\bigl((\nu,u),(\xi,v)\bigr)
+g_{(λ,x)}\bigl((ν,u),(ξ,v)\bigr)
 =
-\nu\xi+D\lambda^2\langle u,v\rangle.
+νξ+Dλ^2⟨u,v⟩.
 ````
 
-Thus the spherical directions are scaled by ``\sqrt{D}|\lambda|`` relative to
+Thus the spherical directions are scaled by ``\sqrt{D}|λ|`` relative to
 the radial direction.
 
 The Veronese manifold is a special case of the [`Segre`](@ref) manifold: the
@@ -162,7 +162,7 @@ end
 
 Check whether `p` represents a point on [`Veronese`](@ref) `M`. In the
 implementation, `p = ([λ], x)` is a stored representative of the tensor
-``\Phi(\lambda,x)=\lambda x^{\otimes D}``. The scale ``\lambda`` must be finite
+``Φ(λ,x)=λ x^{⊗ D}``. The scale ``λ`` must be finite
 and nonzero and ``x`` must lie on ``\mathbb S^{N-1}``.
 """
 function check_point(M::Veronese, p; kwargs...)
@@ -229,7 +229,7 @@ end
 Check whether `X` is a tangent vector at `p` on [`Veronese`](@ref) `M`.
 
 Let ``M=\mathcal V_{N,D}``, let `p = ([λ], x)` be the chosen stored
-representative of the tensor ``\Phi(\lambda,x)=\lambda x^{\otimes D}``, and let
+representative of the tensor ``Φ(λ,x)=λ x^{⊗ D}``, and let
 `X = ([ν], u)` represent a tangent vector at `p`. The tangent space is
 identified with
 
@@ -237,13 +237,13 @@ identified with
 T_pM\simeq\mathbb R\times T_x\mathbb S^{N-1}.
 ````
 
-Hence ``\nu\in\mathbb R`` may be arbitrary, while the spherical component must
+Hence ``ν\in\mathbb R`` may be arbitrary, while the spherical component must
 satisfy
 
 ````math
-u\in T_x\mathbb S^{N-1}=x^\perp,
+u\in T_x\mathbb S^{N-1}=x^⊥,
 \qquad\text{equivalently}\qquad
-\langle x,u\rangle=0.
+⟨x,u⟩=0.
 ````
 """
 function check_vector(M::Veronese, p, X; kwargs...)
@@ -265,25 +265,25 @@ Let `p = ([λ], x)` and `q = ([μ], y)` denote the stored representatives of the
 two manifold points. They correspond to the embedded tensors
 
 ````math
-\Phi(\lambda,x)=\lambda x^{\otimes D},
+Φ(λ,x)=λ x^{⊗ D},
 \qquad
-\Phi(\mu,y)=\mu y^{\otimes D}.
+Φ(μ,y)=μ y^{⊗ D}.
 ````
 
 The tensor represented by `q` has exactly the two parameter representatives
 
 ````math
-(\mu,y)
+(μ,y)
 \quad\text{and}\quad
-\bigl((-1)^D\mu,-y\bigr).
+\bigl((-1)^Dμ,-y\bigr).
 ````
 
-For even ``D``, changing representative leaves ``\mu`` unchanged, so the
+For even ``D``, changing representative leaves ``μ`` unchanged, so the
 representative with the smaller spherical distance to ``x`` is chosen; this is
-equivalent to choosing the sign of ``y`` so that ``\langle x,y\rangle\geq0``.
+equivalent to choosing the sign of ``y`` so that ``⟨x,y⟩≥0``.
 If the inner product is zero, the supplied representative is retained.
-For odd ``D``, changing representative also flips ``\mu``. The representative
-whose scale has the same sign as ``\lambda`` is chosen, so that `p` and the
+For odd ``D``, changing representative also flips ``μ``. The representative
+whose scale has the same sign as ``λ`` is chosen, so that `p` and the
 chosen representative of `q` lie on the same nonzero radial sheet.
 """
 function closest_representative!(M::Veronese, q, p)
@@ -305,13 +305,13 @@ Return whether `p` and `q` are connected by a minimizing geodesic in
 
 Let `p = ([λ], x)` denote the stored representative of the first point, and
 write the matched representative of `q` obtained from
-[`closest_representative!`](@ref) as ``q_*=(\mu,y)``. These represent the
+[`closest_representative!`](@ref) as ``q_*=(μ,y)``. These represent the
 embedded tensors
 
 ````math
-\Phi(\lambda,x)=\lambda x^{\otimes D},
+Φ(λ,x)=λ x^{⊗ D},
 \qquad
-\Phi(\mu,y)=\mu y^{\otimes D}.
+Φ(μ,y)=μ y^{⊗ D}.
 ````
 
 Let
@@ -321,20 +321,20 @@ d_{\mathbb S}(x,y)
 :=
 \operatorname{dist}_{\mathbb S^{N-1}}(x,y)
 =
-\arccos\langle x,y\rangle
+\arccos⟨x,y⟩
 ````
 
 be the intrinsic distance on the unit sphere. Since the induced metric weights
-spherical tangent directions by ``D\lambda^2``, the effective angular
+spherical tangent directions by ``Dλ^2``, the effective angular
 separation is ``\sqrt D\,d_{\mathbb S}(x,y)``. A minimizing geodesic exists if
 and only if the representatives lie in the same connected component and
 
 ````math
-\sqrt D\,d_{\mathbb S}(x,y)<\pi.
+\sqrt D\,d_{\mathbb S}(x,y)<π.
 ````
 
 For ``N≥2`` and points in the same connected component, at or beyond the
-threshold ``\pi``, the intrinsic distance is approached by
+threshold ``π``, the intrinsic distance is approached by
 curves that pass arbitrarily close to the excluded zero tensor, but the
 infimum is not attained by a minimizing geodesic inside the manifold.
 """
@@ -374,25 +374,25 @@ Compute the intrinsic Riemannian distance between `p` and `q`.
 
 Let `p = ([λ], x)` denote the stored representative of the first point, and
 write the matched representative of `q` obtained from
-[`closest_representative!`](@ref) as ``q_*=(\mu,y)``. These represent the
+[`closest_representative!`](@ref) as ``q_*=(μ,y)``. These represent the
 embedded tensors
 
 ````math
-\Phi(\lambda,x)=\lambda x^{\otimes D},
+Φ(λ,x)=λ x^{⊗ D},
 \qquad
-\Phi(\mu,y)=\mu y^{\otimes D}.
+Φ(μ,y)=μ y^{⊗ D}.
 ````
 
 Define
 
 ````math
-r=|\lambda|,
+r=|λ|,
 \qquad
-s=|\mu|,
+s=|μ|,
 \qquad
-\theta=\arccos\langle x,y\rangle,
+θ=\arccos⟨x,y⟩,
 \qquad
-m=\min\bigl(\sqrt D\,\theta,\pi\bigr).
+m=\min\bigl(\sqrt D\,θ,π\bigr).
 ````
 
 If the matched representatives belong to the same connected component, then
@@ -405,9 +405,9 @@ d(p,q)
 \sqrt{(r-s)^2+4rs\sin^2(m/2)}.
 ````
 
-For points in the same connected component, when ``\sqrt D\,\theta<\pi``,
+For points in the same connected component, when ``\sqrt D\,θ<π``,
 this distance is realized by a minimizing
-geodesic. When ``\sqrt D\,\theta\geq\pi``, the formula reduces to ``r+s``;
+geodesic. When ``\sqrt D\,θ≥π``, the formula reduces to ``r+s``;
 this is the infimum of curve lengths obtained by approaching the excluded zero
 tensor and is not attained by a minimizing geodesic. Points in different
 connected components have infinite distance. For ``N≥2``, this can occur
@@ -435,9 +435,9 @@ Embed the point with stored representative `p = ([λ], x)` into the full tensor
 space using the Veronese parametrization
 
 ````math
-\Phi(\lambda,x)=\lambda x^{\otimes D},
+Φ(λ,x)=λ x^{⊗ D},
 \qquad
-x^{\otimes D}=\underbrace{x\otimes\cdots\otimes x}_{D\text{ factors}}.
+x^{⊗ D}=\underbrace{x⊗\cdots⊗ x}_{D\text{ factors}}.
 ````
 
 The embedded tensor is stored as a vector of length ``N^D`` corresponding to
@@ -466,17 +466,17 @@ Let `p = ([λ], x)` be the stored representative of the point, and let
 differential of the Veronese parametrization,
 
 ````math
-D\Phi_{(\lambda,x)}(\nu,u)
+DΦ_{(λ,x)}(ν,u)
 =
-\nu x^{\otimes D}
+ν x^{⊗ D}
 +
-\lambda\sum_{j=1}^{D}
- x^{\otimes(j-1)}\otimes u\otimes x^{\otimes(D-j)}.
+λ\sum_{j=1}^{D}
+ x^{⊗(j-1)}⊗ u⊗ x^{⊗(D-j)}.
 ````
 
 The first term is the radial variation and the sum contains the ``D`` ways of
 inserting the spherical variation ``u`` into one tensor mode. Since
-``u\perp x``, this differential is tangent to the embedded Veronese manifold.
+``u⊥ x``, this differential is tangent to the embedded Veronese manifold.
 """
 embed(::Veronese, p, X)
 
@@ -509,9 +509,9 @@ For ``M=\mathcal V_{N,D}``, let `p = ([λ], x)` be the stored representative of
 the base point and let `X = ([ν], u)` represent a tangent vector at `p`. With
 
 ````math
-r=|\lambda|,
+r=|λ|,
 \qquad
-\dot r=\operatorname{sign}(\lambda)\nu,
+\dot r=\operatorname{sign}(λ)ν,
 \qquad
 m=\sqrt D\,\lVert u\rVert,
 ````
@@ -525,18 +525,18 @@ g=\mathrm dr^2+D r^2g_{\mathbb S^{N-1}}.
 Suppose ``m>0`` and define
 
 ````math
-\alpha=r+\dot r,
+α=r+\dot r,
 \qquad
-\beta=rm,
+β=rm,
 \qquad
-\rho=\sqrt{\alpha^2+\beta^2},
+\rho=\sqrt{α^2+β^2},
 \qquad
-f=\operatorname{atan}(\beta,\alpha)\in(0,\pi).
+f=\operatorname{atan}(β,α)\in(0,π).
 ````
 
-Here ``\operatorname{atan}(\beta,\alpha)`` is the two-argument arctangent,
+Here ``\operatorname{atan}(β,α)`` is the two-argument arctangent,
 which determines the angle from both coordinates. The unit-sphere exponential
-for ``w\perp x`` is
+for ``w⊥ x`` is
 
 ````math
 \operatorname{Exp}^{\mathbb S^{N-1}}_x(w)
@@ -549,13 +549,13 @@ the representative
 
 ````math
 \left(
-    \operatorname{sign}(\lambda)\rho,
+    \operatorname{sign}(λ)\rho,
     \operatorname{Exp}^{\mathbb S^{N-1}}_x\!\left(\frac{f}{m}u\right)
 \right).
 ````
 
 If ``m=0`` and ``r+\dot r>0``, the exponential is the radial point represented
-by ``(\lambda+\nu,x)``. If ``m=0`` and ``r+\dot r\leq0``, the radial geodesic
+by ``(λ+ν,x)``. If ``m=0`` and ``r+\dot r≤0``, the radial geodesic
 reaches or crosses the excluded zero tensor, so the exponential is undefined
 and a `DomainError` is thrown.
 
@@ -624,14 +624,14 @@ Let `p = ([λ], x)` be the stored representative of the point and let
 c
 =
 \begin{bmatrix}
-    \nu \\
-    \sqrt D\,|\lambda|\,c_{\mathbb S}(u)
+    ν \\
+    \sqrt D\,|λ|\,c_{\mathbb S}(u)
 \end{bmatrix}.
 ````
 
-The factor ``\sqrt D\,|\lambda|`` converts an orthonormal sphere basis into an
+The factor ``\sqrt D\,|λ|`` converts an orthonormal sphere basis into an
 orthonormal basis for the scaled spherical part of the Veronese metric
-``g_p=\mathrm d\lambda^2+D\lambda^2g_{\mathbb S}``.
+``g_p=\mathrm dλ^2+Dλ^2g_{\mathbb S}``.
 """
 get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
 
@@ -669,7 +669,7 @@ Let `p = ([λ], x)` be the stored representative of the point. Return the
 tangent vector whose coordinates in the [`DefaultOrthonormalBasis`](@ref) of
 ``T_p\mathcal V_{N,D}`` are `c`. This is the inverse of
 [`get_coordinates`](@ref): the first coordinate is the radial component, while
-the remaining sphere coordinates are divided by ``\sqrt D\,|\lambda|`` before
+the remaining sphere coordinates are divided by ``\sqrt D\,|λ|`` before
 being converted back to a tangent vector on [`Sphere`](@ref).
 """
 get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
@@ -694,7 +694,7 @@ point, and let `X = ([ν], u)` and `Y = ([ξ], v)` represent tangent vectors at
 `p`. Then
 
 ````math
-u,v\in x^\perp,
+u,v\in x^⊥,
 ````
 
 and the differential of the embedding gives
@@ -702,15 +702,15 @@ and the differential of the embedding gives
 ````math
 g_p(X,Y)
 =
-\left\langle
-    D\Phi_{(\lambda,x)}(\nu,u),
-    D\Phi_{(\lambda,x)}(\xi,v)
-\right\rangle
+⟨
+    DΦ_{(λ,x)}(ν,u),
+    DΦ_{(λ,x)}(ξ,v)
+⟩
 =
-\nu\xi+D\lambda^2\langle u,v\rangle.
+νξ+Dλ^2⟨u,v⟩.
 ````
 
-The mixed radial--spherical terms vanish because ``u,v\perp x``, while the
+The mixed radial--spherical terms vanish because ``u,v⊥ x``, while the
 ``D`` equal spherical contributions produce the factor ``D``.
 """
 function inner(M::Veronese, p, X, Y)
@@ -743,27 +743,35 @@ Compute the Riemannian logarithmic map from `p` to `q` on
 [`Veronese`](@ref).
 
 For ``M=\mathcal V_{N,D}``, let `p = ([λ], x)` be the stored representative of
-the base point. The representative of `q` is first matched to `p` with
-[`closest_representative!`](@ref); write the result as ``q_*=(\mu,y)`` and set
+the base point and write the supplied representative of `q` as ``(μ_0,y_0)``.
+The same point `q` is also represented by
+``((-1)^Dμ_0,-y_0)``. Choose between these two representatives as follows:
+for even ``D``, choose the one whose spherical component has nonnegative inner
+product with ``x``; for odd ``D``, choose the one whose scale has the same sign
+as ``λ``. If the inner product is zero in the even case, retain the
+supplied representative. This is the choice made by
+[`closest_representative!`](@ref); denote it by ``q_*=(μ,y)`` and set
 
 ````math
-r=|\lambda|,
+r=|λ|,
 \qquad
-s=|\mu|,
+s=|μ|,
 \qquad
-a=\arccos\langle x,y\rangle,
+a=\arccos⟨x,y⟩,
 \qquad
 m=\sqrt D\,a.
 ````
 
-A minimizing logarithm exists when the matched representatives have the same
-scale sign and ``m<\pi``. Under these conditions, `log(M, p, q)` returns the tangent
+A minimizing logarithm exists when ``λ`` and ``μ`` have the same sign
+and ``m<π``. If either condition fails, `log(M, p, q)` and
+`log!(M, X, p, q)` throw a `DomainError`, since no minimizing geodesic connects
+the points. Under these conditions, `log(M, p, q)` returns the tangent
 representation `X = ([ν], u)` with
 
 ````math
-\nu
+ν
 =
-\operatorname{sign}(\lambda)\bigl(s\cos m-r\bigr)
+\operatorname{sign}(λ)\bigl(s\cos m-r\bigr)
 ````
 
 and, for ``a>0``,
@@ -777,14 +785,13 @@ u
 ````
 
 The minimizing logarithm need not be unique. For ``D=2`` and
-``\langle x,y\rangle=0``, both ``y`` and ``-y`` are equally close matched
+``⟨x,y⟩=0``, both ``y`` and ``-y`` are equally close matched
 representatives and yield distinct minimizing tangent vectors. The matching
 rule keeps the supplied representative at this tie, so this method returns
 one of these logarithms.
 
 For ``a=0``, the continuous limit gives ``u=0``. The implementation evaluates
-the ratio of sines using `sinc` for numerical stability. If the points are not
-connected by a minimizing geodesic, a `DomainError` is thrown.
+the ratio of sines using `sinc` for numerical stability.
 
 See Theorem 4.4 of
 [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite) for the corresponding
@@ -839,7 +846,7 @@ manifold_dimension(M::Veronese) = get_parameter(M.size)[1]
 Let `p = ([λ], x)` be the stored representative of a point on
 [`Veronese`](@ref). Orthogonally project an ambient tensor `A` onto the tangent
 space at `p`. The ambient tensor is stored as a vector of length ``N^D`` and
-the result `Y = ([ν], u)` represents a tangent vector with ``u\perp x``.
+the result `Y = ([ν], u)` represents a tangent vector with ``u⊥ x``.
 
 For each mode ``j=1,\ldots,D``, let ``c_j\in\mathbb R^N`` be the contraction of
 `A` with ``x`` in every mode except mode ``j``. In coordinates,
@@ -855,7 +862,7 @@ A_{i_1,\ldots,i_{j-1},a,i_{j+1},\ldots,i_D}
 and set ``c=\sum_{j=1}^{D}c_j``. The radial coefficient is
 
 ````math
-\nu=\langle A,x^{\otimes D}\rangle.
+ν=⟨A,x^{⊗ D}⟩.
 ````
 
 The spherical component is obtained from the tangent part of ``c``:
@@ -863,13 +870,13 @@ The spherical component is obtained from the tangent part of ``c``:
 ````math
 u
 =
-\frac{(I-xx^\top)c}{D\lambda}
+\frac{(I-xx^\top)c}{Dλ}
 =
-\frac{c-D\nu x}{D\lambda}.
+\frac{c-Dν x}{Dλ}.
 ````
 
-The second equality uses ``\langle x,c\rangle=D\nu``. The implementation
-performs one final projection onto ``x^\perp`` to remove numerical roundoff.
+The second equality uses ``⟨x,c⟩=Dν``. The implementation
+performs one final projection onto ``x^⊥`` to remove numerical roundoff.
 """
 project(::Veronese, p, A)
 
@@ -968,30 +975,30 @@ point representatives, and let `X = ([ν], u)` represent a tangent vector at
 ````math
 A
 =
-D\Phi_{(\lambda,x)}(\nu,u)
+DΦ_{(λ,x)}(ν,u)
 =
-\nu x^{\otimes D}
+ν x^{⊗ D}
 +
-\lambda\sum_{j=1}^{D}
- x^{\otimes(j-1)}\otimes u\otimes x^{\otimes(D-j)}.
+λ\sum_{j=1}^{D}
+ x^{⊗(j-1)}⊗ u⊗ x^{⊗(D-j)}.
 ````
 
 Projection transport returns `Y = ([ξ], v)` at `q` such that
-``D\Phi_{(\mu,y)}(\xi,v)`` is the orthogonal projection of `A` onto the
-embedded tangent space at ``\Phi(\mu,y)``. Set
+``DΦ_{(μ,y)}(ξ,v)`` is the orthogonal projection of `A` onto the
+embedded tangent space at ``Φ(μ,y)``. Set
 
 ````math
-a=\langle x,y\rangle,
+a=⟨x,y⟩,
 \qquad
-b=\langle u,y\rangle.
+b=⟨u,y⟩.
 ````
 
 Then
 
 ````math
-\xi
+ξ
 =
-\nu a^D+D\lambda b a^{D-1},
+ν a^D+Dλ b a^{D-1},
 ````
 
 and, with the final term omitted when ``D=1``,
@@ -999,11 +1006,11 @@ and, with the final term omitted when ``D=1``,
 ````math
 c
 =
-D\nu a^{D-1}x
-+D\lambda a^{D-1}u
-+D(D-1)\lambda b a^{D-2}x,
+Dν a^{D-1}x
++Dλ a^{D-1}u
++D(D-1)λ b a^{D-2}x,
 \qquad
-v=\frac{c-D\xi y}{D\mu}.
+v=\frac{c-Dξ y}{Dμ}.
 ````
 
 The implementation evaluates these contractions directly and therefore does
