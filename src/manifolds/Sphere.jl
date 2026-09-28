@@ -119,25 +119,26 @@ function check_point(M::AbstractSphere, p; kwargs...)
 end
 
 """
-    check_vector(M::AbstractSphere, p, X; kwargs... )
+    check_vector(M::AbstractSphere, p, X; atol, rtol, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`AbstractSphere`](@ref) `M`, i.e.
 after [`check_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
-and orthogonal to `p`.
-The tolerance for the last test can be set using the `kwargs...`.
+and orthogonal to `p` up to `max(atol, rtol * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
         M::AbstractSphere,
         p,
         X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
     absdot = abs(real(dot(p, X)))
-    if !isapprox(absdot, 0; atol = atol, kwargs...)
+    if !(absdot <= atol || absdot <= rtol * norm(X))
         return DomainError(
             absdot,
-            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding (tolerance: $atol).",
+            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding (tolerance: $(max(atol, rtol * norm(X)))).",
         )
     end
     return nothing

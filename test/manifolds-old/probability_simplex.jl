@@ -1,5 +1,12 @@
 include("../header.jl")
 
+@testset "tangent vectors of the probability simplex of any length" begin
+    M = ProbabilitySimplex(2)
+    p = [0.2, 0.3, 0.5]
+    @test is_vector(M, p, project(M, p, [100.0, -50.0, 30.0]))
+    @test !is_vector(M, p, [1.0, -1.0, 1.0e-6])
+end
+
 @testset "Probability simplex" begin
     M = ProbabilitySimplex(2)
     M_euc = MetricManifold(M, EuclideanMetric())

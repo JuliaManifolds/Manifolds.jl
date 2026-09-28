@@ -80,7 +80,8 @@ Check whether ``X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}`` is a tangent vector to
 i.e. `Y` has to be of same dimension as `q` and a ``X`` has to be a symmetric matrix with
 zero diagonal.
 
-The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
+The diagonal has to vanish up to `max(atol, 2 * rtol * norm(Y))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 Note that symmetric of ``X`` holds by construction an is not explicitly checked.
 """
 function check_vector(
@@ -88,11 +89,13 @@ function check_vector(
         q,
         Y::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
     X = q * Y' + Y * q'
     n = diag(X)
-    if !all(isapprox.(n, 0.0; atol = atol, kwargs...))
+    r = maximum(abs, n)
+    if !(r <= atol || r <= 2 * rtol * norm(Y))
         return DomainError(
             n,
             "The vector $(X) is not a tangent to a point on $(M) (represented py $(q) and $(Y), since its diagonal is nonzero.",

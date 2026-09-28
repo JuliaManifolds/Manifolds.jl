@@ -40,9 +40,11 @@ function check_vector(
         p,
         X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
-    if !isapprox(minkowski_metric(p, X), 0; atol = atol, kwargs...)
+    r = abs(minkowski_metric(p, X))
+    if !(r <= atol || r <= rtol * norm(p) * norm(X))
         return DomainError(
             abs(minkowski_metric(p, X)),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal (with respect to the Minkowski inner product) in the embedding.",

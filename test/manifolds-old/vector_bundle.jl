@@ -95,6 +95,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_representation_size = false,
                 test_rand_point = true,
                 test_rand_tvector = true,
+                is_point_atol_multiplier = 1,
             )
 
             Xir = allocate(pts_tb[1])

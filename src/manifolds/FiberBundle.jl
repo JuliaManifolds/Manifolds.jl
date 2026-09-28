@@ -221,6 +221,51 @@ of `p` is attached.
 """
 bundle_projection(B::FiberBundle, p) = submanifold_component(B.manifold, p, Val(1))
 
+"""
+    check_point(B::FiberBundle, p; kwargs...)
+
+Check whether `p` is a valid point on the [`FiberBundle`](@ref) `B`, that is whether its
+base part is a point of the base manifold and its fiber part is an element of the fiber
+over that base point. Both parts are checked: an error of the base part is returned as a
+`ComponentManifoldError` with index 1, an error of the fiber part with index 2, and errors of
+both parts together in a `CompositeManifoldError`. The keyword arguments are passed on to both
+checks.
+"""
+function check_point(B::FiberBundle, p; kwargs...)
+    xp, Vp = submanifold_components(B.manifold, p)
+    e = [
+        (1, check_point(B.manifold, xp; kwargs...)),
+        (2, check_point(Fiber(B.manifold, xp, B.type), Vp; kwargs...)),
+    ]
+    errors = [ComponentManifoldError(i, err) for (i, err) in e if err !== nothing]
+    (length(errors) > 1) && return CompositeManifoldError(errors)
+    (length(errors) == 1) && return errors[1]
+    return nothing
+end
+
+"""
+    check_vector(B::FiberBundle, p, X; kwargs...)
+
+Check whether `X` is a valid tangent vector at `p` on the [`FiberBundle`](@ref) `B`, that
+is whether its base part is a tangent vector of the base manifold at the base part of `p`
+and its fiber part is a tangent vector of the fiber at the fiber part of `p`. Both parts are
+checked: an error of the base part is returned as a `ComponentManifoldError` with index 1, an
+error of the fiber part with index 2, and errors of both parts together in a
+`CompositeManifoldError`. The keyword arguments are passed on to both checks.
+"""
+function check_vector(B::FiberBundle, p, X; kwargs...)
+    xp, Vp = submanifold_components(B.manifold, p)
+    VXM, VXF = submanifold_components(B.manifold, X)
+    e = [
+        (1, check_vector(B.manifold, xp, VXM; kwargs...)),
+        (2, check_vector(Fiber(B.manifold, xp, B.type), Vp, VXF; kwargs...)),
+    ]
+    errors = [ComponentManifoldError(i, err) for (i, err) in e if err !== nothing]
+    (length(errors) > 1) && return CompositeManifoldError(errors)
+    (length(errors) == 1) && return errors[1]
+    return nothing
+end
+
 function get_basis(M::FiberBundle, p, B::AbstractBasis)
     xp1, xp2 = submanifold_components(M, p)
     base_basis = get_basis(M.manifold, xp1, B)
@@ -333,9 +378,9 @@ function Random.rand!(rng::AbstractRNG, M::FiberBundle, pX; vector_at = nothing)
         rand!(rng, M.manifold, pXM)
         rand!(rng, Fiber(M.manifold, pXM, M.type), pXF)
     else
-        vector_atM, vector_atF = submanifold_components(M.manifold, vector_at)
+        vector_atM = bundle_projection(M, vector_at)
         rand!(rng, M.manifold, pXM; vector_at = vector_atM)
-        rand!(rng, Fiber(M.manifold, pXM, M.type), pXF; vector_at = vector_atF)
+        rand!(rng, Fiber(M.manifold, vector_atM, M.type), pXF)
     end
     return pX
 end

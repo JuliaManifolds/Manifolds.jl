@@ -132,17 +132,20 @@ end
 
 Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`, i.e.
 after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
-`X` has to be of same dimension as `p` and its elements have to sum to one.
-The tolerance for the last test can be set using the `kwargs...`.
+`X` has to be of same dimension as `p` and its elements have to sum to zero
+up to `max(atol, rtol * sqrt(length(X)) * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
         M::ProbabilitySimplex,
         p,
         X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
-    if !isapprox(sum(X), 0.0; atol = atol, kwargs...)
+    r = abs(sum(X))
+    if !(r <= atol || r <= rtol * sqrt(length(X)) * norm(X))
         return DomainError(
             sum(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its elements do not sum up to 0.",

@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `distance` and `log` on the unsigned `EssentialManifold` choose the closest of the four sign flips, so that they are the same for every representative of a point.
 * `distance` and `log` on the `EssentialManifold` return a number when a turn about the z axis puts one of the two cameras in place.
 * `project` from a `Euclidean` embedding into a `Euclidean` manifold of fewer array dimensions returns the corresponding entries.
+* Random tangent vectors of a `FiberBundle` are drawn in the fiber over the base point of `vector_at`.
+* The tangent checks of the sphere, the projective space, the probability simplex, the hyperbolic space, the centered matrices, the elliptope and the spectrahedron take a relative tolerance `rtol` and accept tangent vectors of any length.
+* `check_point` and `check_vector` on a `FiberBundle` check the base part and the fiber part and report the errors of both.
 
 ## [0.11.31] 2026-09-25
 

@@ -1,5 +1,12 @@
 include("../header.jl")
 
+@testset "tangent vectors of the projective space of any length" begin
+    M = ProjectiveSpace(2)
+    p = [1.0, 2.0, 3.0] / sqrt(14.0)
+    @test is_vector(M, p, project(M, p, [100.0, -50.0, 30.0]))
+    @test !is_vector(M, p, project(M, p, [1.0, -0.5, 0.3]) .+ 1.0e-6 .* p)
+end
+
 @testset "ProjectiveSpace" begin
     @testset "Real" begin
         M = ProjectiveSpace(2)

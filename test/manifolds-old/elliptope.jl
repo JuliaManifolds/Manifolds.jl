@@ -1,5 +1,12 @@
 include("../header.jl")
 
+@testset "tangent vectors of the elliptope of any length" begin
+    M = Elliptope(3, 2)
+    q = [1.0 0.0; 0.0 1.0; 1 / sqrt(2) 1 / sqrt(2)]
+    @test is_vector(M, q, project(M, q, [100.0 -50.0; 30.0 20.0; -10.0 5.0]))
+    @test !is_vector(M, q, project(M, q, [1.0 -0.5; 0.3 0.2; -0.1 0.4]) .+ 1.0e-6 .* q)
+end
+
 @testset "Elliptope" begin
     M = Elliptope(4, 2)
     @test repr(M) == "Elliptope(4, 2)"

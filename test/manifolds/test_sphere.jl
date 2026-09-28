@@ -15,6 +15,9 @@ using ManifoldDiff
 
     @testset "Basics" begin
         @test base_manifold(M) === M
+        # tangent vectors of any length are accepted, a clearly normal part is not
+        @test is_vector(M, q, project(M, q, [100.0, 200.0, 300.0]))
+        @test !is_vector(M, q, project(M, q, [1.0, 2.0, 3.0]) .+ 1.0e-6 .* q)
     end
 
     # TODO: test ProjectedOrthonormalBasis(:svd), DiagonalizingOrthonormalBasis
