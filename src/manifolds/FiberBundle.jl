@@ -361,7 +361,7 @@ function _isapprox(B::FiberBundle, p, X, Y; kwargs...)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
-    return isapprox(B.manifold, VXM, VYM; kwargs...) &&
+    return isapprox(B.manifold, px, VXM, VYM; kwargs...) &&
         isapprox(Fiber(B.manifold, px, B.type), Vx, VXF, VYF; kwargs...)
 end
 

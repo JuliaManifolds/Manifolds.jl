@@ -8,6 +8,14 @@ using RecursiveArrayTools
     @test Manifolds.FiberBundleProductVectorTransport(M) ==
         Manifolds.FiberBundleProductVectorTransport(vm, vm)
 
+    # tangent vectors are compared as tangent vectors at the base point, not as points
+    TP = TangentBundle(ProjectiveSpace(2))
+    pP = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.5, 0.0])
+    XP = ArrayPartition([0.0, 0.5, 0.0], [0.0, 0.0, 0.5])
+    @test isapprox(TP, pP, XP, XP)
+    @test isapprox(TP, pP, zero_vector(TP, pP), zero_vector(TP, pP))
+    @test !isapprox(TP, pP, XP, ArrayPartition([0.0, 0.7, 0.0], [0.0, 0.0, 0.5]))
+
     TB = TangentBundle(Sphere(2))
     p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
     @test is_point(TB, p)
