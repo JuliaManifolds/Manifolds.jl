@@ -664,13 +664,13 @@ function project!(
             "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
         ),
     )
-    any(n .< m[1:ln]) && throw(
+    any(n[1:lm] .< m) && throw(
         DomainError(
             "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
         ),
     )
     #  fill q with the „top left edge“ of p.
-    q .= p[map(i -> Base.OneTo(i), m)..., ntuple(_ -> 1, lm - ln)...]
+    q .= p[map(i -> Base.OneTo(i), m)..., ntuple(_ -> 1, ln - lm)...]
     return q
 end
 

@@ -184,6 +184,7 @@ function log!(M::EssentialManifold, X, p, q)
         q2min = copy(M, q)
         for k in 1:4
             #flip sign in q to get another member of its equivalence class
+            q2 = copy(M, q)
             if k == 2
                 q2[1][2:3, :] = -q[1][2:3, :]
                 q2[2][[1 3], :] = -q[2][[1 3], :]
@@ -243,7 +244,10 @@ function dist_min_angle_pair(p, q)
     else
         if abs(mod(t_break1 - t_break2 + pi, 2 * pi) - pi) < tol_break
             t_min = t_break1 + pi
-            f_min = 0
+            # the cost at t_min, as at the end of the Newton search
+            θ1 = acos(clamp((m1 * sin(t_min + Φ1) + c1 - 1) / 2, -1, 1))
+            θ2 = acos(clamp((m2 * sin(t_min + Φ2) + c2 - 1) / 2, -1, 1))
+            f_min = θ1^2 + θ2^2
         else
             t_search1 = t_break1
             t_search2 = t_break2
@@ -256,10 +260,13 @@ function dist_min_angle_pair(p, q)
             df2_break2 = dist_min_angle_pair_compute_df_break(t_break2, q212)
 
             #compute derivative of each term at other's discontinuity
+            # sin(θ) vanishes only at θ = 0, where the limit of the derivative is 0
             θ1_break2 = acos(clamp((m1 * sin(t_break2 + Φ1) + c1 - 1) / 2, -1.0, 1.0))
-            df1_break2 = -θ1_break2 * (m1 * cos(t_break2 + Φ1)) / (2 * sin(θ1_break2))
+            s1_break2 = 2 * sin(θ1_break2)
+            df1_break2 = iszero(s1_break2) ? zero(θ1_break2) : -θ1_break2 * (m1 * cos(t_break2 + Φ1)) / s1_break2
             θ2_break1 = acos(clamp((m2 * sin(t_break1 + Φ2) + c2 - 1) / 2, -1.0, 1.0))
-            df2_break1 = -θ2_break1 * (m2 * cos(t_break1 + Φ2)) / (2 * sin(θ2_break1))
+            s2_break1 = 2 * sin(θ2_break1)
+            df2_break1 = iszero(s2_break1) ? zero(θ2_break1) : -θ2_break1 * (m2 * cos(t_break1 + Φ2)) / s2_break1
 
             #compute left and right derivatives of sum of the two terms
             df_break1n = df1_break1 + df2_break1
@@ -375,17 +382,19 @@ function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t
         θ2 = acos(clamp(((m2 * sin(t_min + Φ2) + c2 - 1) / 2), -1, 1))
 
         #compute the first derivatives di, i=1,2
+        # sin(θi) vanishes only at θi = 0, where also mci = 0 and the limit is 0
         s1 = 2 * sin(θ1)
         s2 = 2 * sin(θ2)
-        d1 = (-θ1 * mc1) / s1
-        d2 = (-θ2 * mc2) / s2
+        d1 = iszero(s1) ? zero(θ1) : (-θ1 * mc1) / s1
+        d2 = iszero(s2) ? zero(θ2) : (-θ2 * mc2) / s2
         d = d1 + d2
 
         #compute the second derivatives ddi, i=1,2
-        eztuSq1 = (mc1 / s1)^2
-        eztuSq2 = (mc2 / s2)^2
-        dd1 = eztuSq1 + θ1 / 2 * cot(θ1 / 2) * (1 - eztuSq1)
-        dd2 = eztuSq2 + θ2 / 2 * cot(θ2 / 2) * (1 - eztuSq2)
+        # at θi = 0 the limit of the second derivative is 1
+        eztuSq1 = iszero(s1) ? one(θ1) : (mc1 / s1)^2
+        eztuSq2 = iszero(s2) ? one(θ2) : (mc2 / s2)^2
+        dd1 = iszero(s1) ? one(θ1) : eztuSq1 + θ1 / 2 * cot(θ1 / 2) * (1 - eztuSq1)
+        dd2 = iszero(s2) ? one(θ2) : eztuSq2 + θ2 / 2 * cot(θ2 / 2) * (1 - eztuSq2)
         dd = dd1 + dd2
 
         #compute the new t_min

@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `manifold_dimension` on `DeterminantOneMatrices` over the complex numbers counts the determinant condition as the two real conditions it is.
 * `project` onto the tangent space of the `Elliptope` removes the vertical part with the right sign, so that it is a projection onto the horizontal space.
 * `distance` on a complex `Euclidean` space returns a real number.
+* `distance` and `log` on the unsigned `EssentialManifold` choose the closest of the four sign flips, so that they are the same for every representative of a point.
+* `distance` and `log` on the `EssentialManifold` return a number when a turn about the z axis puts one of the two cameras in place.
+* `project` from a `Euclidean` embedding into a `Euclidean` manifold of fewer array dimensions returns the corresponding entries.
 
 ## [0.11.31] 2026-09-25
 

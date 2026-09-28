@@ -237,6 +237,7 @@ using FiniteDifferences
         O2 = EmbeddedManifold(M, Euclidean(4, 4, 3))
         q2M = embed(O2, p)
         @test norm(q2T - q2M) == 0
+        @test norm(project(O2, q2M) - p) == 0
         # wrong size error checks
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(3, 3, 5))
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
