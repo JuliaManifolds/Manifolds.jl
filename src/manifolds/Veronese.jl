@@ -31,7 +31,8 @@ is the ``D``-fold tensor product of ``x`` with itself. The parametrization
 Φ(λ,x)=λ x^{⊗ D},
 ````
 
-is two-to-one, with equivalent representatives
+is two-to-one. Every embedded tensor can be parametrized by either of the two
+pairs
 
 ````math
 (λ,x)
@@ -39,9 +40,44 @@ is two-to-one, with equivalent representatives
 \bigl((-1)^Dλ,-x\bigr).
 ````
 
-A point is stored as one representative `p = ([λ], x)`, and a tangent vector
-at `p` by `X = ([ν], u)`, where ``u∈T_x\mathbb S^{N-1}=x^⊥``. The Frobenius
-metric inherited from the tensor space is
+Hence, for even ``D`` the sign of ``λ`` is intrinsic and
+``\mathcal V_{N,D}`` has two connected components, while for odd ``D`` the sign
+can be absorbed by replacing ``x`` by ``-x`` and the manifold is connected
+when ``N≥2``. For ``N=1``, the manifold is ``ℝ\setminus\{0\}`` for every
+``D`` and has two connected components.
+
+An instance `M = Veronese(N, D)` represents the manifold
+``\mathcal V_{N,D}``. In the implementation, a manifold point is stored by
+choosing one of the parameter pairs above. Thus
+
+````math
+M=\mathcal V_{N,D},
+\qquad
+p\leftrightarrow(λ,x),
+\qquad
+Φ(λ,x)=λ x^{⊗ D}.
+````
+
+Concretely, the chosen pair is stored as `p = ([λ], x)`. A tangent vector is
+stored analogously as `X = ([ν], u)`, where
+
+````math
+u\in T_x\mathbb S^{N-1}=x^⊥.
+````
+
+The metric is induced by the Euclidean metric on the full tensor space
+``(ℝ^N)^{⊗ D}``. The differential of ``Φ`` is
+
+````math
+DΦ_{(λ,x)}(ν,u)
+=
+ν x^{⊗ D}
++
+λ\sum_{j=1}^{D}
+ x^{⊗(j-1)}⊗ u⊗ x^{⊗(D-j)},
+````
+
+and therefore the induced Riemannian metric is
 
 ````math
 g_{(λ,x)}\bigl((ν,u),(ξ,v)\bigr)
@@ -49,10 +85,8 @@ g_{(λ,x)}\bigl((ν,u),(ξ,v)\bigr)
 νξ+Dλ^2⟨u,v⟩.
 ````
 
-For even ``D``, the sign of ``λ`` is intrinsic and ``\mathcal V_{N,D}`` has two
-connected components. For odd ``D`` and ``N≥2``, the sign can be absorbed into
-``x`` and the manifold is connected. For ``N=1``, it is
-``ℝ\setminus\{0\}`` and has two connected components for every ``D``.
+Thus the spherical directions are scaled by ``\sqrt{D}|λ|`` relative to
+the radial direction.
 
 The Veronese manifold is a special case of the [`Segre`](@ref) manifold: the
 Veronese case uses one spherical factor repeated ``D`` times, whereas the Segre
@@ -118,7 +152,7 @@ end
     check_point(M::Veronese, p; kwargs...)
 
 Check whether `p` represents a point on [`Veronese`](@ref) `M`. In the
-implementation, `p = ([λ], x)` is a stored representative of the tensor
+implementation, `p = ([λ], x)` is the selected parameter pair for the tensor
 ``Φ(λ,x)=λ x^{⊗ D}``. The scale ``λ`` must be finite
 and nonzero and ``x`` must lie on ``\mathbb S^{N-1}``.
 """
@@ -205,19 +239,20 @@ end
 @doc raw"""
     closest_representative!(M::Veronese, q, p)
 
-Every point ``q≐(μ,y)`` on [`Veronese`](@ref) has two equivalent
-representatives,
+Let ``p ≐ (λ,x)`` and ``q ≐ (μ,y)``. The point `q` is described by either of
+the two parameter pairs
 
 ````math
 (μ,y)
 \quad\text{and}\quad
-\bigl((-1)^Dμ,-y\bigr).
+\bigl((-1)^D μ,-y\bigr),
 ````
 
-Given stored representatives `p = ([λ], x)` and `q = ([μ], y)`, replace `q` by
-the representative matched to `p`. For even ``D``, choose ``y`` such that
-``⟨x,y⟩≥0``; when ``⟨x,y⟩=0``, retain the supplied representative. For odd
-``D``, choose the representative whose scale has the same sign as ``λ``.
+which correspond to the same tensor.
+
+For even ``D``, the pair whose spherical component is closest to ``x`` is
+chosen. For odd ``D``, the pair whose scale has the same sign as ``λ`` is
+chosen.
 """
 function closest_representative!(M::Veronese, q, p)
     _, d = get_parameter(M.size)
@@ -233,25 +268,16 @@ end
 @doc raw"""
     connected_by_geodesic(M::Veronese, p, q)
 
-Return whether `p` and `q` are connected by a minimizing geodesic in
-[`Veronese`](@ref).
+Return `true` if `p` and `q` are connected by a minimizing geodesic, and
+`false` otherwise.
 
-Let `p = ([λ], x)` and let ``q_*=([μ],y)`` be the representative of `q` selected
-by [`closest_representative!`](@ref). Set
-
-````math
-d_{\mathbb S}(x,y)=\arccos⟨x,y⟩.
-````
-
-A minimizing geodesic exists if and only if `p` and `q` lie in the same
-connected component and
+Let ``p ≐ (λ,x)`` and let ``q ≐ (μ,y)`` use the pair selected by
+[`closest_representative!`](@ref). A minimizing geodesic exists if and only if
+the two points lie in the same connected component and
 
 ````math
-\sqrt D\,d_{\mathbb S}(x,y)<π.
+\sqrt D\,\operatorname{dist}_{𝕊^{N-1}}(x,y) < π.
 ````
-
-For ``N≥2``, when the left-hand side is at least ``π``, the distance is
-approached by curves that pass arbitrarily close to the excluded zero tensor.
 """
 function connected_by_geodesic(M::Veronese, p, q)
     q_closest = copy(M, q)
@@ -289,32 +315,29 @@ default_vector_transport_method(::Veronese) = ProjectionTransport()
 
 Riemannian distance between two points `p` and `q` on [`Veronese`](@ref).
 
-Let `p = ([λ], x)` and let ``q_*=([μ],y)`` be the representative of `q` selected
-by [`closest_representative!`](@ref). Define
+Let ``p ≐ (λ,x)`` and let ``q ≐ (μ,y)`` use the pair selected by
+[`closest_representative!`](@ref). Define
 
 ````math
-r=|λ|,
+r = |λ|,
 \qquad
-s=|μ|,
+s = |μ|,
 \qquad
-θ=\arccos⟨x,y⟩,
-\qquad
-m=\min\bigl(\sqrt D\,θ,π\bigr).
+m = \min\left(\sqrt D\,\operatorname{dist}_{𝕊^{N-1}}(x,y), π\right).
 ````
 
 If `p` and `q` lie in the same connected component, then
 
 ````math
-d(p,q)
+\operatorname{dist}(p,q)
 =
-\sqrt{r^2+s^2-2rs\cos m}
+\sqrt{r^2+s^2-2rs\cos(m)}
 =
 \sqrt{(r-s)^2+4rs\sin^2(m/2)}.
 ````
 
-When ``\sqrt D\,θ<π``, this distance is realized by a minimizing geodesic.
-Otherwise it equals ``r+s``, but no minimizing geodesic attains it. Points in
-different connected components have infinite distance.
+Otherwise, their distance is infinite. See [`connected_by_geodesic`](@ref) for
+when this distance is attained by a minimizing geodesic.
 """
 function distance(M::Veronese, p, q)
     q_closest = copy(M, q)
@@ -410,42 +433,56 @@ end
 
 Exponential map on [`Veronese`](@ref).
 
-Let `p = ([λ], x)` and `X = ([ν], u)`. Define
+Let ``p ≐ (λ,x)`` and ``X = ([ν],u) ∈ T_pM``. Writing
 
 ````math
-r=|λ|,
+r = |λ|,
 \qquad
-\dot r=\operatorname{sign}(λ)ν,
+\dot r = \operatorname{sign}(λ)ν,
 \qquad
-m=\sqrt D\,\lVert u\rVert,
+m = √D\,\lVert u\rVert,
 ````
 
-and, for ``m>0``, let
+the induced metric takes the warped-cone form
 
 ````math
-ρ=\sqrt{(r+\dot r)^2+(rm)^2},
-\qquad
-f=\operatorname{atan}(rm,r+\dot r).
+g = \mathrm dr^2 + D r^2 g_{𝕊^{N-1}}.
 ````
 
-Then the exponential is represented by
+Thus ``\dot r`` is the radial velocity and ``m`` is the angular speed measured
+in the Veronese metric. For ``m>0``, define
+
+````math
+ρ = \sqrt{(r+\dot r)^2 + (rm)^2},
+\qquad
+f = \operatorname{atan}(rm,r+\dot r).
+````
+
+Then the endpoint of the geodesic with initial data ``(p,X)`` is represented by
 
 ````math
 \operatorname{exp}_p(X)
 ≐
 \left(
-    \operatorname{sign}(λ)ρ,
-    \operatorname{Exp}^{\mathbb S^{N-1}}_x\!\left(\frac{f}{m}u\right)
-\right).
+    \operatorname{sign}(λ)ρ,\,
+    \operatorname{Exp}^{𝕊^{N-1}}_x\!\left(\frac{f}{m}u\right)
+\right),
 ````
 
-Here ``\operatorname{atan}`` is the two-argument arctangent and
-``\operatorname{Exp}^{\mathbb S^{N-1}}`` is the exponential map on the unit
-sphere. If ``m=0`` and ``r+\dot r>0``, then
-``\operatorname{exp}_p(X)≐(λ+ν,x)``. If ``m=0`` and ``r+\dot r≤0``, the radial
-geodesic reaches the excluded zero tensor and a `DomainError` is thrown.
+where ``\operatorname{Exp}^{𝕊^{N-1}}`` is the exponential map on the unit
+sphere. Hence the radial component changes from ``r`` to ``ρ``, while the
+spherical component moves along the sphere in the direction ``u``.
 
-The formula is derived in Proposition 3.1 of
+If ``m=0``, there is no spherical motion. When ``r+\dot r>0``,
+
+````math
+\operatorname{exp}_p(X) ≐ (λ+ν,x).
+````
+
+If ``r+\dot r≤0``, the radial geodesic reaches the excluded zero tensor, so the
+exponential map is not defined and a `DomainError` is thrown.
+
+The formula follows from the warped-cone geodesics in Proposition 3.1 of
 [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
 """
 exp(::Veronese, p, X)
@@ -457,14 +494,10 @@ end
 @doc raw"""
     exp_fused!(M::Veronese, q, p, X, t::Number)
 
-Compute ``\exp_p(tX)`` and store the result in `q`, where `p = ([λ], x)` and
-`X = ([ν], u)`. Rather than first constructing the scaled tangent vector
-``([tν],tu)``, this fused implementation incorporates ``t`` directly into the
-radial and angular formulas and calls `exp_fused!` on [`Sphere`](@ref) for the
-spherical component.
+Compute ``\exp_p(tX)`` and store the result in `q`.
 
-The domain and `DomainError` behavior are the same as for [`exp`](@ref) applied
-to ``tX``.
+The scalar ``t`` is incorporated directly into the exponential-map formulas,
+avoiding the explicit construction of the scaled tangent vector ``tX``.
 """
 function exp_fused!(M::Veronese, q, p, X, t::Number)
     n, d = get_parameter(M.size)
@@ -501,20 +534,21 @@ end
 @doc raw"""
     get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
 
-Get coordinates of ``X≐(ν,u)`` in ``T_{p}\mathcal V_{N,D}`` using a
+Get coordinates of ``X ≐ (ν,u)`` in ``T_p\mathcal V_{N,D}`` using a
 [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`).
-For ``p≐(λ,x)``, let ``c_{\mathbb S}(u)`` be the default orthonormal coordinates
-of ``u∈T_x\mathbb S^{N-1}``. Then
+
+For ``p ≐ (λ,x)``, let ``c_{\mathbb S}(u)`` denote the orthonormal coordinates
+of ``u ∈ T_x\mathbb S^{N-1}``. Since the spherical part of the Veronese metric
+is scaled by ``Dλ^2``, the coordinates are
 
 ````math
 c
 =
 \begin{bmatrix}
     ν \\
-    \sqrt D\,|λ|\,c_{\mathbb S}(u)
+    √D\,|λ|\,c_{\mathbb S}(u)
 \end{bmatrix}.
 ````
-
 """
 get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
 
@@ -607,46 +641,55 @@ end
     log(M::Veronese, p, q)
     log!(M::Veronese, X, p, q)
 
-Logarithmic map on [`Veronese`](@ref).
+The logarithmic map returns the tangent vector `X` at `p` such that
+``exp_p(X)=q`` along a minimizing geodesic.
 
-Let `p = ([λ], x)` and let ``q_*=([μ],y)`` be the representative of `q` selected
-by [`closest_representative!`](@ref). Define
+Let ``p ≐ (λ,x)`` and write ``q ≐ (μ,y)`` for the pair chosen by
+[`closest_representative!`](@ref). Define
 
 ````math
-r=|λ|,
+r = |λ|,
 \qquad
-s=|μ|,
+s = |μ|,
 \qquad
-a=\arccos⟨x,y⟩,
+a = \operatorname{dist}_{𝕊^{N-1}}(x,y),
 \qquad
-m=\sqrt D\,a.
+m = √D\,a.
 ````
 
-A minimizing logarithm exists if and only if ``λ`` and ``μ`` have the same sign
-and ``m<π``. It is represented by ``\operatorname{log}_p(q)≐([ν],u)`` with
+Here ``r`` and ``s`` are the radial magnitudes of the two points, ``a`` is the
+spherical distance from ``x`` to ``y``, and ``m`` is the corresponding angular
+distance in the Veronese metric.
+
+A minimizing logarithm exists when `p` and `q` lie in the same connected
+component and ``m < π``. It is given by
+
+````math
+\operatorname{log}_p(q) ≐ ([ν],u),
+````
+
+with radial component
 
 ````math
 ν
 =
-\operatorname{sign}(λ)\bigl(s\cos m-r\bigr)
+\operatorname{sign}(λ)\bigl(s\cos(m)-r\bigr)
 ````
 
-and, for ``a>0``,
+and, for ``a>0``, spherical component
 
 ````math
 u
 =
 \frac{s}{r}
-\frac{\sin m}{\sqrt D\,\sin a}
+\frac{\sin(m)}{√D\,\sin(a)}
 \bigl(y-\cos(a)x\bigr).
 ````
 
-For ``a=0``, set ``u=0`` by continuity. If either existence condition fails,
-`log` and `log!` throw a `DomainError`.
+The vector ``u ∈ T_x𝕊^{N-1}`` points from ``x`` toward ``y`` along the sphere.
+If ``a=0``, there is no spherical motion and ``u=0``.
 
-When the two equivalent representatives of `q` are equally close to `p`, the
-minimizing logarithm may be nonunique. In this case,
-[`closest_representative!`](@ref) determines which logarithm is returned.
+If no minimizing geodesic exists, `log` and `log!` throw a `DomainError`.
 
 The formula is derived in Theorem 4.4 of
 [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
@@ -680,16 +723,12 @@ end
 @doc raw"""
     manifold_dimension(M::Veronese)
 
-For `M = Veronese(N, D)`, return the manifold dimension ``N``. Indeed, the
-parameter space has one radial degree of freedom and ``N-1`` spherical degrees
-of freedom, hence
+For `M = Veronese(N, D)`, return the manifold dimension ``N``. There is one
+radial degree of freedom and ``N-1`` spherical degrees of freedom, so
 
 ````math
 \dim\mathcal V_{N,D}=1+(N-1)=N.
 ````
-
-The finite two-to-one identification of representatives does not change this
-dimension.
 """
 manifold_dimension(M::Veronese) = get_parameter(M.size)[1]
 
