@@ -58,6 +58,12 @@ include("../header.jl")
         @test is_point(M2, p2)
         @test_throws DomainError is_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]; error = :error)
         @test Manifolds.check_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]) isa DomainError
+        # a point is an m×n matrix of rank exactly k, also in SVD form
+        @test is_point(M2, [1.0 0.0; 0.0 0.0; 0.0 0.0])
+        @test !is_point(M, [1.0 0.0; 0.0 0.0; 0.0 0.0])
+        @test !is_point(
+            M, SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0], [1.0, 0.0], [1.0 0.0; 0.0 1.0])
+        )
 
         @test default_retraction_method(M) === PolarRetraction()
         @test default_inverse_retraction_method(M) === PolarInverseRetraction()
@@ -88,6 +94,18 @@ include("../header.jl")
             p,
             UMVTangentVector(X.U, X.M, p.Vt, 2);
             error = :error,
+        )
+        M4 = FixedRankMatrices(4, 3, 2)
+        p4 = SVDMPoint(
+            [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0], [2.0, 1.0], [1.0 0.0 0.0; 0.0 1.0 0.0]
+        )
+        X4 = UMVTangentVector(
+            [0.0 0.0; 0.0 0.0; 1.0 0.0; 0.0 1.0], [1.0 2.0; 3.0 4.0], [0.0 0.0 1.0; 0.0 0.0 2.0]
+        )
+        @test is_vector(M4, p4, X4)
+        @test !is_vector(M4, p4, UMVTangentVector(X4.U, X4.M, p4.Vt))
+        @test_throws DomainError is_vector(
+            M4, p4, UMVTangentVector(X4.U, X4.M, p4.Vt); error = :error
         )
 
         @test is_point(M, p)

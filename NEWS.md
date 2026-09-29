@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The tangent checks of the sphere, the projective space, the probability simplex, the hyperbolic space, the centered matrices, the elliptope and the spectrahedron take a relative tolerance `rtol` and accept tangent vectors of any length.
 * `check_point` and `check_vector` on a `FiberBundle` check the base part and the fiber part and report the errors of both.
 * `isapprox` for tangent vectors on a `FiberBundle` compares the base part as a tangent vector at the base point.
+* `is_point` on `FixedRankMatrices` accepts a plain matrix of rank `k` for every `k` and requires the rank to be exactly `k`, also for an `SVDMPoint`.
+* `is_vector` on `FixedRankMatrices` returns `false` for a tangent vector whose `Vt` factor is not orthogonal to the point.
 
 ## [0.11.31] 2026-09-25
 

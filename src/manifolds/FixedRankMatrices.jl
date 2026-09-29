@@ -41,10 +41,7 @@ struct FixedRankMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function FixedRankMatrices(
-        m::Int,
-        n::Int,
-        k::Int,
-        field::AbstractNumbers = ℝ;
+        m::Int, n::Int, k::Int, field::AbstractNumbers = ℝ;
         parameter::Symbol = :type,
     )
     size = wrap_type_parameter(parameter, (m, n, k))
@@ -287,8 +284,8 @@ function check_point(M::FixedRankMatrices, p; kwargs...)
     m, n, k = get_parameter(M.size)
     r = rank(p; kwargs...)
     s = "The point $(p) does not lie on $(M), "
-    if r > k
-        return DomainError(r, string(s, "since its rank is too large ($(r))."))
+    if r != k
+        return DomainError(r, string(s, "since its rank is $(r) and not $(k)."))
     end
     return nothing
 end
@@ -307,6 +304,10 @@ function check_point(M::FixedRankMatrices, p::SVDMPoint; kwargs...)
             string(s, " since V is not orthonormal/unitary."),
         )
     end
+    r = rank(Diagonal(p.S); kwargs...)
+    if r != k
+        return DomainError(r, string(s, "since its rank is $(r) and not $(k)."))
+    end
     return nothing
 end
 
@@ -315,19 +316,19 @@ function check_size(M::FixedRankMatrices, p::SVDMPoint)
     if (size(p.U) != (m, k)) || (length(p.S) != k) || (size(p.Vt) != (k, n))
         return DomainError(
             [size(p.U)..., length(p.S), size(p.Vt)...],
-            "The point $(p) does not lie on $(M) since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(p.U, 1))x$(size(p.Vt, 2)) rank $(size(p.S, 1)).",
+            "The point $(p) does not lie on $(M) since the dimensions do not fit (expected $(m)x$(n) rank $(k) got $(size(p.U, 1))x$(size(p.Vt, 2)) rank $(size(p.S, 1))).",
         )
     end
 end
 function check_size(M::FixedRankMatrices, p)
     m, n, k = get_parameter(M.size)
-    pS = svd(p)
-    if (size(pS.U) != (m, k)) || (length(pS.S) != k) || (size(pS.Vt) != (k, n))
+    if size(p) != (m, n)
         return DomainError(
-            [size(pS.U)..., length(pS.S), size(pS.Vt)...],
-            "The point $(p) does not lie on $(M) since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(pS.U, 1))x$(size(pS.Vt, 2)) rank $(size(pS.S, 1)).",
+            [size(p)...],
+            "The point $(p) does not lie on $(M) since the dimensions do not fit (expected $(m)x$(n) got $(size(p, 1))x$(size(p, 2))).",
         )
     end
+    return nothing
 end
 function check_size(M::FixedRankMatrices, p, X::UMVTangentVector)
     m, n, k = get_parameter(M.size)
@@ -363,7 +364,7 @@ function check_vector(
     end
     if !isapprox(X.Vt * p.Vt', zeros(k, k); atol = atol, kwargs...)
         return DomainError(
-            norm(X.Vt * p.Vt - zeros(k, k)),
+            norm(X.Vt * p.Vt' - zeros(k, k)),
             "The tangent vector $(X) is not a tangent vector to $(p) on $(M) since v.V'x.V is not zero.",
         )
     end
