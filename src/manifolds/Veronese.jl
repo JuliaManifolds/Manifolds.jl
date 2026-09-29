@@ -1,7 +1,10 @@
 @doc raw"""
     Veronese{T} <: AbstractManifold{ℝ}
 
-The Veronese manifold
+The Veronese manifold consists of the nonzero symmetric rank-one tensors of
+order ``D`` over ``ℝ^N``.
+
+For positive integers ``N`` and ``D``, it is given by
 
 ````math
 \mathcal V_{N,D}
@@ -14,8 +17,7 @@ The Veronese manifold
 \right\}
 ````
 
-is the set of nonzero symmetric rank-one tensors of order ``D`` over ``ℝ^N``,
-where ``N`` and ``D`` are positive integers. Here
+Here
 
 ````math
 x^{⊗ D}
@@ -40,7 +42,7 @@ pairs
 \bigl((-1)^Dλ,-x\bigr).
 ````
 
-Hence, for even ``D`` the sign of ``λ`` is intrinsic and
+For even ``D`` the sign of ``λ`` is intrinsic and
 ``\mathcal V_{N,D}`` has two connected components, while for odd ``D`` the sign
 can be absorbed by replacing ``x`` by ``-x`` and the manifold is connected
 when ``N≥2``. For ``N=1``, the manifold is ``ℝ\setminus\{0\}`` for every
@@ -58,7 +60,7 @@ p\leftrightarrow(λ,x),
 Φ(λ,x)=λ x^{⊗ D}.
 ````
 
-Concretely, the chosen pair is stored as `p = ([λ], x)`. A tangent vector is
+The chosen pair is stored as `p = ([λ], x)`. A tangent vector is
 stored analogously as `X = ([ν], u)`, where
 
 ````math
@@ -770,6 +772,10 @@ u
 
 The second equality uses ``⟨x,c⟩=Dν``. The implementation
 performs one final projection onto ``x^⊥`` to remove numerical roundoff.
+
+The projection formula follows by expressing the ambient vector in the
+orthonormal tangent basis from Lemma 4.7 of
+[KhoujaKhalilMourrain:2022](@cite).
 """
 project(::Veronese, p, A)
 
