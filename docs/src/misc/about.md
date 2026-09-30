@@ -14,6 +14,7 @@
 ## Contributors
 (in alphabetical order)
 
+- [Se-Eun Choi](https://github.com/sChoiKr) contributed the [Veronese manifold](../manifolds/veronese.md)
 - [Nick Dewaele](https://github.com/Nikdwal) contributed the [Tucker manifold](../manifolds/tucker.md)
 - [Renée Dornig](https://github.com/r-dornig) contributed the [centered  matrices](../manifolds/centeredmatrices.md) and the [essential manifold](../manifolds/essentialmanifold.md)
 - [David Hong](https://github.com/dahong67) contributed uniform distributions on the Stiefel and Grassmann manifolds.

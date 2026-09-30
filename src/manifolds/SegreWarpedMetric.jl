@@ -14,7 +14,7 @@ with a [warped product metric](https://en.wikipedia.org/wiki/Warped_product), bu
 ``A = 1`` corresponds to the usual Segre manifold.
 The Segre manifold is a cone in the sense that if ``p \in \mathcal{S}``, then ``r p \in \mathcal{S}`` for all ``r \neq 0``. The tangent subspace at ``p`` defined ``\mathrm{d} (r p) / \mathrm{d} r`` is called the _radial_ direction. ``A < 1`` puts less weight on the directions orthogonal to the radial direction compared to ``\mathcal{S}``, while ``A > 1`` puts more weight on those directions.
 
-The geometry is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
+The geometry is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
 
 # Constructor
     WarpedMetric(A::Real)
@@ -96,7 +96,7 @@ where
 
 If ``m = 0`` and ``-λ < ν``, then ``\operatorname{exp}_p(v) = p + X``.
 
-The formula is derived in proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
+The formula is derived in proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
 """
 exp(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, X) where {V, A}
 
@@ -236,7 +236,7 @@ and assume ``(μ, y_1,…, y_d)`` is the representative of ``q`` that minimizes 
     \right).
 ````
 
-The formula is derived in theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
+The formula is derived in theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
 """
 log(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, q) where {V, A}
 

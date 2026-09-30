@@ -5,7 +5,7 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.11.32] 2026-xx-xx
+## [0.11.33] unreleased
 
 ### Added
 
@@ -32,6 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `isapprox` for tangent vectors on a `FiberBundle` compares the base part as a tangent vector at the base point.
 * `is_point` on `FixedRankMatrices` accepts a plain matrix of rank `k` for every `k` and requires the rank to be exactly `k`, also for an `SVDMPoint`.
 * `is_vector` on `FixedRankMatrices` returns `false` for a tangent vector whose `Vt` factor is not orthogonal to the point.
+
+## [0.11.32] 2026-09-30
+
+### Added
+
+* The `Veronese` manifold of nonzero symmetric rank-one tensors. (#924)
 
 ## [0.11.31] 2026-09-25
 
