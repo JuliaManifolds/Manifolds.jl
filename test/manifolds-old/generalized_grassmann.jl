@@ -1,5 +1,17 @@
 include("../header.jl")
 
+@testset "generalized Grassmann geodesic speed" begin
+    B = [2.0 1.0 0.0; 1.0 2.0 0.0; 0.0 0.0 1.0]
+    M = GeneralizedGrassmann(3, 2, B)
+    p = project(M, [1.0 0.0; 0.0 1.0; 0.0 0.0])
+    X = [0.1 0.2; -0.3 0.4; 0.5 -0.6]
+    X = X - p * (p' * B * X)
+    for t in [0.25, 0.5, 1.0]
+        @test distance(M, p, exp(M, p, t * X)) ≈ t * norm(M, p, X)
+    end
+    @test isapprox(M, p, log(M, p, exp(M, p, X)), X)
+end
+
 @testset "Generalized Grassmann" begin
     @testset "Real" begin
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]

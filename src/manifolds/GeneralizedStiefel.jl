@@ -79,18 +79,25 @@ function check_size(M::GeneralizedStiefel, p::P, X) where {P}
 end
 
 @doc raw"""
-    check_vector(M::GeneralizedStiefel, p, X; kwargs...)
+    check_vector(M::GeneralizedStiefel, p, X; atol, rtol, kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
 `M`=``\operatorname{St}(n,k,B)``.
 This requires that the [`AbstractNumbers`](@extref ManifoldsBase number-system) fits,
 `p` is a valid point on `M` and it (approximately) holds that
-``p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0``, where `kwargs...` is passed to the `isapprox`.
+``p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp = 0``, that is, the norm of the left hand side is at most
+`atol` or at most `rtol` times ``2\lVert X \rVert_p``, the largest value this norm can attain.
 """
-function check_vector(M::GeneralizedStiefel, p, X; kwargs...)
-    if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
+function check_vector(
+        M::GeneralizedStiefel, p, X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
+        kwargs...,
+    ) where {T}
+    r = norm(p' * M.B * X + X' * M.B * p)
+    if !(r <= atol || r <= rtol * 2 * norm(M, p, X))
         return DomainError(
-            norm(p' * M.B * X + conj(X' * M.B * p)),
+            r,
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since x'Bv + v'Bx is not the zero matrix.",
         )
     end

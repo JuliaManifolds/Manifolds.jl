@@ -32,6 +32,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `isapprox` for tangent vectors on a `FiberBundle` compares the base part as a tangent vector at the base point.
 * `is_point` on `FixedRankMatrices` accepts a plain matrix of rank `k` for every `k` and requires the rank to be exactly `k`, also for an `SVDMPoint`.
 * `is_vector` on `FixedRankMatrices` returns `false` for a tangent vector whose `Vt` factor is not orthogonal to the point.
+* `retract` with the `OrthographicRetraction` on `FixedRankMatrices` returns the point of its documented formula.
+* `riemannian_Hessian` on `FixedRankMatrices` works for matrices with more columns than the rank.
+* `check_vector` on a `Flag` in the orthogonal representation accepts tangent vectors whose blocks vanish up to rounding, with the tolerance keyword `atol`.
+* `volume_density` on `Rotations` and `OrthogonalMatrices` returns the determinant of the differential of the exponential map.
+* `exp` on the `GeneralizedGrassmann` manifold follows the geodesic in the direction of the given tangent vector.
+* `is_vector` on the `GeneralizedStiefel` and `GeneralizedGrassmann` manifolds accepts complex tangent vectors and those with `p'BX = 0`, with a tolerance relative to the length of the vector.
+* `exp`, `log`, `mid_point`, the retractions and the inverse retractions on `Grassmann` and `Stiefel` accept points and tangent vectors given as `StiefelPoint` and `StiefelTangentVector`.
+* `manifold_dimension` on the `HamiltonianMatrices` returns the dimension of the manifold, over the real and over the complex numbers.
+* `rand` on the `HamiltonianMatrices` draws its two off-diagonal blocks independently, as documented.
 
 ## [0.11.32] 2026-09-30
 

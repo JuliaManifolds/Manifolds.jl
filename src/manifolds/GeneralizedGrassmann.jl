@@ -148,8 +148,10 @@ embed(::GeneralizedGrassmann, p, X) = X
     exp(M::GeneralizedGrassmann, p, X)
 
 Compute the exponential map on the [`GeneralizedGrassmann`](@ref) `M` ``= \mathrm{Gr}(n,k,B)``
-starting in `p` with tangent vector (direction) `X`. Let ``X^{\mathrm{H}}BX = USV`` denote the
-SVD decomposition of ``X^{\mathrm{H}}BX``. Then the exponential map is written using
+starting in `p` with tangent vector (direction) `X`. Let ``X = USV^{\mathrm{H}}`` with
+``U^{\mathrm{H}}BU = I_k``, ``S`` diagonal and nonnegative and ``V`` unitary, so that
+``X^{\mathrm{H}}BX = VS^2V^{\mathrm{H}}``. Then the exponential map is written, see Section 4.5
+of [EdelmanAriasSmith:1998](@cite), using
 
 ````math
 \exp_p X = p V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
@@ -163,9 +165,9 @@ exp(::GeneralizedGrassmann, ::Any...)
 function exp!(M::GeneralizedGrassmann, q, p, X)
     norm(M, p, X) ≈ 0 && return copyto!(q, p)
     d = svd(X' * M.B * X)
-    V = d.Vt
+    V = d.V
     S = abs.(sqrt.(d.S))
-    mul!(q, p * (V .* cos.(S')) + X * (V .* usinc.(S')), V)
+    mul!(q, p * (V .* cos.(S')) + X * (V .* usinc.(S')), d.Vt)
     project!(M, q, q)
     return q
 end

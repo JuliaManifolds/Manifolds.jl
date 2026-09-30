@@ -236,6 +236,23 @@ using Random
         @test check_vector(M, p1_ortho, X2_ortho_wrong2) isa DomainError
         @test is_point(M, p1_ortho; error = :error)
         @test is_vector(M, p1_ortho, X1_ortho; error = :error)
+        # converted from the Stiefel representation, so block skew only up to rounding
+        @test is_vector(M, p1o, X1o)
+        @test is_vector(M, p1o, X2o)
+        X1_near = copy(X1_ortho.value)
+        X1_near[1, 1] = 1.0e-6
+        X1_near[1, 2] += 1.0e-6
+        X1o_near = Manifolds.OrthogonalTangentVector(X1_near)
+        @test check_vector(M, p1_ortho, X1o_near) isa DomainError
+        @test check_vector(M, p1_ortho, X1o_near; atol = 1.0e-5) === nothing
+        X1_nan = copy(X1_near)
+        X1_nan[1, 1] = NaN
+        X1o_nan = Manifolds.OrthogonalTangentVector(X1_nan)
+        @test check_vector(M, p1_ortho, X1o_nan; atol = 1.0e-5) isa DomainError
+        X_int = Manifolds.OrthogonalTangentVector(
+            [0 -1 2 0 0; 1 0 0 1 0; -2 0 0 0 0; 0 -1 0 0 0; 0 0 0 0 0],
+        )
+        @test check_vector(M, p1_ortho, X_int) === nothing
         @test isapprox(M, p1_ortho, X2_ortho, project(M, p1_ortho, X2_ortho_wrong1))
         @test isapprox(
             M,

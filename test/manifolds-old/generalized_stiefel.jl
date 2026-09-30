@@ -33,6 +33,9 @@ include("../header.jl")
             @test default_retraction_method(M) == ProjectionRetraction()
             @test is_point(M, rand(M))
             @test is_vector(M, p, rand(M; vector_at = p))
+            M1 = GeneralizedStiefel(3, 1, B)
+            p1 = project(M1, reshape([1.0, 1.0, 1.0], 3, 1))
+            @test is_vector(M1, p1, project(M1, p1, reshape([0.3, -0.2, 0.5], 3, 1)))
         end
         @testset "Embedding and Projection" begin
             @test get_embedding(GeneralizedStiefel(3, 2)) == Euclidean(3, 2)
@@ -119,6 +122,10 @@ include("../header.jl")
             x = [1im 0.0; 0.0 0.5im; 0.0 0.0]
             @test is_point(M, x)
             @test !is_point(M, 2 * x)
+            Xc = project(M, x, [0.1 0.2im; -0.3 0.4; 0.5im 0.6])
+            @test is_vector(M, x, Xc)
+            @test !is_vector(M, x, [0.0 1.0; 1.0 0.0; 0.0 0.0])
+            @test !is_vector(M, x, 1.0e-9 * [0.0 1.0; 1.0 0.0; 0.0 0.0])
         end
     end
 

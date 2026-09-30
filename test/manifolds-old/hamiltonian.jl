@@ -51,7 +51,15 @@ include("../header.jl")
         @test embed(M, p) == p
         @test embed(M, p, p) == p
         @test is_flat(M)
+        @test manifold_dimension(M) == (2 * 2 + 1) * 2
+        @test manifold_dimension(Mf) == manifold_dimension(M)
+        @test manifold_dimension(HamiltonianMatrices(4, ℂ)) == 2 * manifold_dimension(M)
         Random.seed!(42)
         is_point(M, rand(M))
+    end
+    @testset "Random Hamiltonian matrices" begin
+        q = rand(MersenneTwister(42), M)
+        @test is_point(M, q)
+        @test q[3:4, 1:2] != q[1:2, 3:4]
     end
 end

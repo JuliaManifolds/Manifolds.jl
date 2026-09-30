@@ -150,6 +150,19 @@ using ForwardDiff
             @test default_vector_transport_method(M, typeof(p)) == ParallelTransport()
             @test default_vector_transport_method(M, typeof(pS)) == ParallelTransport()
         end
+        @testset "Grassmann and Stiefel in the StiefelPoint representation" begin
+            for M2 in [Grassmann(4, 2), Stiefel(4, 2)]
+                p2 = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+                X2 = [0.0 0.0; 0.0 0.0; 0.1 0.2; -0.3 0.4]
+                q2 = exp(M2, p2, X2)
+                pS2, XS2, qS2 = StiefelPoint(p2), StiefelTangentVector(X2), StiefelPoint(q2)
+                @test exp(M2, pS2, XS2).value ≈ q2
+                @test log(M2, pS2, qS2).value ≈ log(M2, p2, q2)
+                @test retract(M2, pS2, XS2).value ≈ retract(M2, p2, X2)
+                @test inverse_retract(M2, pS2, qS2).value ≈ inverse_retract(M2, p2, q2)
+                @test mid_point(M2, pS2, qS2).value ≈ mid_point(M2, p2, q2)
+            end
+        end
         @testset "A short ONB test" begin
             M = Grassmann(4, 2)
             p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]

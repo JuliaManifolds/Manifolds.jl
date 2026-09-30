@@ -278,10 +278,44 @@ include("../header.jl")
         G = [1.0 0.0; 0.0 2.0; 0.0 0.0]
         H = [0.0 3.0; 0.0 4.0; 0.0 1.0]
         @test is_vector(M, p, riemannian_Hessian(M, p, G, H, X))
+        M3 = FixedRankMatrices(4, 3, 2)
+        p3 = SVDMPoint(
+            [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0], [2.0, 1.0], [1.0 0.0 0.0; 0.0 1.0 0.0]
+        )
+        X3 = UMVTangentVector(
+            [0.0 0.0; 0.0 0.0; 1.0 0.0; 0.0 1.0], [1.0 2.0; 3.0 4.0], [0.0 0.0 1.0; 0.0 0.0 2.0]
+        )
+        G3 = [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 3.0; 1.0 1.0 1.0]
+        H3 = [0.0 3.0 0.0; 0.0 4.0 0.0; 0.0 1.0 0.0; 2.0 0.0 1.0]
+        Y3 = riemannian_Hessian(M3, p3, G3, H3, X3)
+        @test is_vector(M3, p3, Y3)
+        # projection of H3 plus the curvature terms, computed by hand
+        @test Y3.U ≈ [0.0 0.0; 0.0 0.0; 1.5 7.0; 2.5 2.0]
+        @test Y3.M ≈ [0.0 3.0; 0.0 4.0]
+        @test Y3.Vt ≈ [0.0 0.0 1.5; 0.0 0.0 1.0]
     end
     @testset "field parameter" begin
         M = FixedRankMatrices(3, 2, 2; parameter = :field)
         @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ; parameter=:field)"
         @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
+    end
+    @testset "Orthographic retraction" begin
+        # n = k, so every matrix is tangent and the retraction is p + X
+        M = FixedRankMatrices(3, 2, 2)
+        p = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+        X = UMVTangentVector([0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], zeros(2, 2))
+        q = retract(M, p, X, OrthographicRetraction())
+        @test isapprox(embed(M, q), [2.0 0.0; 0.0 2.0; 1.0 1.0])
+        # n > k, the retraction adds U_X (S + M)^{-1} V_X^T to p + X
+        M2 = FixedRankMatrices(4, 3, 2)
+        p2 = SVDMPoint(
+            [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0], [2.0, 1.0], [1.0 0.0 0.0; 0.0 -1.0 0.0]
+        )
+        X2 = UMVTangentVector(
+            [0.0 0.0; 0.0 0.0; 1.0 0.0; 0.0 1.0], [0.0 1.0; 0.0 0.0], [0.0 0.0 1.0; 0.0 0.0 0.0]
+        )
+        q2 = retract(M2, p2, X2, OrthographicRetraction())
+        @test isapprox(embed(M2, q2), [2.0 -1.0 1.0; 0.0 -1.0 0.0; 1.0 0.0 0.5; 0.0 -1.0 0.0])
+        @test isapprox(M2, p2, inverse_retract(M2, p2, q2, OrthographicInverseRetraction()), X2)
     end
 end

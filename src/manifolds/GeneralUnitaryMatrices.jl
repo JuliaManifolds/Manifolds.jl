@@ -1058,7 +1058,7 @@ in [ChevallierLiLuDunson:2022](@cite). See also Theorem 4.1 in [FalorsideHaanDav
 (note that it uses a different convention).
 """
 function volume_density(M::GeneralUnitaryMatrices{ℝ}, p, X)
-    dens = one(eltype(X))
+    dens = one(complex(float(eltype(X))))
     B = get_basis(M, p, DefaultOrthonormalBasis())
     Ys = get_vectors(M, p, B)
     Z = similar(X)
@@ -1070,30 +1070,26 @@ function volume_density(M::GeneralUnitaryMatrices{ℝ}, p, X)
     end
     for ev in eigvals(op_coeffs)
         if abs(ev) > eps(eltype(X))
-            cm = (1 - exp(-ev)) / ev
-            dens *= real(cm)
+            dens *= -expm1(-ev) / ev
         end
     end
 
-    return dens
+    return real(dens)
 end
 
 @doc raw"""
     volume_density(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p, X)
 
-Compute the volume density on O(3)/SO(3). The formula reads [FalorsideHaanDavidsonForre:2019](@cite)
+Compute the volume density on O(3)/SO(3). With the rotation angle
+``θ = \frac{\lVert X\rVert}{\sqrt{2}}`` it is the reciprocal of Eq. (5) in
+[FalorsideHaanDavidsonForre:2019](@cite), that is
 
 ```math
-\frac{1-1\cos(\sqrt{2}\lVert X \rVert)}{\lVert X \rVert^2}.
+\frac{2\bigl(1-\cos θ\bigr)}{θ^2} = \left(\frac{\sin\frac{θ}{2}}{\frac{θ}{2}}\right)^2.
 ```
 """
 function volume_density(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p, X)
-    nX = norm(M, p, X)
-    if nX > eps(eltype(X))
-        return (1 - 1 * cos(sqrt(2) * nX)) / nX^2
-    else
-        return one(nX)
-    end
+    return usinc(norm(M, p, X) / (2 * sqrt(2)))^2
 end
 
 @doc raw"""

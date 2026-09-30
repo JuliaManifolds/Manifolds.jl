@@ -698,11 +698,11 @@ function retract_orthographic_fused!(
     QU, RU = qr(p.U * (diagm(p.S) + tX.M) + tX.U)
     QV, RV = qr(p.Vt' * (diagm(p.S) + tX.M') + tX.Vt')
 
-    Uk, Sk, Vtk = svd(RU * inv(diagm(p.S) + tX.M) * RV')
+    Uk, Sk, Vk = svd(RU * inv(diagm(p.S) + tX.M) * RV')
 
     mul!(q.U, QU[:, 1:k], Uk)
     q.S .= Sk[1:k]
-    mul!(q.Vt, Vtk, QV[:, 1:k]')
+    mul!(q.Vt, Vk', QV[:, 1:k]')
 
     return q
 end
@@ -776,10 +776,10 @@ riemannian_Hessian(M::FixedRankMatrices, p, G, H, X)
 
 function riemannian_Hessian!(M::FixedRankMatrices, Y, p, G, H, X)
     project!(M, Y, p, H)
-    T1 = (G * X.Vt) / Diagonal(p.S)
+    T1 = (G * X.Vt') / Diagonal(p.S)
     Y.U .+= T1 .- p.U * (p.U' * T1)
     T2 = (G' * X.U) / Diagonal(p.S)
-    Y.Vt .+= T2 .- p.Vt' * (p.Vt * T2)
+    Y.Vt .+= (T2 .- p.Vt' * (p.Vt * T2))'
     return Y
 end
 

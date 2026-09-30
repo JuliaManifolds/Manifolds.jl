@@ -389,8 +389,9 @@ include("../header.jl")
             0.30777760628130063 0.0 -0.32059980100053004
             -0.5499897386953444 0.32059980100053004 0.0
         ]
-        @test volume_density(M, p, X) ≈ 0.8440563052346255
+        @test volume_density(M, p, X) ≈ 0.9590216116974793
         @test volume_density(M, p, zero(X)) ≈ 1.0
+        @test volume_density(M, p, 1.0e-12 * X) ≈ 1.0
 
         M = Rotations(4)
         p = [
@@ -405,6 +406,10 @@ include("../header.jl")
             -0.26356215573144676 0.04594199053786204 0.0 0.43156436122007846
             0.4070678736115306 0.10586374034761421 -0.43156436122007846 0.0
         ]
-        @test volume_density(M, p, X) ≈ 0.710713830700454
+        @test volume_density(M, p, X) ≈ 0.9195936931567809
+        # at this vector some zero eigenvalues are computed as rounding errors
+        p = Matrix{Float64}(I, 4, 4)
+        X = get_vector(M, p, [-0.94, 0.45, 0.83, -0.66, -0.66, 0.83], DefaultOrthonormalBasis())
+        @test volume_density(M, p, X) ≈ 0.7531906207139224
     end
 end

@@ -143,6 +143,23 @@ Return true. [`HamiltonianMatrices`](@ref) is a flat manifold.
 is_flat(M::HamiltonianMatrices) = true
 
 @doc raw"""
+    manifold_dimension(M::HamiltonianMatrices)
+
+Return the dimension of the [`HamiltonianMatrices`](@ref) `M` over the number system `𝔽`, that is
+
+````math
+\dim \mathfrak{sp}(2n,𝔽) = (2n+1)n \dim_ℝ 𝔽,
+````
+
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of ``𝔽``.
+For ``𝔽 = ℝ`` this is the dimension of the [`SymplecticMatrices`](@ref) ``\mathrm{Sp}(2n,ℝ)``, whose Lie algebra this is.
+"""
+function manifold_dimension(M::HamiltonianMatrices{𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    return (2n + 1) * n * real_dimension(𝔽)
+end
+
+@doc raw"""
     is_hamiltonian(A::AbstractMatrix; kwargs...)
 
 Test whether a matrix `A` is hamiltonian.
@@ -208,7 +225,7 @@ function rand!(
     randn!(rng, p2)
     randn!(rng, p3)
     p2 .= (1 / 2) .* (p2 .+ p2')
-    p3 .= (1 / 2) .* (p2 .+ p2')
+    p3 .= (1 / 2) .* (p3 .+ p3')
     pX .*= σ
     return pX
 end
