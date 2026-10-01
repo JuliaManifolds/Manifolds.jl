@@ -65,8 +65,8 @@ include("../header.jl")
             M, SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0], [1.0, 0.0], [1.0 0.0; 0.0 1.0])
         )
 
-        @test default_retraction_method(M) === PolarRetraction()
-        @test default_inverse_retraction_method(M) === PolarInverseRetraction()
+        @test default_retraction_method(M) === OrthographicRetraction()
+        @test default_inverse_retraction_method(M) === OrthographicInverseRetraction()
         @test default_vector_transport_method(M) == ProjectionTransport()
 
         @test !is_vector(
@@ -107,6 +107,11 @@ include("../header.jl")
         @test_throws DomainError is_vector(
             M4, p4, UMVTangentVector(X4.U, X4.M, p4.Vt); error = :error
         )
+        # the default retraction and inverse retraction invert each other at a generic point
+        M5 = FixedRankMatrices(5, 4, 2)
+        p5 = SVDMPoint([cos(1.3i - 0.7j) + 0.1 * i * j for i in 1:5, j in 1:4], 2)
+        X5 = project(M5, p5, [sin(0.9i + 1.1j) + 0.2 * (i - j) for i in 1:5, j in 1:4])
+        @test isapprox(M5, p5, inverse_retract(M5, p5, retract(M5, p5, X5)), X5)
 
         @test is_point(M, p)
         @test is_vector(M, p, X)

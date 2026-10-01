@@ -388,20 +388,20 @@ end
 """
     default_inverse_retraction_method(M::FixedRankMatrices)
 
-Return [`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`)
+Return [`OrthographicInverseRetraction`](@ref)
 as the default inverse retraction for the [`FixedRankMatrices`](@ref) manifold.
 """
-default_inverse_retraction_method(::FixedRankMatrices) = PolarInverseRetraction()
+default_inverse_retraction_method(::FixedRankMatrices) = OrthographicInverseRetraction()
 
 metric(::FixedRankMatrices) = EuclideanMetric()
 
 """
     default_retraction_method(M::FixedRankMatrices)
 
-Return [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
+Return [`OrthographicRetraction`](@ref)
 as the default retraction for the [`FixedRankMatrices`](@ref) manifold.
 """
-default_retraction_method(::FixedRankMatrices) = PolarRetraction()
+default_retraction_method(::FixedRankMatrices) = OrthographicRetraction()
 
 """
     default_vector_transport_method(M::FixedRankMatrices)
