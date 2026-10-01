@@ -314,7 +314,7 @@ end
 
     @testset "small distance tests" begin
         @testset for fT in (Float32, Float64), T in (fT, Complex{fT}, Quaternion{fT})
-            𝔽 = T isa Complex ? ℂ : (T isa Quaternion ? ℍ : ℝ)
+            𝔽 = T <: Complex ? ℂ : (T <: Quaternion ? ℍ : ℝ)
             M = ProjectiveSpace(2, 𝔽)
             rT = real(T)
             atol = rtol = sqrt(eps(rT))
@@ -322,6 +322,7 @@ end
                     λ in (one(T), (T <: Real ? -one(T) : sign(randn(T))))
 
                 p = project(M, randn(T, representation_size(M)))
+                @test is_point(M, p)
                 X = project(M, p, randn(T, representation_size(M)))
                 X ./= norm(M, p, X)
                 project!(M, X, p, X)

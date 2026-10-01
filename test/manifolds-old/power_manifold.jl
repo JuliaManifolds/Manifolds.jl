@@ -480,6 +480,9 @@ end
         p = repeat([1.0, 0.0, 0.0], 1, 5)
         X = repeat([0.0, 1.0, 0.0], 1, 5)
         @test volume_density(Ms1, p, X) ≈ volume_density(Ms, p[:, 1], X[:, 1])^5
+        Msn1 = PowerManifold(Ms, NestedPowerRepresentation(), 5)
+        @test volume_density(Msn1, [p[:, i] for i in 1:5], [X[:, i] for i in 1:5]) ≈
+            volume_density(Ms, p[:, 1], X[:, 1])^5
     end
 
     @testset "Static type parameter" begin

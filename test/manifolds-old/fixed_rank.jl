@@ -185,6 +185,10 @@ include("../header.jl")
                 @test yC.U == y.U
                 @test yC.S == y.S
                 @test yC.Vt == y.Vt
+                pc = copy(p)
+                @test pc == p
+                @test pc.U !== p.U
+                @test is_point(M, pc)
                 # embed
                 N = get_embedding(M)
                 A = embed(M, p)

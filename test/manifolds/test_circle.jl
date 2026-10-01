@@ -16,6 +16,7 @@ Test.@testset "The circle manifold" begin
         manifold_dimension => 1,
         representation_size => (),
         repr => "Circle(ℝ)",
+        is_flat => true,
         manifold_volume => 2π,
     )
     Manifolds.Test.test_manifold(
@@ -29,6 +30,7 @@ Test.@testset "The circle manifold" begin
                 manifold_dimension, manifold_volume, mid_point,
                 parallel_transport_direction, parallel_transport_to,
                 repr, representation_size,
+                vector_transport_to,
             ],
             :Bases => [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(X1)],
             :Coordinates => [[π / 2], [-π / 2]],
@@ -52,12 +54,14 @@ Test.@testset "The circle manifold" begin
                 log,
                 manifold_dimension, manifold_volume, mid_point,
                 repr, representation_size,
+                vector_transport_to,
             ],
             :Bases => [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis([X1])],
             :Coordinates => [[π / 2], [-π / 2]],
             :InvalidPoints => fill.([q1]),
             :Points => fill.([p1, p2]),
             :Vectors => fill.([X1, X2]),
+            :SecondVector => fill(X2),
             :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()],
         ),
         expectations,
@@ -77,6 +81,7 @@ Test.@testset "The circle manifold" begin
         manifold_dimension => 1,
         representation_size => (),
         repr => "Circle(ℂ)",
+        is_flat => true,
         manifold_volume => 2π,
         get_embedding => Euclidean(; field = ℂ),
         :atols => Dict(parallel_transport_to => 1.0e-14),
@@ -102,6 +107,7 @@ Test.@testset "The circle manifold" begin
             :Mutating => false,
             :Points => [pc1, pc2],
             :Vectors => [Xc1, Xc2],
+            :SecondVector => 0.25,
         ),
         expectations
     )
@@ -125,6 +131,7 @@ Test.@testset "The circle manifold" begin
             :InvalidVectors => fill.([Yc1]),
             :Points => fill.([pc1, pc2]),
             :Vectors => fill.([Xc1, Xc2]),
+            :SecondVector => fill(0.25),
         ),
         expectations
     )

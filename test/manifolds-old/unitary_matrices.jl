@@ -97,7 +97,7 @@ end
     # wrong length of size
     @test_throws DomainError is_point(M, zeros(2, 2); error = :error)
 
-    # Determinant not one
+    # wrong length of size again
     pF2 = [quat(0, 1, 0, 0) 1.0; 0.0 -quat(0, 1, 0, 0)]
     @test_throws DomainError is_point(M, pF2; error = :error)
     p = QuaternionF64(
@@ -106,6 +106,9 @@ end
         -0.2322369798903669,
         0.5909181717450419,
     )
+    @test is_point(M, fill(p, 1, 1); error = :error)
+    # Determinant not one
+    @test_throws DomainError is_point(M, fill(2 * p, 1, 1); error = :error)
 end
 
 @testset "SO(4) and O(4) exp/log edge cases" begin

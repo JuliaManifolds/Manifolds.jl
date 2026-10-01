@@ -212,6 +212,7 @@ function allocate_result_embedding(M::FixedRankMatrices, ::typeof(project), X, p
     return UMVTangentVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))
 end
 
+Base.copy(p::SVDMPoint) = SVDMPoint(copy(p.U), copy(p.S), copy(p.Vt))
 Base.copy(v::UMVTangentVector) = UMVTangentVector(copy(v.U), copy(v.M), copy(v.Vt))
 
 # Tuple-like broadcasting of UMVTangentVector

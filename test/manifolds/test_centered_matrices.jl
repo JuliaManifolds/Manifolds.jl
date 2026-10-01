@@ -59,6 +59,7 @@ Test.@testset "Centered Matrices" begin
     p4 = q2
     p5 = [1.0 1.0im; -1.0im 0.0; -1.0 + 1.0im -1.0im]
     p6 = [1.0im 0.0; -2.0im 1.0im; 1.0im -1.0im]
+    q4 = [1.0im 0.0; -2.0im 1.0im; 1.0im 0.0] #complex and not centered
     # Complex case
     Manifolds.Test.test_manifold(
         Mc,
@@ -74,9 +75,12 @@ Test.@testset "Centered Matrices" begin
             :Points => [p4, p5, p6],
             :Vectors => [p4],
             :EmbeddedPoints => [p4],
+            :InvalidPoints => Matrix[q1, q3, q4],
+            :InvalidVectors => Matrix[q1, q3, q4],
         ),
         Dict(
-            :IsPointErrors => [ManifoldDomainError, ManifoldDomainError, ManifoldDomainError],
+            :IsPointErrors => [ManifoldDomainError, DomainError, DomainError],
+            :IsVectorErrors => [ManifoldDomainError, DomainError, DomainError],
             is_flat => true,
             get_embedding => Euclidean(3, 2; field = ℂ),
             manifold_dimension => 8,

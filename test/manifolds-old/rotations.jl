@@ -166,13 +166,14 @@ include("../header.jl")
             X2 = log(SOn, pts[1], p)
             @test distance(SOn, p, exp(SOn, pts[1], X2)) < 25 * eps()
             p2 = ManifoldsBase.exp_fused(SOn, pts[1], X, 1.0)
-            X3 = log(SOn, pts[1], p)
-            @test distance(SOn, p, exp(SOn, pts[1], X3)) < 25 * eps()
+            @test isapprox(SOn, p2, p)
+            X3 = log(SOn, pts[1], p2)
+            @test distance(SOn, p2, exp(SOn, pts[1], X3)) < 25 * eps()
 
             @testset "gradient and metric conversion" begin
-                Y = change_metric(M, EuclideanMetric(), p, X)
+                Y = change_metric(SOn, EuclideanMetric(), p, X)
                 @test Y == X
-                Z = change_representer(M, EuclideanMetric(), p, X)
+                Z = change_representer(SOn, EuclideanMetric(), p, X)
                 @test Z == X
             end
         end

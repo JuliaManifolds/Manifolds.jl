@@ -212,7 +212,7 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
                 # Generic tangent vector
                 p_ = exp(M, p, X)
-                @test is_point(M, p)
+                @test is_point(M, p_)
 
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * X)), -1.0)
@@ -356,7 +356,7 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         @test isapprox(-1 / p[1][1]^2, sectional_curvature(M, p, X, Z))
         @test isapprox(0.0, sectional_curvature(M, p, X, V))
 
-        M = MetricManifold(Segre(3, 3, 3), WarpedMetric(1.23))
+        M = MetricManifold(Segre(3, 3), WarpedMetric(1.23))
         @test isapprox((1.23^(-2) - 1) / p[1][1]^2, sectional_curvature(M, p, X, Y))
         @test isapprox(-1 / p[1][1]^2, sectional_curvature(M, p, X, Z))
         @test isapprox(0.0, sectional_curvature(M, p, X, V))

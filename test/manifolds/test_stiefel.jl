@@ -50,6 +50,7 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 default_retraction_method => PolarRetraction(),
                 default_vector_transport_method => DifferentiatedRetractionVectorTransport(PolarRetraction()),
                 injectivity_radius => π,
+                is_flat => false,
                 manifold_dimension => 3,
                 repr => "Stiefel(3, 2, ℝ)",
             )
@@ -409,10 +410,9 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 default_retraction_method => PolarRetraction(),
                 default_vector_transport_method => DifferentiatedRetractionVectorTransport(PolarRetraction()),
                 injectivity_radius => π,
-                manifold_dimension => 3,
+                manifold_dimension => 8,
                 repr => "Stiefel(3, 2, ℂ)",
                 representation_size => (3, 2),
-                manifold_dimension => 8,
                 is_flat => false,
             )
         )

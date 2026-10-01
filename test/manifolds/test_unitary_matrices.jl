@@ -13,7 +13,8 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
             :Functions => [
                 default_vector_transport_method,
                 get_embedding,
-                is_flat,
+                injectivity_radius, is_flat,
+                manifold_dimension,
                 project,
                 rand, repr,
                 # Weingarten, # TODO: V is not normal?!
@@ -139,6 +140,7 @@ end
                 get_embedding,
                 injectivity_radius, is_flat,
                 log,
+                manifold_dimension,
                 project,
                 rand, repr,
             ],

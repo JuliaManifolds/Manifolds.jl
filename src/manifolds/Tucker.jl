@@ -351,6 +351,9 @@ function Base.copyto!(q::TuckerPoint, p::TuckerPoint)
     copyto!(q.hosvd.core, p.hosvd.core)
     return q
 end
+Base.copy(p::TuckerPoint) = TuckerPoint(
+    HOSVD(map(copy, p.hosvd.U), copy(p.hosvd.core), map(copy, p.hosvd.σ)),
+)
 function Base.copyto!(y::TuckerTangentVector, x::TuckerTangentVector)
     for d in 1:ndims(y.Ċ)
         copyto!(y.U̇[d], x.U̇[d])

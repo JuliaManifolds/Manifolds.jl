@@ -27,7 +27,7 @@ using Manifolds, Test, LinearAlgebra
                 get_coordinates, get_vector,
                 log, manifold_dimension,
                 parallel_transport_to, rand, repr, representation_size,
-                zero_vector,
+                vector_transport_to, zero_vector,
             ],
             :Bases => [DefaultOrthonormalBasis()],
             :Coordinates => [[1.0, 0.0, 0.0, 0.0, 0.0, 0.0]],

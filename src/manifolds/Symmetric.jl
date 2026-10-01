@@ -154,7 +154,7 @@ function get_vector_orthonormal!(M::SymmetricMatrices{ℂ}, Y, p, X, ::RealNumbe
     for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
         @inbounds Y[i, j] = (X[k] + (i == j ? 0 : X[k + 1] * 1im)) * scale
-        @inbounds Y[j, i] = Y[i, j]
+        @inbounds Y[j, i] = conj(Y[i, j])
         k += (i == j ? 1 : 2)
     end
     return Y
@@ -218,7 +218,7 @@ where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpo
 """
 project(::SymmetricMatrices, ::Any, ::Any)
 
-project!(::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
+project!(M::SymmetricMatrices, Y, p, X) = project!(M, Y, X)
 
 function Random.rand!(
         rng::AbstractRNG,

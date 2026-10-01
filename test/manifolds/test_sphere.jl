@@ -52,6 +52,7 @@ using ManifoldDiff
             (get_vectors, DefaultOrthogonalBasis()) => :Orthogonal,
             injectivity_radius => π,
             (injectivity_radius, ProjectionRetraction()) => π / 2,
+            is_flat => false,
             is_default_metric => EuclideanMetric(),
             log => X, norm => π / 4,
             parallel_transport_to => parallel_transport_to(M, p, X, q),

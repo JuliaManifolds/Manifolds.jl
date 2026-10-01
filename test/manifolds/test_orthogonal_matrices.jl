@@ -14,6 +14,7 @@ using LinearAlgebra, Manifolds, Quaternions, Test, Random
                 default_vector_transport_method,
                 get_embedding,
                 injectivity_radius, is_flat,
+                manifold_dimension,
                 rand, repr,
             ],
             :EmbeddedPoints => [p3],
