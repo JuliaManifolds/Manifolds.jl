@@ -24,6 +24,7 @@ end
     Bc = get_basis(M, p, B)
     @test length(get_vectors(M, p, Bc)) == manifold_dimension(M)
     @test get_coordinates(M, p, X, Bc) ≈ c
+    @test get_coordinates!(M, similar(c), p, X, Bc) ≈ c
     @test isapprox(M, p, get_vector(M, p, c, Bc), X)
 end
 
