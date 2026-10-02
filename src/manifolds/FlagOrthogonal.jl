@@ -66,7 +66,7 @@ function get_embedding(M::Flag{Tuple{Int}}, ::Type{<:OrthogonalPoint})
     return OrthogonalMatrices(M.size[1]; parameter = :field)
 end
 function ManifoldsBase.get_embedding_type(::Flag, ::Type{<:OrthogonalPoint})
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 function _extract_flag(M::Flag, p::AbstractMatrix, i::Int)
@@ -87,6 +87,10 @@ function inner(
         Y::OrthogonalTangentVector,
     )
     return dot(X.value, Y.value) / 2
+end
+
+function norm(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector)
+    return sqrt(inner(M, p, X, X))
 end
 
 function project!(

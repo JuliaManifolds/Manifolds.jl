@@ -93,6 +93,8 @@ using Random
         @test isapprox(X1, X1os)
     end
     @test inner(M, p1, X1, X2) ≈ inner(M, p1o, X1o, X2o)
+    @test norm(M, p1, X1) ≈ norm(M, p1o, X1o)
+    @test norm(M, p1o, X1o)^2 ≈ inner(M, p1o, X1o, X1o)
 
     @test eltype(p1o) === Float64
     @test eltype(X1o) === Float64
@@ -296,5 +298,14 @@ using Random
         @test Manifolds.get_parameter(M.size)[1] == 5
         @test get_embedding(M) == Stiefel(5, 2; parameter = :field)
         @test repr(M) == "Flag(5, 1, 2; parameter=:field)"
+    end
+
+    @testset "the flag inverse polar retraction inverts the polar retraction" begin
+        M = Flag(4, 1, 2)
+        p = rand(MersenneTwister(42), M)
+        X = rand(MersenneTwister(44), M; vector_at = p)
+        X ./= norm(M, p, X) / 0.05
+        q = retract(M, p, X, PolarRetraction())
+        @test isapprox(M, p, inverse_retract(M, p, q, PolarInverseRetraction()), X; atol = 1.0e-10)
     end
 end
