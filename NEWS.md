@@ -49,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `exp`, `log`, `mid_point`, the retractions and the inverse retractions on `Grassmann` and `Stiefel` accept points and tangent vectors given as `StiefelPoint` and `StiefelTangentVector`.
 * `manifold_dimension` on the `HamiltonianMatrices` returns the dimension of the manifold, over the real and over the complex numbers.
 * `rand` on the `HamiltonianMatrices` draws its two off-diagonal blocks independently, as documented.
+* charts of the `DefaultTorusAtlas` are now correctly switched according to the distance of the point from the chart centre (`get_chart_index`, `check_chart_switch`).
 
 ## [0.11.32] 2026-09-30
 

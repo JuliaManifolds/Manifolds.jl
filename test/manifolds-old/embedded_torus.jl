@@ -140,7 +140,7 @@ using LinearAlgebra
         A,
         i_p0x;
         final_time = 3.0,
-        check_chart_switch_kwargs = (; ϵ = 0.3),
+        check_chart_switch_kwargs = (; ϵ = 1.5),
     )
     p_exp_switch_3 = p_exp_switch(3.0)
     @test isapprox(
@@ -148,7 +148,7 @@ using LinearAlgebra
         [2.701765894057119, 2.668437820810143, -1.8341712552932237],
         rtol = 1.0e-5,
     )
-    @test length(p_exp_switch.sols) < length(p_exp.sols)
+    @test length(p_exp_switch.sols) > length(p_exp.sols)
 
     i_to = (-1.0, -0.3)
     @test transition_map_diff(M, A, i_p0x, [0.0, 0.0], X_p0x, i_to) ≈ X_p0x
