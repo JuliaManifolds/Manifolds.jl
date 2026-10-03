@@ -5,6 +5,88 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.33] unreleased
+
+### Added
+
+* `get_basis`, `get_coordinates` and `get_vector` on the `EssentialManifold` with an orthonormal basis of its five-dimensional horizontal space.
+* `log` on the `ProbabilitySimplex` with the `EuclideanMetric`.
+* `PolarRetraction`, `QRRetraction`, `CayleyRetraction`, `PolarInverseRetraction` and `QRInverseRetraction` on the real `GeneralizedStiefel` manifold.
+* `manifold_dimension` and `is_flat` for `MultinomialSymmetricPositiveDefinite`.
+
+### Changed
+
+* The default retraction and inverse retraction of `FixedRankMatrices` are `OrthographicRetraction` and `OrthographicInverseRetraction`.
+
+### Fixed
+
+* `kretschmann_scalar` now correctly uses the metric instead of the inverse for one of the contractions.
+* `get_coordinates` on the `CholeskySpace` divides the diagonal entries by the diagonal of the point, so that the coordinates are those of the orthonormal basis and invert `get_vector`.
+* `parallel_transport_to` on the `CholeskySpace` (and hence under the log-Cholesky metric) keeps the strictly lower part of the tangent vector, so that the transport is an isometry.
+* `jacobi_field` and `adjoint_Jacobi_field` on the `Circle` and on the number-valued `Euclidean` space apply the weight function they are given.
+* `log` on the complex `Circle` returns a tangent vector for every pair of opposite points.
+* `mid_point` on the complex `Circle` returns the midpoint of the shortest geodesic for every pair of points.
+* `check_vector` on `DeterminantOneMatrices` accepts a trace that vanishes up to rounding, with the tolerance keyword `atol`.
+* `manifold_dimension` on `DeterminantOneMatrices` over the complex numbers counts the determinant condition as the two real conditions it is.
+* `project` onto the tangent space of the `Elliptope` removes the vertical part with the right sign, so that it is a projection onto the horizontal space.
+* `distance` on a complex `Euclidean` space returns a real number.
+* `distance` and `log` on the unsigned `EssentialManifold` choose the closest of the four sign flips, so that they are the same for every representative of a point.
+* `distance` and `log` on the `EssentialManifold` return a number when a turn about the z axis puts one of the two cameras in place.
+* `project` from a `Euclidean` embedding into a `Euclidean` manifold of fewer array dimensions returns the corresponding entries.
+* Random tangent vectors of a `FiberBundle` are drawn in the fiber over the base point of `vector_at`.
+* The tangent checks of the sphere, the projective space, the probability simplex, the hyperbolic space, the centered matrices, the elliptope and the spectrahedron take a relative tolerance `rtol` and accept tangent vectors of any length.
+* `copy` of an `SVDMPoint` or a `TuckerPoint` returns a point with its own arrays.
+* `volume_density` on a `PowerManifold` in a nested representation returns the product of the volume densities of its components.
+* `get_vector` on complex `SymmetricMatrices` returns a Hermitian matrix, so that it inverts `get_coordinates`.
+* `project` onto the tangent space of the complex `SymmetricMatrices` returns the Hermitian part, so that its result is a tangent vector.
+* `check_point` and `check_vector` on a `FiberBundle` check the base part and the fiber part and report the errors of both.
+* `isapprox` for tangent vectors on a `FiberBundle` compares the base part as a tangent vector at the base point.
+* `is_point` on `FixedRankMatrices` accepts a plain matrix of rank `k` for every `k` and requires the rank to be exactly `k`, also for an `SVDMPoint`.
+* `is_vector` on `FixedRankMatrices` returns `false` for a tangent vector whose `Vt` factor is not orthogonal to the point.
+* `retract` with the `OrthographicRetraction` on `FixedRankMatrices` returns the point of its documented formula.
+* `riemannian_Hessian` on `FixedRankMatrices` works for matrices with more columns than the rank.
+* `check_vector` on a `Flag` in the orthogonal representation accepts tangent vectors whose blocks vanish up to rounding, with the tolerance keyword `atol`.
+* `volume_density` on `Rotations` and `OrthogonalMatrices` returns the determinant of the differential of the exponential map.
+* `exp` on the `GeneralizedGrassmann` manifold follows the geodesic in the direction of the given tangent vector.
+* `is_vector` on the `GeneralizedStiefel` and `GeneralizedGrassmann` manifolds accepts complex tangent vectors and those with `p'BX = 0`, with a tolerance relative to the length of the vector.
+* `exp`, `log`, `mid_point`, the retractions and the inverse retractions on `Grassmann` and `Stiefel` accept points and tangent vectors given as `StiefelPoint` and `StiefelTangentVector`.
+* `manifold_dimension` on the `HamiltonianMatrices` returns the dimension of the manifold, over the real and over the complex numbers.
+* `rand` on the `HamiltonianMatrices` draws its two off-diagonal blocks independently, as documented.
+* charts of the `DefaultTorusAtlas` are now correctly switched according to the distance of the point from the chart centre (`get_chart_index`, `check_chart_switch`).
+* embedding of the `Flag` manifold is now marked as `EmbeddedManifoldType` instead of `IsometricallyEmbeddedManifoldType`.
+*`norm` in the orthogonal representation of a flag manifold is fixed (it had wrong scaling).
+* `get_vector` on `HeisenbergMatrices` returns the tangent vector for every size `n`, as its in-place variant does.
+* `riemannian_gradient` on the `Hyperbolic` space changes the representer before it projects onto the tangent space, so that it returns the Riemannian gradient.
+* `riemannian_Hessian` on the `Hyperbolic` space follows its documented formula and leaves the Euclidean Hessian it is given unchanged.
+* `volume_density` on the `Hyperbolic` space measures the tangent vector with its Riemannian norm, so that it is the determinant of the differential of the exponential map at every point.
+* `is_point` on the `Hyperrectangle` checks the bounds also when keyword arguments such as `atol` are given.
+* `retract` with the default `ProjectionRetraction` on the `Hyperrectangle` returns a point inside the box.
+* `horizontal_component`, and with it `exp`, `inner` and `norm`, on `KendallsShapeSpace` return a value when the landmarks span fewer dimensions than the space, such as collinear points in the plane.
+* `project` and `rand` on `KendallsShapeSpace` return horizontal tangent vectors, so that the basis from `ProjectedOrthonormalBasis` is orthonormal.
+* `change_metric` for a metric given by its local matrix keeps inner products also when that matrix does not commute with the local matrix of the manifold's metric.
+* `change_representer` for a metric given by its local matrix reproduces the inner products of that metric also when its local matrix does not commute with the local matrix of the manifold's metric.
+* `flat` and `sharp` on a `MetricManifold` apply the local metric to coefficients in an induced basis, as `flat!` and `sharp!` do.
+* `project` of a matrix onto the multinomial doubly stochastic manifolds runs Sinkhorn's algorithm for up to 1000 iterations, stops once every column sum is within `tolerance` of one, and warns when it does not get there.
+* `distance` on the `ProbabilitySimplex` returns a number for every pair of points, also for a point and itself.
+* `exp` on `ProbabilitySimplex(n; boundary = :closed)` follows the geodesic within the face at points with zero entries.
+* `Weingarten` on `Rotations`, `OrthogonalMatrices` and `UnitaryMatrices` returns a tangent vector in the Lie algebra, like its tangent vector argument.
+* `check_vector` and the tangent projection of `SPDFixedDeterminant` use the condition that the trace of `p \ X` vanishes, so that a geodesic in an accepted direction keeps the determinant, and the tangent check takes a relative tolerance `rtol`.
+* `embed` and `embed!` of a tangent vector on the `Segre` manifold return the embedded tangent vector, and `embed!` writes it into the given array.
+* `vector_transport_to!` with `ProjectionTransport` on the `Segre` manifold returns the transported vector also when the result is the tangent vector being transported.
+* `exp!`, and with it the in-place `retract!` and `mid_point!`, on the `Segre` manifold and under its `WarpedMetric` return the correct point when the result is the starting point itself.
+* `get_coordinates!` on the `Segre` manifold and under its `WarpedMetric` writes the coordinates into the given vector.
+* `connected_by_geodesic` on the `Segre` manifold with a `WarpedMetric` takes the warping factor into account.
+* `log` on `Sphere` and `ArraySphere` returns a tangent vector for every pair of opposite points.
+* `is_vector` and `project` on the `SpecialUnitaryMatrices` require and return tangent vectors of trace zero.
+* `project` onto the tangent space of the `GeneralizedGrassmann` manifold removes the whole part along the columns of the point, so that it and `rand` return tangent vectors `X` with `p'BX = 0`.
+* `change_metric` on the `GeneralizedGrassmann` manifold returns a tangent vector whose length in the manifold's metric equals the Euclidean length of the given one.
+* `distance` and `log` on the `GeneralizedGrassmann` manifold use the metric given by `B`, and `distance` returns `π/2` for a right principal angle.
+* `distance` on the `Grassmann` manifold returns `π/2` for a right principal angle instead of throwing a `SingularException`.
+* `riemann_tensor` on the real `Grassmann` manifold adds the second term of its documented formula, so that `sectional_curvature` there is never negative.
+* `project` onto the tangent space of `MultinomialDoubleStochastic` returns a tangent vector at every point, also at the uniform matrix of two or four rows.
+* `rand` on `OrthogonalMatrices` with `vector_at` draws the projection of a normally distributed matrix with standard deviation `σ`.
+* `project` onto the tangent space of `MultinomialSymmetric`, and with it `riemannian_gradient` and `riemannian_Hessian`, use the symmetric part of a nonsymmetric input, so that they return the correct tangent vector.
+
 ## [0.11.32] 2026-09-30
 
 ### Added

@@ -16,8 +16,8 @@ struct Circle{𝔽} <: AbstractManifold{𝔽} end
 
 Circle(𝔽::AbstractNumbers = ℝ) = Circle{𝔽}()
 
-function adjoint_Jacobi_field(::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
-    return X
+function adjoint_Jacobi_field(M::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 ManifoldsBase.allocate_on(::Circle{ℝ}) = Array{Float64, 0}(undef)
@@ -313,8 +313,8 @@ Return true. [`Circle`](@ref) is a flat manifold.
 """
 is_flat(M::Circle) = true
 
-function jacobi_field(::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
-    return X
+function jacobi_field(M::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 @doc raw"""
@@ -334,7 +334,7 @@ Base.log(::Circle{ℝ}, p::Real, q::Real) = sym_rem(q - p)
 function Base.log(M::Circle{ℂ}, p::Number, q::Number)
     cosθ = complex_dot(p, q)
     if cosθ ≈ -1  # appr. opposing points, return deterministic choice from set-valued log
-        X = real(p) ≈ 1 ? 1im : 1 + 0im
+        X = abs(real(p)) ≈ 1 ? 1im : 1 + 0im
         X = X - complex_dot(p, X) * p
         X *= π / norm(X)
     else
@@ -349,7 +349,7 @@ log!(::Circle{ℝ}, X, p, q) = (X .= sym_rem(q[] - p[]))
 function log!(M::Circle{ℂ}, X, p, q)
     cosθ = complex_dot(p, q)
     if cosθ ≈ -1
-        X .= sum(real.(p)) ≈ 1 ? 1.0im : 1.0 + 0.0im
+        X .= abs(sum(real.(p))) ≈ 1 ? 1.0im : 1.0 + 0.0im
         X .= X - complex_dot(p, X) * p
         X .*= π / norm(X)
     else
@@ -434,7 +434,7 @@ function Statistics.mean(
 end
 
 mid_point(M::Circle{ℝ}, p1, p2) = exp(M, p1, 0.5 * log(M, p1, p2))
-mid_point(::Circle{ℂ}, p1::Complex, p2::Complex) = exp(im * (angle(p1) + angle(p2)) / 2)
+mid_point(M::Circle{ℂ}, p1::Complex, p2::Complex) = exp(M, p1, 0.5 * log(M, p1, p2))
 mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = Scalar(mid_point(M, p1[], p2[]))
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)

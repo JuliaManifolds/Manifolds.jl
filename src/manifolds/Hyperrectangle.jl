@@ -28,7 +28,7 @@ struct Hyperrectangle{T <: AbstractArray} <: AbstractDecoratorManifold{ℝ}
     end
 end
 
-function check_point(M::Hyperrectangle, p)
+function check_point(M::Hyperrectangle, p; kwargs...)
     if !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
@@ -415,7 +415,7 @@ representation_size(M::Hyperrectangle) = size(M.lb)
 
 function ManifoldsBase.retract_project!(M::Hyperrectangle, r, q, Y)
     r .= q .+ Y
-    project(M, r, r)
+    project!(M, r, r)
     return r
 end
 function ManifoldsBase.retract_project_fused!(M::Hyperrectangle, r, q, Y, t::Number)

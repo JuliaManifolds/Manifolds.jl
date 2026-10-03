@@ -15,6 +15,9 @@ using ManifoldDiff
 
     @testset "Basics" begin
         @test base_manifold(M) === M
+        # tangent vectors of any length are accepted, a clearly normal part is not
+        @test is_vector(M, q, project(M, q, [100.0, 200.0, 300.0]))
+        @test !is_vector(M, q, project(M, q, [1.0, 2.0, 3.0]) .+ 1.0e-6 .* q)
     end
 
     # TODO: test ProjectedOrthonormalBasis(:svd), DiagonalizingOrthonormalBasis
@@ -49,6 +52,7 @@ using ManifoldDiff
             (get_vectors, DefaultOrthogonalBasis()) => :Orthogonal,
             injectivity_radius => π,
             (injectivity_radius, ProjectionRetraction()) => π / 2,
+            is_flat => false,
             is_default_metric => EuclideanMetric(),
             log => X, norm => π / 4,
             parallel_transport_to => parallel_transport_to(M, p, X, q),
@@ -209,6 +213,18 @@ using ManifoldDiff
             @test isapprox(dot(x, v), 0; atol = 1.0e-12)
             vexp = normalize(project(M, x, [1, zeros(n)...]))
             @test v ≈ π * vexp
+
+            # opposite points starting at the negative end of the first axis
+            for (N, x) in [
+                    (M, [-0.9999999999999999, 0.0, 0.0]),
+                    (ArraySphere(2, 2), [-1.0 0.0; 0.0 0.0]),
+                    (Sphere(2, ℂ), [-1.0 + 0.0im, 0.0, 0.0]),
+                ]
+                v = log(N, x, -x)
+                @test is_vector(N, x, v)
+                @test norm(v) ≈ π
+                @test isapprox(N, -x, exp(N, x, v))
+            end
 
             x = [1, zeros(n)...]
             v = log(M, x, -x)

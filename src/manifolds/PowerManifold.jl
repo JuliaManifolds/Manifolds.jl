@@ -206,7 +206,7 @@ Return volume density on the [`PowerManifold`](@extref `ManifoldsBase.PowerManif
 volume densities.
 """
 function volume_density(M::PowerManifold, p, X)
-    density = one(float(eltype(X)))
+    density = one(float(number_eltype(X)))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         p_i = _read(M, rep_size, p, i)

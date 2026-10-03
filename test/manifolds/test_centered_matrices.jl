@@ -2,6 +2,13 @@ using Manifolds, Test
 
 Test.@testset "Centered Matrices" begin
 
+    Test.@testset "tangent vectors of any length" begin
+        N = CenteredMatrices(3, 2)
+        p = [1.0 2.0; -3.0 0.0; 2.0 -2.0]
+        Test.@test is_vector(N, p, project(N, p, [100.0 -50.0; 30.0 20.0; -10.0 5.0]))
+        Test.@test !is_vector(N, p, [1.0 1.0; -1.0 -1.0; 1.0e-6 0.0])
+    end
+
     M = CenteredMatrices(3, 2)
 
     p1 = [1 2; 4 5; -5 -7]
@@ -52,6 +59,7 @@ Test.@testset "Centered Matrices" begin
     p4 = q2
     p5 = [1.0 1.0im; -1.0im 0.0; -1.0 + 1.0im -1.0im]
     p6 = [1.0im 0.0; -2.0im 1.0im; 1.0im -1.0im]
+    q4 = [1.0im 0.0; -2.0im 1.0im; 1.0im 0.0] #complex and not centered
     # Complex case
     Manifolds.Test.test_manifold(
         Mc,
@@ -67,9 +75,12 @@ Test.@testset "Centered Matrices" begin
             :Points => [p4, p5, p6],
             :Vectors => [p4],
             :EmbeddedPoints => [p4],
+            :InvalidPoints => Matrix[q1, q3, q4],
+            :InvalidVectors => Matrix[q1, q3, q4],
         ),
         Dict(
-            :IsPointErrors => [ManifoldDomainError, ManifoldDomainError, ManifoldDomainError],
+            :IsPointErrors => [ManifoldDomainError, DomainError, DomainError],
+            :IsVectorErrors => [ManifoldDomainError, DomainError, DomainError],
             is_flat => true,
             get_embedding => Euclidean(3, 2; field = ℂ),
             manifold_dimension => 8,

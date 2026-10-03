@@ -41,18 +41,18 @@ function Euclidean(
     return Euclidean{field, typeof(size)}(size)
 end
 
-function adjoint_Jacobi_field(::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
-    return X
+function adjoint_Jacobi_field(M::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 function adjoint_Jacobi_field(
-        ::Euclidean{𝔽, TypeParameter{Tuple{}}},
+        M::Euclidean{𝔽, TypeParameter{Tuple{}}},
         p,
         q,
         t,
         X,
         β::Tβ,
     ) where {𝔽, Tβ}
-    return X
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
@@ -141,7 +141,7 @@ Base.@propagate_inbounds function distance(M::Euclidean, p, q)
     @boundscheck if axes(p) != axes(q)
         throw(DimensionMismatch("At last one of $p and $q does not belong to $M"))
     end
-    s = zero(eltype(p))
+    s = zero(real(eltype(p)))
     @inbounds begin # COV_EXCL_LINE
         @simd for I in eachindex(p, q) # COV_EXCL_LINE
             p_i = p[I]
@@ -454,11 +454,11 @@ Return true. [`Euclidean`](@ref) is a flat manifold.
 """
 is_flat(M::Euclidean) = true
 
-function jacobi_field(::Euclidean{𝔽, TypeParameter{Tuple{}}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
-    return X
+function jacobi_field(M::Euclidean{𝔽, TypeParameter{Tuple{}}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
-function jacobi_field(::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
-    return X
+function jacobi_field(M::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 function local_metric(
@@ -664,13 +664,13 @@ function project!(
             "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
         ),
     )
-    any(n .< m[1:ln]) && throw(
+    any(n[1:lm] .< m) && throw(
         DomainError(
             "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
         ),
     )
     #  fill q with the „top left edge“ of p.
-    q .= p[map(i -> Base.OneTo(i), m)..., ntuple(_ -> 1, lm - ln)...]
+    q .= p[map(i -> Base.OneTo(i), m)..., ntuple(_ -> 1, ln - lm)...]
     return q
 end
 

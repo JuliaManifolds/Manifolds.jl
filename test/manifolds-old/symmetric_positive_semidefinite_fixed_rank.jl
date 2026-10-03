@@ -39,6 +39,14 @@ include("../header.jl")
         M = SymmetricPositiveSemidefiniteFixedRank(4, 2, ℂ)
         @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℂ)"
         @test manifold_dimension(M) == 12
+        qc = ComplexF64[1.0 0.0; 0.0 1.0im; 0.0 0.0; 0.0 0.0]
+        qc2 = ComplexF64[2.0 1.0; 0.0 1.0; 0.0 1.0im; 0.0 0.0]
+        @test is_point(M, qc)
+        Xc = log(M, qc, qc2)
+        @test is_vector(M, qc, Xc)
+        qe = exp(M, qc, Xc)
+        @test qe * qe' ≈ qc2 * qc2'
+        @test isapprox(M, qe, qc2; atol = 5 * eps(Float64))
     end
     @testset "field parameter" begin
         M = SymmetricPositiveSemidefiniteFixedRank(4, 2; parameter = :field)

@@ -21,9 +21,9 @@ a whole equivalence class of representers. For ``B=I_n`` this simplifies to the 
 The tangent space at a point (subspace) ``p`` is given by
 
 ````math
-T_x\mathrm{Gr}(n,k,B) = \bigl\{
+T_p\mathrm{Gr}(n,k,B) = \bigl\{
 X ∈ 𝔽^{n×k} :
-X^{\mathrm{H}}Bp + p^{\mathrm{H}}BX = 0_{k} \bigr\},
+p^{\mathrm{H}}BX = 0_{k} \bigr\},
 ````
 
 where ``0_{k}`` denotes the ``k×k`` zero matrix.
@@ -82,14 +82,27 @@ end
     change_metric(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
 
 Change `X` to the corresponding vector with respect to the metric of the [`GeneralizedGrassmann`](@ref) `M`,
-i.e. let ``B=LL'`` be the Cholesky decomposition of the matrix `M.B`, then the corresponding vector is ``L\X``.
+i.e. find ``c\colon T_p\mathrm{Gr}(n,k,B) → T_p\mathrm{Gr}(n,k,B)`` such that for all
+``X, Y ∈ T_p\mathrm{Gr}(n,k,B)`` it holds
+
+```math
+⟨X,Y⟩ = \operatorname{tr}(X^{\mathrm{H}}Y) = \operatorname{tr}(c(X)^{\mathrm{H}}Bc(Y)) = g_p(c(X),c(Y)).
+```
+
+Let ``B=LL^{\mathrm{H}}`` be the Cholesky decomposition of the matrix `M.B`,
+``P = L^{\mathrm{H}}p`` and ``Q = I_n - PP^{\mathrm{H}}``. Then
+``c(X) = L^{-\mathrm{H}}(QL^{-1}L^{-\mathrm{H}}Q)^{1/2}L^{\mathrm{H}}X``,
+which is the positive square root of the change of representer ``X ↦ (B^{-1} - pp^{\mathrm{H}})X``
+on the tangent space, see Section 4.5 of [EdelmanAriasSmith:1998](@cite) for the latter.
 """
 change_metric(M::GeneralizedGrassmann, ::EuclideanMetric, ::Any, ::Any)
 
 function change_metric!(M::GeneralizedGrassmann, Y, ::EuclideanMetric, p, X)
     C2 = cholesky(M.B).L
-    copyto!(Y, X)
-    ldiv!(C2, Y)
+    P = C2' * p
+    R = C2' \ (I - P * P')
+    copyto!(Y, sqrt(Hermitian(R' * R)) * (C2' * X))
+    ldiv!(C2', Y)
     return Y
 end
 
@@ -133,12 +146,15 @@ d_{\mathrm{Gr}(n,k,B)}(p,q) = \operatorname{norm}(\log_p(q)).
 ````
 """
 function distance(M::GeneralizedGrassmann, p, q)
-    z = p' * M.B' * q
-    X = allocate_result(M, log, p, q)
-    X .= q / z .- p
-    d = svd(X)
-    X .= d.U .* atan.(d.S')
-    return norm(M, p, X)
+    # principal angles in the inner product of B, Knyazev, Argentati, 2002, Algorithm 3.2
+    F = svd(p' * M.B * q)
+    s = min.(F.S, 1)
+    small = s .> sqrt(2) / 2
+    any(small) || return norm(acos.(s))
+    Q = q * F.V[:, small]
+    K = sqrt(Hermitian(M.B))
+    μ = svdvals(K * (Q - p * (p' * (M.B * Q))))
+    return norm(vcat(acos.(s[.!small]), asin.(min.(μ, 1))))
 end
 
 embed(::GeneralizedGrassmann, p) = p
@@ -148,8 +164,10 @@ embed(::GeneralizedGrassmann, p, X) = X
     exp(M::GeneralizedGrassmann, p, X)
 
 Compute the exponential map on the [`GeneralizedGrassmann`](@ref) `M` ``= \mathrm{Gr}(n,k,B)``
-starting in `p` with tangent vector (direction) `X`. Let ``X^{\mathrm{H}}BX = USV`` denote the
-SVD decomposition of ``X^{\mathrm{H}}BX``. Then the exponential map is written using
+starting in `p` with tangent vector (direction) `X`. Let ``X = USV^{\mathrm{H}}`` with
+``U^{\mathrm{H}}BU = I_k``, ``S`` diagonal and nonnegative and ``V`` unitary, so that
+``X^{\mathrm{H}}BX = VS^2V^{\mathrm{H}}``. Then the exponential map is written, see Section 4.5
+of [EdelmanAriasSmith:1998](@cite), using
 
 ````math
 \exp_p X = p V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
@@ -163,9 +181,9 @@ exp(::GeneralizedGrassmann, ::Any...)
 function exp!(M::GeneralizedGrassmann, q, p, X)
     norm(M, p, X) ≈ 0 && return copyto!(q, p)
     d = svd(X' * M.B * X)
-    V = d.Vt
+    V = d.V
     S = abs.(sqrt.(d.S))
-    mul!(q, p * (V .* cos.(S')) + X * (V .* usinc.(S')), V)
+    mul!(q, p * (V .* cos.(S')) + X * (V .* usinc.(S')), d.Vt)
     project!(M, q, q)
     return q
 end
@@ -230,15 +248,17 @@ i.e. the tangent vector `X` whose corresponding [`geodesic`](@extref `ManifoldsB
 reaches `q` after time 1 on `M`. The formula reads
 
 ````math
-\log_p q = V⋅ \operatorname{atan}(S) ⋅ U^\mathrm{H},
+\log_p q = B^{-1/2}U⋅ \operatorname{atan}(S) ⋅ V^\mathrm{H},
 ````
 
-where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian
+and ``B^{1/2}`` is the square root of ``B``; multiplying by it turns the metric into the
+Euclidean one, see Section 4.5 of [EdelmanAriasSmith:1998](@cite).
 The matrices ``U`` and ``V`` are the unitary matrices, and ``S`` is the diagonal matrix
 containing the singular values of the SVD-decomposition
 
 ````math
-USV = (q^\mathrm{H}Bp)^{-1} ( q^\mathrm{H} - q^\mathrm{H}Bpp^\mathrm{H}).
+USV^\mathrm{H} = B^{1/2}\bigl(q(p^\mathrm{H}Bq)^{-1} - p\bigr).
 ````
 
 In this formula the ``\operatorname{atan}`` is meant elementwise.
@@ -246,10 +266,11 @@ In this formula the ``\operatorname{atan}`` is meant elementwise.
 log(::GeneralizedGrassmann, ::Any...)
 
 function log!(M::GeneralizedGrassmann, X, p, q)
+    K = sqrt(Hermitian(M.B))
     z = p' * M.B' * q
     X .= q / z .- p
-    d = svd(X)
-    return mul!(X, d.U, atan.(d.S) .* d.Vt)
+    d = svd(K * X)
+    return mul!(X, K \ d.U, atan.(d.S) .* d.Vt)
 end
 
 @doc raw"""
@@ -321,7 +342,7 @@ project(::GeneralizedGrassmann, ::Any, ::Any)
 function project!(M::GeneralizedGrassmann, Y, p, X)
     A = p' * M.B' * X
     copyto!(Y, X)
-    mul!(Y, p, Hermitian((A .+ A') ./ 2), -1, 1)
+    mul!(Y, p, A, -1, 1)
     return Y
 end
 

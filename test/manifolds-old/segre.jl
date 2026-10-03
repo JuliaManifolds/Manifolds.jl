@@ -172,6 +172,13 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 X_ = zeros(prod(V))
                 embed!(M, X_, p, X)
                 @test is_vector(get_embedding(M), p_, X_)
+                @test isapprox(
+                    X_,
+                    sum(
+                        kron([i == j ? X[j] : p[j] for j in 1:(length(V) + 1)]...) for
+                            i in 1:(length(V) + 1)
+                    ),
+                )
             end
 
             @testset "vector_transport_to" begin
@@ -186,11 +193,18 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 Z_inplace = zero_vector(N, q)
                 vector_transport_to!(N, Z_inplace, p, X, q, ProjectionTransport())
                 @test isapprox(Z_inplace, Z; atol = 1.0e-10)
+
+                Z_alias = deepcopy(X)
+                vector_transport_to!(N, Z_alias, p, Z_alias, q, ProjectionTransport())
+                @test isapprox(Z_alias, Z; atol = 1.0e-10)
             end
 
             @testset "get_coordinates" begin
                 @test isapprox(X, get_vector(M, p, get_coordinates(M, p, X)))
                 @test isapprox(c, get_coordinates(M, p, get_vector(M, p, c)))
+                c_ = fill(NaN, manifold_dimension(M))
+                get_coordinates!(M, c_, p, X, DefaultOrthonormalBasis())
+                @test isapprox(c_, get_coordinates(M, p, X))
 
                 # Coordinates are ON
                 @test isapprox(
@@ -205,6 +219,14 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 @test is_point(M, p_)
                 @test isapprox(p, p_; atol = 1.0e-5)
 
+                # the result may be the starting point itself
+                p_alias = deepcopy(p)
+                exp!(M, p_alias, p_alias, X)
+                @test isapprox(p_alias, exp(M, p, X))
+                p_alias = deepcopy(p)
+                mid_point!(M, p_alias, p_alias, q)
+                @test isapprox(p_alias, mid_point(M, p, q))
+
                 # Tangent vector in the scaling direction
                 p_ = exp(M, p, [X[1], zeros.(size.(X[2:end]))...])
                 @test is_point(M, p_)
@@ -212,7 +234,7 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
                 # Generic tangent vector
                 p_ = exp(M, p, X)
-                @test is_point(M, p)
+                @test is_point(M, p_)
 
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * X)), -1.0)
@@ -344,6 +366,17 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         @test is_vector(M, p, log(M, p, q_))
     end
 
+    # The warping factor scales the spherical angle sum in connected_by_geodesic
+    @testset "connected_by_geodesic with a warped metric" begin
+        p = [[1.0], [1.0, 0.0, 0.0], [1.0, 0.0]]
+        M = MetricManifold(Segre(3, 2), WarpedMetric(2.0))
+        @test connected_by_geodesic(M, p, [[1.0], [cos(1.4), sin(1.4), 0.0], [1.0, 0.0]])
+        @test !connected_by_geodesic(M, p, [[1.0], [cos(1.8), sin(1.8), 0.0], [1.0, 0.0]])
+        M = MetricManifold(Segre(2, 2, 2, 2, 2), WarpedMetric(0.5))
+        p = [[1.0], [[1.0, 0.0] for _ in 1:5]...]
+        @test connected_by_geodesic(M, p, [[1.0], [[cos(1.5), sin(1.5)] for _ in 1:5]...])
+    end
+
     # Test the formulas for sectional curvature stated in the docs
     @testset "sectional_curvature" begin
         M = Segre(3, 3)
@@ -356,7 +389,7 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         @test isapprox(-1 / p[1][1]^2, sectional_curvature(M, p, X, Z))
         @test isapprox(0.0, sectional_curvature(M, p, X, V))
 
-        M = MetricManifold(Segre(3, 3, 3), WarpedMetric(1.23))
+        M = MetricManifold(Segre(3, 3), WarpedMetric(1.23))
         @test isapprox((1.23^(-2) - 1) / p[1][1]^2, sectional_curvature(M, p, X, Y))
         @test isapprox(-1 / p[1][1]^2, sectional_curvature(M, p, X, Z))
         @test isapprox(0.0, sectional_curvature(M, p, X, V))

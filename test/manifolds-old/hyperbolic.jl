@@ -1,5 +1,12 @@
 include("../header.jl")
 
+@testset "tangent vectors of the hyperbolic space far from the apex" begin
+    M = Hyperbolic(2)
+    p = exp(M, [0.0, 0.0, 1.0], [5.0, 0.0, 0.0])
+    @test is_vector(M, p, project(M, p, [100.0, -50.0, 30.0]))
+    @test !is_vector(M, p, [1.0, 0.0, 0.0])
+end
+
 @testset "Hyperbolic Space" begin
     M = Hyperbolic(2)
     @testset "Hyperbolic Basics" begin
@@ -394,20 +401,34 @@ include("../header.jl")
     end
     @testset "Riemannian Hessian" begin
         M = Hyperbolic(2)
-        p = [0.0, 0.0, 1.0]
+        p = [1.0, 1.0, sqrt(3)]
         G = [1.0, 0.2, 0.3]
         H = [2.0, 0.3, 0.4]
-        X = [0.3, 0.4, 0.0]
+        X = [1.0, 2.0, sqrt(3)]
         D = diagm([1.0, 1.0, -1.0])
-        rH = project(M, p, D * H + dot(p, D * G) .* X)
-        @test riemannian_Hessian(M, p, G, H, X) == rH
+        rH = project(M, p, D * H + dot(p, G) .* X)
+        @test riemannian_Hessian(M, p, G, H, X) ≈ rH
+        @test H ≈ [2.0, 0.3, 0.4]
+    end
+    @testset "Riemannian gradient" begin
+        M = Hyperbolic(2)
+        p = [1.0, 1.0, sqrt(3)]
+        G = [0.4, -0.7, 1.1]
+        Y = riemannian_gradient(M, p, G)
+        @test is_vector(M, p, Y)
+        for V in (project(M, p, [1.0, 0.0, 0.0]), project(M, p, [0.0, 1.0, 0.0]))
+            @test inner(M, p, Y, V) ≈ dot(G, V)
+        end
+        Y2 = similar(Y)
+        riemannian_gradient!(M, Y2, p, G)
+        @test Y2 == Y
     end
     @testset "Manifold volume" begin
         M = Hyperbolic(2)
         @test manifold_volume(M) == Inf
         p = [1.0, 1.0, sqrt(3)]
         X = [1.0, 2.0, sqrt(3)]
-        @test volume_density(M, p, X) ≈ 2.980406103535168
+        @test volume_density(M, p, X) ≈ 1.368298872008591
         @test volume_density(M, p, [0.0, 0.0, 0.0]) ≈ 1.0
     end
     @testset "field parameter" begin

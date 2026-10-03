@@ -13,15 +13,16 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
             :Functions => [
                 default_vector_transport_method,
                 get_embedding,
-                is_flat,
+                injectivity_radius, is_flat,
+                manifold_dimension,
                 project,
                 rand, repr,
-                # Weingarten, # TODO: V is not normal?!
+                Weingarten,
                 riemannian_Hessian,
             ],
             :EmbeddedPoints => [ones(2, 2), 1im .* ones(2, 2), [2im 0.0; 0.0 2im]],
             :EmbeddedVectors => [[2im 0.0; 1.0 2im]],
-            :NormalVectors => [[1.0 0.0; 1.0 0.0]],
+            :NormalVectors => [[1im 0.0; 0.0 2im]],
             :Points => [p1],
             :Vectors => [X1],
             :Bases => [DefaultOrthonormalBasis()],
@@ -92,8 +93,8 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
     @testset "Riemannian Hessian" begin
         p = Matrix{Float64}(I, 2, 2)
         X = [0.0 3.0; -3.0 0.0]
-        V = [1.0 0.0; 1.0 0.0]
-        @test Weingarten(M, p, X, V) == -1 / 2 * p * (V' * X - X' * V)
+        q = [0.0 1im; 1im 0.0]
+        @test Weingarten(M, q, X, q * [1.0 0.0; 0.0 2.0]) == [0.0 -4.5; 4.5 0.0]
         G = [0.0 1.0; 0.0 0.0]
         H = [0.0 0.0; 2.0 0.0]
         @test riemannian_Hessian(M, p, G, H, X) == [0.0 -1.0; 1.0 0.0]
@@ -139,6 +140,7 @@ end
                 get_embedding,
                 injectivity_radius, is_flat,
                 log,
+                manifold_dimension,
                 project,
                 rand, repr,
             ],

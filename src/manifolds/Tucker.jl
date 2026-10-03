@@ -9,7 +9,7 @@ Segre manifold, i.e., the set of rank-1 tensors.
 
 Let ``𝔽`` be the real or complex numbers.
 Any tensor ``p`` on the Tucker manifold can be represented as a multilinear product in HOSVD
-[DeLathauwerDeMoorVanderwalle:2000](@cite) form
+[DeLathauwerDeMoorVandewalle:2000](@cite) form
 ```math
 p = (U_1,\dots,U_D) ⋅ \mathcal{C}
 ```
@@ -351,6 +351,9 @@ function Base.copyto!(q::TuckerPoint, p::TuckerPoint)
     copyto!(q.hosvd.core, p.hosvd.core)
     return q
 end
+Base.copy(p::TuckerPoint) = TuckerPoint(
+    HOSVD(map(copy, p.hosvd.U), copy(p.hosvd.core), map(copy, p.hosvd.σ)),
+)
 function Base.copyto!(y::TuckerTangentVector, x::TuckerTangentVector)
     for d in 1:ndims(y.Ċ)
         copyto!(y.U̇[d], x.U̇[d])

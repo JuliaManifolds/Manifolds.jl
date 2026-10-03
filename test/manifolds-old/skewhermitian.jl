@@ -41,6 +41,8 @@ end
         @test manifold_dimension(M_complex) == 9
         @test A_skewsym2 == project!(M, A_skewsym, A_skewsym)
         @test A_skewsym2 == project(M, A_skewsym, A_skewsym)
+        @test project(M, A) == [0 -1 -2; 1 0 -1; 2 1 0] # the point projection antisymmetrizes
+        @test project(M, B_skewsym, A) == [0 -1 -2; 1 0 -1; 2 1 0] # and so does the tangent one
         A_sym3 = similar(A_skewsym)
         embed!(M, A_sym3, A_skewsym)
         A_sym4 = embed(M, A_skewsym)
@@ -94,8 +96,9 @@ end
                 test_rand_point = true,
             )
             @test isapprox(
+                M_complex,
                 -pts_complex[1],
-                exp(M, pts_complex[1], log(M, pts_complex[1], -pts_complex[1])),
+                exp(M_complex, pts_complex[1], log(M_complex, pts_complex[1], -pts_complex[1])),
             )
         end # testset type $T
     end # for

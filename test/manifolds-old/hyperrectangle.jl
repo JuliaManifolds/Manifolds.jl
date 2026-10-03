@@ -21,6 +21,7 @@ include("../header.jl")
     @test_throws DomainError is_point(M, [1.0im, 0.0, 0.0]; error = :error)
     @test_throws DomainError is_point(M, [NaN, 3.0, 0.0]; error = :error)
     @test_throws DomainError is_point(M, [10.0, 3.0, 0.0]; error = :error)
+    @test_throws DomainError is_point(M, [10.0, 3.0, 0.0]; atol = 1.0e-5, error = :error)
     @test_throws DomainError is_vector(M, [1.0, 2.0, 0.0], [1.0im, 0.0, 0.0]; error = :error)
     @test_throws DomainError is_vector(M, [1], [1.0, 1.0, 0.0]; error = :error)
     @test_throws DomainError is_vector(M, [0.0, 0.0, 0.0], [1.0]; error = :error)
@@ -29,6 +30,7 @@ include("../header.jl")
     @testset "projections" begin
         @test project(M, [4.0, -2.0, 3.0]) ≈ [1.0, 2.0, 3.0]
         @test project(M, [1.0, 2.0, 3.0], [2.0, -0.5, -10.0]) ≈ [0.0, 0.0, -10.0]
+        @test retract(M, [0.0, 3.0, 0.0], [10.0, 10.0, 10.0]) == [1.0, 4.0, 9.0]
     end
 
     @testset "injectivity_radius" begin

@@ -2,6 +2,15 @@ include("../header.jl")
 using DiffEqCallbacks, OrdinaryDiffEq
 using ForwardDiff
 
+@testset "Grassmann distance at a right and at a small angle" begin
+    M = Grassmann(4, 2)
+    p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+    q = [0.0 0.0; 0.0 1.0; 1.0 0.0; 0.0 0.0]
+    @test distance(M, p, q) ≈ π / 2
+    t = 1.0e-10
+    @test distance(M, p, [cos(t) 0.0; 0.0 1.0; sin(t) 0.0; 0.0 0.0]) ≈ t
+end
+
 @testset "Grassmann" begin
     @testset "Real" begin
         M = Grassmann(3, 2)
@@ -109,7 +118,8 @@ using ForwardDiff
                 @test norm(M, pts[1], X1) isa Real
                 @test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
             end
-            @test riemann_tensor(M, p1, X, Y, 2 * X + Y) ≈ [0 -2; 0 1; 2 0]
+            @test riemann_tensor(M, p1, X, Y, 2 * X + Y) ≈ [-2 -2; 0 -1; -2 2]
+            @test sectional_curvature(M, p1, X, [0.0 0.0; 0.0 0.0; 1.0 0.0]) ≈ 1.0
             @testset "gradient and metric conversion" begin
                 Y = change_metric(M, EuclideanMetric(), p1, X)
                 @test Y == X
@@ -149,6 +159,19 @@ using ForwardDiff
             pS = StiefelPoint(p)
             @test default_vector_transport_method(M, typeof(p)) == ParallelTransport()
             @test default_vector_transport_method(M, typeof(pS)) == ParallelTransport()
+        end
+        @testset "Grassmann and Stiefel in the StiefelPoint representation" begin
+            for M2 in [Grassmann(4, 2), Stiefel(4, 2)]
+                p2 = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+                X2 = [0.0 0.0; 0.0 0.0; 0.1 0.2; -0.3 0.4]
+                q2 = exp(M2, p2, X2)
+                pS2, XS2, qS2 = StiefelPoint(p2), StiefelTangentVector(X2), StiefelPoint(q2)
+                @test exp(M2, pS2, XS2).value ≈ q2
+                @test log(M2, pS2, qS2).value ≈ log(M2, p2, q2)
+                @test retract(M2, pS2, XS2).value ≈ retract(M2, p2, X2)
+                @test inverse_retract(M2, pS2, qS2).value ≈ inverse_retract(M2, p2, q2)
+                @test mid_point(M2, pS2, qS2).value ≈ mid_point(M2, p2, q2)
+            end
         end
         @testset "A short ONB test" begin
             M = Grassmann(4, 2)
@@ -443,6 +466,8 @@ using ForwardDiff
                 @test Manifolds.inner(M, A, i, a, c, c) ≈ Manifolds.inner(M, p, X, X)
                 @test Manifolds.inner(M, A, i, a, c, d) ≈ Manifolds.inner(M, p, X, Y)
                 @test Manifolds.det_local_metric(M, A, i, a) > 0
+                @test get_coordinates(M, p, riemann_tensor(M, p, X, Y, Y), B) ≈
+                    riemann_tensor(M, A, i, a, c, d, d)
 
                 # TODO: check against the embedding-based implementation of the Levi-Civita connection
                 Zc = affine_connection(M, A, i, a, c, d)

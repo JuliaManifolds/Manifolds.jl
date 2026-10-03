@@ -132,17 +132,20 @@ end
 
 Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`, i.e.
 after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
-`X` has to be of same dimension as `p` and its elements have to sum to one.
-The tolerance for the last test can be set using the `kwargs...`.
+`X` has to be of same dimension as `p` and its elements have to sum to zero
+up to `max(atol, rtol * sqrt(length(X)) * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
         M::ProbabilitySimplex,
         p,
         X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
-    if !isapprox(sum(X), 0.0; atol = atol, kwargs...)
+    r = abs(sum(X))
+    if !(r <= atol || r <= rtol * sqrt(length(X)) * norm(X))
         return DomainError(
             sum(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its elements do not sum up to 0.",
@@ -167,7 +170,7 @@ function distance(::ProbabilitySimplex, p, q)
     @inbounds for i in eachindex(p, q)
         sumsqrt += sqrt(p[i] * q[i])
     end
-    return 2 * acos(sumsqrt)
+    return 2 * acos(clamp(sumsqrt, -1, 1))
 end
 
 embed(::ProbabilitySimplex, p) = p
@@ -189,9 +192,11 @@ operations $X_p^2$ and $\sqrt{p}$.
 """
 exp(::ProbabilitySimplex, ::Any...)
 
-function exp!(::ProbabilitySimplex, q, p, X)
+function exp!(::ProbabilitySimplex{<:Any, boundary}, q, p, X) where {boundary}
     s = sqrt.(p)
     Xs = X ./ s ./ 2
+    # closed simplex: where p and X both vanish, the geodesic stays in that face
+    (boundary === :closed) && (Xs = ifelse.(iszero.(s) .& iszero.(X), zero(eltype(Xs)), Xs))
     θ = norm(Xs)
     q .= (cos(θ) .* s .+ usinc(θ) .* Xs) .^ 2
     return q

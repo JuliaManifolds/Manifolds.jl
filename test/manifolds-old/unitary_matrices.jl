@@ -79,6 +79,24 @@ end
     @test injectivity_radius(SpecialUnitaryMatrices(2)) == π * sqrt(2)
     @test injectivity_radius(SpecialUnitaryMatrices(3)) == π * sqrt(2)
     @test injectivity_radius(SpecialUnitaryMatrices(4)) == π * sqrt(2)
+
+    @testset "traceless tangent vectors" begin
+        M = SpecialUnitaryMatrices(3)
+        p = Matrix{ComplexF64}(I, 3, 3)
+        @test !is_vector(M, p, 1.0im * Matrix{ComplexF64}(I, 3, 3))
+        @test !is_vector(M, p, 1.0e-9im * Matrix{ComplexF64}(I, 3, 3))
+        Z = ComplexF64[1.0 0.2im -0.3; 0.4 -0.5im 0.6; 0.7 0.8 -0.9im]
+        X = project(M, p, Z)
+        # the skew-Hermitian part of Z has the trace -1.4im
+        @test X ≈ (Z - Z') / 2 + 1.4im / 3 * I
+        @test is_vector(M, p, X)
+        @test is_point(M, exp(M, p, X))
+        @test is_vector(M, p, project(M, p, 1.0e9 * Z))
+        # skew-Hermitian up to 1e-7, so accepted only with a larger tolerance
+        Y = ComplexF64[1.0e-7 1.0 0.0; -1.0 -1.0e-7 0.0; 0.0 0.0 0.0]
+        @test !is_vector(M, p, Y)
+        @test is_vector(M, p, Y; atol = 1.0e-6)
+    end
 end
 
 @testset "Quaternionic Unitary Matrices" begin
@@ -97,7 +115,7 @@ end
     # wrong length of size
     @test_throws DomainError is_point(M, zeros(2, 2); error = :error)
 
-    # Determinant not one
+    # wrong length of size again
     pF2 = [quat(0, 1, 0, 0) 1.0; 0.0 -quat(0, 1, 0, 0)]
     @test_throws DomainError is_point(M, pF2; error = :error)
     p = QuaternionF64(
@@ -106,6 +124,9 @@ end
         -0.2322369798903669,
         0.5909181717450419,
     )
+    @test is_point(M, fill(p, 1, 1); error = :error)
+    # Determinant not one
+    @test_throws DomainError is_point(M, fill(2 * p, 1, 1); error = :error)
 end
 
 @testset "SO(4) and O(4) exp/log edge cases" begin

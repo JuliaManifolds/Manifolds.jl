@@ -41,16 +41,26 @@ default_vector_transport_method(::Grassmann, ::Type{<:StiefelPoint}) = ParallelT
 
 Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M```= \mathrm{Gr}(n,k)``.
 
-The distance is given by
+The distance is the arc length
 
 ````math
-d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\log_p(q)).
+d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\log_p(q)) = \Bigl(\sum_{i=1}^k θ_i^2\Bigr)^{1/2}
 ````
+
+of the principal angles ``θ_i`` between the spans of `p` and `q`, see Section 4.3 of [EdelmanAriasSmith:1998](@cite).
+The angles are ``θ_i = \arccos(σ_i)`` for the singular values ``σ_i`` of ``p^{\mathrm{H}}q``; the small ones
+are recomputed with the arc sine, see Algorithm 3.2 of [KnyazevArgentati:2002](@cite).
 """
 function distance(::Grassmann, p, q)
-    z = p' * q
-    S = svd(q / z - p).S
-    return norm(map(atan, S))
+    F = svd(p' * q)
+    s = min.(F.S, 1)
+    θ = acos.(s)
+    small = s .^ 2 .>= 1 / 2
+    if any(small)
+        R = q * F.V[:, small]
+        θ[small] = asin.(min.(svdvals(R - p * (p' * R)), 1))
+    end
+    return norm(θ)
 end
 
 embed(::Grassmann, p) = p
@@ -146,11 +156,11 @@ function ManifoldsBase.get_embedding_type(::Grassmann)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
-function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::Type{<:StiefelPoint})
-    return ManifoldsBase.EmbeddedForwardingType()
+function ManifoldsBase.get_embedding_type(::Grassmann, ::Type{<:StiefelPoint})
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
-function ManifoldsBase.get_forwarding_type(::Stiefel, f, ::Type{<:StiefelPoint})
-    return ManifoldsBase.EmbeddedForwardingType()
+function ManifoldsBase.get_embedding_type(::Stiefel, ::Type{<:StiefelPoint})
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 @doc raw"""
@@ -478,7 +488,7 @@ function riemann_tensor!(::Grassmann{ℝ}, Xresult, p, X, Y, Z)
     YXᵀ = XYᵀ'
     YᵀX = Y' * X
     XᵀY = YᵀX'
-    Xresult .= (XYᵀ - YXᵀ) * Z .- Z * (YᵀX - XᵀY)
+    Xresult .= (XYᵀ - YXᵀ) * Z .+ Z * (YᵀX - XᵀY)
     return Xresult
 end
 

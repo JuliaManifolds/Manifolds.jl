@@ -1,5 +1,50 @@
 include("../header.jl")
 
+@testset "the essential distance where a rotation angle reaches zero" begin
+    M = EssentialManifold(true)
+    Id = Matrix(1.0I, 3, 3)
+    Rx = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 -1.0]
+    Rz = [-1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 1.0]
+    p = [Id, Id]
+    # a half turn about z is shared by both cameras, one about x is not
+    @test distance(M, p, [Id, Rz]) ≈ π
+    @test distance(M, p, [Rx, Id]) ≈ sqrt(2) * π
+    @test distance(M, p, [Id, Rx]) ≈ sqrt(2) * π
+end
+
+@testset "the essential manifold has as many coordinates as dimensions" begin
+    M = EssentialManifold()
+    p = rand(MersenneTwister(42), M)
+    X = project(M, p, rand(MersenneTwister(44), M; vector_at = p))
+    B = DefaultOrthonormalBasis()
+    c = get_coordinates(M, p, X, B)
+    @test length(c) == manifold_dimension(M)
+    @test isapprox(M, p, get_vector(M, p, c, B), X)
+    @test norm(c) ≈ norm(M, p, X)
+    Bc = get_basis(M, p, B)
+    @test length(get_vectors(M, p, Bc)) == manifold_dimension(M)
+    @test get_coordinates(M, p, X, Bc) ≈ c
+    @test get_coordinates!(M, similar(c), p, X, Bc) ≈ c
+    @test isapprox(M, p, get_vector(M, p, c, Bc), X)
+end
+
+@testset "the unsigned essential distance is the same for every representative" begin
+    M = EssentialManifold(false)
+    Id = Matrix(1.0I, 3, 3)
+    Rx = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 -1.0]
+    Ry = [-1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 -1.0]
+    Rz = [-1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 1.0]
+    p = [Id, Id]
+    # turns by 1 about the x axis and by 2 about the y axis, at distance sqrt(2 * (1^2 + 2^2))
+    q = [
+        [1.0 0.0 0.0; 0.0 cos(1) -sin(1); 0.0 sin(1) cos(1)],
+        [cos(2) 0.0 sin(2); 0.0 1.0 0.0; -sin(2) 0.0 cos(2)],
+    ]
+    for h in [[Id, Id], [Rx, Rx], [Id, Rz], [Rx, Ry]]
+        @test distance(M, p, [h[1] * q[1], h[2] * q[2]]) ≈ sqrt(10)
+    end
+end
+
 @testset "Essential manifold" begin
     M = EssentialManifold()
     a = π / 6

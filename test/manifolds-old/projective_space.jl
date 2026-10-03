@@ -1,5 +1,12 @@
 include("../header.jl")
 
+@testset "tangent vectors of the projective space of any length" begin
+    M = ProjectiveSpace(2)
+    p = [1.0, 2.0, 3.0] / sqrt(14.0)
+    @test is_vector(M, p, project(M, p, [100.0, -50.0, 30.0]))
+    @test !is_vector(M, p, project(M, p, [1.0, -0.5, 0.3]) .+ 1.0e-6 .* p)
+end
+
 @testset "ProjectiveSpace" begin
     @testset "Real" begin
         M = ProjectiveSpace(2)
@@ -307,7 +314,7 @@ include("../header.jl")
 
     @testset "small distance tests" begin
         @testset for fT in (Float32, Float64), T in (fT, Complex{fT}, Quaternion{fT})
-            𝔽 = T isa Complex ? ℂ : (T isa Quaternion ? ℍ : ℝ)
+            𝔽 = T <: Complex ? ℂ : (T <: Quaternion ? ℍ : ℝ)
             M = ProjectiveSpace(2, 𝔽)
             rT = real(T)
             atol = rtol = sqrt(eps(rT))
@@ -315,6 +322,7 @@ include("../header.jl")
                     λ in (one(T), (T <: Real ? -one(T) : sign(randn(T))))
 
                 p = project(M, randn(T, representation_size(M)))
+                @test is_point(M, p)
                 X = project(M, p, randn(T, representation_size(M)))
                 X ./= norm(M, p, X)
                 project!(M, X, p, X)

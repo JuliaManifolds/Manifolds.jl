@@ -123,7 +123,7 @@ end
 
 function get_coordinates_orthonormal!(M::CholeskySpace, Xⁱ, p, X, ::RealNumbers)
     n = get_parameter(M.size)[1]
-    view(Xⁱ, 1:n) .= diag(X)
+    view(Xⁱ, 1:n) .= diag(X) ./ diag(p)
     xi_ind = n + 1
     for i in 1:n
         for j in (i + 1):n
@@ -251,7 +251,7 @@ and ``\operatorname{diag}`` extracts the diagonal matrix.
 parallel_transport_to(::CholeskySpace, ::Any, ::Any, ::Any)
 
 function parallel_transport_to!(::CholeskySpace, Y, p, X, q)
-    return copyto!(Y, strictlyLowerTriangular(p) + Diagonal(diag(q) .* diag(X) ./ diag(p)))
+    return copyto!(Y, strictlyLowerTriangular(X) + Diagonal(diag(q) .* diag(X) ./ diag(p)))
 end
 
 function Random.rand!(

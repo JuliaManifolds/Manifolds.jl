@@ -184,6 +184,7 @@ function log!(M::EssentialManifold, X, p, q)
         q2min = copy(M, q)
         for k in 1:4
             #flip sign in q to get another member of its equivalence class
+            q2 = copy(M, q)
             if k == 2
                 q2[1][2:3, :] = -q[1][2:3, :]
                 q2[2][[1 3], :] = -q[2][[1 3], :]
@@ -243,7 +244,10 @@ function dist_min_angle_pair(p, q)
     else
         if abs(mod(t_break1 - t_break2 + pi, 2 * pi) - pi) < tol_break
             t_min = t_break1 + pi
-            f_min = 0
+            # the cost at t_min, as at the end of the Newton search
+            θ1 = acos(clamp((m1 * sin(t_min + Φ1) + c1 - 1) / 2, -1, 1))
+            θ2 = acos(clamp((m2 * sin(t_min + Φ2) + c2 - 1) / 2, -1, 1))
+            f_min = θ1^2 + θ2^2
         else
             t_search1 = t_break1
             t_search2 = t_break2
@@ -256,10 +260,13 @@ function dist_min_angle_pair(p, q)
             df2_break2 = dist_min_angle_pair_compute_df_break(t_break2, q212)
 
             #compute derivative of each term at other's discontinuity
+            # sin(θ) vanishes only at θ = 0, where the limit of the derivative is 0
             θ1_break2 = acos(clamp((m1 * sin(t_break2 + Φ1) + c1 - 1) / 2, -1.0, 1.0))
-            df1_break2 = -θ1_break2 * (m1 * cos(t_break2 + Φ1)) / (2 * sin(θ1_break2))
+            s1_break2 = 2 * sin(θ1_break2)
+            df1_break2 = iszero(s1_break2) ? zero(θ1_break2) : -θ1_break2 * (m1 * cos(t_break2 + Φ1)) / s1_break2
             θ2_break1 = acos(clamp((m2 * sin(t_break1 + Φ2) + c2 - 1) / 2, -1.0, 1.0))
-            df2_break1 = -θ2_break1 * (m2 * cos(t_break1 + Φ2)) / (2 * sin(θ2_break1))
+            s2_break1 = 2 * sin(θ2_break1)
+            df2_break1 = iszero(s2_break1) ? zero(θ2_break1) : -θ2_break1 * (m2 * cos(t_break1 + Φ2)) / s2_break1
 
             #compute left and right derivatives of sum of the two terms
             df_break1n = df1_break1 + df2_break1
@@ -375,17 +382,19 @@ function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t
         θ2 = acos(clamp(((m2 * sin(t_min + Φ2) + c2 - 1) / 2), -1, 1))
 
         #compute the first derivatives di, i=1,2
+        # sin(θi) vanishes only at θi = 0, where also mci = 0 and the limit is 0
         s1 = 2 * sin(θ1)
         s2 = 2 * sin(θ2)
-        d1 = (-θ1 * mc1) / s1
-        d2 = (-θ2 * mc2) / s2
+        d1 = iszero(s1) ? zero(θ1) : (-θ1 * mc1) / s1
+        d2 = iszero(s2) ? zero(θ2) : (-θ2 * mc2) / s2
         d = d1 + d2
 
         #compute the second derivatives ddi, i=1,2
-        eztuSq1 = (mc1 / s1)^2
-        eztuSq2 = (mc2 / s2)^2
-        dd1 = eztuSq1 + θ1 / 2 * cot(θ1 / 2) * (1 - eztuSq1)
-        dd2 = eztuSq2 + θ2 / 2 * cot(θ2 / 2) * (1 - eztuSq2)
+        # at θi = 0 the limit of the second derivative is 1
+        eztuSq1 = iszero(s1) ? one(θ1) : (mc1 / s1)^2
+        eztuSq2 = iszero(s2) ? one(θ2) : (mc2 / s2)^2
+        dd1 = iszero(s1) ? one(θ1) : eztuSq1 + θ1 / 2 * cot(θ1 / 2) * (1 - eztuSq1)
+        dd2 = iszero(s2) ? one(θ2) : eztuSq2 + θ2 / 2 * cot(θ2 / 2) * (1 - eztuSq2)
         dd = dd1 + dd2
 
         #compute the new t_min
@@ -443,6 +452,75 @@ function project!(M::EssentialManifold, Y, p, X)
         ],
     )
     return Y
+end
+
+@doc raw"""
+    get_coordinates(M::EssentialManifold, p, X, ::DefaultOrthonormalBasis)
+    get_coordinates!(M::EssentialManifold, c, p, X, ::DefaultOrthonormalBasis)
+
+Compute the five coordinates of the horizontal tangent vector `X` at `p` ``= (R_1, R_2)`` in an
+orthonormal basis of the horizontal space.
+
+The vertical space is spanned by the velocity of the action of ``H_z`` at ``θ = 0``, which in the
+coordinates of the two rotations reads ``(R_1^{\mathrm{T}}e_z, R_2^{\mathrm{T}}e_z)``, see
+[`vert_proj`](@ref) and [TronDaniilidis:2017](@cite). The Householder reflection that maps this
+direction to the last of the six coordinates maps the first five coordinate directions to an
+orthonormal basis of its orthogonal complement, the horizontal space.
+"""
+function get_coordinates(M::EssentialManifold, p, X, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    return get_coordinates!(M, allocate_result(M, get_coordinates, p, X, B), p, X, B)
+end
+function get_coordinates!(M::EssentialManifold, c, p, X, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    d = vcat(get_coordinates(M.manifold, p[1], X[1], B), get_coordinates(M.manifold, p[2], X[2], B))
+    return c .= view(_horizontal_reflection(p) * d, 1:5)
+end
+
+@doc raw"""
+    get_vector(M::EssentialManifold, p, c, ::DefaultOrthonormalBasis)
+    get_vector!(M::EssentialManifold, Y, p, c, ::DefaultOrthonormalBasis)
+
+Compute the horizontal tangent vector at `p` with the five coordinates `c` in the basis that
+`get_coordinates` on the [`EssentialManifold`](@ref) uses.
+"""
+function get_vector(M::EssentialManifold, p, c, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    return get_vector!(M, allocate_result(M, get_vector, p, c), p, c, B)
+end
+function get_vector!(M::EssentialManifold, Y, p, c, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    d = _horizontal_reflection(p) * vcat(c, 0)
+    get_vector!(M.manifold, Y[1], p[1], view(d, 1:3), B)
+    get_vector!(M.manifold, Y[2], p[2], view(d, 4:6), B)
+    return Y
+end
+
+@doc raw"""
+    get_basis(M::EssentialManifold, p, ::DefaultOrthonormalBasis)
+
+Return the five orthonormal basis vectors of the horizontal space at `p` that `get_coordinates`
+on the [`EssentialManifold`](@ref) uses.
+"""
+function get_basis(M::EssentialManifold, p, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    return CachedBasis(B, [get_vector(M, p, e, B) for e in eachcol(Matrix{eltype(p[1])}(I, 5, 5))])
+end
+
+const _EssentialCachedBasis = CachedBasis{ℝ, <:DefaultOrthonormalBasis{ℝ, TangentSpaceType}, <:AbstractVector}
+
+function get_coordinates(M::EssentialManifold, p, X, B::_EssentialCachedBasis)
+    return [inner(M, p, X, V) for V in B.data]
+end
+function get_coordinates!(M::EssentialManifold, c, p, X, B::_EssentialCachedBasis)
+    return map!(V -> inner(M, p, X, V), c, B.data)
+end
+function get_vector(M::EssentialManifold, p, c, B::_EssentialCachedBasis)
+    return get_vector!(M, allocate_result(M, get_vector, p, c), p, c, B)
+end
+function get_vector!(M::EssentialManifold, Y, p, c, B::_EssentialCachedBasis)
+    return copyto!(Y, sum(c .* B.data))
+end
+
+function _horizontal_reflection(p)
+    w = vcat(p[1][3, :], p[2][3, :]) ./ sqrt(2) # the vertical direction, of unit length
+    w[end] += w[end] < 0 ? -1 : 1
+    return I - 2 * w * w' / dot(w, w)
 end
 
 function Base.show(io::IO, M::EssentialManifold)

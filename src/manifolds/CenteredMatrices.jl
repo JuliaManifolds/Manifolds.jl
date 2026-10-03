@@ -57,17 +57,20 @@ end
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`CenteredMatrices`](@ref) `M`, i.e. that `X` is a matrix of size `(m, n)` whose columns
 sum to zero and its values are from the correct [`AbstractNumbers`](@extref ManifoldsBase number-system).
-The tolerance for the column sums of `p` and `X` can be set using `kwargs...`.
+The column sums of `X` have to vanish up to `max(atol, rtol * sqrt(m) * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
         M::CenteredMatrices,
         p,
         X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
     m, n = get_parameter(M.size)
-    if !isapprox(sum(X, dims = 1), zeros(1, n); atol = atol, kwargs...)
+    r = norm(sum(X, dims = 1))
+    if !(r <= atol || r <= rtol * sqrt(m) * norm(X))
         return DomainError(
             X,
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its columns do not sum to zero.",

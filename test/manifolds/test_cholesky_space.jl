@@ -27,7 +27,7 @@ using Manifolds, Test, LinearAlgebra
                 get_coordinates, get_vector,
                 log, manifold_dimension,
                 parallel_transport_to, rand, repr, representation_size,
-                zero_vector,
+                vector_transport_to, zero_vector,
             ],
             :Bases => [DefaultOrthonormalBasis()],
             :Coordinates => [[1.0, 0.0, 0.0, 0.0, 0.0, 0.0]],
@@ -50,6 +50,19 @@ using Manifolds, Test, LinearAlgebra
             representation_size => (3, 3),
         )
     )
+
+    @testset "coordinates are orthonormal at a point with a non-unit diagonal" begin
+        W = [1.0 0.0 0.0; 2.0 3.0 0.0; -1.0 0.5 2.0]
+        c = get_coordinates(M, p2, W, DefaultOrthonormalBasis())
+        @test norm(c) ≈ norm(M, p2, W)
+        @test get_vector(M, p2, c, DefaultOrthonormalBasis()) ≈ W
+    end
+    @testset "parallel transport is an isometry and keeps the strictly lower part" begin
+        W = [1.0 0.0 0.0; 2.0 3.0 0.0; -1.0 0.5 2.0]
+        Wt = parallel_transport_to(M, p2, W, p3)
+        @test inner(M, p3, Wt, Wt) ≈ inner(M, p2, W, W)
+        @test Manifolds.strictlyLowerTriangular(Wt) == Manifolds.strictlyLowerTriangular(W)
+    end
 
     M = CholeskySpace(3; parameter = :field)
     Manifolds.Test.test_manifold(

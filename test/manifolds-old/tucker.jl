@@ -100,6 +100,10 @@ include("../header.jl")
             u = allocate(v)
             copyto!(u, v)
             @test u == v
+            pc = copy(p)
+            @test pc == p
+            @test pc.hosvd.U[1] !== p.hosvd.U[1]
+            @test is_point(M, pc)
 
             # broadcasting
             @test axes(v) === ()

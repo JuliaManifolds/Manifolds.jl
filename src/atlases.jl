@@ -688,7 +688,7 @@ and the inverse local metric `g^{ij}` (returned by `inverse_local_metric`) to fo
 contraction:
 
 ````math
-    K = g^{u v} g^{i p} g^{j q} g^{k r} R^u_{i j k} R^v_{p q r}
+    K = g_{u v} g^{i p} g^{j q} g^{k r} R^u_{i j k} R^v_{p q r}
 ````
 
 # Arguments
@@ -710,6 +710,7 @@ function kretschmann_scalar(
     n = length(a)
     T = eltype(a)
     R = riemann_tensor(M, A, i, a; backend = backend)   # R[u, ii, j, k] == R^u_{ijk}
+    g = local_metric(M, A, i, a)                        # g_{ij}
     ginv = inverse_local_metric(M, A, i, a)             # g^{ij}
 
     K = zero(T)
@@ -719,7 +720,7 @@ function kretschmann_scalar(
             continue
         end
         for v in 1:n, p in 1:n, q in 1:n, r in 1:n
-            K += ginv[u, v] * ginv[ii, p] * ginv[j, q] * ginv[k, r] * Ruijk * R[v, p, q, r]
+            K += g[u, v] * ginv[ii, p] * ginv[j, q] * ginv[k, r] * Ruijk * R[v, p, q, r]
         end
     end
     return K
@@ -1004,7 +1005,7 @@ function ricci_tensor!(
     return Ric
 end
 
-"""
+@doc raw"""
     riemann_tensor(M::AbstractManifold, A::AbstractAtlas, i, a;
         backend::AbstractADType = AutoForwardDiff()
 
@@ -1013,10 +1014,12 @@ chart `i` of atlas `A`.
 
 Returns a 4-dimensional array `R` of size (n,n,n,n) with components `R[u,i,j,k] = R^u_{ijk}`,
 where the first index is the contravariant (upper) index and the remaining three are covariant
-(lower) indices. The components satisfy, for coordinate vector fields e_i:
+(lower) indices. With ``Γ^u_{ij}`` denoting the Christoffel symbols of the second kind,
+the components are
 
 ````math
-    R^u_{ijk} e_u = (∇_{e_i} ∇_{e_j} - ∇_{e_j} ∇_{e_i} - ∇_{[e_i,e_j]}) e_k
+    R^u_{ijk} = ∂_i Γ^u_{jk} - ∂_j Γ^u_{ik}
+        + \sum_m \left(Γ^m_{jk} Γ^u_{im} - Γ^m_{ik} Γ^u_{jm}\right).
 ````
 
 # Arguments

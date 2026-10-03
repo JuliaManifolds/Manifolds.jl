@@ -19,15 +19,15 @@ These matrices are sometimes also called [isochoric](https://en.wiktionary.org/w
 the matrix representing an ellipsoid. All ellipsoids that represent points on this manifold have the same volume.
 
 The tangent space is modelled the same as for [`SymmetricPositiveDefinite`](@ref)`(n)`
-and consists of all symmetric matrices with zero trace
+and consists of all symmetric matrices ``X`` whose product with ``p^{-1}`` has zero trace
 ```math
     T_p\mathcal P_d(n) =
     \bigl\{
-        X \in \mathbb R^{n×n} \big|\ X=X^\mathrm{T} \text{ and } \operatorname{tr}(X) = 0
+        X \in \mathbb R^{n×n} \big|\ X=X^\mathrm{T} \text{ and } \operatorname{tr}(p^{-1}X) = 0
     \bigr\},
 ```
-since for a constant determinant we require that ``0 = D\det(p)[Z] = \det(p)\operatorname{tr}(p^{-1}Z)`` for all tangent vectors ``Z``.
-Additionally we store the tangent vectors as ``X=p^{-1}Z``, i.e. symmetric matrices.
+since for a constant determinant we require that ``0 = D\det(p)[X] = \det(p)\operatorname{tr}(p^{-1}X)`` for all tangent vectors ``X``.
+At the identity matrix this is the set of symmetric matrices of zero trace.
 
 # Constructor
 
@@ -71,26 +71,27 @@ function check_point(M::SPDFixedDeterminant, p; kwargs...)
 end
 
 @doc raw"""
-    check_vector(M::SPDFixedDeterminant, p, X; kwargs... )
+    check_vector(M::SPDFixedDeterminant, p, X; atol, rtol, kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SPDFixedDeterminant`](@ref) `M`,
 i.e. `X` has to be a tangent vector on [`SymmetricPositiveDefinite`](@ref), so a symmetric matrix,
-and additionally fulfill ``\operatorname{tr}(X) = 0``.
-
-The tolerance for the trace check of `X` can be set using `kwargs...`, which influences the `isapprox`-check.
+and additionally fulfill ``\operatorname{tr}(p^{-1}X) = 0``
+up to `max(atol, rtol * sqrt(n) * norm(M, p, X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
-        M::SPDFixedDeterminant,
-        p,
-        X::T;
+        M::SPDFixedDeterminant, p, X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
-    if !isapprox(tr(X), 0; atol = atol, kwargs...)
+    n = get_parameter(M.size)[1]
+    r = abs(tr(p \ X))
+    if !(r <= atol || r <= rtol * sqrt(n) * norm(M, p, X))
         return DomainError(
-            tr(X),
-            "The vector $(X) is not a tangent vector to $(p) on $(M), since it does not have a zero trace.",
+            r,
+            "The vector $(X) is not a tangent vector to $(p) on $(M), since the trace of p^{-1}X does not vanish.",
         )
     end
     return nothing
@@ -155,13 +156,14 @@ end
 
 Project the symmetric matrix `X` onto the tangent space at `p` of the
 (sub-)manifold of s.p.d. matrices of determinant `M.d` (in place of `Y`),
-by setting its diagonal (and hence its trace) to zero.
+by subtracting the multiple of `p` that makes the trace of ``p^{-1}X`` vanish.
 """
 project(M::SPDFixedDeterminant, p, X)
 
 function project!(M::SPDFixedDeterminant, Y, p, X)
+    n = get_parameter(M.size)[1]
     copyto!(M, Y, p, X)
-    fill!(view(Y, diagind(Y)), 0)
+    Y .-= (tr(p \ X) / n) .* p
     return Y
 end
 

@@ -93,6 +93,15 @@ end
         @test distance(M, p1, q1) ≈ norm(M, p1, X1)
     end
 
+    @testset "project, rand and the projected basis give horizontal vectors" begin
+        Y = project(M, p1, [1.0 0.0 -1.0; 0.0 1.0 -1.0])
+        @test norm(M, p1, Y) ≈ norm(get_embedding(M), p1, Y)
+        Z = rand(MersenneTwister(44), M; vector_at = p1)
+        @test norm(M, p1, Z) ≈ norm(get_embedding(M), p1, Z)
+        V = get_vectors(M, p1, get_basis(M, p1, ProjectedOrthonormalBasis(:svd)))
+        @test [inner(M, p1, v, w) for v in V, w in V] ≈ I
+    end
+
     Manifolds.test_manifold(
         M,
         [p1, p2, p3];
@@ -112,6 +121,21 @@ end
         Md2_1 = KendallsShapeSpace(2, 1)
         @test manifold_dimension(Md3_2) == 0
         @test manifold_dimension(Md2_1) == 0
+    end
+    @testset "collinear landmarks and a triangle in space" begin
+        p = [1.0 -1.0 0.0; 0.0 0.0 0.0] ./ sqrt(2)
+        X = [0.0 0.0 0.0; 1.0 -0.5 -0.5]
+        @test horizontal_component(M, p, X) ≈ [0.0 0.0 0.0; 0.25 0.25 -0.5]
+        @test norm(M, p, X) ≈ sqrt(0.375)
+        @test distance(M, p, exp(M, p, X)) ≈ sqrt(0.375)
+        q = [0.5 -0.5 0.0; 0.5 -0.5 0.0]
+        Xq = [-0.375 0.375 0.0; 0.625 -0.125 -0.5]
+        @test horizontal_component(M, q, Xq) ≈ [0.0 0.0 0.0; 0.25 0.25 -0.5]
+        M3 = KendallsShapeSpace(3, 3)
+        p3 = [0.5 -0.5 0.0; 0.0 0.5 -0.5; 0.0 0.0 0.0]
+        X3 = [0.0 0.0 0.0; 1.0 -0.5 -0.5; 0.0 0.0 0.0]
+        Y3 = [0.0 0.375 -0.375; 0.625 -0.125 -0.5; 0.0 0.0 0.0]
+        @test horizontal_component(M3, p3, X3) ≈ Y3
     end
     @testset "field parameter" begin
         M = KendallsShapeSpace(2, 3; parameter = :field)

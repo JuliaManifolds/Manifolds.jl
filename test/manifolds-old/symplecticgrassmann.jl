@@ -40,7 +40,7 @@ include("../header.jl")
         @test repr(Mf) == "SymplecticGrassmann(6, 4; parameter=:field)"
         @test manifold_dimension(M) == 4 * (6 - 4)
         for _M in [M, Mf]
-            @test is_point(M, p)
+            @test is_point(_M, p)
             @test is_vector(_M, p, X)
         end
         @test get_embedding(M) == SymplecticStiefel(6, 4)

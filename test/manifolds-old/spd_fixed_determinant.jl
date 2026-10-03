@@ -35,6 +35,19 @@ include("../header.jl")
     @test norm(M, p, log(M, p, q) - X) ≈ 0 atol = 3.0e-16
     @test norm(M, p, log(get_embedding(M), p, q) - X) ≈ 0 atol = 3.0e-16
 
+    @testset "tangent vectors away from the identity" begin
+        M3 = SPDFixedDeterminant(3, 1.0)
+        p3 = [2.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 0.5]
+        # trace zero, but the geodesic in this direction changes the determinant
+        X3 = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 0.0]
+        @test !is_vector(M3, p3, X3)
+        @test project(M3, p3, X3) ≈ [4.0 0.0 0.0; 0.0 -2.5 0.0; 0.0 0.0 0.25] ./ 3
+        q3 = project(M3, [4.0 1.0 0.5; 1.0 3.0 0.2; 0.5 0.2 2.0])
+        Z3 = [1.0 2.0 3.0; 2.0 -1.0 0.5; 3.0 0.5 4.0]
+        @test is_vector(M3, q3, project(M3, q3, 100 .* Z3))
+        @test is_vector(M3, p3, log(M3, p3, q3))
+    end
+
     @testset "field parameter" begin
         M = SPDFixedDeterminant(2, 1.0; parameter = :field)
         @test repr(M) == "SPDFixedDeterminant(2, 1.0; parameter=:field)"

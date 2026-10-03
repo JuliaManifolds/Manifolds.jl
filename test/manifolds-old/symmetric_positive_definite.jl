@@ -22,7 +22,7 @@ include("../header.jl")
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M2, one(zeros(3, 3)))
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M3, one(zeros(3, 3)))
     metrics = [M1, M2, M3, M5, M6]
-    types = [Matrix{Float64}, SPDPoint]
+    types = [Matrix{Float64}, MMatrix{3, 3, Float64, 9}, SPDPoint]
 
     for M in metrics
         basis_types = if (M == M1 || M == M2 || M == M3)
@@ -39,20 +39,12 @@ include("../header.jl")
             end
             for T in types
                 exp_log_atol_multiplier = 8.0
-                if T <: MMatrix{3, 3, Float64}
-                    # eigendecomposition of 3x3 SPD matrices from StaticArrays is not very accurate
-                    exp_log_atol_multiplier = 5.0e7
-                end
                 if M == M6
                     # we have to raise this slightly for the nondiagonal case.
                     exp_log_atol_multiplier = 5.0e1
                 end
                 if T == SPDPoint && (M != M1 && M != M2)
                     # SPDPoint only meant for Affine metric
-                    continue
-                end
-                if M == M3 && T <: MMatrix
-                    # Cholesky or something does not work in vector_transport yet for MMatrix
                     continue
                 end
                 A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
@@ -65,7 +57,7 @@ include("../header.jl")
                 Manifolds.test_manifold(
                     M,
                     pts;
-                    vector_transport_methods = typeof(M) == SymmetricPositiveDefinite{3} ?
+                    vector_transport_methods = M isa SymmetricPositiveDefinite ?
                         [ParallelTransport()] : [],
                     exp_log_atol_multiplier = exp_log_atol_multiplier,
                     basis_types_vecs = basis_types,
@@ -138,7 +130,7 @@ include("../header.jl")
         p1 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
         p2 = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
         p3 = A(π / 6) * [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1] * transpose(A(π / 6))
-        embed(M, p1) == p1
+        @test embed(M, p1) == p1
         X1 = log(M, p1, p3)
         Y1 = vector_transport_to(M, p1, X1, p2)
         @test is_vector(M, p2, Y1)

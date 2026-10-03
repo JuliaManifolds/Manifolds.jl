@@ -228,10 +228,36 @@ function Manifolds.sharp!(
     v.data .= w.data ./ 2
     return v
 end
+function Manifolds.flat(M::BaseManifold, x, w::ManifoldsBase.TFVector{<:Any, <:AbstractBasis})
+    return flat!(M, ManifoldsBase.CoTFVector(similar(w.data), dual_basis(M, x, w.basis)), x, w)
+end
+function Manifolds.sharp(M::BaseManifold, x, w::ManifoldsBase.CoTFVector{<:Any, <:AbstractBasis})
+    return sharp!(M, ManifoldsBase.TFVector(similar(w.data), dual_basis(M, x, w.basis)), x, w)
+end
 
 # test for https://github.com/JuliaManifolds/Manifolds.jl/issues/539
 struct Issue539Metric <: RiemannianMetric end
 Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, p, X, Y) = 3
+
+# a metric whose local matrix does not commute with the one of TestEuclideanMetric
+struct TestNonDiagonalMetric <: AbstractMetric end
+function Manifolds.local_metric(
+        ::MetricManifold{ℝ, TestEuclidean{2}, TestNonDiagonalMetric},
+        ::Any,
+        ::DefaultOrthogonalBasis,
+    )
+    return [2.0 0.5; 0.5 1.0]
+end
+
+# a metric whose local matrix does not commute with the one of TestEuclideanMetric
+struct TestNonDiagonalMetric <: AbstractMetric end
+function Manifolds.local_metric(
+        ::MetricManifold{ℝ, TestEuclidean{2}, TestNonDiagonalMetric},
+        ::Any,
+        ::DefaultOrthogonalBasis,
+    )
+    return [2.0 0.5; 0.5 1.0]
+end
 
 @testset "Metrics" begin
     # some tests failed due to insufficient accuracy for a particularly bad RNG state
@@ -626,6 +652,7 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
             get_basis(MM2, p, DefaultOrthonormalBasis()).data
         @test_throws MethodError get_basis(MM, p, DefaultOrthonormalBasis())
 
+        X = [0.5, 0.7, 0.11]
         fX = ManifoldsBase.TFVector(X, B_p)
         fY = ManifoldsBase.TFVector(Y, B_p)
         coX = flat(M, p, X)
@@ -648,6 +675,10 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         coMMfY = flat(MM, p, fY)
         @test inner(MM, p, fX, fY) ≈ inner(cotspace2, X0p, coMMfX, coMMfY)
         @test isapprox(sharp(MM, p, coMMfX).data, fX.data)
+        fZ = ManifoldsBase.TFVector([0.5, 0.7, 0.11], B_p)
+        @test flat(MM, p, fZ).data ≈ 2 .* fZ.data
+        @test flat(MM, p, fZ).data !== fZ.data
+        @test sharp(MM, p, flat(MM, p, fZ)).data ≈ fZ.data
 
         @testset "Mutating flat/sharp" begin
             cofX2 = allocate(cofX)
@@ -689,9 +720,26 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         @test change_metric(M, TestEuclideanMetric(), p, X) == X
         Y = change_metric(M, G, p, X)
         @test Y ≈ sqrt(2) .* X #scaled metric has a factor 2, removing introduces this factor
+        H = TestNonDiagonalMetric()
+        B = DefaultOrthogonalBasis()
+        G1, G2 = local_metric(M, p, B), local_metric(H(M), p, B)
+        X1, X2 = [1.0, 2.0], [-0.5, 3.0]
+        x1, x2 = get_coordinates(M, p, X1, B), get_coordinates(M, p, X2, B)
+        z1 = get_coordinates(M, p, change_metric(M, H, p, X1), B)
+        z2 = get_coordinates(M, p, change_metric(M, H, p, X2), B)
+        # converting keeps inner products also when G1 and G2 do not commute
+        @test dot(z1, G1 * z2) ≈ dot(x1, G2 * x2)
+        @test dot(z1, G1 * z1) ≈ dot(x1, G2 * x1)
         @test change_representer(M, TestEuclideanMetric(), p, X) == X
         Y2 = change_representer(M, G, p, X)
         @test Y2 ≈ 2 .* X #scaled metric has a factor 2, removing introduces this factor
+        H = TestNonDiagonalMetric()
+        B = DefaultOrthogonalBasis()
+        X1 = [1.0, 2.0]
+        c1 = get_coordinates(M, p, change_representer(M, H, p, X1), B)
+        x1 = get_coordinates(M, p, X1, B)
+        # g1(c(X1), Z) = g2(X1, Z) for every Z, also when G1 and G2 do not commute
+        @test local_metric(M, p, B) * c1 ≈ local_metric(H(M), p, B) * x1
     end
 
     @testset "issue #539" begin

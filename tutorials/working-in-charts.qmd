@@ -55,7 +55,7 @@ GLMakie.activate!()
 """
 	torus_figure()
 
-This function generates a simple plot of a torus and returns the new figure containing the plot.
+This function generates a simple plot of a torus and returns the new axis and the figure containing the plot.
 """
 function torus_figure()
     fig = Figure(size = (1400, 1000), fontsize = 16)

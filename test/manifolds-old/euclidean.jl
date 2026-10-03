@@ -237,6 +237,7 @@ using FiniteDifferences
         O2 = EmbeddedManifold(M, Euclidean(4, 4, 3))
         q2M = embed(O2, p)
         @test norm(q2T - q2M) == 0
+        @test norm(project(O2, q2M) - p) == 0
         # wrong size error checks
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(3, 3, 5))
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
@@ -363,6 +364,13 @@ using FiniteDifferences
         @test distance(M, 2.0, 4.0) == 2.0
     end
 
+    @testset "the distance on a complex space is a real number" begin
+        M = Euclidean(2; field = ℂ)
+        d = distance(M, [1.0 + 0im, 2.0 + 0im], [0.0im, 0.0im])
+        @test d isa Float64
+        @test d ≈ sqrt(5)
+    end
+
     @testset "errors" begin
         M = Euclidean(4)
         @test_throws DimensionMismatch distance(M, [1, 2, 3, 4], [1 2; 3 4])
@@ -378,7 +386,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
         @test ManifoldDiff.diagonalizing_projectors(M0, 0.0, 2.0) ==
             ((0.0, ManifoldDiff.IdentityProjector()),)
         @test ManifoldDiff.jacobi_field(
@@ -388,7 +396,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
     end
 
     @testset "Weingarten & Hessian" begin
@@ -428,7 +436,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
         @test ManifoldDiff.diagonalizing_projectors(M0s, 0.0, 2.0) ==
             ((0.0, ManifoldDiff.IdentityProjector()),)
         @test ManifoldDiff.jacobi_field(
@@ -438,7 +446,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
     end
 
     @testset "Mixed array dimensions for exp and PT" begin
