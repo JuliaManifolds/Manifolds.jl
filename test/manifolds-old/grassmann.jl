@@ -2,6 +2,15 @@ include("../header.jl")
 using DiffEqCallbacks, OrdinaryDiffEq
 using ForwardDiff
 
+@testset "Grassmann distance at a right and at a small angle" begin
+    M = Grassmann(4, 2)
+    p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+    q = [0.0 0.0; 0.0 1.0; 1.0 0.0; 0.0 0.0]
+    @test distance(M, p, q) ≈ π / 2
+    t = 1.0e-10
+    @test distance(M, p, [cos(t) 0.0; 0.0 1.0; sin(t) 0.0; 0.0 0.0]) ≈ t
+end
+
 @testset "Grassmann" begin
     @testset "Real" begin
         M = Grassmann(3, 2)

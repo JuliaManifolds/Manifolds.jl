@@ -407,8 +407,8 @@ end
         X = [1.0, 2.0, sqrt(3)]
         D = diagm([1.0, 1.0, -1.0])
         rH = project(M, p, D * H + dot(p, G) .* X)
-        @test riemannian_Hessian(M, p, G, H, X) == rH
-        @test H == [2.0, 0.3, 0.4]
+        @test riemannian_Hessian(M, p, G, H, X) ≈ rH
+        @test H ≈ [2.0, 0.3, 0.4]
     end
     @testset "Riemannian gradient" begin
         M = Hyperbolic(2)

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * `get_basis`, `get_coordinates` and `get_vector` on the `EssentialManifold` with an orthonormal basis of its five-dimensional horizontal space.
 * `log` on the `ProbabilitySimplex` with the `EuclideanMetric`.
+* `PolarRetraction`, `QRRetraction`, `CayleyRetraction`, `PolarInverseRetraction` and `QRInverseRetraction` on the real `GeneralizedStiefel` manifold.
 
 ### Changed
 
@@ -79,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `project` onto the tangent space of the `GeneralizedGrassmann` manifold removes the whole part along the columns of the point, so that it and `rand` return tangent vectors `X` with `p'BX = 0`.
 * `change_metric` on the `GeneralizedGrassmann` manifold returns a tangent vector whose length in the manifold's metric equals the Euclidean length of the given one.
 * `distance` and `log` on the `GeneralizedGrassmann` manifold use the metric given by `B`, and `distance` returns `π/2` for a right principal angle.
+* `distance` on the `Grassmann` manifold returns `π/2` for a right principal angle instead of throwing a `SingularException`.
 
 ## [0.11.32] 2026-09-30
 
