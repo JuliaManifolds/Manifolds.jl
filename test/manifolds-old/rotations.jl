@@ -251,8 +251,8 @@ include("../header.jl")
         M = Rotations(2)
         p = Matrix{Float64}(I, 2, 2)
         X = [0.0 3.0; -3.0 0.0]
-        V = [1.0 0.0; 1.0 0.0]
-        @test Weingarten(M, p, X, V) == -1 / 2 * p * (V' * X - X' * V)
+        q = [0.0 -1.0; 1.0 0.0]
+        @test Weingarten(M, q, X, q * [1.0 0.0; 0.0 2.0]) == [0.0 -4.5; 4.5 0.0]
         G = [0.0 1.0; 0.0 0.0]
         H = [0.0 0.0; 2.0 0.0]
         @test riemannian_Hessian(M, p, G, H, X) == [0.0 -1.0; 1.0 0.0]

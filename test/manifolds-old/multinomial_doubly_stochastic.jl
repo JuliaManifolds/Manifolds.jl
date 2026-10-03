@@ -82,4 +82,14 @@ include("../header.jl")
         X = riemannian_gradient(M, p, Y)
         @test isapprox(M, p, G, X)
     end
+    @testset "Sinkhorn's algorithm" begin
+        M = MultinomialDoubleStochastic(3)
+        # needs more than a hundred iterations
+        X4 = [-2.0 0.0 2.0; 0.0 4.0 -4.0; 2.0 -4.0 2.0]
+        @test is_point(M, retract(M, p3, X4, ProjectionRetraction()))
+        # stalls with a column sum at the next number above one
+        A = [0.1 0.5 0.6; 0.1 0.9 0.5; 0.3 0.7 0.9]
+        @test_logs project(M, A)
+        @test_logs (:warn,) project(M, A; maxiter = 1)
+    end
 end

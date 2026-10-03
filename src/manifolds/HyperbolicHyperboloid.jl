@@ -481,6 +481,32 @@ function parallel_transport_to!(::Hyperbolic, Y, p, X, q)
 end
 
 @doc raw"""
+    riemannian_gradient(M::Hyperbolic, p, G)
+    riemannian_gradient!(M::Hyperbolic, X, p, G)
+
+Compute the Riemannian gradient ``\operatorname{grad} f(p)`` from the Euclidean gradient
+``∇f(\tilde p)`` in `G`, where ``\tilde p`` is the representation of `p` in the embedding.
+
+Let ``\mathbf{g} = \mathbf{g}^{-1} = \operatorname{diag}(1,...,1,-1)``. Since the metric of the
+[`Hyperbolic`](@ref) space is the [`MinkowskiMetric`](@ref) of the embedding, the representer is
+changed before the projection onto the tangent space, see Proposition 7.7 in [Boumal:2023](@cite):
+
+```math
+\operatorname{grad} f(p)
+= \operatorname{proj}_{T_p\mathcal H^n}\bigl(\mathbf{g}^{-1}∇f(p)\bigr).
+```
+"""
+riemannian_gradient(M::Hyperbolic, p, G)
+
+function riemannian_gradient!(
+        M::Hyperbolic, X, p, G; embedding_metric::AbstractMetric = EuclideanMetric()
+    )
+    change_representer!(M, X, embedding_metric, p, G)
+    project!(M, X, p, X)
+    return X
+end
+
+@doc raw"""
     Y = riemannian_Hessian(M::Hyperbolic, p, G, H, X)
     riemannian_Hessian!(M::Hyperbolic, Y, p, G, H, X)
 
@@ -505,19 +531,19 @@ function riemannian_Hessian!(M::Hyperbolic, Y, p, G, H, X)
     g = copy(G)
     g[end] *= -1 # = g^{-1}G
     h = copy(H)
-    H[end] *= -1 # = g^{-1}H
-    project!(M, Y, p, h .+ dot(p, g) .* X)
+    h[end] *= -1 # = g^{-1}H
+    project!(M, Y, p, h .+ minkowski_metric(p, g) .* X)
     return Y
 end
 @doc raw"""
     volume_density(M::Hyperbolic, p, X)
 
 Compute volume density function of the hyperbolic manifold. The formula reads
-``(\sinh(\lVert X\rVert)/\lVert X\rVert)^(n-1)`` where `n` is the dimension of `M`.
+``(\sinh(\lVert X\rVert_p)/\lVert X\rVert_p)^{n-1}`` where `n` is the dimension of `M`.
 It is derived from Eq. (4.1) in[ChevallierLiLuDunson:2022](@cite).
 """
 function volume_density(M::Hyperbolic, p, X)
-    Xnorm = norm(X)
+    Xnorm = norm(M, p, X)
     if Xnorm == 0
         return one(eltype(X))
     else

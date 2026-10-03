@@ -156,8 +156,8 @@ get_vector(M::HeisenbergMatrices, p, c, ::DefaultOrthonormalBasis{ℝ, TangentSp
 function get_vector_orthonormal(M::HeisenbergMatrices, p, Xⁱ, ::RealNumbers)
     n = get_parameter(M.size)[1]
     return [
-        0 Xⁱ[1:n] Xⁱ[2 * n + 1]
-        zeros(n, n + 1) Xⁱ[(n + 1):(2 * n)]'
+        0 Xⁱ[1:n]' Xⁱ[2 * n + 1]
+        zeros(n, n + 1) Xⁱ[(n + 1):(2 * n)]
         zeros(1, n + 2)
     ]
 end

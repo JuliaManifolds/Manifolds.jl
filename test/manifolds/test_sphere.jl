@@ -214,6 +214,18 @@ using ManifoldDiff
             vexp = normalize(project(M, x, [1, zeros(n)...]))
             @test v ≈ π * vexp
 
+            # opposite points starting at the negative end of the first axis
+            for (N, x) in [
+                    (M, [-0.9999999999999999, 0.0, 0.0]),
+                    (ArraySphere(2, 2), [-1.0 0.0; 0.0 0.0]),
+                    (Sphere(2, ℂ), [-1.0 + 0.0im, 0.0, 0.0]),
+                ]
+                v = log(N, x, -x)
+                @test is_vector(N, x, v)
+                @test norm(v) ≈ π
+                @test isapprox(N, -x, exp(N, x, v))
+            end
+
             x = [1, zeros(n)...]
             v = log(M, x, -x)
             @test norm(v) ≈ π

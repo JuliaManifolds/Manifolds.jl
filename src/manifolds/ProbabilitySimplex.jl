@@ -170,7 +170,7 @@ function distance(::ProbabilitySimplex, p, q)
     @inbounds for i in eachindex(p, q)
         sumsqrt += sqrt(p[i] * q[i])
     end
-    return 2 * acos(sumsqrt)
+    return 2 * acos(clamp(sumsqrt, -1, 1))
 end
 
 embed(::ProbabilitySimplex, p) = p
@@ -192,9 +192,11 @@ operations $X_p^2$ and $\sqrt{p}$.
 """
 exp(::ProbabilitySimplex, ::Any...)
 
-function exp!(::ProbabilitySimplex, q, p, X)
+function exp!(::ProbabilitySimplex{<:Any, boundary}, q, p, X) where {boundary}
     s = sqrt.(p)
     Xs = X ./ s ./ 2
+    # closed simplex: where p and X both vanish, the geodesic stays in that face
+    (boundary === :closed) && (Xs = ifelse.(iszero.(s) .& iszero.(X), zero(eltype(Xs)), Xs))
     θ = norm(Xs)
     q .= (cos(θ) .* s .+ usinc(θ) .* Xs) .^ 2
     return q

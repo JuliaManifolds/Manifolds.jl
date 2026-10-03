@@ -7,7 +7,7 @@ function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     x = get_coordinates(M, p, X, B)
     C1 = cholesky(G1).L
     C2 = cholesky(G2).L
-    z = (C1 \ C2)'x
+    z = C1' \ (C2' * x)
     return get_vector!(M, Y, p, z, B)
 end
 
@@ -18,7 +18,7 @@ function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     G1 = local_metric(M, p, B)
     G2 = local_metric(G(M), p, B)
     x = get_coordinates(M, p, X, B)
-    z = (G1 \ G2)'x
+    z = (G1 \ G2) * x
     return get_vector!(M, Y, p, z, B)
 end
 
@@ -36,6 +36,11 @@ X^♭= G_p X,
 where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@ref)
 """
 flat(::MetricManifold, ::Any, ::TFVector)
+
+function flat(M::MetricManifold, p, X::TFVector{<:Any, <:InducedBasis})
+    (metric(M.manifold) == M.metric) && (return flat(M.manifold, p, X))
+    return CoTFVector(local_metric(M, p, X.basis) * X.data, dual_basis(M, p, X.basis))
+end
 
 function flat!(M::AbstractManifold, ξ::CoTFVector, p, X::TFVector)
     (metric(M.manifold) == M.metric) && (return flat!(M.manifold, ξ, p, X))
@@ -65,6 +70,12 @@ where ``G_p`` is the local matrix representation of `G`, i.e. one employs
 [`inverse_local_metric`](@ref) here to obtain ``G_p^{-1}``.
 """
 sharp(::MetricManifold, ::Any, ::CoTFVector)
+
+function sharp(M::MetricManifold, p, ξ::CoTFVector{<:Any, <:InducedBasis})
+    (metric(M.manifold) == M.metric) && (return sharp(M.manifold, p, ξ))
+    B = dual_basis(M, p, ξ.basis)
+    return TFVector(inverse_local_metric(M, p, B) * ξ.data, B)
+end
 
 function sharp!(M::MetricManifold, X::TFVector, p, ξ::CoTFVector)
     (metric(M.manifold) == M.metric) && (return sharp!(M.manifold, X, p, ξ))

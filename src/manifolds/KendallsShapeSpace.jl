@@ -104,6 +104,22 @@ horizontal_component(::KendallsShapeSpace, p, X)
 
 function horizontal_component!(::KendallsShapeSpace, Y, p, X)
     B = p * transpose(p)
+    n, k = size(p)
+    if rank(B) < n
+        # remove the projection onto the vertical space, spanned by (e_j e_i^T - e_i e_j^T) p
+        V = zeros(promote_type(eltype(p), eltype(X)), n * k, div(n * (n - 1), 2))
+        L = LinearIndices(p)
+        c = 0
+        for i in 1:n, j in (i + 1):n
+            c += 1
+            for l in 1:k
+                V[L[i, l], c] = -p[j, l]
+                V[L[j, l], c] = p[i, l]
+            end
+        end
+        Y .= X .- reshape(V * (V \ vec(X)), n, k)
+        return Y
+    end
     C = X * transpose(p) - p * transpose(X)
     A = sylvc(B, B, C)
     Y .= X .- A * p
@@ -174,7 +190,9 @@ function project!(M::KendallsShapeSpace, q, p)
 end
 
 function project!(M::KendallsShapeSpace, Y, p, X)
-    return project!(get_embedding(M), Y, p, X)
+    project!(get_embedding(M), Y, p, X)
+    horizontal_component!(M, Y, p, Y)
+    return Y
 end
 
 @doc raw"""
@@ -196,6 +214,7 @@ function Random.rand!(
         σ::Real = one(eltype(pX)),
     )
     rand!(rng, get_embedding(M), pX; vector_at = vector_at, σ = σ)
+    vector_at === nothing || horizontal_component!(M, pX, vector_at, pX)
     return pX
 end
 

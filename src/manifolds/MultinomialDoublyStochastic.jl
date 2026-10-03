@@ -184,7 +184,7 @@ end
     project(
         M::AbstractMultinomialDoublyStochastic,
         p;
-        maxiter = 100,
+        maxiter = 1000,
         tolerance = eps(eltype(p))
     )
 
@@ -201,7 +201,7 @@ function project!(
         ::AbstractMultinomialDoublyStochastic,
         q,
         p;
-        maxiter::Int = 100,
+        maxiter::Int = 1000,
         tolerance::Real = eps(eltype(p)),
     )
     any(p .<= 0) && throw(
@@ -213,13 +213,16 @@ function project!(
     d1 = sum(p, dims = 1)
     d2 = 1 ./ (p * d1')
     row = d2' * p
-    gap = 2 * tolerance
-    while iter < maxiter && (gap >= tolerance)
+    gap = maximum(abs.(row .* d1 .- 1))
+    while iter < maxiter && (gap > tolerance)
         iter += 1
         row .= d2' * p
         gap = maximum(abs.(row .* d1 .- 1))
         d1 .= 1 ./ row
         d2 .= 1 ./ (p * d1')
+    end
+    if gap > tolerance
+        @warn "Sinkhorn's algorithm stopped after $(maxiter) iterations with a gap of $(gap), which is larger than the tolerance $(tolerance)."
     end
     q .= p .* (d2 * d1)
     return q

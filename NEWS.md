@@ -52,6 +52,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * charts of the `DefaultTorusAtlas` are now correctly switched according to the distance of the point from the chart centre (`get_chart_index`, `check_chart_switch`).
 * embedding of the `Flag` manifold is now marked as `EmbeddedManifoldType` instead of `IsometricallyEmbeddedManifoldType`.
 *`norm` in the orthogonal representation of a flag manifold is fixed (it had wrong scaling).
+* `get_vector` on `HeisenbergMatrices` returns the tangent vector for every size `n`, as its in-place variant does.
+* `riemannian_gradient` on the `Hyperbolic` space changes the representer before it projects onto the tangent space, so that it returns the Riemannian gradient.
+* `riemannian_Hessian` on the `Hyperbolic` space follows its documented formula and leaves the Euclidean Hessian it is given unchanged.
+* `volume_density` on the `Hyperbolic` space measures the tangent vector with its Riemannian norm, so that it is the determinant of the differential of the exponential map at every point.
+* `is_point` on the `Hyperrectangle` checks the bounds also when keyword arguments such as `atol` are given.
+* `retract` with the default `ProjectionRetraction` on the `Hyperrectangle` returns a point inside the box.
+* `horizontal_component`, and with it `exp`, `inner` and `norm`, on `KendallsShapeSpace` return a value when the landmarks span fewer dimensions than the space, such as collinear points in the plane.
+* `project` and `rand` on `KendallsShapeSpace` return horizontal tangent vectors, so that the basis from `ProjectedOrthonormalBasis` is orthonormal.
+* `change_metric` for a metric given by its local matrix keeps inner products also when that matrix does not commute with the local matrix of the manifold's metric.
+* `change_representer` for a metric given by its local matrix reproduces the inner products of that metric also when its local matrix does not commute with the local matrix of the manifold's metric.
+* `flat` and `sharp` on a `MetricManifold` apply the local metric to coefficients in an induced basis, as `flat!` and `sharp!` do.
+* `project` of a matrix onto the multinomial doubly stochastic manifolds runs Sinkhorn's algorithm for up to 1000 iterations, stops once every column sum is within `tolerance` of one, and warns when it does not get there.
+* `distance` on the `ProbabilitySimplex` returns a number for every pair of points, also for a point and itself.
+* `exp` on `ProbabilitySimplex(n; boundary = :closed)` follows the geodesic within the face at points with zero entries.
+* `Weingarten` on `Rotations`, `OrthogonalMatrices` and `UnitaryMatrices` returns a tangent vector in the Lie algebra, like its tangent vector argument.
+* `check_vector` and the tangent projection of `SPDFixedDeterminant` use the condition that the trace of `p \ X` vanishes, so that a geodesic in an accepted direction keeps the determinant, and the tangent check takes a relative tolerance `rtol`.
+* `embed` and `embed!` of a tangent vector on the `Segre` manifold return the embedded tangent vector, and `embed!` writes it into the given array.
+* `vector_transport_to!` with `ProjectionTransport` on the `Segre` manifold returns the transported vector also when the result is the tangent vector being transported.
+* `exp!`, and with it the in-place `retract!` and `mid_point!`, on the `Segre` manifold and under its `WarpedMetric` return the correct point when the result is the starting point itself.
+* `get_coordinates!` on the `Segre` manifold and under its `WarpedMetric` writes the coordinates into the given vector.
+* `connected_by_geodesic` on the `Segre` manifold with a `WarpedMetric` takes the warping factor into account.
+* `log` on `Sphere` and `ArraySphere` returns a tangent vector for every pair of opposite points.
 
 ## [0.11.32] 2026-09-30
 

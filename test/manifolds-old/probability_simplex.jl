@@ -7,6 +7,12 @@ include("../header.jl")
     @test !is_vector(M, p, [1.0, -1.0, 1.0e-6])
 end
 
+@testset "distance of a point of the probability simplex from itself" begin
+    M = ProbabilitySimplex(3)
+    p = [0.2, 0.4, 0.3, 0.1]
+    @test distance(M, p, p) == 0.0
+end
+
 @testset "Probability simplex" begin
     M = ProbabilitySimplex(2)
     M_euc = MetricManifold(M, EuclideanMetric())
@@ -138,6 +144,11 @@ end
         @test is_point(Mb, p)
         @test_throws DomainError is_point(Mb, p .- 1; error = :error)
         @test inner(Mb, p, X, Y) == 8
+        Mb3 = ProbabilitySimplex(3; boundary = :closed)
+        pb = [0.0, 0.2, 0.3, 0.5]
+        qb = [0.0, 0.5, 0.25, 0.25]
+        # a vanishing entry stays zero, so exp inverts log on that face
+        @test isapprox(Mb3, exp(Mb3, pb, log(Mb3, pb, qb)), qb)
 
         @test_throws ArgumentError ProbabilitySimplex(2; boundary = :tomato)
     end

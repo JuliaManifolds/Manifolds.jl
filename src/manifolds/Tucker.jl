@@ -9,7 +9,7 @@ Segre manifold, i.e., the set of rank-1 tensors.
 
 Let ``𝔽`` be the real or complex numbers.
 Any tensor ``p`` on the Tucker manifold can be represented as a multilinear product in HOSVD
-[DeLathauwerDeMoorVanderwalle:2000](@cite) form
+[DeLathauwerDeMoorVandewalle:2000](@cite) form
 ```math
 p = (U_1,\dots,U_D) ⋅ \mathcal{C}
 ```

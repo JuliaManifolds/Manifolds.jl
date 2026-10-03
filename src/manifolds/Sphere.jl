@@ -384,7 +384,7 @@ function log!(M::AbstractSphere, X, p, q)
     cosθ = clamp(real(dot(p, q)), -1, 1)
     if cosθ ≈ -1 # appr. opposing points, return deterministic choice from set-valued log
         fill!(X, zero(eltype(X)))
-        if p[1] ≈ 1
+        if abs(real(p[1])) ≈ 1
             X[2] = 1
         else
             X[1] = 1

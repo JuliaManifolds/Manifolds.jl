@@ -63,4 +63,13 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
         Dict(:Functions => [get_embedding, repr]),
         Dict(get_embedding => Euclidean(3, 3; parameter = :field), repr => "HeisenbergMatrices(1; parameter=:field)")
     )
+
+    @testset "get_vector for n = 2" begin
+        M2 = HeisenbergMatrices(2)
+        p = Matrix{Float64}(I, 4, 4)
+        c = [1.0, 2.0, 3.0, 4.0, 5.0]
+        X = get_vector(M2, p, c, DefaultOrthonormalBasis())
+        @test is_vector(M2, p, X)
+        @test get_coordinates(M2, p, X, DefaultOrthonormalBasis()) == c
+    end
 end
