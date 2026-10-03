@@ -80,10 +80,11 @@ end
             @test exp!(M_euc, X, pts[1], [0.0, 0.1, -0.1]) ≈ [0.5, 0.4, 0.1]
             @test ManifoldsBase.exp_fused!(M_euc, X, pts[1], [0.0, 0.1, -0.1], 1.0) ≈
                 [0.5, 0.4, 0.1]
+            @test log(M_euc, pts[1], pts[2]) ≈ pts[2] - pts[1]
+            @test distance(M_euc, pts[1], pts[2]) ≈ norm(pts[2] - pts[1])
             Manifolds.test_manifold(
                 M_euc,
                 pts,
-                test_exp_log = false,
                 test_injectivity_radius = false,
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,

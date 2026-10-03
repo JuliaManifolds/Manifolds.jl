@@ -9,6 +9,8 @@ function exp_fused!(
     return (q .= p .+ t .* X)
 end
 
+log!(::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, X, p, q) = (X .= q .- p)
+
 @doc raw"""
     manifold_volume(::MetricManifold{ℝ,<:ProbabilitySimplex{n},<:EuclideanMetric})) where {n}
 

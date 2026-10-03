@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * `get_basis`, `get_coordinates` and `get_vector` on the `EssentialManifold` with an orthonormal basis of its five-dimensional horizontal space.
+* `log` on the `ProbabilitySimplex` with the `EuclideanMetric`.
 
 ### Changed
 
@@ -74,6 +75,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_coordinates!` on the `Segre` manifold and under its `WarpedMetric` writes the coordinates into the given vector.
 * `connected_by_geodesic` on the `Segre` manifold with a `WarpedMetric` takes the warping factor into account.
 * `log` on `Sphere` and `ArraySphere` returns a tangent vector for every pair of opposite points.
+* `is_vector` and `project` on the `SpecialUnitaryMatrices` require and return tangent vectors of trace zero.
+* `project` onto the tangent space of the `GeneralizedGrassmann` manifold removes the whole part along the columns of the point, so that it and `rand` return tangent vectors `X` with `p'BX = 0`.
+* `change_metric` on the `GeneralizedGrassmann` manifold returns a tangent vector whose length in the manifold's metric equals the Euclidean length of the given one.
+* `distance` and `log` on the `GeneralizedGrassmann` manifold use the metric given by `B`, and `distance` returns `π/2` for a right principal angle.
 
 ## [0.11.32] 2026-09-30
 

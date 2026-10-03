@@ -82,3 +82,53 @@ which is[^1]
 function injectivity_radius(::SpecialUnitaryMatrices)
     return π * sqrt(2.0)
 end
+
+@doc raw"""
+    is_vector(M::SpecialUnitaryMatrices, p, X; atol, rtol, kwargs...)
+
+Check whether `X` is a tangent vector at `p` on the [`SpecialUnitaryMatrices`](@ref) `M`, that is
+whether `X` lies in the Lie algebra ``\mathfrak{su}(n)`` of the skew-Hermitian matrices of trace
+zero, see Section 3.4, Proposition 3.24 of [Hall:2015](@cite).
+
+The skew-Hermitian check is performed with `isapprox`, which receives `atol`, `rtol` and all
+further keyword arguments. The trace has to vanish up to `max(atol, rtol * sqrt(n) * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
+"""
+is_vector(::SpecialUnitaryMatrices, ::Any, ::Any)
+
+function check_vector(
+        M::SpecialUnitaryMatrices, p, X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
+        kwargs...,
+    ) where {T}
+    n = get_parameter(M.size)[1]
+    s = check_point(SkewHermitianMatrices(n, ℂ), X; atol = atol, rtol = rtol, kwargs...)
+    s === nothing || return s
+    t = abs(tr(X))
+    if !(t <= atol || t <= rtol * sqrt(n) * norm(X))
+        return DomainError(
+            tr(X),
+            "The tangent vector $(X) does not lie in the tangent space at $(p) of $(M), since its trace is $(tr(X)) and not zero.",
+        )
+    end
+    return nothing
+end
+
+@doc raw"""
+    project(M::SpecialUnitaryMatrices, p, X)
+    project!(M::SpecialUnitaryMatrices, Y, p, X)
+
+Orthogonally project ``X ∈ ℂ^{n×n}`` onto the tangent space of `M` at `p` and change the
+representer to the Lie algebra ``\mathfrak{su}(n)``, that is compute the skew-Hermitian part
+``Y`` of ``p^{\mathrm{H}}X`` and subtract ``\frac{1}{n}\operatorname{tr}(Y)`` from its diagonal, as the
+projection on the [`DeterminantOneMatrices`](@ref) does.
+"""
+project(::SpecialUnitaryMatrices, p, X)
+
+function project!(M::SpecialUnitaryMatrices, Y, p, X)
+    n = get_parameter(M.size)[1]
+    project!(SkewHermitianMatrices(n, ℂ), Y, p \ X)
+    # the trace part is removed as on the determinant one matrices
+    return project!(DeterminantOneMatrices(n, ℂ), Y, I, Y)
+end
