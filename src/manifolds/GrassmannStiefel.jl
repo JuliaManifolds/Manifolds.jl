@@ -488,7 +488,7 @@ function riemann_tensor!(::Grassmann{ℝ}, Xresult, p, X, Y, Z)
     YXᵀ = XYᵀ'
     YᵀX = Y' * X
     XᵀY = YᵀX'
-    Xresult .= (XYᵀ - YXᵀ) * Z .- Z * (YᵀX - XᵀY)
+    Xresult .= (XYᵀ - YXᵀ) * Z .+ Z * (YᵀX - XᵀY)
     return Xresult
 end
 

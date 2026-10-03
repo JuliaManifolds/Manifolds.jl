@@ -81,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `change_metric` on the `GeneralizedGrassmann` manifold returns a tangent vector whose length in the manifold's metric equals the Euclidean length of the given one.
 * `distance` and `log` on the `GeneralizedGrassmann` manifold use the metric given by `B`, and `distance` returns `π/2` for a right principal angle.
 * `distance` on the `Grassmann` manifold returns `π/2` for a right principal angle instead of throwing a `SingularException`.
+* `riemann_tensor` on the real `Grassmann` manifold adds the second term of its documented formula, so that `sectional_curvature` there is never negative.
 
 ## [0.11.32] 2026-09-30
 

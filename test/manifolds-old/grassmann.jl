@@ -118,7 +118,8 @@ end
                 @test norm(M, pts[1], X1) isa Real
                 @test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
             end
-            @test riemann_tensor(M, p1, X, Y, 2 * X + Y) ≈ [0 -2; 0 1; 2 0]
+            @test riemann_tensor(M, p1, X, Y, 2 * X + Y) ≈ [-2 -2; 0 -1; -2 2]
+            @test sectional_curvature(M, p1, X, [0.0 0.0; 0.0 0.0; 1.0 0.0]) ≈ 1.0
             @testset "gradient and metric conversion" begin
                 Y = change_metric(M, EuclideanMetric(), p1, X)
                 @test Y == X
@@ -465,6 +466,8 @@ end
                 @test Manifolds.inner(M, A, i, a, c, c) ≈ Manifolds.inner(M, p, X, X)
                 @test Manifolds.inner(M, A, i, a, c, d) ≈ Manifolds.inner(M, p, X, Y)
                 @test Manifolds.det_local_metric(M, A, i, a) > 0
+                @test get_coordinates(M, p, riemann_tensor(M, p, X, Y, Y), B) ≈
+                    riemann_tensor(M, A, i, a, c, d, d)
 
                 # TODO: check against the embedding-based implementation of the Levi-Civita connection
                 Zc = affine_connection(M, A, i, a, c, d)
