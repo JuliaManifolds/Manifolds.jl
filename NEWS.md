@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_basis`, `get_coordinates` and `get_vector` on the `EssentialManifold` with an orthonormal basis of its five-dimensional horizontal space.
 * `log` on the `ProbabilitySimplex` with the `EuclideanMetric`.
 * `PolarRetraction`, `QRRetraction`, `CayleyRetraction`, `PolarInverseRetraction` and `QRInverseRetraction` on the real `GeneralizedStiefel` manifold.
+* `manifold_dimension` and `is_flat` for `MultinomialSymmetricPositiveDefinite`.
 
 ### Changed
 
@@ -84,6 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `riemann_tensor` on the real `Grassmann` manifold adds the second term of its documented formula, so that `sectional_curvature` there is never negative.
 * `project` onto the tangent space of `MultinomialDoubleStochastic` returns a tangent vector at every point, also at the uniform matrix of two or four rows.
 * `rand` on `OrthogonalMatrices` with `vector_at` draws the projection of a normally distributed matrix with standard deviation `σ`.
+* `project` onto the tangent space of `MultinomialSymmetric`, and with it `riemannian_gradient` and `riemannian_Hessian`, use the symmetric part of a nonsymmetric input, so that they return the correct tangent vector.
 
 ## [0.11.32] 2026-09-30
 

@@ -8,6 +8,10 @@ include("../header.jl")
         @test repr(Mf) == "MultinomialSymmetricPositiveDefinite(3; parameter=:field)"
         @test get_embedding(M) == MultinomialMatrices(3, 3)
         @test get_embedding(Mf) == MultinomialMatrices(3, 3; parameter = :field)
+        @test manifold_dimension(M) == manifold_dimension(MultinomialSymmetric(3)) == 3
+        @test manifold_dimension(Mf) == 3
+        @test !is_flat(M)
+        @test is_flat(MultinomialSymmetricPositiveDefinite(2))
         #
         # Checks
         # (a) Points

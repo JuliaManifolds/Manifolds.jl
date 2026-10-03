@@ -44,6 +44,15 @@ include("../header.jl")
     )
     X3 = [1.0 1.0 1.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
     @test inner(M, p, X3, X3) == 9.0
+    @testset "Nonsymmetric input from the embedding" begin
+        Y = [1.0 2.0 0.0; 0.0 1.0 -1.0; 3.0 0.0 1.0]
+        @test is_vector(M, p2, project(M, p2, Y))
+        @test project(M, p2, Y) ≈ project(M, p2, (Y + Y') / 2)
+        @test is_vector(M, p2, riemannian_gradient(M, p2, Y))
+        H = [1.0 0.5 2.0; 0.3 1.0 0.0; 1.5 0.2 1.0]
+        Hs = riemannian_Hessian(M, p2, (Y + Y') / 2, (H + H') / 2, X2)
+        @test riemannian_Hessian(M, p2, Y, H, X2) ≈ Hs
+    end
 
     types = [Matrix{Float64}]
 

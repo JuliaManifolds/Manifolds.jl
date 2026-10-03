@@ -69,6 +69,29 @@ function ManifoldsBase.get_embedding_type(::MultinomialSymmetricPositiveDefinite
 end
 
 """
+    is_flat(M::MultinomialSymmetricPositiveDefinite)
+
+Return whether the [`MultinomialSymmetricPositiveDefinite`](@ref) `M` is flat,
+which is the case if and only if its dimension is one.
+"""
+is_flat(M::MultinomialSymmetricPositiveDefinite) = manifold_dimension(M) == 1
+
+@doc raw"""
+    manifold_dimension(M::MultinomialSymmetricPositiveDefinite)
+
+Return the dimension of the [`MultinomialSymmetricPositiveDefinite`](@ref) manifold,
+````math
+\operatorname{dim}_{\mathcal{SP}^+(n)} = \frac{n(n-1)}{2},
+````
+the dimension of the polytope of symmetric doubly stochastic matrices, see Section 1 of [Davis:2015](@cite),
+of which the manifold is an open subset, see pp. 36 and 41 of [Douik:2020](@cite).
+"""
+function manifold_dimension(M::MultinomialSymmetricPositiveDefinite)
+    n = get_parameter(M.size)[1]
+    return div(n * (n - 1), 2)
+end
+
+"""
     Random.rand!(
         rng::AbstractRNG,
         M::MultinomialSymmetricPositiveDefinite,
