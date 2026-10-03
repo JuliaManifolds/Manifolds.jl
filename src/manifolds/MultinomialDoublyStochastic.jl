@@ -161,7 +161,8 @@ The formula reads
 ````
 
 where ``⊙`` denotes the Hadamard or elementwise product and ``\mathbb{1}_n`` is the vector of length ``n`` containing ones.
-The two vectors ``α,β ∈ ℝ^{n×n}`` are computed as a solution (typically using the left pseudo inverse) of
+The two vectors ``α,β ∈ ℝ^n`` are computed with an LU decomposition, or with the pseudo inverse if that fails,
+as a solution of
 
 ````math
     \begin{pmatrix} I_n & p\\p^{\mathrm{T}} & I_n \end{pmatrix}
@@ -170,13 +171,19 @@ The two vectors ``α,β ∈ ℝ^{n×n}`` are computed as a solution (typically u
     \begin{pmatrix} Y\mathbf{1}\\Y^{\mathrm{T}}\mathbf{1}\end{pmatrix},
 ````
 where ``I_n`` is the ``n×n`` unit matrix and ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
+This system has infinitely many solutions, and all of them yield the same projection,
+see [DouikHassibi:2019](@cite) and Theorem 3.1 in [Douik:2020](@cite).
 
 """
 project(::MultinomialDoubleStochastic, ::Any, ::Any)
 
 function project!(M::MultinomialDoubleStochastic, X, p, Y)
     n = get_parameter(M.size)[1]
-    ζ = [I p; p' I] \ [sum(Y, dims = 2); sum(Y, dims = 1)'] # Formula (25) from 1802.02628
+    A = [I p; p' I]
+    b = [sum(Y, dims = 2); sum(Y, dims = 1)']
+    # the system has infinitely many solutions; if the LU factorization fails, the pseudo inverse picks one
+    F = lu(A; check = false)
+    ζ = issuccess(F) ? F \ b : pinv(A) * b
     return X .= Y .- (repeat(ζ[1:n], 1, n) .+ repeat(ζ[(n + 1):end]', n, 1)) .* p
 end
 

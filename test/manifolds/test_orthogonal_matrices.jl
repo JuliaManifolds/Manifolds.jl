@@ -51,4 +51,11 @@ using LinearAlgebra, Manifolds, Quaternions, Test, Random
         @test abs(rand(MersenneTwister(), OrthogonalMatrices(1))[]) == 1
         @test injectivity_radius(OrthogonalMatrices(1; parameter = :field)) == 0.0
     end
+
+    @testset "Random tangent vectors scale with σ" begin
+        X = rand(MersenneTwister(42), M; vector_at = p1)
+        Y = rand(MersenneTwister(42), M; vector_at = p1, σ = 2.0)
+        @test is_vector(M, p1, Y)
+        @test Y == 2 .* X
+    end
 end

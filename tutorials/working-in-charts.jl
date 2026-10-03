@@ -91,7 +91,7 @@ end
 """
 	torus_figure()
 
-This function generates a simple plot of a torus and returns the new figure containing the plot.
+This function generates a simple plot of a torus and returns the new axis and the figure containing the plot.
 """
 function torus_figure()
     fig = Figure(resolution = (1400, 1000), fontsize = 16)
@@ -212,15 +212,15 @@ end
 # ╔═╡ c1660206-d21a-4812-9dd3-bda91b633c0b
 begin
     geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy], t_end)(0.0:dt:t_end)
-    geo_ps = [Point3f(s[1]) for s in geo]
     pt_indices = 1:div(length(geo), 10):length(geo)
-    geo_ps_pt = [Point3f(s[1]) for s in geo[pt_indices]]
-    geo_Ys = [Point3f(s[3]) for s in geo[pt_indices]]
 end;
 
 # ╔═╡ a30fa94f-5669-4265-a541-03d16dbd5745
 begin
     if render_images || interactive # generate images in these two cases
+        geo_ps = [Point3f(s[1]) for s in geo]
+        geo_ps_pt = [Point3f(s[1]) for s in geo[pt_indices]]
+        geo_Ys = [Point3f(s[3]) for s in geo[pt_indices]]
         ax1, fig1 = torus_figure()
         arrows!(ax1, geo_ps_pt, geo_Ys, linewidth = 0.05, color = :blue)
         lines!(geo_ps; linewidth = 4.0, color = :green)
@@ -262,12 +262,12 @@ begin
     bvp_a1 = [θ₁, φ₁]
     bvp_a2 = [θ₂, φ₂]
     bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i)
-    geo_r = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)]
 end;
 
 # ╔═╡ eea2fbc7-1ba8-49f8-916c-743984abe15d
 begin
     if render_images || interactive # generate images in these two cases
+        geo_r = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)]
         ax2, fig2 = torus_figure()
         lines!(geo_r; linewidth = 4.0, color = :green)
         (!interactive) && Makie.save(image_prefix * "/working-in-charts-geodesic.png", fig2)

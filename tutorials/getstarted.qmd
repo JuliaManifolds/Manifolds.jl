@@ -108,7 +108,7 @@ Note that the `LoadError:` is due to quarto, on `REPL` you would just get the `D
 
 ```{julia}
 #| error: true
-is_point(M₂, [0, 0, 1.001]; error = :error)
+is_point(M₂, [0, 0, 1.001], true)
 ```
 
 #### 3. ``[The sphere](@ref SphereSection)``{=commonmark}
