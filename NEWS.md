@@ -107,6 +107,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `rand` on the quaternionic `Stiefel` and `Grassmann` manifolds returns a point.
 * `riemannian_Hessian` on the `Stiefel` manifold with the `CanonicalMetric` or a `StiefelSubmersionMetric` applies the inverse of the metric, so it returns the Hessian with respect to that metric.
 * `project` onto a complex `GeneralizedStiefel` manifold, and its default retraction, return a point of the manifold also when the weight matrix is the identity.
+* `manifold_volume`, `volume_density` and `riemann_tensor` on the `ProbabilitySimplex` return the correct values for every point and tangent vector (sphere radius was incorrectly set to 1 instead of 2 for the diffeomorphism).
 
 ## [0.11.32] 2026-09-30
 

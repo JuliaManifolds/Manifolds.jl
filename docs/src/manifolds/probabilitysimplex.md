@@ -25,7 +25,7 @@ An isometric embedding of interior of [`ProbabilitySimplex`](@ref) in positive o
 [`Sphere`](@ref) is established through functions [`simplex_to_amplitude`](@ref Manifolds.simplex_to_amplitude) and [`amplitude_to_simplex`](@ref Manifolds.amplitude_to_simplex). Some properties extend to the boundary but not all.
 
 This embedding isometrically maps the Fisher-Rao metric on the open probability simplex to
-the sphere of radius 1 with Euclidean metric. More details can be found in Section 2.2
+the sphere of radius 2 with Euclidean metric. More details can be found in Section 2.2
 of [AyJostLeSchwachhoefer:2017](@cite).
 
 The name derives from the notion of probability amplitudes in quantum mechanics.

@@ -175,12 +175,12 @@ end
         Y = [0.05, 0.05, -0.1]
         Z = [-0.1, 0.15, -0.05]
         @test riemann_tensor(M, p, X, Y, Z) ≈
-            [-0.0034821428571428577, -0.005625, 0.009107142857142857]
+            [-0.0008705357142857144, -0.0014062500000000002, 0.0022767857142857143]
     end
 
     @testset "Volume density" begin
-        @test manifold_volume(M) ≈ pi / 2
-        @test volume_density(M, p, Y) ≈ 0.986956111346216
+        @test manifold_volume(M) ≈ 2 * pi
+        @test volume_density(M, p, Y) ≈ 0.9967294043214631
         @test manifold_volume(M_euc) ≈ sqrt(3) / 2
         @test volume_density(M_euc, p, Y) ≈ 1.0
     end

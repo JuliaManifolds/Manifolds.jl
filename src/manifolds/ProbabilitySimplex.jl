@@ -340,13 +340,13 @@ manifold_dimension(M::ProbabilitySimplex) = get_parameter(M.size)[1]
 @doc raw"""
     manifold_volume(::ProbabilitySimplex)
 
-Return the volume of the [`ProbabilitySimplex`](@ref), i.e. volume of the `n`-dimensional
-[`Sphere`](@ref) divided by ``2^{n+1}``, corresponding to the volume of its positive
-orthant.
+Return the volume of the [`ProbabilitySimplex`](@ref), i.e. the volume of the `n`-dimensional
+[`Sphere`](@ref) of radius 2 divided by ``2^{n+1}``, corresponding to the volume of its
+positive orthant.
 """
 function manifold_volume(M::ProbabilitySimplex)
     n = get_parameter(M.size)[1]
-    return manifold_volume(Sphere(n)) / 2^(n + 1)
+    return 2^n * manifold_volume(Sphere(n)) / 2^(n + 1)
 end
 
 @doc raw"""
@@ -529,11 +529,11 @@ function riemann_tensor!(M::ProbabilitySimplex, Xresult, p, X, Y, Z)
     Xrs = riemann_tensor(
         Sphere(n),
         pe,
-        simplex_to_amplitude_diff(M, p, X),
-        simplex_to_amplitude_diff(M, p, Y),
-        simplex_to_amplitude_diff(M, p, Z),
+        simplex_to_amplitude_diff(M, p, X) / 2,
+        simplex_to_amplitude_diff(M, p, Y) / 2,
+        simplex_to_amplitude_diff(M, p, Z) / 2,
     )
-    amplitude_to_simplex_diff!(M, Xresult, pe, Xrs)
+    amplitude_to_simplex_diff!(M, Xresult, pe, 2 .* Xrs)
     return Xresult
 end
 
@@ -557,7 +557,7 @@ vector `X`. It is computed using isometry with positive orthant of a sphere.
 function volume_density(M::ProbabilitySimplex, p, X)
     n = get_parameter(M.size)[1]
     pe = simplex_to_amplitude(M, p)
-    return volume_density(Sphere(n), pe, simplex_to_amplitude_diff(M, p, X))
+    return volume_density(Sphere(n), pe, simplex_to_amplitude_diff(M, p, X) / 2)
 end
 
 @doc raw"""
