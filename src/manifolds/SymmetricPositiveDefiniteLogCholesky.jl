@@ -102,7 +102,7 @@ function get_vector_orthonormal!(
     MC = CholeskySpace(N; parameter = get_parameter_type(M.manifold))
     y = cholesky(p).L
     get_vector_orthonormal!(MC, X, y, Xⁱ, rn)
-    tangent_cholesky_to_tangent_spd!(p, X)
+    tangent_cholesky_to_tangent_spd!(y, X)
     return X
 end
 

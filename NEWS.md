@@ -86,6 +86,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `project` onto the tangent space of `MultinomialDoubleStochastic` returns a tangent vector at every point, also at the uniform matrix of two or four rows.
 * `rand` on `OrthogonalMatrices` with `vector_at` draws the projection of a normally distributed matrix with standard deviation `σ`.
 * `project` onto the tangent space of `MultinomialSymmetric`, and with it `riemannian_gradient` and `riemannian_Hessian`, use the symmetric part of a nonsymmetric input, so that they return the correct tangent vector.
+* `is_point` on `SymmetricPositiveDefinite` accepts a matrix that is symmetric up to rounding, such as a result of `exp`; the tolerance can be set with the keywords of `isapprox`.
+* `rand` on `SymmetricPositiveDefinite` draws Gaussian tangent vectors whose coordinates in an orthonormal basis at the base point have standard deviation `σ`, by default `1/sqrt(n)`, the `:Rician` draw accepts an `SPDPoint`, and `rand!` into an `SPDPoint` stores the matrix square roots of the drawn point.
+* `distance` on the `SymmetricPositiveDefinite` manifold returns zero only for equal points, also when their eigenvalues differ by many orders of magnitude.
+* `sectional_curvature_min` on `SymmetricPositiveDefinite` returns `-0.5`, the smallest sectional curvature of the affine invariant metric.
+* `volume_density` on `SymmetricPositiveDefinite` uses the eigenvalues of `p^(-1/2) X p^(-1/2)` and half their differences, so that it is the determinant of the differential of the exponential map at `p`.
+* `log` on `SymmetricPositiveDefinite` with the `BuresWassersteinMetric` takes the square roots of the products of the two points, so that it inverts `exp` also for points that do not commute.
+* `distance` under the `BuresWassersteinMetric` and the `GeneralizedBuresWassersteinMetric` returns a real number also when rounding makes the squared distance negative or complex, for example for a point and itself.
+* `get_vector` under the `LogCholeskyMetric` on `SymmetricPositiveDefinite` uses the Cholesky factor of the point, so that it inverts `get_coordinates` and its basis vectors are orthonormal at every point.
+* `log` on the `SymmetricPositiveDefinite` manifold returns a tangent vector whose length is the distance also when `q` is more than sixteen orders of magnitude smaller than `p`, such as `q = 1e-9 * I` and `p = 1e9 * I`.
 
 ## [0.11.32] 2026-09-30
 

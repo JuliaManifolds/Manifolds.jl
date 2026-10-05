@@ -58,7 +58,7 @@ function distance(
         p,
         q,
     )
-    return sqrt(tr(p) + tr(q) - 2 * tr(sqrt(p * q)))
+    return sqrt(max(real(tr(p) + tr(q) - 2 * tr(sqrt(p * q))), 0))
 end
 
 @doc raw"""
@@ -135,6 +135,6 @@ function log!(
         p,
         q,
     )
-    X .= sqrt(Symmetric(p * q)) + sqrt(Symmetric(q * p)) - 2 * p
+    X .= real.(Symmetric(sqrt(p * q) + sqrt(q * p)) - 2 * p)
     return X
 end
