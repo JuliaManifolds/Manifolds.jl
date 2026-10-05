@@ -364,9 +364,12 @@ project(::Hyperrectangle, ::Any, ::Any)
 function project!(M::Hyperrectangle, Y, p, X)
     copyto!(Y, X)
     for i in eachindex(M.lb, Y)
+        # intentionally no `else` to allow for the case of a point being at both bounds,
+        # which is possible for a zero-width Hyperrectangle
         if M.ub[i] == p[i]
             Y[i] = min(Y[i], 0)
-        elseif M.lb[i] == p[i]
+        end
+        if M.lb[i] == p[i]
             Y[i] = max(Y[i], 0)
         end
     end
