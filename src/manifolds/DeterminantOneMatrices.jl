@@ -88,7 +88,7 @@ end
     manifold_dimension(M::DeterminantOneMatrices{n,𝔽})
 
 Return the dimension of the [`DeterminantOneMatrices`](@ref) matrix `M` over the number system
-`𝔽`, which is the dimension of its embedding, the [`Euclidean`](@ref)`(n, n; field=𝔽)`,
+`𝔽`. It is the dimension of its embedding, the [`Euclidean`](@ref)`(n, n; field=𝔽)`,
 reduced by the real dimension of `𝔽`, since ``\det(p) = 1`` is a single equation over ``𝔽``.
 """
 function manifold_dimension(M::DeterminantOneMatrices{𝔽}) where {𝔽}

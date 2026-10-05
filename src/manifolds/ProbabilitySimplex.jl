@@ -130,8 +130,8 @@ end
 """
     check_vector(M::ProbabilitySimplex, p, X; kwargs... )
 
-Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`, i.e.
-after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
+Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`.
+After [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
 `X` has to be of same dimension as `p` and its elements have to sum to zero
 up to `max(atol, rtol * sqrt(length(X)) * norm(X))`.
 The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.

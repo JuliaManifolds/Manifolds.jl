@@ -414,9 +414,10 @@ end
 @doc raw"""
     _jacobi_exp_matrix(M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...)
 
-Solve the chart-coordinate geodesic and a matrix-valued Jacobi equation to compute the
-coordinate matrix of the differential of the exponential map with respect to either its
-argument (if `wrt` is set to `:argument`) or its basepoint (if `wrt` is set to `:basepoint`).
+Compute the coordinate matrix of the differential of the exponential map in a chart.
+It is obtained by solving the chart-coordinate geodesic and a matrix-valued Jacobi equation,
+with respect to either the argument (if `wrt` is set to `:argument`) or the basepoint
+(if `wrt` is set to `:basepoint`).
 
 The geodesic coordinates satisfy
 ```math

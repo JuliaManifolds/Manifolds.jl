@@ -246,9 +246,9 @@ end
 """
     check_vector(B::FiberBundle, p, X; kwargs...)
 
-Check whether `X` is a valid tangent vector at `p` on the [`FiberBundle`](@ref) `B`, that
-is whether its base part is a tangent vector of the base manifold at the base part of `p`
-and its fiber part is a tangent vector of the fiber at the fiber part of `p`. Both parts are
+Check whether `X` is a valid tangent vector at `p` on the [`FiberBundle`](@ref) `B`.
+Its base part has to be a tangent vector of the base manifold at the base part of `p`
+and its fiber part a tangent vector of the fiber at the fiber part of `p`. Both parts are
 checked: an error of the base part is returned as a `ComponentManifoldError` with index 1, an
 error of the fiber part with index 2, and errors of both parts together in a
 `CompositeManifoldError`. The keyword arguments are passed on to both checks.

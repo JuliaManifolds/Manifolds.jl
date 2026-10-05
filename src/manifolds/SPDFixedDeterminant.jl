@@ -74,8 +74,8 @@ end
     check_vector(M::SPDFixedDeterminant, p, X; atol, rtol, kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`SPDFixedDeterminant`](@ref) `M`,
-i.e. `X` has to be a tangent vector on [`SymmetricPositiveDefinite`](@ref), so a symmetric matrix,
+[`SPDFixedDeterminant`](@ref) `M`.
+`X` has to be a tangent vector on [`SymmetricPositiveDefinite`](@ref), so a symmetric matrix,
 and additionally fulfill ``\operatorname{tr}(p^{-1}X) = 0``
 up to `max(atol, rtol * sqrt(n) * norm(M, p, X))`.
 The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
@@ -155,8 +155,8 @@ end
     project!(M::SPDFixedDeterminant, Y, p, X)
 
 Project the symmetric matrix `X` onto the tangent space at `p` of the
-(sub-)manifold of s.p.d. matrices of determinant `M.d` (in place of `Y`),
-by subtracting the multiple of `p` that makes the trace of ``p^{-1}X`` vanish.
+(sub-)manifold of s.p.d. matrices of determinant `M.d` (in place of `Y`).
+This subtracts the multiple of `p` that makes the trace of ``p^{-1}X`` vanish.
 """
 project(M::SPDFixedDeterminant, p, X)
 

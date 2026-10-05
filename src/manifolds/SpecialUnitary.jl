@@ -86,9 +86,9 @@ end
 @doc raw"""
     is_vector(M::SpecialUnitaryMatrices, p, X; atol, rtol, kwargs...)
 
-Check whether `X` is a tangent vector at `p` on the [`SpecialUnitaryMatrices`](@ref) `M`, that is
-whether `X` lies in the Lie algebra ``\mathfrak{su}(n)`` of the skew-Hermitian matrices of trace
-zero, see Section 3.4, Proposition 3.24 of [Hall:2015](@cite).
+Check whether `X` is a tangent vector at `p` on the [`SpecialUnitaryMatrices`](@ref) `M`.
+That is the case if `X` lies in the Lie algebra ``\mathfrak{su}(n)`` of the skew-Hermitian
+matrices of trace zero, see Section 3.4, Proposition 3.24 of [Hall:2015](@cite).
 
 The skew-Hermitian check is performed with `isapprox`, which receives `atol`, `rtol` and all
 further keyword arguments. The trace has to vanish up to `max(atol, rtol * sqrt(n) * norm(X))`.
@@ -120,7 +120,7 @@ end
     project!(M::SpecialUnitaryMatrices, Y, p, X)
 
 Orthogonally project ``X ∈ ℂ^{n×n}`` onto the tangent space of `M` at `p` and change the
-representer to the Lie algebra ``\mathfrak{su}(n)``, that is compute the skew-Hermitian part
+representer to the Lie algebra ``\mathfrak{su}(n)``. That is, compute the skew-Hermitian part
 ``Y`` of ``p^{\mathrm{H}}X`` and subtract ``\frac{1}{n}\operatorname{tr}(Y)`` from its diagonal, as the
 projection on the [`DeterminantOneMatrices`](@ref) does.
 """
@@ -136,9 +136,9 @@ end
 @doc raw"""
     rand(M::SpecialUnitaryMatrices; vector_at = nothing, σ::Real = 1.0)
 
-Generate a random point on the [`SpecialUnitaryMatrices`](@ref) `M`, if `vector_at` is `nothing`,
-as on the [`UnitaryMatrices`](@ref) from the QR decomposition of an ``n×n`` matrix, with its
-first row divided by the sign of the determinant, so that the determinant is one.
+Generate a random point on the [`SpecialUnitaryMatrices`](@ref) `M`, if `vector_at` is `nothing`.
+The point is drawn as on the [`UnitaryMatrices`](@ref) from the QR decomposition of an ``n×n``
+matrix, with its first row divided by the sign of the determinant, so that the determinant is one.
 
 Generate a tangent vector at `vector_at` by projecting a normally distributed matrix
 onto the tangent space.
