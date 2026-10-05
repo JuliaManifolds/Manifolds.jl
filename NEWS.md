@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `log` on the `ProbabilitySimplex` with the `EuclideanMetric`.
 * `PolarRetraction`, `QRRetraction`, `CayleyRetraction`, `PolarInverseRetraction` and `QRInverseRetraction` on the real `GeneralizedStiefel` manifold.
 * `manifold_dimension` and `is_flat` for `MultinomialSymmetricPositiveDefinite`.
+* `rand` and `rand!` on the `SpecialUnitaryMatrices`, which draw points of determinant one and tangent vectors of trace zero.
 
 ### Changed
 
@@ -95,6 +96,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `distance` under the `BuresWassersteinMetric` and the `GeneralizedBuresWassersteinMetric` returns a real number also when rounding makes the squared distance negative or complex, for example for a point and itself.
 * `get_vector` under the `LogCholeskyMetric` on `SymmetricPositiveDefinite` uses the Cholesky factor of the point, so that it inverts `get_coordinates` and its basis vectors are orthonormal at every point.
 * `log` on the `SymmetricPositiveDefinite` manifold returns a tangent vector whose length is the distance also when `q` is more than sixteen orders of magnitude smaller than `p`, such as `q = 1e-9 * I` and `p = 1e9 * I`.
+* `exp!` into an `SPDPoint` stores an orthonormal eigen decomposition, so the resulting point is correct also when it does not store its matrix, and equals the result of `exp`.
+* `get_coordinates` and `get_vector` on `KendallsPreShapeSpace` use an orthonormal basis of its tangent space.
 
 ## [0.11.32] 2026-09-30
 

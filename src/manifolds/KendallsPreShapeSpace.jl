@@ -107,6 +107,59 @@ function manifold_dimension(M::KendallsPreShapeSpace)
     return n * (k - 1) - 1
 end
 
+@doc raw"""
+    helmert_submatrix(::Type{T}, k::Int)
+
+Return the (`k`-1)×`k` matrix below the first row of the Helmert matrix of order `k`, whose
+`j`-th row is ``(h_j, …, h_j, -jh_j, 0, …, 0)`` with ``h_j = (j(j+1))^{-1/2}``. With the first
+row ``(1/\sqrt{k}, …, 1/\sqrt{k})`` the Helmert matrix is orthogonal, see Eq. (8.87) in
+[Gentle:2017; Section 8.8.1](@cite).
+"""
+function helmert_submatrix(::Type{T}, k::Int) where {T}
+    H = zeros(T, k - 1, k)
+    for j in 1:(k - 1)
+        h = inv(sqrt(T(j) * (j + 1)))
+        H[j, 1:j] .= h
+        H[j, j + 1] = -j * h
+    end
+    return H
+end
+
+@doc raw"""
+    get_coordinates(M::KendallsPreShapeSpace, p, X, ::DefaultOrthonormalBasis)
+
+Compute the coordinates of the tangent vector `X` at `p` on the [`KendallsPreShapeSpace`](@ref) `M`
+in an orthonormal basis. With the [`helmert_submatrix`](@ref Manifolds.helmert_submatrix) ``H``,
+``p ↦ pH^{\mathrm{T}}`` maps `M` isometrically onto the [`ArraySphere`](@ref)`(n, k-1)`, see
+[Kendall:1989; Section 2](@cite), and the coordinates are those of ``XH^{\mathrm{T}}`` at
+``pH^{\mathrm{T}}`` on that sphere.
+"""
+get_coordinates(::KendallsPreShapeSpace, p, X, ::DefaultOrthonormalBasis)
+
+function get_coordinates_orthonormal!(M::KendallsPreShapeSpace, c, p, X, ::RealNumbers)
+    n, k = get_parameter(M.size)
+    H = helmert_submatrix(eltype(p), k)
+    return get_coordinates_orthonormal!(ArraySphere(n, k - 1), c, p * H', X * H', ℝ)
+end
+
+@doc raw"""
+    get_vector(M::KendallsPreShapeSpace, p, c, ::DefaultOrthonormalBasis)
+
+Compute the tangent vector at `p` on the [`KendallsPreShapeSpace`](@ref) `M` with the coordinates `c`
+in an orthonormal basis. It is ``YH``, where ``H`` is the
+[`helmert_submatrix`](@ref Manifolds.helmert_submatrix) and ``Y`` is the tangent vector with the
+coordinates `c` at ``pH^{\mathrm{T}}`` on the [`ArraySphere`](@ref)`(n, k-1)`, see
+[Kendall:1989; Section 2](@cite).
+"""
+get_vector(::KendallsPreShapeSpace, p, c, ::DefaultOrthonormalBasis)
+
+function get_vector_orthonormal!(M::KendallsPreShapeSpace, Y, p, c, ::RealNumbers)
+    n, k = get_parameter(M.size)
+    H = helmert_submatrix(eltype(p), k)
+    Y .= get_vector(ArraySphere(n, k - 1), p * H', c, DefaultOrthonormalBasis()) * H
+    return Y
+end
+
 """
     project(M::KendallsPreShapeSpace, p)
 

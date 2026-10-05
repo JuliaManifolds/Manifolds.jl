@@ -97,6 +97,19 @@ end
         @test !is_vector(M, p, Y)
         @test is_vector(M, p, Y; atol = 1.0e-6)
     end
+
+    @testset "rand" begin
+        M = SpecialUnitaryMatrices(3)
+        p = rand(MersenneTwister(4711), M)
+        @test is_point(M, p)
+        @test det(p) ≈ 1
+        X = rand(MersenneTwister(4711), M; vector_at = p)
+        @test is_vector(M, p, X)
+        @test is_point(M, exp(M, p, X))
+        q = similar(p)
+        rand!(MersenneTwister(4711), M, q)
+        @test is_point(M, q)
+    end
 end
 
 @testset "Quaternionic Unitary Matrices" begin

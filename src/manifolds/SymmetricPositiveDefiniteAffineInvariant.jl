@@ -131,7 +131,7 @@ function exp!(::SymmetricPositiveDefinite, q::SPDPoint, p, X)
     pU_e = p_sqrt * U_e
     Q = pU_e * Se * transpose(pU_e)
     !ismissing(q.p) && copyto!(q.p, Q)
-    Q_e = eigen(Q)
+    Q_e = eigen(Symmetric(Q))
     copyto!(q.eigen.values, Q_e.values)
     copyto!(q.eigen.vectors, Q_e.vectors)
     if !ismissing(q.sqrt) && !ismissing(q.sqrt_inv)

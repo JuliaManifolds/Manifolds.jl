@@ -43,6 +43,22 @@ include("../header.jl")
         @test repr(M) == "KendallsPreShapeSpace(2, 3; parameter=:field)"
         @test get_embedding(M) === ArraySphere(2, 3; field = ℝ, parameter = :field)
     end
+    @testset "coordinates in an orthonormal basis" begin
+        B = DefaultOrthonormalBasis()
+        M2, M3 = KendallsPreShapeSpace(2, 3), KendallsPreShapeSpace(3, 4)
+        q = project(M3, [1.0 2.0 -0.5 0.3; -1.0 0.4 0.8 2.0; 0.2 -0.7 1.5 -1.1])
+        X2 = project(M2, p1, [0.3 -0.2 0.5; 0.1 0.4 -0.6])
+        Y2 = project(M2, p1, [-0.4 0.9 0.2; 0.7 -0.1 0.3])
+        X3 = project(M3, q, [0.5 -0.3 0.2 0.1; 0.0 0.7 -0.4 0.6; -0.8 0.1 0.9 -0.2])
+        Y3 = project(M3, q, [0.2 0.6 -0.1 -0.9; 0.4 -0.5 0.3 0.8; 0.1 0.2 -0.7 0.5])
+        for (N, p, X, Y) in [(M2, p1, X2, Y2), (M3, q, X3, Y3)]
+            c = get_coordinates(N, p, X, B)
+            @test length(c) == manifold_dimension(N)
+            @test isapprox(N, p, get_vector(N, p, c, B), X)
+            @test is_vector(N, p, get_vector(N, p, c, B))
+            @test dot(c, get_coordinates(N, p, Y, B)) ≈ inner(N, p, X, Y)
+        end
+    end
 end
 
 @testset "KendallsShapeSpace" begin

@@ -325,6 +325,10 @@ include("../header.jl")
         @test isapprox(exp!(M, pS, p, zero_vector(M, p)), p)
         @test ismissing(pS.sqrt)
         @test ismissing(pS.sqrt_inv)
+        qR = SPDPoint(Matrix{Float64}(I, 3, 3); store_p = false)
+        exp!(M, qR, p, ones(3, 3))
+        @test isapprox(M, qR, exp(M, p, ones(3, 3)))
+        @test exp(M, p, ones(3, 3)) == qR
         @test allocate_result(M1, zero_vector, p) isa Matrix
         c1 = ManifoldsBase.allocate_coordinates(M, p, Float64, 6)
         c2 = ManifoldsBase.allocate_coordinates(M, embed(M, p), Float64, 6)
