@@ -190,4 +190,17 @@ end
         @test repr(M) == "ProbabilitySimplex(2; boundary=:open, parameter=:field)"
         @test get_embedding(M) === Euclidean(3; parameter = :field)
     end
+
+    @testset "the softmax retraction agrees with exp to first order" begin
+        M = ProbabilitySimplex(2)
+        p = [0.1, 0.7, 0.2]
+        X = [0.05, 0.05, -0.1]
+        d(t) = distance(M, exp(M, p, t * X), retract(M, p, t * X, SoftmaxRetraction()))
+        @test d(0.2) / d(0.1) ≈ 4 atol = 0.05
+        @test isapprox(
+            M, p,
+            inverse_retract(M, p, retract(M, p, X, SoftmaxRetraction()), SoftmaxInverseRetraction()),
+            X,
+        )
+    end
 end

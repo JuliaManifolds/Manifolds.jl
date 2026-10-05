@@ -283,16 +283,17 @@ end
 
 Compute a first order approximation by projection. The formula reads
 ````math
-\operatorname{retr}^{-1}_p q = \bigl( I_{n+1} - \frac{1}{n}\mathbb{1}^{n+1,n+1} \bigr)(\log(q)-\log(p))
+\operatorname{retr}^{-1}_p q = p ⊙ \bigl( I_{n+1} - \mathbb{1}_{n+1}p^{\mathrm{T}} \bigr)(\log(q)-\log(p))
 ````
-where $\mathbb{1}^{m,n}$ is the size `(m,n)` matrix containing ones, and $\log$ is applied elementwise.
+where ``\mathbb{1}_{n+1}`` is the vector of length ``n+1`` containing ones, ``⊙`` is the
+elementwise product, and ``\log`` is applied elementwise.
 """
 inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
 
 function inverse_retract_softmax!(::ProbabilitySimplex, X, p, q)
     X .= log.(q) .- log.(p)
-    meanlogdiff = mean(X)
-    X .-= meanlogdiff
+    c = dot(p, X)
+    X .= p .* (X .- c)
     return X
 end
 
@@ -473,7 +474,7 @@ end
 Compute a first order approximation by applying the softmax function. The formula reads
 
 ````math
-\operatorname{retr}_p X = \frac{p\mathrm{e}^X}{⟨p,\mathrm{e}^X⟩},
+\operatorname{retr}_p X = \frac{p\mathrm{e}^{X/p}}{⟨p,\mathrm{e}^{X/p}⟩},
 ````
 
 where multiplication, exponentiation and division are meant elementwise.
@@ -486,7 +487,7 @@ end
 function ManifoldsBase.retract_softmax_fused!(::ProbabilitySimplex, q, p, X, t::Number)
     s = zero(eltype(q))
     @inbounds for i in eachindex(q, p, X)
-        q[i] = p[i] * exp(t * X[i])
+        q[i] = p[i] * exp(t * X[i] / p[i])
         s += q[i]
     end
     q ./= s
