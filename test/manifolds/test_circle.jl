@@ -31,6 +31,7 @@ Test.@testset "The circle manifold" begin
                 parallel_transport_direction, parallel_transport_to,
                 repr, representation_size,
                 vector_transport_to,
+                zero_vector,
             ],
             :Bases => [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(X1)],
             :Coordinates => [[π / 2], [-π / 2]],

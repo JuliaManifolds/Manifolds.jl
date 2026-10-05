@@ -426,6 +426,7 @@ using FiniteDifferences
         @test manifold_dimension(M0s) == 1
         @test project(M0s, 4.0) == 4.0
         @test project(M0s, 2.0, 4.0) == 4.0
+        @test zero_vector(M0s, 2.0) == 0.0
         @test retract(M0s, 2.0, 4.0) == 6.0
         @test retract(M0s, 2.0, 4.0, ExponentialRetraction()) == 6.0
 

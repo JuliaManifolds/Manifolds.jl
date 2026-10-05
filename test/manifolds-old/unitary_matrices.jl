@@ -123,6 +123,7 @@ end
         @test is_point(M, p)
         X = rand(MersenneTwister(), M; vector_at = p)
         @test is_vector(M, p, X)
+        @test zero_vector(M, p) == zero(p)
     end
 
     # wrong length of size

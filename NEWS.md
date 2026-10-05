@@ -98,6 +98,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `log` on the `SymmetricPositiveDefinite` manifold returns a tangent vector whose length is the distance also when `q` is more than sixteen orders of magnitude smaller than `p`, such as `q = 1e-9 * I` and `p = 1e9 * I`.
 * `exp!` into an `SPDPoint` stores an orthonormal eigen decomposition, so the resulting point is correct also when it does not store its matrix, and equals the result of `exp`.
 * `get_coordinates` and `get_vector` on `KendallsPreShapeSpace` use an orthonormal basis of its tangent space.
+* `is_vector` on `Grassmann` requires `p'X = 0` relative to the size of `X` with the keywords `atol` and `rtol`, so that vectors that only rotate the basis of the point are rejected.
+* `is_vector` on `Stiefel` checks that `p'X` is skew-Hermitian with `isapprox` and an absolute tolerance scaled by the size of `X`, so that it accepts complex tangent vectors and the tangent vectors of `Stiefel(n, 1)`.
+* `inverse_retract` with `QRInverseRetraction` on a complex `Stiefel` manifold returns a tangent vector and inverts `retract` with `QRRetraction`.
+* `vector_transport_direction` and `vector_transport_to` with `DifferentiatedRetractionVectorTransport(QRRetraction())` on `Stiefel` compute the derivative of the QR retraction.
+* `exp!` on the `Stiefel` manifold with the `CanonicalMetric` can write its result into its own starting point.
+* The logarithmic map of the `Stiefel` manifold with the `CanonicalMetric` also works for two coinciding or nearly coinciding points when `2k > n`.
+* `rand` on the quaternionic `Stiefel` and `Grassmann` manifolds returns a point.
+* `riemannian_Hessian` on the `Stiefel` manifold with the `CanonicalMetric` or a `StiefelSubmersionMetric` applies the inverse of the metric, so it returns the Hessian with respect to that metric.
+* `project` onto a complex `GeneralizedStiefel` manifold, and its default retraction, return a point of the manifold also when the weight matrix is the identity.
 
 ## [0.11.32] 2026-09-30
 

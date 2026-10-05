@@ -230,20 +230,20 @@ Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
 Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
 where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
 
-Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](@extref `ManifoldsBase.EuclideanMetric`)
-``α_0=1, α_1=\frac{1}{2}`` in their formula. The formula reads
+Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`StiefelSubmersionMetric`](@ref)
+``α_0=1, α_1=\frac{1}{2(α+1)}`` in their formula. The formula reads
 
 ```math
     \operatorname{Hess}f(p)[X]
     =
-    \operatorname{proj}_{T_p\mathcal M}\Bigl(
+    \operatorname{proj}_{T_p\mathcal M}\Bigl(g_p^{-1}\Bigl(
         ∇^2f(p)[X] - \frac{1}{2} X \bigl( (∇f(p))^{\mathrm{H}}p + p^{\mathrm{H}}∇f(p)\bigr)
-        - \frac{2α+1}{2(α+1)} \bigl( P ∇f(p) p^{\mathrm{H}} + p ∇f(p))^{\mathrm{H}} P)X
-    \Bigr),
+        - \frac{2α+1}{2(α+1)} \bigl( P ∇f(p) p^{\mathrm{H}} + p (∇f(p))^{\mathrm{H}} P\bigr)X
+    \Bigr)\Bigr),
 ```
-where ``P = I-pp^{\mathrm{H}}``.
+where ``P = I-pp^{\mathrm{H}}`` and ``g_p^{-1}W = PW + 2(α+1)pp^{\mathrm{H}}W``.
 
-Compared to Eq. (5.6) we have that their ``α_0 = 1``and ``\alpha_1 =  \frac{2α+1}{2(α+1)} + 1``.
+Compared to Eq. (5.6) we have that their ``α_0 = 1`` and ``α_1 = \frac{1}{2(α+1)}``.
 """
 riemannian_Hessian(
     M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, p, G, H, X,
@@ -255,7 +255,9 @@ function riemannian_Hessian!(
     α = metric(M).α
     Gp = symmetrize(G' * p)
     Z = symmetrize((I - p * p') * G * p')
-    project!(M, Y, p, H - X * Gp - (2 * α + 1) / (α + 1) * Z * X)
+    W = H - X * Gp - (2 * α + 1) / (α + 1) * Z * X
+    # apply g_p^{-1}W = (I - pp')W + 2(α+1)pp'W = W + (2α+1)pp'W, then project
+    project!(M, Y, p, W + (2 * α + 1) * p * (p' * W))
     return Y
 end
 
@@ -325,7 +327,7 @@ function stiefel_factorization(p, x)
         Z1 = Z[1:k, 1:k]
         Z2 = Z[(k + 1):(2k), 1:k]
     end
-    if p ≈ x
+    if k ≤ div(n, 2) && p ≈ x
         copyto!(U1, p)
         copyto!(U2, qr(U1).Q[1:n, (k + 1):(2k)])
         copyto!(xfact, x)

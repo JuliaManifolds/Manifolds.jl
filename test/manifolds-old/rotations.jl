@@ -378,6 +378,8 @@ include("../header.jl")
         @test manifold_volume(Rotations(3)) ≈ 8 * π^2 * sqrt(2)
         @test manifold_volume(Rotations(4)) ≈ (2 * π)^4 * sqrt(2)
         @test manifold_volume(Rotations(5)) ≈ 4 * (2 * π)^6 / 6 * sqrt(2)
+        @test volume_density(Rotations(2), [1.0 0.0; 0.0 1.0], [0.0 0.5; -0.5 0.0]) == 1.0
+        @test volume_density(OrthogonalMatrices(2), [1.0 0.0; 0.0 1.0], [0.0 0.5; -0.5 0.0]) == 1.0
 
         M = Rotations(3)
         p = [

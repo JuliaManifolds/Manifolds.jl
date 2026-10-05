@@ -7,6 +7,7 @@ Test.@testset "Centered Matrices" begin
         p = [1.0 2.0; -3.0 0.0; 2.0 -2.0]
         Test.@test is_vector(N, p, project(N, p, [100.0 -50.0; 30.0 20.0; -10.0 5.0]))
         Test.@test !is_vector(N, p, [1.0 1.0; -1.0 -1.0; 1.0e-6 0.0])
+        Test.@test Weingarten!(N, similar(p), p, p, ones(3, 2)) == zero(p)
     end
 
     M = CenteredMatrices(3, 2)

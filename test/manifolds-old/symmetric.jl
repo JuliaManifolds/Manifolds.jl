@@ -23,6 +23,7 @@ include("../header.jl")
         @test_throws ManifoldDomainError is_point(M, C; error = :error)
         @test_throws ManifoldDomainError is_point(M, D; error = :error) #embedding changes type
         @test check_vector(M, B_sym, B_sym) === nothing
+        @test Weingarten!(M, similar(B_sym), B_sym, B_sym, B_sym) == zero(B_sym)
         @test_throws DomainError is_vector(M, B_sym, A; error = :error)
         @test_throws ManifoldDomainError is_vector(M, A, B_sym; error = :error)
         @test_throws ManifoldDomainError is_vector(M, B_sym, D; error = :error)

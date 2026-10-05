@@ -270,9 +270,16 @@ end
         p = reshape([im, 0.0, 0.0], 3, 1)
         @test is_point(G, p)
         X = reshape([-0.5; 0.5; 0], 3, 1)
-        @test_throws ManifoldDomainError is_vector(G, p, X; error = :error)
+        @test_throws DomainError is_vector(G, p, X; error = :error)
         Y = project(G, p, X)
         @test is_vector(G, p, Y)
+    end
+
+    @testset "Quaternionic" begin
+        G = Grassmann(3, 2, ℍ)
+        p = rand(MersenneTwister(42), G)
+        @test is_point(G, p; error = :error)
+        @test !is_point(G, 2 .* p)
     end
 
     @testset "Projector representation" begin
@@ -344,7 +351,10 @@ end
         p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
         X = StiefelTangentVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
         @test is_point(M, p; error = :error)
-        @test is_vector(M, p, X; error = :error)
+        @test !is_vector(M, p, X) # X only rotates the basis of p
+        @test is_vector(M, p, StiefelTangentVector([0.0 0.0; 0.0 0.0; 1.0 0.0]); error = :error)
+        pg = project(M, [1.0 0.0; 1.0 1.0; 0.0 2.0])
+        @test is_vector(M, pg, project(M, pg, [0.1 0.2; -0.3 0.4; 0.5 -0.6]))
         @test repr(p) == "StiefelPoint($(p.value))"
         @test repr(X) == "StiefelTangentVector($(X.value))"
         M2 = Stiefel(3, 2)

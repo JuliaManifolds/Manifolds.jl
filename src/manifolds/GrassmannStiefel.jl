@@ -31,6 +31,31 @@ ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTangentVec
 ManifoldsBase.@default_manifold_fallbacks (Stiefel{ℝ}) StiefelPoint StiefelTangentVector value value
 ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTangentVector value value
 
+@doc raw"""
+    is_vector(M::Grassmann, p, X; atol, rtol, kwargs...)
+
+Check whether `X` is a tangent vector at `p` on the [`Grassmann`](@ref) `M`, that is whether
+``p^{\mathrm{H}}X = 0`` holds up to `max(atol, rtol * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
+"""
+is_vector(::Grassmann, ::Any, ::Any)
+
+function check_vector(
+        M::Grassmann, p, X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
+        kwargs...,
+    ) where {T}
+    r = norm(p' * X)
+    if !(r <= atol || r <= rtol * norm(X))
+        return DomainError(
+            r,
+            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X is not the zero matrix.",
+        )
+    end
+    return nothing
+end
+
 function default_vector_transport_method(::Grassmann, ::Type{<:AbstractArray})
     return ParallelTransport()
 end
@@ -379,7 +404,7 @@ function Random.rand!(
     ) where {𝔽}
     if vector_at === nothing
         n, k = get_parameter(M.size)
-        V = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
+        V = σ * randn(rng, eltype(pX), (n, k))
         pX .= qr(V).Q[:, 1:k]
     else
         Z = σ * randn(rng, eltype(pX), size(pX))

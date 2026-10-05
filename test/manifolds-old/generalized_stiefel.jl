@@ -149,6 +149,11 @@ include("../header.jl")
             @test is_vector(M, x, Xc)
             @test !is_vector(M, x, [0.0 1.0; 1.0 0.0; 0.0 0.0])
             @test !is_vector(M, x, 1.0e-9 * [0.0 1.0; 1.0 0.0; 0.0 0.0])
+            F = ComplexF64[1.0 2.0im; 3.0 4.0; 5.0im 6.0]
+            @test is_point(M, project(M, F))
+            MI = GeneralizedStiefel(3, 2, Matrix{ComplexF64}(I, 3, 3), ℂ)
+            @test is_point(MI, project(MI, F))
+            @test is_point(M, retract(M, x, Xc, PolarRetraction()))
         end
     end
 

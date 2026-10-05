@@ -175,7 +175,7 @@ project(::GeneralizedStiefel, ::Any)
 
 function project!(M::GeneralizedStiefel, q, p)
     s = svd(p)
-    e = eigen(s.U' * M.B * s.U)
+    e = eigen(Hermitian(s.U' * M.B * s.U))
     qsinv = e.vectors ./ sqrt.(transpose(e.values))
     q .= s.U * qsinv * e.vectors' * s.V'
     return q
