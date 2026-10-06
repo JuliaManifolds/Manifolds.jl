@@ -108,6 +108,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `riemannian_Hessian` on the `Stiefel` manifold with the `CanonicalMetric` or a `StiefelSubmersionMetric` applies the inverse of the metric, so it returns the Hessian with respect to that metric.
 * `project` onto a complex `GeneralizedStiefel` manifold, and its default retraction, return a point of the manifold also when the weight matrix is the identity.
 * `manifold_volume`, `volume_density` and `riemann_tensor` on the `ProbabilitySimplex` return the correct values for every point and tangent vector (sphere radius was incorrectly set to 1 instead of 2 for the diffeomorphism).
+* `Manifolds.Test.test_manifold` compares the expected result of `log` when one is given.
+* `Manifolds.Test.test_manifold` compares the expected sectional curvature and its expected minimum and maximum when they are given.
+* `Manifolds.Test.test_default_retraction` and `Manifolds.Test.test_default_vector_transport_method` compare with an expected value only when one is given.
+* `Manifolds.Test.test_mid_point`, and with it `Manifolds.Test.test_manifold`, compare the mid-points of both argument orders by default and skip this comparison for `test_symmetry = false` or the property `:TestMidpointSymmetry => false`.
+* The `:Seed` property of `Manifolds.Test.test_manifold` and the `seed` keyword of `Manifolds.Test.test_rand` seed the random number generator before sampling.
+* `Manifolds.Test.test_retract`, `test_sectional_curvature`, `test_sharp`, `test_shortest_geodesic` and `test_vector_transport` compare their result with a supplied expected value.
+* `Manifolds.Test.test_geodesic` compares the speed of the geodesic with `norm(M, p, X)`, so that it passes for end times other than one.
 
 ## [0.11.32] 2026-09-30
 
