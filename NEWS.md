@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * The default retraction and inverse retraction of `FixedRankMatrices` are `OrthographicRetraction` and `OrthographicInverseRetraction`.
+* `default_retraction_method` on the doubly stochastic multinomial manifolds is now the
+`ProjectionRetraction`.
 
 ### Fixed
 

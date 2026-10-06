@@ -100,4 +100,13 @@ include("../header.jl")
         @test_logs project(M, A)
         @test_logs (:warn,) project(M, A; maxiter = 1)
     end
+    @testset "default retraction of the doubly stochastic multinomial manifolds" begin
+        p = [0.5 0.3 0.2; 0.3 0.4 0.3; 0.2 0.3 0.5]
+        X = [0.1 -0.05 -0.05; -0.05 0.1 -0.05; -0.05 -0.05 0.1]
+        for M in (MultinomialDoubleStochastic(3), MultinomialSymmetric(3))
+            @test default_retraction_method(M) === ProjectionRetraction()
+            @test retract(M, p, X) == retract(M, p, X, ProjectionRetraction())
+            @test is_point(M, retract(M, p, X))
+        end
+    end
 end

@@ -10,6 +10,14 @@ That way they share the inner product (just by restriction), and even the Rieman
 """
 abstract type AbstractMultinomialDoublyStochastic <: AbstractDecoratorManifold{ℝ} end
 
+"""
+    default_retraction_method(M::AbstractMultinomialDoublyStochastic)
+
+Return [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`), the retraction
+that the doubly stochastic multinomial manifolds implement.
+"""
+default_retraction_method(::AbstractMultinomialDoublyStochastic) = ProjectionRetraction()
+
 @doc raw"""
     representation_size(M::AbstractMultinomialDoublyStochastic)
 
