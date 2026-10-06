@@ -10,6 +10,13 @@ Test.@testset "Centered Matrices" begin
         Test.@test Weingarten!(N, similar(p), p, p, ones(3, 2)) == zero(p)
     end
 
+    Test.@testset "points of any size" begin
+        N = CenteredMatrices(3, 2)
+        Test.@test is_point(N, project(N, [100.0 -50.0; 30.0 20.0; -10.0 5.0]))
+        Test.@test !is_point(N, [1.0 1.0; -1.0 -1.0; 1.0e-6 0.0])
+        Test.@test !is_point(N, [Inf 0.0; 0.0 0.0; 0.0 0.0])
+    end
+
     M = CenteredMatrices(3, 2)
 
     p1 = [1 2; 4 5; -5 -7]

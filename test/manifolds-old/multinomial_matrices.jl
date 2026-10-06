@@ -59,8 +59,10 @@ include("../header.jl")
         M = MultinomialMatrices(3, 2)
         p = [0.5 0.4 0.1; 0.5 0.4 0.1]'
         Y = [1.0 -1.0; 0.0 0.0; -1.0 1.0]
-        G = project(M, p, p .* Y)
         X = riemannian_gradient(M, p, Y)
-        @test isapprox(M, p, G, X)
+        @test isapprox(M, p, X, [0.3 -0.3; -0.16 0.16; -0.14 0.14])
+        # the Riemannian gradient satisfies ⟨X, V⟩_p = ⟨Y, V⟩ for tangent vectors V
+        V = [1.0 0.0; -1.0 1.0; 0.0 -1.0]
+        @test inner(M, p, X, V) ≈ dot(Y, V)
     end
 end

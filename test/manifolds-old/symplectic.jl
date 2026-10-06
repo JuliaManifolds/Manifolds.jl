@@ -169,6 +169,9 @@ using ManifoldDiff
         @test is_point(M_big, p_big; error = :error, atol = 1.0e-9)
         X_big = rand(M_big; vector_at = p_big)
         @test is_vector(M_big, p_big, X_big; error = :error, atol = 1.0e-9)
+        X_seeded = rand(MersenneTwister(7), M_big; vector_at = p_big)
+        @test X_seeded == rand(MersenneTwister(7), M_big; vector_at = p_big)
+        @test is_vector(M_big, p_big, X_seeded; error = :error, atol = 1.0e-9)
     end
     @testset "test_manifold(SymplecticMatrices(6))" begin
         Manifolds.test_manifold(
@@ -217,6 +220,7 @@ using ManifoldDiff
         X2 = similar(X)
         riemannian_gradient!(Sp_6, X2, p_grad, one(p_grad))
         @test isapprox(Sp_6, p_grad, X, X2)
+        @test isapprox(X, analytical_grad_f(p_grad); atol = 1.0e-9)
     end
     @testset "SymplecticElement" begin
         @test SymplecticElement() == SymplecticElement(1)

@@ -121,6 +121,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The `:Seed` property of `Manifolds.Test.test_manifold` and the `seed` keyword of `Manifolds.Test.test_rand` seed the random number generator before sampling.
 * `Manifolds.Test.test_retract`, `test_sectional_curvature`, `test_sharp`, `test_shortest_geodesic` and `test_vector_transport` compare their result with a supplied expected value.
 * `Manifolds.Test.test_geodesic` compares the speed of the geodesic with `norm(M, p, X)`, so that it passes for end times other than one.
+* The point check of `CenteredMatrices` takes a relative tolerance `rtol` and accepts the large points the manifold produces.
+* `rand` with a `vector_at` on the `SymplecticMatrices` uses the generator it is given, so seeded draws repeat.
+* `riemannian_gradient` on `SymplecticMatrices` returns the gradient with respect to the `RealSymplecticMetric`, the metric that `inner` implements.
+* `riemannian_gradient` on the `SymplecticGrassmann` manifold returns the gradient given in its documentation.
+* `riemannian_gradient` on `MultinomialMatrices` projects orthogonally with respect to the Fisher–Rao metric.
+* `riemannian_gradient` on a `PowerManifold` with the array or the nested representation computes the gradient factor by factor, with the gradient of the factor manifold.
+* `Manifolds.Test.test_mid_point`, and with it `Manifolds.Test.test_manifold`, compare the mid-points of both argument orders by default and skip this comparison for `test_symmetry = false` or the property `:TestMidpointSymmetry => false`.
 
 ## [0.11.32] 2026-09-30
 

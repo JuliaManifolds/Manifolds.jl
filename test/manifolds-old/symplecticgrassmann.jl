@@ -82,8 +82,10 @@ include("../header.jl")
         Z2 = similar(Z)
         riemannian_gradient!(M, Z2, p, A)
         @test isapprox(M, Z2, Z)
-        # How can we better test that this is a correct gradient?
-        # Or what can we further test here?
+        @test is_vector(M, p, Z)
+        # Z represents the differential along directions V with p^+V = 0
+        Xh = X - p * (symplectic_inverse(p) * X)
+        @test inner(M, p, Z, Xh) ≈ dot(A, Xh)
     end
     @testset "Projector representation" begin
         # cf. Propo 4.3 BendokatZimmermann, φ and

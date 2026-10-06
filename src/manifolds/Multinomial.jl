@@ -93,20 +93,20 @@ end
 
 Let ``Y`` denote the Euclidean gradient of a function ``\tilde f`` defined in the
 embedding neighborhood of `M`, then the Riemannian gradient is given by
-Equation 5 of [DouikHassibi:2019](@cite) as
+Equation (3.5) of [Douik:2020](@cite) as the projection of ``Y⊙p`` onto the tangent space
+that is orthogonal with respect to the Fisher–Rao metric. Column by column this reads
 
 ```math
-  \operatorname{grad} f(p) = \proj_{T_p\mathcal M}(Y⊙p)
+  \operatorname{grad} f(p)_j = p_j⊙Y_j - ⟨p_j, Y_j⟩p_j, \qquad j = 1,…,m,
 ```
 
-where ``⊙`` denotes the Hadamard or elementwise product.
+where ``p_j`` and ``Y_j`` are the ``j``th columns and ``⊙`` denotes the Hadamard or elementwise product.
 
 """
 riemannian_gradient(M::MultinomialMatrices, p, Y; kwargs...)
 
 function riemannian_gradient!(M::MultinomialMatrices, X, p, Y; kwargs...)
-    X .= p .* Y
-    project!(M, X, p, X)
+    X .= p .* Y .- p .* sum(p .* Y; dims = 1)
     return X
 end
 

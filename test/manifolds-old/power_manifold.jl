@@ -491,3 +491,19 @@ end
             "PowerManifold(Sphere(2), 5, parameter=:type)"
     end
 end
+
+@testset "Riemannian gradient on a power of hyperboloids" begin
+    M = PowerManifold(Hyperbolic(2), 2)
+    p = [[1.0, 1.0, sqrt(3)] [0.0, 0.0, 1.0]]
+    G = [[0.4, -0.7, 1.1] [0.2, 0.1, -0.3]]
+    Y = riemannian_gradient(M, p, G)
+    @test is_vector(M, p, Y)
+    for V in (
+            project(M, p, [[1.0, 0.0, 0.0] [0.0, 1.0, 0.0]]),
+            project(M, p, [[0.0, 1.0, 0.0] [1.0, 0.0, 0.0]]),
+        )
+        @test inner(M, p, Y, V) ≈ dot(G, V)
+    end
+    N = PowerManifold(Hyperbolic(2), NestedPowerRepresentation(), 2)
+    @test riemannian_gradient(N, [p[:, 1], p[:, 2]], [G[:, 1], G[:, 2]]) ≈ [Y[:, 1], Y[:, 2]]
+end

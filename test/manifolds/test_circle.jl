@@ -4,7 +4,7 @@ Test.@testset "The circle manifold" begin
     M = Circle()
     @test Manifolds.number_of_coordinates(M, DefaultOrthogonalBasis()) == 1
     p1 = π / 2
-    p2 = -π / 2
+    p2 = -π / 4
     X1 = 1.0
     X2 = -1.0
 
@@ -264,5 +264,16 @@ Test.@testset "The circle manifold" begin
     @testset "allocate_on" begin
         @test ManifoldsBase.allocate_on(M) isa Array{Float64, 0}
         @test ManifoldsBase.allocate_on(Mc) isa Array{ComplexF64, 0}
+    end
+    Test.@testset "antipodal points on the real circle" begin
+        for (p, q) in [(π / 2, -π / 2), (fill(π / 2), fill(-π / 2))]
+            @test distance(M, p, q) ≈ π
+            X = log(M, p, q)
+            @test norm(M, p, X) ≈ π
+            @test isapprox(M, exp(M, p, X), q)
+            m = mid_point(M, p, q)
+            @test distance(M, p, m) ≈ π / 2
+            @test distance(M, q, m) ≈ π / 2
+        end
     end
 end

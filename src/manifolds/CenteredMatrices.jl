@@ -31,16 +31,20 @@ Check whether the matrix is a valid point on the
 [`CenteredMatrices`](@ref) `M`, i.e. is an `m`-by-`n` matrix whose columns sum to
 zero.
 
-The tolerance for the column sums of `p` can be set using `kwargs...`.
+The norm of the column sums of `p` has to be at most `atol`, or at most `rtol * sqrt(m) * norm(p)` if this scale is finite.
+The relative tolerance `rtol` refers to the size of `p`; its default is the one of `isapprox`.
 """
 function check_point(
         M::CenteredMatrices,
         p::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
     m, n = get_parameter(M.size)
-    if !isapprox(sum(p, dims = 1), zeros(1, n); atol = atol, kwargs...)
+    r = norm(sum(p, dims = 1))
+    s = sqrt(m) * norm(p)
+    if !(r <= atol || (isfinite(s) && r <= rtol * s))
         return DomainError(
             p,
             string(

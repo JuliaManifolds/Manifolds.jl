@@ -160,6 +160,30 @@ function riemannian_Hessian!(M::AbstractPowerManifold, Y, p, G, H, X)
 end
 
 @doc raw"""
+    riemannian_gradient(M::PowerManifold, p, G; kwargs...)
+    riemannian_gradient!(M::PowerManifold, X, p, G; kwargs...)
+
+Compute the Riemannian gradient from the Euclidean gradient `G` of the representation in the
+embedding. For the array and the nested power representation it decouples: for every index ``i``
+the element ``X_i`` is the Riemannian gradient on the factor manifold at ``p_i`` computed from ``G_i``.
+"""
+riemannian_gradient(M::PowerManifold, p, G)
+
+function riemannian_gradient!(
+        M::PowerManifold{𝔽, TM, TSize, <:Union{ArrayPowerRepresentation, NestedPowerRepresentation}},
+        X, p, G; kwargs...,
+    ) where {𝔽, TM, TSize}
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        riemannian_gradient!(
+            M.manifold, _write(M, rep_size, X, i), _read(M, rep_size, p, i),
+            _read(M, rep_size, G, i); kwargs...,
+        )
+    end
+    return X
+end
+
+@doc raw"""
     sharp(M::AbstractPowerManifold, p, ξ::RieszRepresenterCotangentVector)
 
 Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
