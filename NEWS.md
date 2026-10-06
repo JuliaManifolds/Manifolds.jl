@@ -14,12 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `PolarRetraction`, `QRRetraction`, `CayleyRetraction`, `PolarInverseRetraction` and `QRInverseRetraction` on the real `GeneralizedStiefel` manifold.
 * `manifold_dimension` and `is_flat` for `MultinomialSymmetricPositiveDefinite`.
 * `rand` and `rand!` on the `SpecialUnitaryMatrices`, which draw points of determinant one and tangent vectors of trace zero.
+* `ProjectionRetraction` on the `MultinomialSymmetricPositiveDefinite` manifold.
 
 ### Changed
 
 * The default retraction and inverse retraction of `FixedRankMatrices` are `OrthographicRetraction` and `OrthographicInverseRetraction`.
 * `default_retraction_method` on the doubly stochastic multinomial manifolds is now the
 `ProjectionRetraction`.
+* embedding of the `MultinomialSymmetricPositiveDefinite` manifold is changed from `MultinomialMatrices` to `MultinomialSymmetric`, and is marked as `IsometricallyEmbeddedManifoldType` instead of `EmbeddedManifoldType`. Consequently, `inner`, `norm` and `riemannian_gradient` are now also available.
 
 ### Fixed
 

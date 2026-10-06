@@ -58,14 +58,14 @@ end
 function get_embedding(
         ::MultinomialSymmetricPositiveDefinite{TypeParameter{Tuple{n}}},
     ) where {n}
-    return MultinomialMatrices(n, n)
+    return MultinomialSymmetric(n)
 end
 function get_embedding(M::MultinomialSymmetricPositiveDefinite{Tuple{Int}})
     n = get_parameter(M.size)[1]
-    return MultinomialMatrices(n, n; parameter = :field)
+    return MultinomialSymmetric(n; parameter = :field)
 end
 function ManifoldsBase.get_embedding_type(::MultinomialSymmetricPositiveDefinite)
-    return ManifoldsBase.EmbeddedManifoldType()
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
 """
@@ -89,6 +89,27 @@ of which the manifold is an open subset, see pp. 36 and 41 of [Douik:2020](@cite
 function manifold_dimension(M::MultinomialSymmetricPositiveDefinite)
     n = get_parameter(M.size)[1]
     return div(n * (n - 1), 2)
+end
+
+@doc raw"""
+    project(M::MultinomialSymmetricPositiveDefinite, p, X)
+
+Project `X` onto the tangent space at `p` on the [`MultinomialSymmetricPositiveDefinite`](@ref) `M`.
+The manifold is an open subset of the [`MultinomialSymmetric`](@ref) matrices and has their
+geometry, see Section 3.3, p. 39 of [Douik:2020](@cite), so with the symmetric part
+``X_{\mathrm{s}} = \frac{1}{2}(X+X^{\mathrm{T}})`` the projection reads
+
+````math
+    \operatorname{proj}_p(X) = X_{\mathrm{s}} - (α\mathbf{1}_n^{\mathrm{T}} + \mathbf{1}_n α^{\mathrm{T}}) ⊙ p,
+    \qquad (I_n+p)α = X_{\mathrm{s}}\mathbf{1}_n,
+````
+
+where ``⊙`` denotes the elementwise product and ``\mathbf{1}_n`` the vector of ``n`` ones.
+"""
+project(::MultinomialSymmetricPositiveDefinite, ::Any, ::Any)
+
+function project!(M::MultinomialSymmetricPositiveDefinite, Y, p, X)
+    return project!(get_embedding(M), Y, p, X)
 end
 
 """
@@ -137,6 +158,22 @@ function Random.rand!(
         end
     end
     return p
+end
+
+@doc raw"""
+    retract(M::MultinomialSymmetricPositiveDefinite, p, X, ::ProjectionRetraction)
+
+Compute the projection retraction of the [`MultinomialSymmetric`](@ref) matrices, which projects
+``p⊙\exp(X⨸p)`` onto the doubly stochastic matrices, where ``⊙,⨸`` are elementwise
+multiplication and division and ``\exp`` is the elementwise exponential.
+The result is positive definite only for tangent vectors `X` small enough,
+see Section 3.3, p. 39 of [Douik:2020](@cite).
+"""
+retract(::MultinomialSymmetricPositiveDefinite, ::Any, ::Any, ::ProjectionRetraction)
+
+function ManifoldsBase.retract_project!(M::MultinomialSymmetricPositiveDefinite, q, p, X)
+    N = get_embedding(M)
+    return ManifoldsBase.retract_project!(N, q, p, X)
 end
 
 function Base.show(
