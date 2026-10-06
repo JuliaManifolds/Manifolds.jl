@@ -203,4 +203,16 @@ end
             X,
         )
     end
+
+    @testset "boundary conditions" begin
+        # a zero entry of a point on the closed simplex stays zero
+        Mb = ProbabilitySimplex(3; boundary = :closed)
+        qb = retract(Mb, [0.0, 0.2, 0.3, 0.5], [0.0, 0.1, 0.05, -0.15], SoftmaxRetraction())
+        @test is_point(Mb, qb)
+        @test qb[1] == 0
+        # an exponent of 1000 does not overflow
+        Mc = ProbabilitySimplex(2; boundary = :closed)
+        pc = [1.0e-6, 0.5, 0.499999]
+        @test retract(Mc, pc, [0.001, -0.0005, -0.0005], SoftmaxRetraction()) == [1.0, 0.0, 0.0]
+    end
 end

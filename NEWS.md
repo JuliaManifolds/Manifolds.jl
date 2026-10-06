@@ -108,6 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `riemannian_Hessian` on the `Stiefel` manifold with the `CanonicalMetric` or a `StiefelSubmersionMetric` applies the inverse of the metric, so it returns the Hessian with respect to that metric.
 * `project` onto a complex `GeneralizedStiefel` manifold, and its default retraction, return a point of the manifold also when the weight matrix is the identity.
 * `manifold_volume`, `volume_density` and `riemann_tensor` on the `ProbabilitySimplex` return the correct values for every point and tangent vector (sphere radius was incorrectly set to 1 instead of 2 for the diffeomorphism).
+* `retract` with `SoftmaxRetraction` on the `ProbabilitySimplex` applies correct scaling by `p`, keeps zero entries of a point on the closed simplex and does not overflow for large exponents.
 * `Manifolds.Test.test_manifold` compares the expected result of `log` when one is given.
 * `Manifolds.Test.test_manifold` compares the expected sectional curvature and its expected minimum and maximum when they are given.
 * `Manifolds.Test.test_default_retraction` and `Manifolds.Test.test_default_vector_transport_method` compare with an expected value only when one is given.

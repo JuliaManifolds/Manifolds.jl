@@ -478,6 +478,9 @@ Compute a first order approximation by applying the softmax function. The formul
 ````
 
 where multiplication, exponentiation and division are meant elementwise.
+The largest exponent is subtracted from all exponents, which leaves the quotient unchanged
+and keeps the exponential from overflowing; on the closed simplex an entry with ``p_i = 0``
+stays zero.
 """
 retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxRetraction)
 
@@ -485,9 +488,15 @@ function ManifoldsBase.retract_softmax!(M::ProbabilitySimplex, q, p, X)
     return ManifoldsBase.retract_softmax_fused!(M, q, p, X, one(eltype(p)))
 end
 function ManifoldsBase.retract_softmax_fused!(::ProbabilitySimplex, q, p, X, t::Number)
+    m = maximum(t * X[i] / p[i] for i in eachindex(p, X) if !iszero(p[i]))
     s = zero(eltype(q))
     @inbounds for i in eachindex(q, p, X)
-        q[i] = p[i] * exp(t * X[i] / p[i])
+        if iszero(p[i])
+            # a zero entry of p on the closed simplex stays zero
+            q[i] = p[i]
+        else
+            q[i] = p[i] * exp(t * X[i] / p[i] - m)
+        end
         s += q[i]
     end
     q ./= s
