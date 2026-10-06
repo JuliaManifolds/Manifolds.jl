@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `default_retraction_method` on the doubly stochastic multinomial manifolds is now the
 `ProjectionRetraction`.
 * embedding of the `MultinomialSymmetricPositiveDefinite` manifold is changed from `MultinomialMatrices` to `MultinomialSymmetric`, and is marked as `IsometricallyEmbeddedManifoldType` instead of `EmbeddedManifoldType`. Consequently, `inner`, `norm` and `riemannian_gradient` are now also available.
+* `project` onto the tangent space of `MultinomialMatrices` is now orthogonal with respect to the Fisher–Rao metric instead of subtracting the mean of each column.
 
 ### Fixed
 
@@ -126,7 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `rand` with a `vector_at` on the `SymplecticMatrices` uses the generator it is given, so seeded draws repeat.
 * `riemannian_gradient` on `SymplecticMatrices` returns the gradient with respect to the `RealSymplecticMetric`, the metric that `inner` implements.
 * `riemannian_gradient` on the `SymplecticGrassmann` manifold returns the gradient given in its documentation.
-* `riemannian_gradient` on `MultinomialMatrices` projects orthogonally with respect to the Fisher–Rao metric.
+* `riemannian_gradient` on `MultinomialMatrices` returns the Riemannian gradient with respect to the Fisher–Rao metric.
 * `riemannian_gradient` on a `PowerManifold` with the array or the nested representation computes the gradient factor by factor, with the gradient of the factor manifold.
 * `Manifolds.Test.test_mid_point`, and with it `Manifolds.Test.test_manifold`, compare the mid-points of both argument orders by default and skip this comparison for `test_symmetry = false` or the property `:TestMidpointSymmetry => false`.
 * `project` onto a tangent space and `embed` of a tangent vector on the quaternionic `UnitaryMatrices(1, ℍ)` take the point into account, so that they and the default vector transport follow the Lie algebra representation of tangent vectors.

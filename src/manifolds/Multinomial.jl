@@ -89,24 +89,44 @@ function power_dimensions(M::MultinomialMatrices)
 end
 
 @doc raw"""
+    project(M::MultinomialMatrices, p, Y)
+
+Project `Y` from the embedding onto the tangent space at `p` on the
+[`MultinomialMatrices`](@ref) `M`, orthogonally with respect to the Fisher–Rao metric.
+Column by column the formula reads
+
+```math
+  \operatorname{proj}_{T_p\mathcal M}(Y)_j = Y_j - ⟨\mathbb{1}_n, Y_j⟩p_j, \qquad j = 1,…,m,
+```
+
+where ``p_j`` and ``Y_j`` are the ``j``th columns of ``p`` and ``Y``, respectively.
+"""
+project(::MultinomialMatrices, ::Any, ::Any)
+
+function project!(::MultinomialMatrices, X, p, Y)
+    X .= Y .- p .* sum(Y; dims = 1)
+    return X
+end
+
+@doc raw"""
     riemannian_gradient(M::MultinomialMatrices, p, Y; kwargs...)
 
 Let ``Y`` denote the Euclidean gradient of a function ``\tilde f`` defined in the
 embedding neighborhood of `M`, then the Riemannian gradient is given by
-Equation (3.5) of [Douik:2020](@cite) as the projection of ``Y⊙p`` onto the tangent space
-that is orthogonal with respect to the Fisher–Rao metric. Column by column this reads
+Equation 5 of [DouikHassibi:2019](@cite) as
 
 ```math
-  \operatorname{grad} f(p)_j = p_j⊙Y_j - ⟨p_j, Y_j⟩p_j, \qquad j = 1,…,m,
+  \operatorname{grad} f(p) = \proj_{T_p\mathcal M}(Y⊙p)
 ```
 
-where ``p_j`` and ``Y_j`` are the ``j``th columns and ``⊙`` denotes the Hadamard or elementwise product.
+where ``⊙`` denotes the Hadamard or elementwise product.
 
 """
 riemannian_gradient(M::MultinomialMatrices, p, Y; kwargs...)
 
 function riemannian_gradient!(M::MultinomialMatrices, X, p, Y; kwargs...)
-    X .= p .* Y .- p .* sum(p .* Y; dims = 1)
+    X .= p .* Y
+    project!(M, X, p, X)
     return X
 end
 
