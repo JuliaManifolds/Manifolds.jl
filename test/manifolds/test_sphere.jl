@@ -232,6 +232,16 @@ using ManifoldDiff
             @test isapprox(dot(x, v), 0; atol = 1.0e-12)
             vexp = normalize(project(M, x, [0, 1, zeros(n - 1)...]))
             @test v ≈ π * vexp
+
+            # nearly opposite and nearly equal points, compared to a BigFloat reference
+            p = [1.0, 0.0, 0.0]
+            for θ in [1.0e-12, 1.0e-6, π - 1.0e-6, π - 1.0e-9, π - 1.0e-12]
+                q = [cos(θ), 0.6 * sin(θ), 0.8 * sin(θ)]
+                X = log(M, p, q)
+                Xb = log(M, big.(p), big.(q))
+                @test isapprox(X, Xb; atol = 4 * eps())
+                @test isapprox(X, [0.0, 0.6 * θ, 0.8 * θ]; atol = 4 * eps())
+            end
         end
 
         @testset "StereographicAtlas" begin

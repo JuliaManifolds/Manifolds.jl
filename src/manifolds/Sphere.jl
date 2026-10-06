@@ -369,20 +369,34 @@ end
 
 Compute the logarithmic map on the [`AbstractSphere`](@ref) `M`, i.e. the tangent vector,
 whose geodesic starting from `p` reaches `q` after time 1.
-The formula reads for ``x ≠ -y``
+The formula reads for ``p ≠ -q``
 
 ````math
 \log_p q = d_{𝕊}(p,q) \frac{q-\Re(⟨p,q⟩) p}{\lVert q-\Re(⟨p,q⟩) p \rVert_2},
 ````
 
-and a deterministic choice from the set of tangent vectors is returned if ``x=-y``, i.e. for
-opposite points.
+and a deterministic choice from the set of tangent vectors of length ``π`` is returned if
+``p = -q``, i.e. for opposite points.
+To avoid cancellation, the direction is computed from ``q-p`` or, for nearly opposite
+points, from ``q+p``, and the distance using `atan`.
 """
 log(::AbstractSphere, ::Any...)
 
 function log!(M::AbstractSphere, X, p, q)
     cosθ = clamp(real(dot(p, q)), -1, 1)
-    if cosθ ≈ -1 # appr. opposing points, return deterministic choice from set-valued log
+    # Work with q - p (or q + p for nearly opposite points), which avoids cancellation
+    # in the direction; its tangent component equals q - cosθ p.
+    if cosθ >= 0
+        X .= q .- p
+    else
+        X .= q .+ p
+    end
+    X .-= real(dot(p, X)) .* p
+    sinθ = norm(X)
+    if cosθ >= 0
+        θ = atan(sinθ, cosθ)
+        iszero(sinθ) ? fill!(X, zero(eltype(X))) : (X .*= θ / sinθ)
+    elseif iszero(sinθ) # opposing points, return deterministic choice from set-valued log
         fill!(X, zero(eltype(X)))
         if abs(real(p[1])) ≈ 1
             X[2] = 1
@@ -392,8 +406,9 @@ function log!(M::AbstractSphere, X, p, q)
         copyto!(X, X .- real(dot(p, X)) .* p)
         X .*= π / norm(X)
     else
-        θ = acos(cosθ)
-        X .= (q .- cosθ .* p) ./ usinc(θ)
+        # θ = π - φ, where φ is the angle between -p and q
+        θ = π - atan(sinθ, -cosθ)
+        X .*= θ / sinθ
     end
     return project!(M, X, p, X)
 end
