@@ -92,11 +92,12 @@ function ManifoldsBase.get_embedding_type(::MultinomialSymmetric)
 end
 
 """
-    is_flat(::MultinomialSymmetric)
+    is_flat(M::MultinomialSymmetric)
 
-Return false. [`MultinomialSymmetric`](@ref) is not a flat manifold.
+Return true if the [`MultinomialSymmetric`](@ref) `M` is one-dimensional, that is for ``n = 2``,
+and false otherwise. Every Riemannian 1-manifold is flat, see p. 222 of [Lee:2019](@cite).
 """
-is_flat(M::MultinomialSymmetric) = false
+is_flat(M::MultinomialSymmetric) = manifold_dimension(M) == 1
 
 @doc raw"""
     manifold_dimension(M::MultinomialSymmetric)

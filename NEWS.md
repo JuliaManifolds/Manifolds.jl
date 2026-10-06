@@ -87,6 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `project` onto the tangent space of `MultinomialDoubleStochastic` returns a tangent vector at every point, also at the uniform matrix of two or four rows.
 * `rand` on `OrthogonalMatrices` with `vector_at` draws the projection of a normally distributed matrix with standard deviation `σ`.
 * `project` onto the tangent space of `MultinomialSymmetric`, and with it `riemannian_gradient` and `riemannian_Hessian`, use the symmetric part of a nonsymmetric input, so that they return the correct tangent vector.
+* `is_flat` on `MultinomialSymmetric(2)` returns `true`.
 * `is_point` on `SymmetricPositiveDefinite` accepts a matrix that is symmetric up to rounding, such as a result of `exp`; the tolerance can be set with the keywords of `isapprox`.
 * `rand` on `SymmetricPositiveDefinite` draws Gaussian tangent vectors whose coordinates in an orthonormal basis at the base point have standard deviation `σ`, by default `1/sqrt(n)`, the `:Rician` draw accepts an `SPDPoint`, and `rand!` into an `SPDPoint` stores the matrix square roots of the drawn point.
 * `distance` on the `SymmetricPositiveDefinite` manifold returns zero only for equal points, also when their eigenvalues differ by many orders of magnitude.
