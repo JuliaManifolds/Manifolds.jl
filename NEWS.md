@@ -74,6 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `project` of a matrix onto the multinomial doubly stochastic manifolds runs Sinkhorn's algorithm for up to 1000 iterations, stops once every column sum is within `tolerance` of one, and warns when it does not get there.
 * `distance` on the `ProbabilitySimplex` returns a number for every pair of points, also for a point and itself.
 * `exp` on `ProbabilitySimplex(n; boundary = :closed)` follows the geodesic within the face at points with zero entries.
+* `rand` with `vector_at` and `change_metric` on the `ProbabilitySimplex` and the `MultinomialMatrices` work at points with small entries (near the boundary).
 * `Weingarten` on `Rotations`, `OrthogonalMatrices` and `UnitaryMatrices` returns a tangent vector in the Lie algebra, like its tangent vector argument.
 * `check_vector` and the tangent projection of `SPDFixedDeterminant` use the condition that the trace of `p \ X` vanishes, so that a geodesic in an accepted direction keeps the determinant, and the tangent check takes a relative tolerance `rtol`.
 * `embed` and `embed!` of a tangent vector on the `Segre` manifold return the embedded tangent vector, and `embed!` writes it into the given array.

@@ -95,7 +95,9 @@ and taking the square root of the matrix.
 change_metric(::ProbabilitySimplex, ::EuclideanMetric, ::Any, ::Any)
 
 function change_metric!(::ProbabilitySimplex, Y, ::EuclideanMetric, p, X)
-    return Y .= sqrt(Diagonal(p) - p * p') * X
+    # the matrix is positive semidefinite; negative eigenvalues are rounding errors
+    e = eigen(Symmetric(Diagonal(p) - p * p'))
+    return Y .= e.vectors * Diagonal(sqrt.(max.(e.values, 0))) * e.vectors' * X
 end
 
 """

@@ -109,6 +109,11 @@ end
         # Check adaption of metric and representer
         Y1 = change_metric(M, EuclideanMetric(), p, X)
         @test Y1 ≈ [-0.17062114054478128, 0.04002429219016789, 0.13059684835461377]
+        # p3 is a point close to the boundary of the simplex, so the metric is nearly singular
+        p3 = [0.05218307154737151, 0.9471667513325462, 0.0006501771200825463]
+        Y3 = change_metric(M, EuclideanMetric(), p3, [1.0, -0.5, -0.5])
+        @test is_vector(M, p3, Y3)
+        @test inner(M, p3, Y3, Y3) ≈ 1.5
         Y2 = change_representer(M, EuclideanMetric(), p, X)
         @test Y2 ≈ [-0.10040964054128285, 0.03818665287320871, 0.06222298766807415]
 
