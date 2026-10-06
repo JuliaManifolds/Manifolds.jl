@@ -249,16 +249,6 @@ function Manifolds.local_metric(
     return [2.0 0.5; 0.5 1.0]
 end
 
-# a metric whose local matrix does not commute with the one of TestEuclideanMetric
-struct TestNonDiagonalMetric <: AbstractMetric end
-function Manifolds.local_metric(
-        ::MetricManifold{ℝ, TestEuclidean{2}, TestNonDiagonalMetric},
-        ::Any,
-        ::DefaultOrthogonalBasis,
-    )
-    return [2.0 0.5; 0.5 1.0]
-end
-
 @testset "Metrics" begin
     # some tests failed due to insufficient accuracy for a particularly bad RNG state
     Random.seed!(42)

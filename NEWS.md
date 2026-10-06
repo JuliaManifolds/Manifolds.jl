@@ -128,6 +128,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `riemannian_gradient` on `MultinomialMatrices` projects orthogonally with respect to the Fisher–Rao metric.
 * `riemannian_gradient` on a `PowerManifold` with the array or the nested representation computes the gradient factor by factor, with the gradient of the factor manifold.
 * `Manifolds.Test.test_mid_point`, and with it `Manifolds.Test.test_manifold`, compare the mid-points of both argument orders by default and skip this comparison for `test_symmetry = false` or the property `:TestMidpointSymmetry => false`.
+* `project` onto a tangent space and `embed` of a tangent vector on the quaternionic `UnitaryMatrices(1, ℍ)` take the point into account, so that they and the default vector transport follow the Lie algebra representation of tangent vectors.
+* `riemannian_Hessian` on `OrthogonalMatrices` and `UnitaryMatrices` returns the correct Hessian at every point.
 
 ## [0.11.32] 2026-09-30
 

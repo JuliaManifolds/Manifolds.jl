@@ -98,6 +98,8 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
         G = [0.0 1.0; 0.0 0.0]
         H = [0.0 0.0; 2.0 0.0]
         @test riemannian_Hessian(M, p, G, H, X) == [0.0 -1.0; 1.0 0.0]
+        p2 = [0.0 1.0; -1.0 0.0]
+        @test riemannian_Hessian(M, p2, G, H, X) == [0.0 -1.5; 1.5 0.0]
     end
 
     @test is_flat(UnitaryMatrices(1))
@@ -190,6 +192,14 @@ end
 
         @test is_point(MH, fill(p, 1, 1))
         @test is_point(MH, p)
+    end
+
+    @testset "Projection and embedding use the Lie algebra" begin
+        p = QuaternionF64(0.0, 1.0, 0.0, 0.0)
+        X = QuaternionF64(1.0, 0.0, 0.0, 0.0) # tangent at p in the embedding
+        @test project(MH, p, X) == QuaternionF64(0.0, -1.0, 0.0, 0.0)
+        @test embed(MH, p, project(MH, p, X))[] == X
+        @test is_point(MH, exp(MH, p, project(MH, p, X)))
     end
 
     @testset "Functions with specific expectation" begin
