@@ -192,14 +192,25 @@ tangent space at `p` of the [`AbstractSphere`](@ref) `M`.
 """
 exp(::AbstractSphere, ::Any...)
 
-function exp!(M::AbstractSphere, q, p, X)
-    θ = norm(M, p, X)
-    q .= cos(θ) .* p .+ usinc(θ) .* X
+# cos(θ) and sin(θ)/θ as functions of θ², using series for small θ so that automatic
+# differentiation (also of higher order) stays finite at θ = 0
+function _cos_usinc_sq(θ²)
+    # the first omitted terms are about θ⁶ / 720
+    if θ² < cbrt(eps(typeof(θ²)))
+        return 1 - θ² * (1 // 2 - θ² / 24), 1 - θ² * (1 // 6 - θ² / 120)
+    end
+    θ = sqrt(θ²)
+    return cos(θ), usinc(θ)
+end
+
+function exp!(::AbstractSphere, q, p, X)
+    c, s = _cos_usinc_sq(real(dot(X, X)))
+    q .= c .* p .+ s .* X
     return q
 end
-function exp_fused!(M::AbstractSphere, q, p, X, t::Number)
-    θ = abs(t) * norm(M, p, X)
-    q .= cos(θ) .* p .+ usinc(θ) .* t .* X
+function exp_fused!(::AbstractSphere, q, p, X, t::Number)
+    c, s = _cos_usinc_sq(abs2(t) * real(dot(X, X)))
+    q .= c .* p .+ s .* t .* X
     return q
 end
 
@@ -392,11 +403,21 @@ function log!(M::AbstractSphere, X, p, q)
         X .= q .+ p
     end
     X .-= real(dot(p, X)) .* p
-    sinθ = norm(X)
+    sin²θ = real(dot(X, X))
     if cosθ >= 0
-        θ = atan(sinθ, cosθ)
-        iszero(sinθ) ? fill!(X, zero(eltype(X))) : (X .*= θ / sinθ)
-    elseif iszero(sinθ) # opposing points, return deterministic choice from set-valued log
+        # scale X by θ / sinθ; for small θ use the series of asin(s) / s in s² = sin²θ,
+        # which is accurate and keeps automatic differentiation finite at p = q
+        # (the first omitted term is about sin⁶θ / 20)
+        if sin²θ < cbrt(eps(typeof(sin²θ)))
+            X .*= 1 + sin²θ * (1 // 6 + sin²θ * 3 // 40)
+        else
+            sinθ = sqrt(sin²θ)
+            X .*= atan(sinθ, cosθ) / sinθ
+        end
+        return project!(M, X, p, X)
+    end
+    sinθ = sqrt(sin²θ)
+    if iszero(sinθ) # opposing points, return deterministic choice from set-valued log
         fill!(X, zero(eltype(X)))
         if abs(real(p[1])) ≈ 1
             X[2] = 1
