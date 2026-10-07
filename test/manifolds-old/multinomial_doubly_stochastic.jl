@@ -99,6 +99,7 @@ include("../header.jl")
         A = [0.1 0.5 0.6; 0.1 0.9 0.5; 0.3 0.7 0.9]
         @test_logs project(M, A)
         @test_logs (:warn,) project(M, A; maxiter = 1)
+        @test_logs project(M, A; maxiter = 1, warn_nonconvergence = false)
     end
     @testset "default retraction of the doubly stochastic multinomial manifolds" begin
         p = [0.5 0.3 0.2; 0.3 0.4 0.3; 0.2 0.3 0.5]

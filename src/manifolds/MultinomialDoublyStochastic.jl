@@ -200,11 +200,14 @@ end
         M::AbstractMultinomialDoublyStochastic,
         p;
         maxiter = 1000,
-        tolerance = eps(eltype(p))
+        tolerance = eps(eltype(p)),
+        warn_nonconvergence = true,
     )
 
 project a matrix `p` with positive entries applying Sinkhorn's algorithm.
 Note that this project method – different from the usual case, accepts keywords.
+If the algorithm does not reach `tolerance` within `maxiter` iterations, a warning is
+issued unless `warn_nonconvergence` is set to `false`.
 """
 function project(M::AbstractMultinomialDoublyStochastic, p; kwargs...)
     q = allocate_result(M, project, p)
@@ -218,6 +221,7 @@ function project!(
         p;
         maxiter::Int = 1000,
         tolerance::Real = eps(eltype(p)),
+        warn_nonconvergence::Bool = true,
     )
     any(p .<= 0) && throw(
         DomainError(
@@ -236,7 +240,7 @@ function project!(
         d1 .= 1 ./ row
         d2 .= 1 ./ (p * d1')
     end
-    if gap > tolerance
+    if warn_nonconvergence && gap > tolerance
         @warn "Sinkhorn's algorithm stopped after $(maxiter) iterations with a gap of $(gap), which is larger than the tolerance $(tolerance)."
     end
     q .= p .* (d2 * d1)

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `manifold_dimension` and `is_flat` for `MultinomialSymmetricPositiveDefinite`.
 * `rand` and `rand!` on the `SpecialUnitaryMatrices`, which draw points of determinant one and tangent vectors of trace zero.
 * `ProjectionRetraction` on the `MultinomialSymmetricPositiveDefinite` manifold.
+* `warn_nonconvergence` keyword for `project` on the doubly stochastic multinomial manifolds, which allows disabling the warning issued when Sinkhorn's algorithm does not converge.
 
 ### Changed
 
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* `rand` on the `MultinomialSymmetricPositiveDefinite` manifold rejects samples for which Sinkhorn's algorithm did not converge, so that it no longer occasionally returns points whose rows do not sum to one.
 * `kretschmann_scalar` now correctly uses the metric instead of the inverse for one of the contractions.
 * `get_coordinates` on the `CholeskySpace` divides the diagonal entries by the diagonal of the point, so that the coordinates are those of the orthonormal basis and invert `get_vector`.
 * `parallel_transport_to` on the `CholeskySpace` (and hence under the log-Cholesky metric) keeps the strictly lower part of the tangent vector, so that the transport is an isometry.

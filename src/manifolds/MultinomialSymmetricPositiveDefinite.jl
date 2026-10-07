@@ -132,7 +132,8 @@ The steps are as follows:
     e. Construct a new matrix `R = UDL` which is totally positive.
 2. Project the totally positive matrix `R` onto the manifold of [`MultinomialDoubleStochastic`](@ref)
    matrices.
-3. Symmetrize the projected matrix and return the result.
+3. Symmetrize the projected matrix and return the result. If the projection did not
+   converge or the result is not positive definite, start over from step 1.
 
 This method roughly follows the procedure described in https://math.stackexchange.com/questions/2773460/how-to-generate-a-totally-positive-matrix-randomly-using-software-like-maple
 """
@@ -151,9 +152,15 @@ function Random.rand!(
         uutd = dm \ Vlu.U
         random_totally_positive = uutd * dm * Vlu.L
         MMDS = MultinomialDoubleStochastic(n)
-        ds = project(MMDS, random_totally_positive; maxiter = 1000)
+        ds = project(
+            MMDS, random_totally_positive; maxiter = 1000, warn_nonconvergence = false
+        )
         p .= (ds .+ ds') ./ 2
-        if eigmin(p) > 0
+        # Sinkhorn's algorithm converges very slowly for nearly decomposable matrices,
+        # so reject samples for which it did not converge
+        sinkhorn_converged =
+            maximum(abs.(sum(p; dims = 2) .- 1)) <= 2 * n * eps(eltype(p))
+        if sinkhorn_converged && eigmin(p) > 0
             is_spd = true
         end
     end
