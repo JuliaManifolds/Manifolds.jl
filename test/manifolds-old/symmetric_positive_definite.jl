@@ -286,6 +286,8 @@ include("../header.jl")
         p2 = copy(p)
         @test SPDPoint(p2) === p2
         @test p2.eigen == p.eigen
+        @test ManifoldsBase.check_size(M1, p; atol = 1.0e-8) === nothing
+        @test ManifoldsBase.check_size(M1, p, Matrix{Float64}(I, 3, 3); atol = 1.0e-8) === nothing
         pS = SPDPoint(
             2 * Matrix{Float64}(I, 3, 3);
             store_p = false,

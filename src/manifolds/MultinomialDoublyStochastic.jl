@@ -200,7 +200,7 @@ end
         M::AbstractMultinomialDoublyStochastic,
         p;
         maxiter = 1000,
-        tolerance = eps(eltype(p)),
+        tolerance = eps(real(float(eltype(p)))),
         warn_nonconvergence = true,
     )
 
@@ -220,7 +220,7 @@ function project!(
         q,
         p;
         maxiter::Int = 1000,
-        tolerance::Real = eps(eltype(p)),
+        tolerance::Real = eps(real(float(eltype(p)))),
         warn_nonconvergence::Bool = true,
     )
     any(p .<= 0) && throw(
@@ -229,7 +229,7 @@ function project!(
         ),
     )
     iter = 0
-    d1 = sum(p, dims = 1)
+    d1 = float.(sum(p, dims = 1))
     d2 = 1 ./ (p * d1')
     row = d2' * p
     gap = maximum(abs.(row .* d1 .- 1))

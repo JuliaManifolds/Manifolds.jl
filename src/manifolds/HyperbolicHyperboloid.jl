@@ -244,6 +244,11 @@ d_{\mathcal H^n}(p,q) = \operatorname{acosh}( - ⟨p, q⟩_{\mathrm{M}}),
 
 where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding, the [`Lorentz`](@ref)ian manifold,
 see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the paper [BergmannPerschSteidl:2016:1](@cite).
+For numerical stability this is evaluated as
+
+````math
+d_{\mathcal H^n}(p,q) = 2\operatorname{asinh}\Bigl(\frac{1}{2}\sqrt{\max\{0, ⟨q-p,q-p⟩_{\mathrm{M}}\}}\Bigr).
+````
 """
 function distance(::Hyperbolic, p, q)
     w = q - p

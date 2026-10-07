@@ -289,6 +289,8 @@ end
         pS = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
         Xs = StiefelTangentVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
         @test representation_size(M, p) == (3, 3)
+        @test ManifoldsBase.check_size(M, p; atol = 1.0e-8) === nothing
+        @test ManifoldsBase.check_size(Grassmann(4, 2), p; atol = 1.0e-8) isa DomainError
 
         q = embed(M, p)
         @test q == p.value

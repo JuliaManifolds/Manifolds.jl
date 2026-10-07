@@ -9,7 +9,7 @@ using Manifolds, Test, LinearAlgebra
     p2 = cholesky([2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]).L
     p3 = cholesky(A(π / 6) * [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1] * transpose(A(π / 6))).L
 
-    # Tangent vectors are symmetric matrices
+    # Tangent vectors are lower triangular matrices
     X1 = [3.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1.0]
     X2 = [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 3.0]
 
@@ -17,7 +17,7 @@ using Manifolds, Test, LinearAlgebra
     q2 = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 1.0] # nonpos diag
     q3 = [2.0 0.0 1.0; 0.0 1.0 0.0; 0.0 0.0 4.0] # no lower and nonsym
 
-    Y = [0.0 1.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0] # not symmetric
+    Y = [0.0 1.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0] # not lower triangular
     Manifolds.Test.test_manifold(
         M,
         Dict(

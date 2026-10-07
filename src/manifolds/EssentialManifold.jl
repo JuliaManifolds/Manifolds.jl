@@ -240,14 +240,14 @@ function dist_min_angle_pair(p, q)
     tol_break = sqrt(eps(eltype(q211)))
     if (abs(m1) < tol_m_zero) && (abs(m2) < tol_m_zero)
         t_min = 0
-        f_min = 2 * pi^2
+        f_min = pi^2
     else
         if abs(mod(t_break1 - t_break2 + pi, 2 * pi) - pi) < tol_break
             t_min = t_break1 + pi
             # the cost at t_min, as at the end of the Newton search
             θ1 = acos(clamp((m1 * sin(t_min + Φ1) + c1 - 1) / 2, -1, 1))
             θ2 = acos(clamp((m2 * sin(t_min + Φ2) + c2 - 1) / 2, -1, 1))
-            f_min = θ1^2 + θ2^2
+            f_min = (θ1^2 + θ2^2) / 2
         else
             t_search1 = t_break1
             t_search2 = t_break2
@@ -404,7 +404,7 @@ function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t
             break
         end
     end
-    f_min = θ1^2 + θ2^2
+    f_min = (θ1^2 + θ2^2) / 2
     return t_min, f_min
 end
 

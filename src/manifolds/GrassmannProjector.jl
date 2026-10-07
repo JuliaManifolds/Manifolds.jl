@@ -58,7 +58,7 @@ end
 Check that the [`ProjectorPoint`](@ref) is of correct size, i.e. from ``\mathbb F^{n×n}``
 """
 function check_size(M::Grassmann, p::ProjectorPoint; kwargs...)
-    return check_size(get_embedding(M, typeof(p)), p.value; kwargs...)
+    return check_size(get_embedding(M, typeof(p)), p.value)
 end
 
 @doc raw"""

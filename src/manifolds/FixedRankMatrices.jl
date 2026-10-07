@@ -500,10 +500,7 @@ For more details, see [AbsilOseledets:2014](@cite).
 inverse_retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicInverseRetraction)
 
 function inverse_retract_orthographic!(
-        M::FixedRankMatrices,
-        X::UMVTangentVector,
-        p::SVDMPoint,
-        q::SVDMPoint,
+        M::FixedRankMatrices, X::UMVTangentVector, p::SVDMPoint, q::SVDMPoint; kwargs...
     )
     project!(M, X, p, embed(M, q) - embed(M, p))
     return X
@@ -679,20 +676,14 @@ For more details, see [AbsilOseledets:2014](@cite).
 retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicRetraction)
 
 function retract_orthographic!(
-        M::FixedRankMatrices,
-        q::SVDMPoint,
-        p::SVDMPoint,
-        X::UMVTangentVector,
+        M::FixedRankMatrices, q::SVDMPoint, p::SVDMPoint, X::UMVTangentVector; kwargs...
     )
-    return retract_orthographic_fused!(M, q, p, X, one(eltype(p)))
+    return retract_orthographic_fused!(M, q, p, X, one(eltype(p)); kwargs...)
 end
 
 function retract_orthographic_fused!(
-        M::FixedRankMatrices,
-        q::SVDMPoint,
-        p::SVDMPoint,
-        X::UMVTangentVector,
-        t::Number,
+        M::FixedRankMatrices, q::SVDMPoint, p::SVDMPoint, X::UMVTangentVector, t::Number;
+        kwargs...
     )
     m, n, k = get_parameter(M.size)
     tX = t * X

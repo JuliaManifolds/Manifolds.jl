@@ -145,6 +145,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `is_flat` on `DeterminantOneMatrices` returns `false` for sizes two and larger.
 * `rand` draws random points and tangent vectors on `CenteredMatrices`, `Elliptope`, `Spectrahedron` and `SPDFixedDeterminant`.
 * `rand` on `DeterminantOneMatrices` draws tangent vectors from the whole tangent space, and `is_vector` there takes a relative tolerance `rtol` and accepts tangent vectors of any length.
+* `retract`, `retract_fused` and `inverse_retract` with the `OrthographicRetraction` and the `OrthographicInverseRetraction` on `FixedRankMatrices` accept keyword arguments.
+* `project!` onto the multinomial doubly stochastic manifolds accepts a matrix with integer entries when the result is a floating point matrix.
+* `parallel_transport_direction` on the `Grassmann` manifold allocates its result directly instead of computing a geodesic for it.
 
 ## [0.11.32] 2026-09-30
 

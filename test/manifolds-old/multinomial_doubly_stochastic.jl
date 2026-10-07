@@ -27,6 +27,8 @@ include("../header.jl")
     @test pE2 == p
     @test_throws DomainError project(M, -ones(3, 3))
     @test project(M, p) == p
+    Z = [1 2 3; 4 5 6; 7 8 10] # integer entries
+    @test project!(M, zeros(3, 3), Z) ≈ project(M, float.(Z))
     p2 = [0.1 0.2 0.7; 0.2 0.7 0.1; 0.7 0.1 0.2]
     p3 = [0.1 0.4 0.5; 0.4 0.5 0.1; 0.5 0.1 0.4]
 

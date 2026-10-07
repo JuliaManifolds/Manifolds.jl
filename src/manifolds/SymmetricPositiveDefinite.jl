@@ -172,10 +172,10 @@ function check_vector(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
 end
 
 function check_size(M::SymmetricPositiveDefinite, p::SPDPoint; kwargs...)
-    return check_size(M, convert(AbstractMatrix, p); kwargs...)
+    return check_size(M, convert(AbstractMatrix, p))
 end
 function check_size(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
-    return check_size(M, convert(AbstractMatrix, p), X; kwargs...)
+    return check_size(M, convert(AbstractMatrix, p), X)
 end
 
 function Base.copy(p::SPDPoint)

@@ -323,7 +323,7 @@ parallel_transport_direction(M::Grassmann, p, X, Y)
 
 # Hook into default since here we have direction first
 function parallel_transport_direction(M::Grassmann, p, X, Y)
-    Z = zero_vector(M, exp(M, p, X))
+    Z = allocate_result(M, vector_transport_direction, X, p, Y)
     return parallel_transport_direction!(M, Z, p, X, Y)
 end
 
