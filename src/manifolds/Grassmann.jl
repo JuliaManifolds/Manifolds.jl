@@ -149,7 +149,7 @@ function _isapprox(M::Grassmann, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end
 function _isapprox(M::Grassmann, p, q; atol = sqrt(max_eps(p, q)), kwargs...)
-    return isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
+    return p == q || isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
 end
 
 """

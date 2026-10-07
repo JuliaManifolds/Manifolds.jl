@@ -184,10 +184,12 @@ end
     end
 
     @testset "Volume density" begin
+        pv = [0.1, 0.7, 0.2]
+        Yv = [0.05, 0.05, -0.1]
         @test manifold_volume(M) ≈ 2 * pi
-        @test volume_density(M, p, Y) ≈ 0.9967294043214631
+        @test volume_density(M, pv, Yv) ≈ 0.9967294043214631
         @test manifold_volume(M_euc) ≈ sqrt(3) / 2
-        @test volume_density(M_euc, p, Y) ≈ 1.0
+        @test volume_density(M_euc, pv, Yv) ≈ 1.0
     end
 
     @testset "field parameter" begin

@@ -112,7 +112,7 @@ include("../header.jl")
     @testset "Volume" begin
         M = Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 9.0])
         @test manifold_volume(M) == 48.0
-        p = zeros(3)
+        p = [0.0, 3.0, 0.0]
         X = zeros(3)
         @test volume_density(M, p, X) == 1.0
     end
@@ -133,7 +133,7 @@ include("../header.jl")
             pts[3] - pts[1],
             (pts[3] - pts[1]) / 2,
         ) == [0.0, 0.0, 0.0]
-        @test sectional_curvature(M, p, [1.0, 0.0], [0.0, 1.0]) == 0.0
+        @test sectional_curvature(M, pts[2], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]) == 0.0
         @test sectional_curvature_max(M) == 0.0
         @test sectional_curvature_min(M) == 0.0
     end

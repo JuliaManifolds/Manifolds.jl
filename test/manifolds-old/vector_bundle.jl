@@ -207,7 +207,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
         tbvt = Manifolds.FiberBundleProductVectorTransport(ppt, ppt)
         @test TangentBundle(M, tbvt).vector_transport === tbvt
         @test CotangentBundle(M, tbvt).vector_transport === tbvt
-        @test TangentBundle(M, tbvt).vector_transport === tbvt
+        @test TangentBundle(M, tbvt) isa TangentBundle
+        @test CotangentBundle(M, tbvt) isa CotangentBundle
     end
 
     @testset "Extended flatness tests" begin

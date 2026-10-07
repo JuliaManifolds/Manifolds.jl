@@ -281,7 +281,7 @@ end
         E = TestEuclidean{3}()
         g = TestEuclideanMetric()
         M = MetricManifold(E, g)
-        default_retraction_method(::TestEuclidean) = TestRetraction()
+        @test default_retraction_method(E) === TestRetraction()
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
         q = similar(X)
@@ -564,9 +564,8 @@ end
         @test project!(MM, Y, p, X) === project!(M, Y, p, X)
         @test project!(MM, q, p) === project!(M, q, p)
         # without a definition for the metric from the embedding, no projection possible
-        @test_throws MethodError log!(MM, Y, p, q) === project!(M, Y, p, q)
-        @test_throws MethodError vector_transport_to!(MM, Y, p, X, q) ===
-            vector_transport_to!(M, Y, p, X, q)
+        @test_throws MethodError log!(MM, Y, p, q)
+        @test_throws MethodError vector_transport_to!(MM, Y, p, X, q)
         # without DiffEq, these error
         @test_throws MethodError exp(MM, p, X, 1:3)
         # these always fall back anyways.
@@ -590,10 +589,8 @@ end
         @test_throws MethodError local_metric_jacobian(MM2, p, B_p)
         @test_throws MethodError christoffel_symbols_second_jacobian(MM2, p, B_p)
         # MM falls back to nondefault error
-        if VERSION >= v"1.9"
-            @test_throws MethodError Manifolds.projected_distribution(MM, 1, p)
-            @test_throws MethodError Manifolds.projected_distribution(MM, 1)
-        end
+        @test_throws MethodError Manifolds.projected_distribution(MM, 1, p)
+        @test_throws MethodError Manifolds.projected_distribution(MM, 1)
 
         @test inner(MM2, p, X, Y) === inner(M, p, X, Y)
         @test norm(MM2, p, X) === norm(M, p, X)

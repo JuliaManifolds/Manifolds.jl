@@ -154,6 +154,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `riemannian_gradient` on the `SymplecticStiefel` manifold accepts the `embedding_metric` keyword in its allocating form and returns the same result with it as without it.
 * `mean!(M, y, x)` uses the default estimation method for the type of the points, as `mean(M, x)` does.
 * `Manifolds.Test.test_parallel_transport` and `Manifolds.Test.test_vector_transport` compare the transported vector in the tangent space at the point it is transported to.
+* `parallel_transport_to` and `parallel_transport_direction` work on `OrthogonalMatrices`, `UnitaryMatrices` and `SpecialUnitaryMatrices` as they do on `Rotations`.
+* The exponential map and the parallel transport on `Rotations(3)` and `OrthogonalMatrices(3)` return finite values for tangent vectors shorter than `1e-162`.
+* `isapprox` on `Grassmann`, `GeneralizedGrassmann` and `KendallsShapeSpace` finds every point approximately equal to itself, also with `atol = 0`.
+* `isapprox` on the `EssentialManifold` reports two representatives of the same point as equal.
 
 ## [0.11.32] 2026-09-30
 

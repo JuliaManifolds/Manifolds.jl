@@ -170,7 +170,7 @@ Test.@testset "The circle manifold" begin
             @test is_point(M, p)
         end
         @testset "small and large distance tests" begin
-            M = Circle(ℂ)
+            Mc = Circle(ℂ)
             p = -0.42681766710748265 + 0.9043377018818392im
             q = -0.42681766710748226 + 0.9043377018818393im
             @test isapprox(distance(Mc, p, q), 4.041272810440265e-16)

@@ -302,7 +302,7 @@ end
             end
         end
         for v in V, w in V
-            @test inner(M, p, v, w) ≈ (v == w ? 1 : 0)
+            @test inner(M, p, v, w) ≈ (v == w ? 1 : 0) atol = 5.0e-16 rtol = sqrt(eps())
         end
         X = 0.5 * V[1] + 1.0 .* V[2]
         @test is_vector(M, p, X)

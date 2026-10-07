@@ -334,6 +334,11 @@ include("../header.jl")
             0.32587783145998306 0.0 -0.49138641089195584
             -0.3903114578816011 0.4913864108919558 0.0
         ]
+        # a tangent vector whose angle squared underflows to zero
+        Xs = 1.0e-170 .* X
+        @test exp(M, p, Xs) ≈ p
+        @test exp(M, Matrix(p), Matrix(Xs)) ≈ p
+        @test parallel_transport_direction(M, p, X, Xs) ≈ X
     end
     @testset "Jacobians" begin
         M = Rotations(2)

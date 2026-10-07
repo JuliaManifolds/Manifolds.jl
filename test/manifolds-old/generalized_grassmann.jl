@@ -146,7 +146,7 @@ end
         @testset "Type $T" for T in types
             pts = convert.(T, [p, q, r])
             @test !is_point(M, 2 * p)
-            @test_throws ManifoldDomainError !is_point(M, 2 * r; error = :error)
+            @test_throws ManifoldDomainError is_point(M, 2 * r; error = :error)
             @test !is_vector(M, p, q)
             @test_throws ManifoldDomainError is_vector(M, p, q; error = :error)
             Manifolds.test_manifold(
@@ -181,8 +181,6 @@ end
             @test !is_flat(M)
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
-            x = [1.0 0.0; 0.0 0.5; 0.0 0.0]
-
             x = [1im 0.0; 0.0 0.5im; 0.0 0.0]
             @test is_point(M, x)
             @test !is_point(M, 2 * x)

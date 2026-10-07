@@ -52,7 +52,6 @@ using ForwardDiff
 
     @testset "gradient" begin
         set_default_differential_backend!(fd51)
-        r2 = Euclidean(2)
 
         c1(t) = [sin(t), cos(t)]
         f1(x) = x[1] + x[2]^2
@@ -60,7 +59,6 @@ using ForwardDiff
             y .= x[1] + x[2]^2
             return y
         end
-        f2(x) = 3 * x[1] * x[2] + x[2]^3
         @test _jacobian(c1, 0.0) ≈ [1.0; 0.0]
 
         @testset for backend in [fd51]
@@ -83,7 +81,7 @@ using ForwardDiff
             @test _gradient(f1, [1.0, -1.0], backend) ≈ [1.0, -2.0]
             @test _jacobian(c1, 0.0, backend) ≈ [1.0; 0.0]
             jac = [NaN; NaN]
-            _jacobian!(c1, jac, 0.0, backend)
+            @test _jacobian!(c1, jac, 0.0, backend) === jac
             @test jac ≈ [1.0; 0.0]
         end
 
@@ -91,7 +89,6 @@ using ForwardDiff
     end
 
     @testset "Hessian" begin
-        r2 = Euclidean(2)
         f1(p) = norm(p - [1.0, -1.0])^2
         q = [2.0, 3.0]
 
@@ -134,13 +131,13 @@ rb_onb_fwd_diff = TangentDiffBackend(AutoForwardDiff())
     Xval = [-sqrt(2) / 2, 0.0, sqrt(2) / 2]
     @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4, rb_onb_default), Xval)
     X = similar(p)
-    differential!(s2, c1, X, π / 4, rb_onb_default)
+    @test differential!(s2, c1, X, π / 4, rb_onb_default) === X
     @test isapprox(s2, c1(π / 4), X, Xval)
 
     @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff]
         @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4, backend), Xval)
         X = similar(p)
-        differential!(s2, c1, X, π / 4, backend)
+        @test differential!(s2, c1, X, π / 4, backend) === X
         @test isapprox(s2, c1(π / 4), X, Xval)
     end
 end

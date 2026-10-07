@@ -69,7 +69,7 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
             vector_transport_direction!(
                 M, Zca, p, X, X, DifferentiatedRetractionVectorTransport(CayleyRetraction()),
             )
-            @test is_vector(M, qca, Yca; atol = 10^-15)
+            @test is_vector(M, qca, Zca; atol = 10^-15)
             @test isapprox(M, qca, Yca, Zca)
             rpa = PadeRetraction(2)
             @test repr(rpa) == "PadeRetraction(2)"
@@ -394,7 +394,7 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
                 QRInverseRetraction(),
             )
             Z243 = inverse_retract(M, p243, q243, QRInverseRetraction())
-            @test isapprox(M43, p243, Y243, Z243)
+            @test isapprox(M, p243, Y243, Z243)
         end
     end
     @testset "Complex Stiefel Manifold" begin
@@ -402,7 +402,7 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
         pc = [0.5 + 0.5im 0.5 + 0.5im; 0.5 + 0.5im -0.5 - 0.5im; 0.0 0.0]
         Xc = [0.0 0.0; 0.0 0.0; 0.1 -0.1]
         qc = exp(Mc, pc, Xc)
-        rc = exp(Mc, pc, Xc)
+        rc = exp(Mc, pc, 2 .* Xc)
         Yc = inverse_retract(Mc, qc, pc, PolarInverseRetraction())
         Zc = inverse_retract(Mc, rc, pc, PolarInverseRetraction())
         # Invalid ones

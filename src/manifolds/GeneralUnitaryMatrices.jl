@@ -267,11 +267,28 @@ function ManifoldsBase.exp_fused(
     )
     return exp(M, p, t * X)
 end
+@doc raw"""
+    exp(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p::SMatrix, X::SMatrix)
+
+Compute the exponential map on the three by three real [`GeneralUnitaryMatrices`](@ref) `M`
+for static matrices by the Rodrigues formula, Proposition 2.7 in [GallierQuaintance:2020](@cite),
+
+```math
+\exp_p X = p\mathrm{e}^X = p\bigl(I + aX + bX^2\bigr),
+\qquad a = \frac{\sin θ}{θ},
+\qquad b = \frac{1 - \cos θ}{θ^2},
+\qquad θ = \frac{\lVert X \rVert_p}{\sqrt{2}}.
+```
+
+If ``θ^2`` evaluates to zero, ``a = 1 - θ^2/6`` and ``b = 1/2 - θ^2/24`` are used instead, the
+first two terms of the series of ``a`` and ``b`` in the proof of Proposition 2.7, page 32, in
+[GallierQuaintance:2020](@cite).
+"""
 function exp(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p::SMatrix, X::SMatrix)
     θ = norm(M, p, X) / sqrt(2)
-    if θ ≈ 0
+    if iszero(θ^2)
         a = 1 - θ^2 / 6
-        b = θ / 2
+        b = 1 / 2 - θ^2 / 24
     else
         a = sin(θ) / θ
         b = (1 - cos(θ)) / θ^2
@@ -300,6 +317,23 @@ end
 function exp!(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, q, p, X)
     return exp_fused!(M, q, p, X, one(eltype(X)))
 end
+@doc raw"""
+    exp_fused!(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, q, p, X, t::Real)
+
+Compute ``\exp_p(tX)`` on the three by three real [`GeneralUnitaryMatrices`](@ref) `M` and store
+the result in `q`, by the Rodrigues formula, Proposition 2.7 in [GallierQuaintance:2020](@cite),
+
+```math
+\exp_p(tX) = p\mathrm{e}^{tX} = p\bigl(I + a\,tX + b\,t^2X^2\bigr),
+\qquad a = \frac{\sin θ}{θ},
+\qquad b = \frac{1 - \cos θ}{θ^2},
+\qquad θ = \frac{\lvert t \rvert \lVert X \rVert_p}{\sqrt{2}}.
+```
+
+If ``θ^2`` evaluates to zero, ``a = 1 - θ^2/6`` and ``b = 1/2 - θ^2/24`` are used instead, the
+first two terms of the series of ``a`` and ``b`` in the proof of Proposition 2.7, page 32, in
+[GallierQuaintance:2020](@cite).
+"""
 function ManifoldsBase.exp_fused!(
         M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}},
         q,
@@ -308,9 +342,9 @@ function ManifoldsBase.exp_fused!(
         t::Real,
     )
     θ = abs(t) * norm(M, p, X) / sqrt(2)
-    if θ ≈ 0
+    if iszero(θ^2)
         a = 1 - θ^2 / 6
-        b = θ / 2
+        b = 1 / 2 - θ^2 / 24
     else
         a = sin(θ) / θ
         b = (1 - cos(θ)) / θ^2
@@ -845,6 +879,124 @@ function log!(M::GeneralUnitaryMatrices{ℂ, <:Any, DeterminantOneMatrixType}, X
 end
 
 norm(::GeneralUnitaryMatrices, p, X) = norm(X)
+
+"""
+    _exp_half(::GeneralUnitaryMatrices, d)
+
+Calculate `exp(d / 2)`.
+"""
+_exp_half(::GeneralUnitaryMatrices, d) = exp(d / 2)
+"""
+    _exp_half(::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, d)
+
+Calculate `exp(d / 2)` for the three by three real matrices, that is [`Rotations`](@ref)`(3)` and
+[`OrthogonalMatrices`](@ref)`(3)`, by the Rodrigues formula, Proposition 2.7 in [GallierQuaintance:2020](@cite).
+For `d / 2` it reads `I + (a / 2) d + (b / 4) d^2` with
+`a = sin(θ) / θ`, `b = (1 - cos(θ)) / θ^2` and `θ = norm(d) / (2 * sqrt(2))`.
+If `θ^2` evaluates to zero, `a = 1 - θ^2 / 6` and `b = 1 / 2 - θ^2 / 24` are used instead, the
+first two terms of the series of `a` and `b` in the proof of Proposition 2.7, page 32, in
+[GallierQuaintance:2020](@cite).
+"""
+function _exp_half(::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, d)
+    θ = norm(d) / (2 * sqrt(2))
+    if iszero(θ^2)
+        a = 1 - θ^2 / 6
+        b = 1 / 2 - θ^2 / 24
+    else
+        a = sin(θ) / θ
+        b = (1 - cos(θ)) / θ^2
+    end
+    a /= 2
+    b /= 4
+
+    return I + a .* d .+ b .* (d^2)
+end
+
+@doc raw"""
+    parallel_transport_direction(M::GeneralUnitaryMatrices, p, X, d)
+
+Compute the parallel transport of `X` from `p` in direction `d` on the
+[`GeneralUnitaryMatrices`](@ref) `M`, that is on the [`Rotations`](@ref), the
+[`OrthogonalMatrices`](@ref), the [`UnitaryMatrices`](@ref) and the [`SpecialUnitaryMatrices`](@ref),
+with tangent vectors represented in the Lie algebra. The formula, provided in
+[Rentmeesters:2011](@cite) for the rotations, reads
+
+```math
+\mathcal P_{q\gets p}X = q^{\mathrm{H}}p \operatorname{Exp}(d/2) X \operatorname{Exp}(d/2),
+```
+
+where ``q = \exp_p d`` and ``\operatorname{Exp}`` denotes the matrix exponential.
+"""
+parallel_transport_direction(::GeneralUnitaryMatrices, p, X, d)
+function parallel_transport_direction(M::GeneralUnitaryMatrices, p, X, d)
+    expdhalf = _exp_half(M, d)
+    q = exp(M, p, d)
+    return q' * p * expdhalf * X * expdhalf
+end
+@doc raw"""
+    parallel_transport_direction(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p, X, d)
+
+Return `X`, the parallel transport of `X` from `p` in direction `d` on the two by two real
+[`GeneralUnitaryMatrices`](@ref) `M`. Two skew-symmetric two by two matrices commute, so
+``\operatorname{Exp}(-d/2) X \operatorname{Exp}(d/2) = X``.
+"""
+parallel_transport_direction(::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p, X, d) = X
+
+function parallel_transport_direction!(M::GeneralUnitaryMatrices, Y, p, X, d)
+    expdhalf = _exp_half(M, d)
+    q = exp(M, p, d)
+    return copyto!(Y, q' * p * expdhalf * X * expdhalf)
+end
+function parallel_transport_direction!(
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, Y, p, X, d,
+    )
+    return copyto!(Y, X)
+end
+
+function parallel_transport_to!(M::GeneralUnitaryMatrices, Y, p, X, q)
+    d = log(M, p, q)
+    expdhalf = _exp_half(M, d)
+    return copyto!(Y, q' * p * expdhalf * X * expdhalf)
+end
+function parallel_transport_to!(
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, Y, p, X, q,
+    )
+    return copyto!(Y, X)
+end
+function parallel_transport_to!(
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, Y, p, X, q,
+    )
+    d = log(M, p, q)
+    expdhalf = _exp_half(M, d)
+    return copyto!(Y, q' * p * expdhalf * X * expdhalf)
+end
+@doc raw"""
+    parallel_transport_to(M::GeneralUnitaryMatrices, p, X, q)
+
+Compute the parallel transport of `X` from `p` to `q` on the [`GeneralUnitaryMatrices`](@ref)
+`M`, with tangent vectors represented in the Lie algebra. With ``d = \log_p q``, the formula
+of [Rentmeesters:2011](@cite) reads
+
+```math
+\mathcal P_{q\gets p}X = q^{\mathrm{H}}p \operatorname{Exp}(d/2) X \operatorname{Exp}(d/2),
+```
+
+where ``\operatorname{Exp}`` denotes the matrix exponential.
+"""
+parallel_transport_to(::GeneralUnitaryMatrices, p, X, q)
+function parallel_transport_to(M::GeneralUnitaryMatrices, p, X, q)
+    d = log(M, p, q)
+    expdhalf = _exp_half(M, d)
+    return q' * p * expdhalf * X * expdhalf
+end
+@doc raw"""
+    parallel_transport_to(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p, X, q)
+
+Return `X`, the parallel transport of `X` from `p` to `q` on the two by two real
+[`GeneralUnitaryMatrices`](@ref) `M`. Two skew-symmetric two by two matrices commute, so
+``\operatorname{Exp}(-d/2) X \operatorname{Exp}(d/2) = X`` for ``d = \log_p q``.
+"""
+parallel_transport_to(::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p, X, q) = X
 
 @doc raw"""
     manifold_dimension(M::Rotations)

@@ -671,7 +671,7 @@ function Manifolds.Test.test_copyto(
 end
 
 """
-    Manifolds.Test.test_default_inverse_retraction_method(
+    Manifolds.Test.test_default_inverse_retraction(
         M, T=missing;
         expected_value = NoExpectation(),
         expected_type = !isexpected(expected_value) ? NoExpectation() : typeof(expected_value),
@@ -699,7 +699,7 @@ function Manifolds.Test.test_default_inverse_retraction(
 end # Manifolds.Test.test_default_inverse_retraction
 
 """
-    Manifolds.Test.test_default_retraction_method(
+    Manifolds.Test.test_default_retraction(
         M, T=missing;
         expected_value = NoExpectation(),
         expected_type = isexpected(expected_value) ? Expect(typeof(expect(expected_value))) : NoExpectation(),
@@ -1165,6 +1165,7 @@ end # Manifolds.Test.test_get_coordinates
 """
     Manifolds.Test.test_get_basis(
         M, p, b::AbstractBasis;
+        available_functions = [],
         expected_value = NoExpectation(),
         expected_type = isexpected(expected_value) ? Expect(typeof(expect(expected_value))) : Expect(CachedBasis),
         name = "get_basis on \$M at point \$(typeof(p)) for basis \$(typeof(b))",
@@ -1313,7 +1314,7 @@ function Manifolds.Test.test_get_vectors(
 end # Manifolds.Test.test_get_vectors
 
 """
-    Manifolds.Test.test_injectority_radius(M, p = missing;
+    Manifolds.Test.test_injectivity_radius(M, p = missing;
         expected_value = NoExpectation(),
         expected_global_value = NoExpectation(),
         retraction_method = missing,
@@ -1390,7 +1391,7 @@ function Manifolds.Test.test_inner(
 end # Manifolds.Test.test_inner
 
 """
-    Manifolds.Test.test_inverse_retraction(
+    Manifolds.Test.test_inverse_retract(
         M, p, q, m::AbstractInverseRetractionMethod;
         available_functions=[],
         expected_value = NoExpectation(),
@@ -1478,8 +1479,8 @@ function Manifolds.Test.test_is_flat(
 end
 
 """
-    Manifolds.Test.is_point(
-        M, p qs...;
+    Manifolds.Test.test_is_point(
+        M, p, qs...;
         errors = [],
         name = "is_point on \$M for \$(typeof(p)) points",
         test_warn = true,
@@ -2339,8 +2340,9 @@ function Manifolds.Test.test_volume_density(
 end # Manifolds.Test.test_volume_density
 
 """
-    Manifolds.Test.Weingarten(
+    Manifolds.Test.test_Weingarten(
         M, p, X, V;
+        available_functions = [],
         expected_value = NoExpectation(),
         test_aliased = true,
         test_mutating = true,

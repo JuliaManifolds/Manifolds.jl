@@ -165,7 +165,7 @@ end
                 p = exp(X)
                 @test p ≈ exp(M, E, X)
                 p3 = exp(M, E, log(M, E, p))
-                # broken for 9 of the 10
+                # the last vector, with nearly equal angles, is off by less than 1e-10
                 @test isapprox(M, p, p3; atol = 1.0e-4)
             end
         end

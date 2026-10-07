@@ -413,7 +413,6 @@ end
         M = Sphere(2)
         N = PowerManifold(M, 2)
         p = [1.0 0.0; 0.0 0.0; 1.0 0.0]
-        q = 1 / sqrt(2) * [1.0 0.0; 1.0 1.0; 0.0 1.0]
         q = 1 / sqrt(2) * [0.0 1.0; 1.0 1.0; 1.0 0.0]
         r = 1 / sqrt(3) * [1.0 1.0; 1.0 1.0; 1.0 1.0]
         X = log(M, p, q)
@@ -463,15 +462,15 @@ end
         }
 
         pse_ap = ArrayPartition(
-            SA[1.0, 2.0],
-            SA[
+            [1.0, 2.0],
+            [
                 0.5403023058681398 -0.8414709848078965
                 0.8414709848078965 0.5403023058681398
             ],
         )
         p2_ap = [pse_ap, pse_ap]
         @test allocate(PSE2, p2_ap) isa Vector{
-            ArrayPartition{Float64, Tuple{SVector{2, Float64}, SMatrix{2, 2, Float64, 4}}},
+            ArrayPartition{Float64, Tuple{Vector{Float64}, Matrix{Float64}}},
         }
     end
 

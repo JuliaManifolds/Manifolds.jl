@@ -1,4 +1,5 @@
 include("../header.jl")
+using ADTypes
 using FiniteDifferences
 using Manifolds: RiemannianProjectionBackend
 using ManifoldDiff

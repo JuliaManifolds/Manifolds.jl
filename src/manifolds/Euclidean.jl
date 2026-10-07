@@ -1,5 +1,5 @@
 @doc raw"""
-    Euclidean{T,𝔽} <: AbstractManifold{𝔽}
+    Euclidean{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 Euclidean vector space.
 
@@ -9,7 +9,7 @@ Euclidean vector space.
 
 Generate the ``n``-dimensional vector space ``ℝ^n``.
 
-    Euclidean(n₁,n₂,...,nᵢ; field=ℝ, parameter::Symbol = :field)
+    Euclidean(n₁,n₂,...,nᵢ; field=ℝ, parameter::Symbol = :type)
     𝔽^(n₁,n₂,...,nᵢ) = Euclidean(n₁,n₂,...,nᵢ; field=𝔽)
 
 Generate the vector space of ``k = n_1 ⋅ n_2 ⋅ … ⋅ n_i`` values, i.e. the

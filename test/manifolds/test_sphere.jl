@@ -358,7 +358,7 @@ using ManifoldDiff
             @test sectional_curvature_max(M) == 1.0
             @test sectional_curvature_min(M) == 1.0
             M1 = Sphere(1)
-            @test sectional_curvature(M1, p, X, Y) == 0.0
+            @test sectional_curvature(M1, [0.0, 1.0], [1.0, 0.0], [1.0, 0.0]) == 0.0
             @test sectional_curvature_max(M1) == 0.0
             @test sectional_curvature_min(M1) == 0.0
         end

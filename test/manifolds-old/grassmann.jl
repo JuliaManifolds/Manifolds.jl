@@ -105,6 +105,7 @@ end
                 is_point_atol_multiplier = 10.0,
                 projection_atol_multiplier = 10.0,
                 retraction_atol_multiplier = 10.0,
+                test_inplace = true,
             )
 
             @testset "inner/norm" begin

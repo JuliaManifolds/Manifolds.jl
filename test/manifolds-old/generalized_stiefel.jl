@@ -104,7 +104,7 @@ include("../header.jl")
         @testset "Type $T" for T in types
             pts = convert.(T, [p, y, z])
             @test !is_point(M, 2 * p)
-            @test_throws DomainError !is_point(M, 2 * p; error = :error)
+            @test_throws DomainError is_point(M, 2 * z; error = :error)
             @test !is_vector(M, p, y)
             @test_throws DomainError is_vector(M, p, y; error = :error)
             Manifolds.test_manifold(
@@ -140,8 +140,6 @@ include("../header.jl")
             @test !is_flat(M)
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
-            x = [1.0 0.0; 0.0 0.5; 0.0 0.0]
-
             x = [1im 0.0; 0.0 0.5im; 0.0 0.0]
             @test is_point(M, x)
             @test !is_point(M, 2 * x)
