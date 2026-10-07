@@ -110,9 +110,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 shortest_geodesic, vector_transport_to,
             ),
         )
-        if !isempty(two_point_functions) && (n_points < 2)
-            error("To test `$(join(two_point_functions, "`, `"))`, at least two `:Points` must be provided.")
-        end
+        (!isempty(two_point_functions) && (n_points < 2)) && error("To test `$(join(two_point_functions, "`, `"))`, at least two `:Points` must be provided.")
         if (copy in functions)
             Manifolds.Test.test_copy(
                 M, points[1], vectors[1];
