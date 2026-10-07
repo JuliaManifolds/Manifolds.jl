@@ -93,7 +93,7 @@ for manifold `M` at `p` with respect to the coordinates of `B`, i.e.
 \frac{∂}{∂ p^l} Γ^{k}_{ij} = Γ^{k}_{ij,l}.
 ```
 
-The dimensions of the resulting multi-dimensional array are ordered ``(i,j,k,l)``.
+The dimensions of the resulting multi-dimensional array are ordered ``(k,i,j,l)``.
 """
 christoffel_symbols_second_jacobian(::AbstractManifold, ::Any, B::AbstractBasis)
 function christoffel_symbols_second_jacobian(
