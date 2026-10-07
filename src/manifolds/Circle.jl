@@ -442,12 +442,16 @@ mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = Scalar(mid_point(M
 number_of_coordinates(::Circle, ::AbstractBasis) = 1
 
 @doc raw"""
-    project(M::Circle{ℂ}, p)
+    project(M::Circle, p)
 
-Project a point `p` onto the complex [`Circle`](@ref) `M`, i.e. the unit circle in the complex plane.
+Project a point `p` onto the [`Circle`](@ref) `M`.
+For the real-valued case this is the symmetric remainder [`sym_rem`](@ref) of `p`,
+for the complex-valued case it is the projection onto the unit circle in the complex plane.
 """
 project(::Circle, ::Any)
+project(::Circle{ℝ}, p::Real) = sym_rem(p)
 project(::Circle{ℂ}, p::Number) = p / abs(p)
+project!(::Circle{ℝ}, q, p) = (q .= sym_rem(p))
 project!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 @doc raw"""
@@ -455,11 +459,15 @@ project!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 Project a value `X` onto the tangent space of the point `p` on the [`Circle`](@ref) `M`.
 
+For the real-valued case the tangent space is all of ``ℝ``, so `X` is returned unchanged.
+
 For the complex valued case `X` is projected onto the line in the complex plane
 that is parallel to the tangent to `p` on the unit circle and contains `0`.
 """
 project(::Circle, ::Any, ::Any)
+project(::Circle{ℝ}, p::Real, X::Real) = X
 project(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
+project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
 project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
 
 @doc raw"""

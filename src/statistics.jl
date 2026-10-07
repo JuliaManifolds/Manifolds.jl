@@ -81,6 +81,7 @@ as the point that satisfies the minimizer
 where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 
 In the general case, the [`GradientDescentEstimation`](@extref `ManifoldsBase.GradientDescentEstimation`) is used to compute the mean.
+
     mean(
         M::AbstractManifold,
         x::AbstractVector,

@@ -152,7 +152,7 @@ from the cotangent bundle to vectors from the tangent bundle
 """
 sharp(::AbstractManifold, p, ξ)
 
-@trait_function sharp(M::AbstractDecoratorManifold, X::TFVector, p, ξ::CoTFVector)
+@trait_function sharp(M::AbstractDecoratorManifold, p, ξ::CoTFVector)
 
 sharp(::AbstractManifold, p, ξ::RieszRepresenterCotangentVector) = ξ.X
 function sharp(M::AbstractManifold, p, X::CoTFVector{<:Any, <:AbstractBasis})

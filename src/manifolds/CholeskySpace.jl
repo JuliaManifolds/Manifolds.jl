@@ -60,12 +60,10 @@ and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_vector(
-        M::CholeskySpace,
-        p,
-        X;
-        atol::Real = sqrt(prod(representation_size(M)) * eps(float(eltype(p)))),
+        M::CholeskySpace, p, X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
-    )
+    ) where {T}
     if !isapprox(norm(strictlyUpperTriangular(X)), 0.0; atol = atol, kwargs...)
         return DomainError(
             norm(UpperTriangular(X) - Diagonal(X)),

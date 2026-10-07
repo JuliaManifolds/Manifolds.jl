@@ -15,7 +15,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     Manifolds.Test.test_manifold(
         M,
         Dict(
-            :Functions => [get_embedding, is_point, is_vector, manifold_dimension, project, embed, rand, repr],
+            :Functions => [get_embedding, is_flat, is_point, is_vector, manifold_dimension, project, embed, rand, repr],
             :Points => [p, q], :Vectors => [X, Y],
             :InvalidPoints => [pf, qf], :InvalidVectors => [Xf],
             :EmbeddedPoints => [pf], :EmbeddedVectors => [Xf],
@@ -24,6 +24,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         Dict(
             manifold_dimension => 3,
             repr => "DeterminantOneMatrices(2, ℝ)",
+            is_flat => false,
             get_embedding => Euclidean(2, 2),
         ),
     )
@@ -85,5 +86,10 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         p = [1.0 0.0; 0.0 1.0]
         @test is_vector(M, p, [1.0e-17 0.5; -0.5 0.0])
         @test !is_vector(M, p, [1.0 0.0; 0.0 0.0])
+    end
+    @testset "Flatness" begin
+        @test is_flat(DeterminantOneMatrices(1))
+        @test is_flat(DeterminantOneMatrices(1, ℂ))
+        @test !is_flat(DeterminantOneMatrices(2, ℂ))
     end
 end

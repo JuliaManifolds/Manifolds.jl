@@ -49,22 +49,26 @@ function check_point(M::DeterminantOneMatrices, p; kwargs...)
 end
 
 """
-    check_vector(M::DeterminantOneMatrices{n,𝔽}, p, X; atol=sqrt(eps(float(real(eltype(X))))), kwargs... )
+    check_vector(M::DeterminantOneMatrices{n,𝔽}, p, X; atol, rtol, kwargs...)
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`DeterminantOneMatrices`](@ref) `M`, which are all matrices of size ``n×n``
 with trace 0.
 
-The trace is compared to zero with the absolute tolerance `atol`.
+The trace is compared to zero up to `max(atol, rtol * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
         M::DeterminantOneMatrices, p, X;
-        atol::Real = sqrt(eps(float(real(eltype(X))))), kwargs...,
+        atol::Real = sqrt(eps(float(real(eltype(X))))),
+        rtol::Real = sqrt(eps(float(real(eltype(X))))),
+        kwargs...,
     )
-    if !isapprox(tr(X), 0; atol = atol, kwargs...)
+    abstr = abs(tr(X))
+    if !(abstr <= atol || abstr <= rtol * norm(X))
         return DomainError(
             tr(X),
-            "The tangent vector $(X) does not lie in the Tangent space at $(p) of $(M), since its trace is $(tr(X)) and not zero.",
+            "The tangent vector $(X) does not lie in the Tangent space at $(p) of $(M), since its trace is $(tr(X)) and not zero (tolerance: $(max(atol, rtol * norm(X)))).",
         )
     end
     return nothing
@@ -83,6 +87,14 @@ end
 function ManifoldsBase.get_embedding_type(::DeterminantOneMatrices)
     return ManifoldsBase.EmbeddedSubmanifoldType()
 end
+
+"""
+    is_flat(M::DeterminantOneMatrices)
+
+Return `true` for ``n = 1``, where the [`DeterminantOneMatrices`](@ref) are a single point, and
+`false` otherwise, since they have nonzero sectional curvature for ``n ≥ 2``.
+"""
+is_flat(M::DeterminantOneMatrices) = get_parameter(M.size)[1] == 1
 
 @doc raw"""
     manifold_dimension(M::DeterminantOneMatrices{n,𝔽})
@@ -181,7 +193,8 @@ function Random.rand!(
         pX[1, :] ./= sign(det_pX)
         pX ./= abs(det_pX)^(1 / n)
     else # tangent vectors: trace 0
-        pX[diagind(pX)] .= 0
+        n = size(pX)[1]
+        pX[diagind(pX)] .-= tr(pX) / n
     end
     return pX
 end

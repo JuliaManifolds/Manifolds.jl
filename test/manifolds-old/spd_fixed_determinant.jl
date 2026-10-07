@@ -53,4 +53,10 @@ include("../header.jl")
         @test repr(M) == "SPDFixedDeterminant(2, 1.0; parameter=:field)"
         @test get_embedding(M) == SymmetricPositiveDefinite(2; parameter = :field)
     end
+    @testset "random points and tangent vectors" begin
+        M = SPDFixedDeterminant(2, 1.0)
+        p = rand(MersenneTwister(42), M)
+        @test is_point(M, p)
+        @test is_vector(M, p, rand(MersenneTwister(44), M; vector_at = p))
+    end
 end
