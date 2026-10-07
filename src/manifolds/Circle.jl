@@ -350,7 +350,7 @@ function log!(M::Circle{ℂ}, X, p, q)
     cosθ = complex_dot(p, q)
     if cosθ ≈ -1
         X .= abs(sum(real.(p))) ≈ 1 ? 1.0im : 1.0 + 0.0im
-        X .= X - complex_dot(p, X) * p
+        X .-= complex_dot(p, X) .* p
         X .*= π / norm(X)
     else
         cosθ = cosθ > 1 ? one(cosθ) : cosθ
@@ -468,7 +468,7 @@ project(::Circle, ::Any, ::Any)
 project(::Circle{ℝ}, p::Real, X::Real) = X
 project(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
 project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
-project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
+project!(::Circle{ℂ}, Y, p, X) = (Y .= X .- complex_dot(p, X) .* p)
 
 @doc raw"""
     Random.rand(M::Circle{ℝ}; vector_at = nothing, σ::Real=1.0)

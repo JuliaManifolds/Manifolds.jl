@@ -278,7 +278,7 @@ Test.@testset "The circle manifold" begin
         @test ManifoldsBase.allocate_on(M) isa Array{Float64, 0}
         @test ManifoldsBase.allocate_on(Mc) isa Array{ComplexF64, 0}
     end
-    Test.@testset "antipodal points on the real circle" begin
+    @testset "antipodal points on the real circle" begin
         for (p, q) in [(π / 2, -π / 2), (fill(π / 2), fill(-π / 2))]
             @test distance(M, p, q) ≈ π
             X = log(M, p, q)
@@ -288,5 +288,15 @@ Test.@testset "The circle manifold" begin
             @test distance(M, p, m) ≈ π / 2
             @test distance(M, q, m) ≈ π / 2
         end
+    end
+    @testset "logarithm on a power of complex circles" begin
+        N = PowerManifold(Circle(ℂ), 3)
+        p = [1.0 + 0.0im, 1.0im, -1.0 + 0.0im]
+        q = [exp(0.3im), exp(1.2im), exp(-2.5im)]
+        X = log(N, p, q)
+        @test is_vector(N, p, X)
+        @test isapprox(N, exp(N, p, X), q)
+        @test isapprox(N, p, inverse_retract(N, p, q), X)
+        @test isapprox(N, p, log(N, p, -p), [π * im, π, π * im])
     end
 end

@@ -142,6 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `WeiszfeldEstimation` is exported, like the other estimation methods for `mean` and `median`.
 * `check_vector` on the `CholeskySpace` rejects a matrix with a nonzero strictly upper triangular part with the same default tolerance as `check_point`.
 * `project` and `project!` work for the real `Circle` and hence for the `Torus`.
+* `log` and `inverse_retract` work on a `PowerManifold` of complex `Circle`s.
 * `is_flat` on `DeterminantOneMatrices` returns `false` for sizes two and larger.
 * `rand` draws random points and tangent vectors on `CenteredMatrices`, `Elliptope`, `Spectrahedron` and `SPDFixedDeterminant`.
 * `rand` on `DeterminantOneMatrices` draws tangent vectors from the whole tangent space, and `is_vector` there takes a relative tolerance `rtol` and accepts tangent vectors of any length.
