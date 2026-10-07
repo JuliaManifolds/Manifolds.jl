@@ -174,7 +174,7 @@ function Statistics.mean!(
         M::AbstractManifold,
         y,
         x::AbstractVector,
-        method::AbstractApproximationMethod = default_approximation_method(M, mean);
+        method::AbstractApproximationMethod = default_approximation_method(M, mean, eltype(x));
         kwargs...,
     )
     w = _unit_weights(length(x))

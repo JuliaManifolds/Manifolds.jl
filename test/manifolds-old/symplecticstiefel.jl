@@ -299,6 +299,8 @@ end
             return Q_grad * p * (euc_grad_f') * Q_grad * p + euc_grad_f * p' * p
         end
         p_grad = convert(Array{Float64}, points[1])
+        X_r = riemannian_gradient(M, points[1], X2)
+        @test riemannian_gradient(M, points[1], X2; embedding_metric = EuclideanMetric()) == X_r
         fd_diff = RiemannianProjectionBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 
         @test isapprox(

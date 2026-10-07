@@ -402,16 +402,16 @@ as the default vector transport method for the [`Tucker`](@ref) manifold.
 """
 default_vector_transport_method(::Tucker) = ProjectionTransport()
 
-@doc raw""" 
-    vector_transport_to(M::Tucker, Y, p, X, q, ::ProjectionTransport) 
-  
-Compute the projection vector transport on the [`Tucker`](@ref) manifold by projecting 
-the tangent vector `X` onto the tangent space of `M` at `q`. 
+@doc raw"""
+    vector_transport_to(M::Tucker, p, X, q, ::ProjectionTransport)
 
-Let 
-````math 
-p = (C_p, U_p^1, …, U_p^D), \qquad X = (C_X, U_X^1, …, U_X^D) ∈ T_p M, \qquad q = (C_q, U_q^1, …, U_q^1).
-```` 
+Compute the projection vector transport on the [`Tucker`](@ref) manifold by projecting
+the tangent vector `X` onto the tangent space of `M` at `q`.
+
+Let
+````math
+p = (C_p, U_p^1, …, U_p^D), \qquad X = (C_X, U_X^1, …, U_X^D) ∈ T_p M, \qquad q = (C_q, U_q^1, …, U_q^D).
+````
 
 This means that
 ````math 
@@ -429,10 +429,11 @@ U_Y^i
 = \left[C_X ×_{j ≠ i} U_p^j (U_q^j)^T ×_i U_p^i (I - U_q^i (U_q^i)^T)\right]_{(i)} (C_q)_{(i)}^+
 + \sum_{k ≠ i} \left[ C_p ×_{j ≠ k ≠ i} U_p^j (U_q^j)^T ×_k U_X^k(U_q^k)^T ×_i U_p^i (I - U_q^i (U_q^i)^T)\right]_{(i)} (C_q)_{(i)}^+
 + \left[ C_p ×_{j ≠ i} U_p^j (U_q^j)^T ×_i U_X^i (I - U_q^i (U_q^i)^T)\right]_{(i)} (C_q)_{(i)}^+ 
-```` 
+````
 
-Note that ``(C_q)_{(i)}^+ = ((C_q)_{(i)}^∗ (C_q)_{(i)})^{-1} (C_q)_{(i)}^∗ = Σ_{(i)}^{-2} (C_q)_{(i)}^∗``,
+Note that ``(C_q)_{(i)}^+ = (C_q)_{(i)}^T ((C_q)_{(i)} (C_q)_{(i)}^T)^{-1} = (C_q)_{(i)}^T Σ_{(i)}^{-2}``,
 where ``Σ_{(i)}`` is the diagonal Matrix containing the singular values of the mode-``i`` unfolding of ``C_q``.
+The first equality holds because ``(C_q)_{(i)}`` has full row rank, see [KressnerSteinlechnerVandereycken:2013](@cite), Section 2.2.
 
 Then the transported tangent vector is represented by
 ````math
@@ -440,7 +441,7 @@ Y = (C_Y, U_Y^1, …, U_Y^D).
 ````
 For details, see [KressnerSteinlechnerVandereycken:2013](@cite).
 """
-vector_transport_to(M::Tucker{𝔽, T, D}, Y::TuckerTangentVector{T, D}, p::TuckerPoint{T, D}, X::TuckerTangentVector{T, D}, q::TuckerPoint{T, D}, ::ProjectionTransport) where {𝔽, T, D}
+vector_transport_to(::Tucker{𝔽, T, D}, ::TuckerPoint{T, D}, ::TuckerTangentVector{T, D}, ::TuckerPoint{T, D}, ::ProjectionTransport) where {𝔽, T, D}
 
 function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T, D}, p::TuckerPoint{T, D}, X::TuckerTangentVector{T, D}, q::TuckerPoint{T, D}) where {T, D}
     dims, ranks = Manifolds.get_parameter(M.size)

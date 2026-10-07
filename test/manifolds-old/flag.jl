@@ -88,6 +88,8 @@ using Random
     @testset "conversion between Stiefel and orthogonal coordinates" begin
         p1os = convert(AbstractMatrix, M, p1o)
         @test isapprox(p1, p1os)
+        p2os = convert(AbstractMatrix, M, p2o)
+        @test isapprox(p2, p2os)
 
         X1os = convert(AbstractMatrix, M, p1o, X1o)
         @test isapprox(X1, X1os)
@@ -158,7 +160,7 @@ using Random
         vector_transport_methods = [ProjectionTransport()],
         vector_transport_retractions = [PolarRetraction()],
         vector_transport_inverse_retractions = [PolarInverseRetraction()],
-        test_vector_transport_direction = [true, true, false],
+        test_vector_transport_direction = [true],
         mid_point12 = nothing,
         test_inplace = true,
         test_rand_point = true,

@@ -524,13 +524,10 @@ function Manifolds.test_manifold(
                 end
             end
             if isa(btype, ProjectedOrthonormalBasis)
-                # check projection idempotency
+                # check that the basis vectors are tangent vectors
+                atol = is_tangent_atol_multiplier * Manifolds.find_eps(p)
                 for i in 1:N
-                    Test.@test norm(M, p, bvectors[i]) ≈ 1
-                    for j in (i + 1):N
-                        Test.@test real(inner(M, p, bvectors[i], bvectors[j])) ≈ 0 atol =
-                            sqrt(Manifolds.find_eps(p))
-                    end
+                    Test.@test is_vector(M, p, bvectors[i]; atol = atol)
                 end
                 # check projection idempotency
                 for i in 1:N

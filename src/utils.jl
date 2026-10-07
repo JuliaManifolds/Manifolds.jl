@@ -378,5 +378,5 @@ function _ensure_nonzero_rng_determinant!(
     while abs(det(pX)) < atol
         rand!(rng, M, pX; kwargs...)
     end
-    return
+    return pX
 end

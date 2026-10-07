@@ -299,6 +299,7 @@ using FiniteDifferences
         p = zeros(3)
         M = DefaultManifold()
         TpM = TangentSpace(M, p)
+        @test base_manifold(TpM) === M
         B = induced_basis(M, Manifolds.get_default_atlas(M), p, TangentSpaceType())
         MM = MetricManifold(M, EuclideanMetric())
         @test local_metric(MM, p, B) == Diagonal(ones(3))

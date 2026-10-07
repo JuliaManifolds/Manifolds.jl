@@ -305,6 +305,12 @@ function mean(
     )
     return fill(3, 1)
 end
+function mean!(::TestStatsOverload1, y, ::AbstractVector, ::AbstractWeights, ::TestStatsMethod1)
+    return fill!(y, 5)
+end
+function default_approximation_method(::TestStatsOverload1, ::typeof(mean), ::Type{<:Number})
+    return TestStatsMethod1()
+end
 
 function median(
         ::TestStatsOverload1,
@@ -361,6 +367,7 @@ end
             @test mean!(M, y, x, w, GradientDescentEstimation()) == [3.0]
             @test mean(M, x, GradientDescentEstimation()) == [3.0]
             @test mean!(M, y, x, GradientDescentEstimation()) == [3.0]
+            @test mean!(M, fill(0.0), [0.0]) == mean(M, [0.0]) == fill(5.0)
         end
 
         @testset "median" begin

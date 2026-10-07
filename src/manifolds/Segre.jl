@@ -593,16 +593,17 @@ If ``p ≐ (λ, x_1, …, x_d) ∈ \mathcal{S}`` and ``X``, ``Y``, ``Z ∈ T_p (
 ``R_{\mathcal{S}}`` is zero in the remaining (orthogonal) directions.
 """
 function riemann_tensor(M::Segre{ℝ, V}, p, X, Y, Z) where {V}
+    z = zero(p[1][1])
     return [
-        [0.0],
+        [z],
         [
             riemann_tensor(Sphere(n - 1), x, xdot1, xdot2, xdot3) for
                 (n, x, xdot1, xdot2, xdot3) in zip(V, p[2:end], X[2:end], Y[2:end], Z[2:end])
         ]...,
     ] +
         (1 / p[1][1]^2) * (
-        inner(M, p, [[0.0], X[2:end]...], [[0.0], Z[2:end]...]) * [[0.0], Y[2:end]...] -
-            inner(M, p, [[0.0], Y[2:end]...], [[0.0], Z[2:end]...]) * [[0.0], X[2:end]...]
+        inner(M, p, [[z], X[2:end]...], [[z], Z[2:end]...]) * [[z], Y[2:end]...] -
+            inner(M, p, [[z], Y[2:end]...], [[z], Z[2:end]...]) * [[z], X[2:end]...]
     )
 end
 

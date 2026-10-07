@@ -213,6 +213,7 @@ include("../header.jl")
                 @test X == w
                 w = allocate(X, number_eltype(X))
                 zero_vector!(M, w, p)
+                @test w == zero_vector(M, p)
                 oneP = SVDMPoint(one(zeros(3, 3)), ones(2), one(zeros(2, 2)), 2)
                 @test oneP == one(p)
 

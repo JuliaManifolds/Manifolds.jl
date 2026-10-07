@@ -21,6 +21,8 @@ using LinearAlgebra
     @test p ≈ [1.7230709564189848, -4.431999755591838, 0.958851077208406]
     i_p0x = Manifolds.get_chart_index(M, A, p)
     @test [i_p0x...] ≈ p0x
+    @test Manifolds.get_parameters(M, A, i_p0x, p) ≈ [0.0, 0.0]
+    @test Manifolds.get_point(M, A, i_p0x, p0x) ≈ [Manifolds._torus_param(M, (2 .* p0x)...)...]
     B = induced_basis(M, A, i_p0x)
     X = get_vector(M, p, X_p0x, B)
     Y = get_vector(M, p, Y_p0x, B)

@@ -149,6 +149,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `retract`, `retract_fused` and `inverse_retract` with the `OrthographicRetraction` and the `OrthographicInverseRetraction` on `FixedRankMatrices` accept keyword arguments.
 * `project!` onto the multinomial doubly stochastic manifolds accepts a matrix with integer entries when the result is a floating point matrix.
 * `parallel_transport_direction` on the `Grassmann` manifold allocates its result directly instead of computing a geodesic for it.
+* `riemann_tensor` on the `Segre` manifold, also under a `WarpedMetric`, returns the element type of the point instead of always `Float64`.
+* `retract`, `retract_fused` and `inverse_retract` with the `PolarLightRetraction` and the `PolarLightInverseRetraction` on `Stiefel` accept keyword arguments.
+* `riemannian_gradient` on the `SymplecticStiefel` manifold accepts the `embedding_metric` keyword in its allocating form and returns the same result with it as without it.
+* `mean!(M, y, x)` uses the default estimation method for the type of the points, as `mean(M, x)` does.
+* `Manifolds.Test.test_parallel_transport` and `Manifolds.Test.test_vector_transport` compare the transported vector in the tangent space at the point it is transported to.
 
 ## [0.11.32] 2026-09-30
 

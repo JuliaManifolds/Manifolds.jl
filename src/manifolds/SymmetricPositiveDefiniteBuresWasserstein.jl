@@ -48,10 +48,10 @@ Compute the distance with respect to the [`BuresWassersteinMetric`](@ref) on [`S
 
 ```math
 d(p,q) =
-    \operatorname{tr}(p) + \operatorname{tr}(q) - 2\operatorname{tr}\Bigl( (p^{\frac{1}{2}}qp^{\frac{1}{2}} \bigr)^\frac{1}{2} \Bigr),
+    \sqrt{\operatorname{tr}(p) + \operatorname{tr}(q) - 2\operatorname{tr}\bigl((pq)^{\frac{1}{2}}\bigr)},
 ```
 
-where the last trace can be simplified (by rotating the matrix products in the trace) to ``\operatorname{tr}(pq)``.
+where ``(pq)^{\frac{1}{2}}`` is the matrix square root of ``pq``, see [HanMishraJawanpuriaGao:2023](@cite), Section 2, eq. (1).
 """
 function distance(
         ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric},

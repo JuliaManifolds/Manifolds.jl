@@ -108,8 +108,8 @@ function ManifoldsBase._retract_fused!(
     )
     return retract_polar_light_fused!(M, q, p, X, t; kwargs...)
 end
-function retract_polar_light_fused!(M::AbstractManifold, q, p, X, t::Number)
-    return retract_polar_light!(M, q, p, t * X)
+function retract_polar_light_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+    return retract_polar_light!(M, q, p, t * X; kwargs...)
 end
 
 function allocation_promotion_function(::Stiefel{ℂ}, ::Any, ::Tuple)
@@ -365,7 +365,7 @@ function inverse_retract_polar!(::Stiefel, X, p, q)
     X .-= p
     return X
 end
-function inverse_retract_polar_light!(::Stiefel, X, p, q)
+function inverse_retract_polar_light!(::Stiefel, X, p, q; kwargs...)
     # n, k = get_parameter(M.size)
     # Inspired by the steps from the original implementation in Python, see
     # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L119-L146
@@ -617,7 +617,7 @@ function ManifoldsBase.retract_qr_fused!(::Stiefel, q, p, X, t::Number)
     return mul!(q, _qrfac_to_q(qrfac), D)
 end
 
-function retract_polar_light!(::Stiefel, q, p, X)
+function retract_polar_light!(::Stiefel, q, p, X; kwargs...)
     # n, k = get_parameter(M.size)
     # Inspired by the steps from the original implementation in Python, see
     # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L86-L115

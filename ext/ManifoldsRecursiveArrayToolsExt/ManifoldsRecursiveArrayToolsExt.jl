@@ -5,15 +5,11 @@ using ManifoldsBase
 using RecursiveArrayTools: ArrayPartition
 import RecursiveArrayTools: recursive_bottom_eltype
 using StaticArrays
-using LinearAlgebra
-
-using Base.Iterators: repeated
 
 using Manifolds:
     FiberBundleBasisData,
     FiberBundleProductVectorTransport,
-    PowerManifoldNestedReplacing,
-    TypeParameter
+    PowerManifoldNestedReplacing
 
 using Manifolds: bundle_transport_tangent_direction, bundle_transport_tangent_to
 
@@ -24,14 +20,10 @@ import Manifolds:
     get_coordinates,
     get_vector,
     get_vectors,
-    hat,
-    isapprox,
     jacobi_field,
-    project,
     riemannian_gradient,
     _vector_transport_direction,
-    _vector_transport_to,
-    vee
+    _vector_transport_to
 
 function allocate(
         ::PowerManifoldNestedReplacing,

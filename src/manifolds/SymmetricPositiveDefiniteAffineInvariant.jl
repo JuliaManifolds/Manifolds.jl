@@ -227,10 +227,10 @@ end
     get_coordinates(::SymmetricPositiveDefinite, p, X, ::DefaultOrthonormalBasis)
 
 Using the basis from [`get_basis`](@ref get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
-the coordinates with respect to this ONB can be simplified to
+the coordinates with respect to this ONB are the inner products with its basis vectors ``\Xi_{i,j}``,
 
 ```math
-   c_k = \mathrm{tr}(p^{-\frac{1}{2}}\Delta_{i,j} X)
+   c_k = g_p(X, \Xi_{i,j}) = \operatorname{tr}(p^{-1} X p^{-1} \Xi_{i,j}),
 ```
 where ``k`` is the linearized index of the ``i=1,\ldots,n, j=i,\ldots,n``.
 """

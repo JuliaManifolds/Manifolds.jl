@@ -24,7 +24,7 @@ struct ApproximateLogarithmicMap{T} <: ApproximateInverseRetraction
     tolerance::T
 end
 
-function distance(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, q, p)
+function distance(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, p, q)
     return norm(M, p, log(M, p, q))
 end
 

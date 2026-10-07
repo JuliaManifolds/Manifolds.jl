@@ -167,7 +167,8 @@ end
     Random.rand(M::DeterminantOneMatrices; vector_at=nothing, kwargs...)
 
 If `vector_at` is `nothing`, return a random point on the [`DeterminantOneMatrices`](@ref)
-manifold `M` by using `rand` in the embedding.
+manifold `M` by using `rand` in the embedding. The point is drawn again while the absolute
+value of its determinant is below the square root of the machine epsilon of its entries.
 
 If `vector_at` is not `nothing`, return a random tangent vector from the tangent space of
 the point `vector_at` on the [`DeterminantOneMatrices`](@ref) by using by using `rand` in the

@@ -103,6 +103,16 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     t = Test.@testset "$test_name" begin # COV_EXCL_LINE
         n_points = length(points)
         n_vectors = length(vectors)
+        two_point_functions = filter(
+            f -> f in functions,
+            (
+                distance, inverse_retract, log, mid_point, parallel_transport_to,
+                shortest_geodesic, vector_transport_to,
+            ),
+        )
+        if !isempty(two_point_functions) && (n_points < 2)
+            error("To test `$(join(two_point_functions, "`, `"))`, at least two `:Points` must be provided.")
+        end
         if (copy in functions)
             Manifolds.Test.test_copy(
                 M, points[1], vectors[1];
@@ -1814,7 +1824,7 @@ function Manifolds.Test.test_parallel_transport(
     Test.@testset "$(name)" begin
         Y = parallel_transport_to(M, p, X, q)
         Test.@test is_vector(M, q, Y; error = :error, kwargs...)
-        !isexpected(expected_value) || Test.@test isapprox(M, p, Y, expect(expected_value); error = :error, kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(M, q, Y, expect(expected_value); error = :error, kwargs...)
         if test_mutating
             Y2 = copy(M, p, X)
             parallel_transport_to!(M, Y2, p, X, q)
@@ -1831,14 +1841,14 @@ function Manifolds.Test.test_parallel_transport(
             if test_mutating
                 Y5 = copy(M, p, X)
                 parallel_transport_direction!(M, Y5, p, X, direction)
-                Test.@test isapprox(M, p, Y5, Y4; error = :error, kwargs...)
+                Test.@test isapprox(M, q, Y5, Y4; error = :error, kwargs...)
                 if test_aliased
                     Y6 = copy(M, p, X)
                     parallel_transport_direction!(M, Y6, p, Y6, direction)  # aliased #1
-                    Test.@test isapprox(M, p, Y6, Y4; error = :error, kwargs...)
+                    Test.@test isapprox(M, q, Y6, Y4; error = :error, kwargs...)
                     Y7 = copy(M, p, direction)
                     parallel_transport_direction!(M, Y7, p, X, direction)  # aliased #2
-                    Test.@test isapprox(M, p, Y7, Y4; error = :error, kwargs...)
+                    Test.@test isapprox(M, q, Y7, Y4; error = :error, kwargs...)
                 end
             end
             # consistency check
@@ -2276,7 +2286,7 @@ function Manifolds.Test.test_vector_transport(
             if test_aliased
                 Y3 = copy(M, p, X)
                 vector_transport_to!(M, Y3, p, Y3, q, m)  # aliased
-                Test.@test isapprox(M, p, Y3, Y; error = :error, kwargs...)
+                Test.@test isapprox(M, q, Y3, Y; error = :error, kwargs...)
             end
         end
         if (vector_transport_direction in available_functions) && !isnothing(direction)
@@ -2285,7 +2295,7 @@ function Manifolds.Test.test_vector_transport(
             if test_mutating
                 Y5 = copy(M, p, X)
                 vector_transport_direction!(M, Y5, p, X, direction, m)
-                Test.@test isapprox(M, p, Y5, Y4; error = :error, kwargs...)
+                Test.@test isapprox(M, q, Y5, Y4; error = :error, kwargs...)
                 if test_aliased
                     Y6 = copy(M, p, X)
                     vector_transport_direction!(M, Y6, p, Y6, direction, m)  # aliased #1
