@@ -134,6 +134,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `riemannian_Hessian` on `OrthogonalMatrices` and `UnitaryMatrices` returns the correct Hessian at every point.
 * `manifold_volume` of `OrthogonalMatrices`, `Rotations`, `UnitaryMatrices` and `SpecialUnitaryMatrices` is the volume with respect to the metric of `inner`.
 * `log` on `SpecialUnitaryMatrices` returns the tangent vector of minimal norm, which has trace zero.
+* `project` onto the tangent space of the `Tucker` manifold also works in its allocating form and returns a `TuckerTangentVector`.
 
 ## [0.11.32] 2026-09-30
 

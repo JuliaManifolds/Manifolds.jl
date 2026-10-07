@@ -305,6 +305,9 @@ include("../header.jl")
         Y_manual = project!(M, Y_manual, q, embed(M, p, X))
         Y = vector_transport_to!(M, Y, p, X, q, ProjectionTransport())
         @test isapprox(M, q, Y_manual, Y, atol = atol, rtol = rtol)
+        # the allocating projection agrees with the in-place one
+        Y_alloc = project(M, q, embed(M, p, X))
+        @test isapprox(M, q, Y_manual, Y_alloc, atol = atol, rtol = rtol)
 
         # test transport for in-place update
         p = allocate(p̃)

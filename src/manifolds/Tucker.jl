@@ -1007,6 +1007,12 @@ for fun in [:get_vector, :inverse_retract, :project, :zero_vector, :rand]
     end
 end
 
+function ManifoldsBase.allocate_result_embedding(
+        M::Tucker, ::typeof(project), X, p::TuckerPoint, vals...,
+    )
+    return TuckerTangentVector(allocate(p.hosvd.core), allocate(p.hosvd.U))
+end
+
 function ManifoldsBase.allocate_result(M::Tucker, ::typeof(rand))
     N, R = get_parameter(M.size)
     core = zeros(R...)
