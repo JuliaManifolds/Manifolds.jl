@@ -35,9 +35,9 @@ using LinearAlgebra, Manifolds, Quaternions, Test, Random
     @testset "volume" begin
         @test manifold_volume(OrthogonalMatrices(1)) ≈ 2
         @test manifold_volume(OrthogonalMatrices(2)) ≈ 4 * π * sqrt(2)
-        @test manifold_volume(OrthogonalMatrices(3)) ≈ 16 * π^2 * sqrt(2)
-        @test manifold_volume(OrthogonalMatrices(4)) ≈ 2 * (2 * π)^4 * sqrt(2)
-        @test manifold_volume(OrthogonalMatrices(5)) ≈ 8 * (2 * π)^6 / 6 * sqrt(2)
+        @test manifold_volume(OrthogonalMatrices(3)) ≈ 32 * π^2 * sqrt(2)
+        @test manifold_volume(OrthogonalMatrices(4)) ≈ 16 * (2 * π)^4
+        @test manifold_volume(OrthogonalMatrices(5)) ≈ 256 * (2 * π)^6 / 6
     end
 
     @testset "Field parameter" begin

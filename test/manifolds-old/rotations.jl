@@ -375,9 +375,9 @@ include("../header.jl")
     @testset "manifold_volume and volume_density" begin
         @test manifold_volume(Rotations(1)) ≈ 1
         @test manifold_volume(Rotations(2)) ≈ 2 * π * sqrt(2)
-        @test manifold_volume(Rotations(3)) ≈ 8 * π^2 * sqrt(2)
-        @test manifold_volume(Rotations(4)) ≈ (2 * π)^4 * sqrt(2)
-        @test manifold_volume(Rotations(5)) ≈ 4 * (2 * π)^6 / 6 * sqrt(2)
+        @test manifold_volume(Rotations(3)) ≈ 16 * π^2 * sqrt(2)
+        @test manifold_volume(Rotations(4)) ≈ 8 * (2 * π)^4
+        @test manifold_volume(Rotations(5)) ≈ 128 * (2 * π)^6 / 6
         @test volume_density(Rotations(2), [1.0 0.0; 0.0 1.0], [0.0 0.5; -0.5 0.0]) == 1.0
         @test volume_density(OrthogonalMatrices(2), [1.0 0.0; 0.0 1.0], [0.0 0.5; -0.5 0.0]) == 1.0
 

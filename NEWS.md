@@ -132,6 +132,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `Manifolds.Test.test_mid_point`, and with it `Manifolds.Test.test_manifold`, compare the mid-points of both argument orders by default and skip this comparison for `test_symmetry = false` or the property `:TestMidpointSymmetry => false`.
 * `project` onto a tangent space and `embed` of a tangent vector on the quaternionic `UnitaryMatrices(1, ℍ)` take the point into account, so that they and the default vector transport follow the Lie algebra representation of tangent vectors.
 * `riemannian_Hessian` on `OrthogonalMatrices` and `UnitaryMatrices` returns the correct Hessian at every point.
+* `manifold_volume` of `OrthogonalMatrices`, `Rotations`, `UnitaryMatrices` and `SpecialUnitaryMatrices` is the volume with respect to the metric of `inner`.
+* `log` on `SpecialUnitaryMatrices` returns the tangent vector of minimal norm, which has trace zero.
 
 ## [0.11.32] 2026-09-30
 

@@ -68,9 +68,9 @@ end
 
 @testset "Special unitary matrices" begin
     @test manifold_volume(SpecialUnitaryMatrices(1)) ≈ 1
-    @test manifold_volume(SpecialUnitaryMatrices(2)) ≈ 2 * π^2
-    @test manifold_volume(SpecialUnitaryMatrices(3)) ≈ sqrt(3) * π^5
-    @test manifold_volume(SpecialUnitaryMatrices(4)) ≈ sqrt(2) * 4 * π^9 / 12
+    @test manifold_volume(SpecialUnitaryMatrices(2)) ≈ 4 * sqrt(2) * π^2
+    @test manifold_volume(SpecialUnitaryMatrices(3)) ≈ 16 * sqrt(3) * π^5
+    @test manifold_volume(SpecialUnitaryMatrices(4)) ≈ 256 * π^9 / 3
 
     @test manifold_dimension(SpecialUnitaryMatrices(2)) == 3
     @test manifold_dimension(SpecialUnitaryMatrices(3)) == 8
@@ -184,4 +184,22 @@ end
     X3a = log(Rotations(4), E, R3)
     @test is_vector(Rotations(4), E, X3a)
     @test X3a[2, 3] ≈ π
+end
+
+@testset "logarithm of the special unitary matrices of minimal norm" begin
+    M = SpecialUnitaryMatrices(3)
+    p = Matrix{ComplexF64}(I, 3, 3)
+    q = Matrix{ComplexF64}(Diagonal([cis(1.6), cis(1.6), cis(-3.2)]))
+    X = log(M, p, q)
+    @test is_vector(M, p, X)
+    @test sort(imag.(eigvals(X))) ≈ [-3.2, 1.6, 1.6]
+    @test isapprox(M, exp(M, p, X), q)
+    @test distance(M, p, q) ≈ norm([1.6, 1.6, -3.2])
+    Y = [0.0 0.5im 0.2; -0.2 0.3im 0.1im; 0.0 0.1im -0.3im]
+    r = exp(M, p, Y - Y')
+    @test isapprox(M, exp(M, r, log(M, r, q * r)), q * r)
+    @test distance(M, r, q * r) ≈ norm([1.6, 1.6, -3.2])
+    Z = log(M, p, q')
+    @test sort(imag.(eigvals(Z))) ≈ [-1.6, -1.6, 3.2]
+    @test log(M, SMatrix{3, 3}(p), SMatrix{3, 3}(q)) ≈ X
 end

@@ -813,6 +813,37 @@ function log!(M::GeneralUnitaryMatrices{𝔽}, X, p, q) where {𝔽}
     return X
 end
 
+@doc raw"""
+    log(M::SpecialUnitaryMatrices, p, q)
+
+Compute the logarithmic map on the [`SpecialUnitaryMatrices`](@ref) `M`.
+
+Let ``p^{\mathrm{H}}q = V\operatorname{diag}(e^{\mathrm{i}θ_1}, …, e^{\mathrm{i}θ_n})V^{\mathrm{H}}``
+with ``-π < θ_1 ≤ … ≤ θ_n ≤ π``. Since ``\det(p^{\mathrm{H}}q) = 1``, the angles sum to ``2πζ``
+for an integer ``ζ``, and
+
+```math
+\log_p q = V\operatorname{diag}(\mathrm{i}φ_1, …, \mathrm{i}φ_n)V^{\mathrm{H}},
+```
+
+where ``φ_j = θ_j - 2π`` for the ``ζ`` largest angles if ``ζ > 0``, ``φ_j = θ_j + 2π`` for the
+``-ζ`` smallest angles if ``ζ < 0``, and ``φ_j = θ_j`` otherwise. This is the logarithm of
+``p^{\mathrm{H}}q`` in ``\mathfrak{su}(n)`` of minimal norm, Theorems 1 and 2 and Lemma 1 in
+[Talaganis:2026](@cite).
+"""
+log(::GeneralUnitaryMatrices{ℂ, <:Any, DeterminantOneMatrixType}, ::Any, ::Any)
+function log!(M::GeneralUnitaryMatrices{ℂ, <:Any, DeterminantOneMatrixType}, X, p, q)
+    log_safe!(X, adjoint(p) * q)
+    n = get_parameter(M.size)[1]
+    project!(SkewHermitianMatrices(n, ℂ), X, X)
+    ζ = round(Int, imag(tr(X)) / (2π))
+    ζ == 0 && return X
+    e = eigen(Hermitian(-im * X))
+    θ = collect(e.values)
+    ζ > 0 ? (θ[(end - ζ + 1):end] .-= 2π) : (θ[1:(-ζ)] .+= 2π)
+    return copyto!(X, im * e.vectors * Diagonal(θ) * e.vectors')
+end
+
 norm(::GeneralUnitaryMatrices, p, X) = norm(X)
 
 @doc raw"""
@@ -832,16 +863,14 @@ end
 @doc raw"""
     manifold_volume(::GeneralUnitaryMatrices{ℝ,<:Any,AbsoluteDeterminantOneMatrixType})
 
-Volume of the manifold of real orthogonal matrices of absolute determinant one. The
-formula reads [BoyaSudarshanTilma:2003](@cite):
+Volume of the manifold of real orthogonal matrices of absolute determinant one with respect
+to the metric of [`inner`](@ref), Eq. (A27) in [ZyczkowskiSommers:2003](@cite):
 
 ```math
-\begin{cases}
-\frac{2^{k}(2\pi)^{k^2}}{\prod_{s=1}^{k-1} (2s)!} & \text{ if } n = 2k \\
-
-\frac{2^{k+1}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
-\end{cases}
+2^{n(n+3)/4} \prod_{k=1}^{n} \frac{π^{k/2}}{Γ(k/2)},
 ```
+
+twice the volume of the [`Rotations`](@ref).
 """
 function manifold_volume(
         M::GeneralUnitaryMatrices{ℝ, <:Any, AbsoluteDeterminantOneMatrixType},
@@ -852,56 +881,36 @@ end
 @doc raw"""
     manifold_volume(::GeneralUnitaryMatrices{ℝ,<:Any,DeterminantOneMatrixType})
 
-Volume of the manifold of real orthogonal matrices of determinant one. The
-formula reads [BoyaSudarshanTilma:2003](@cite):
+Volume of the manifold of real orthogonal matrices of determinant one with respect to the
+metric of [`inner`](@ref), Eq. (A31) in [ZyczkowskiSommers:2003](@cite):
 
 ```math
-\begin{cases}
-2 & \text{ if } n = 0 \\
-\frac{2^{k-1/2}(2\pi)^{k^2}}{\prod_{s=1}^{k-1} (2s)!} & \text{ if } n = 2k+2 \\
-\frac{2^{k+1/2}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
-\end{cases}
+2^{n(n+3)/4-1} \prod_{k=1}^{n} \frac{π^{k/2}}{Γ(k/2)}.
 ```
-
-It differs from the paper by a factor of `sqrt(2)` due to a different choice of
-normalization.
 """
 function manifold_volume(M::GeneralUnitaryMatrices{ℝ, <:Any, DeterminantOneMatrixType})
     n = get_parameter(M.size)[1]
-    vol = 1.0
-    if n % 2 == 0
-        k = div(n, 2)
-        vol *= 2^(k - 1) * (2π)^(k^2)
-        for s in 1:(k - 1)
-            vol /= factorial(2 * s)
-        end
-    else
-        k = div(n - 1, 2)
-        vol *= 2^k * (2π)^(k * (k + 1))
-        for s in 1:(k - 1)
-            vol /= factorial(2 * s + 1)
-        end
-    end
-    if n > 1
-        vol *= sqrt(2)
+    vol = 2.0^(n * (n + 3) / 4 - 1)
+    for k in 1:n
+        vol *= π^(k / 2) / gamma(k / 2)
     end
     return vol
 end
 @doc raw"""
     manifold_volume(::GeneralUnitaryMatrices{ℂ,<:Any,AbsoluteDeterminantOneMatrixType})
 
-Volume of the manifold of complex general unitary matrices of absolute determinant one. The
-formula reads [BoyaSudarshanTilma:2003](@cite)
+Volume of the manifold of complex general unitary matrices of absolute determinant one with
+respect to the metric of [`inner`](@ref), Eq. (3.9) in [ZyczkowskiSommers:2003](@cite):
 
 ```math
-\sqrt{n 2^{n+1}} π^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}.
+(2π)^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}.
 ```
 """
 function manifold_volume(
         M::GeneralUnitaryMatrices{ℂ, <:Any, AbsoluteDeterminantOneMatrixType},
     )
     n = get_parameter(M.size)[1]
-    vol = sqrt(n * 2^(n + 1)) * π^(((n + 1) * n) // 2)
+    vol = (2π)^div(n * (n + 1), 2)
     kf = 1
     for k in 1:(n - 1)
         kf *= k

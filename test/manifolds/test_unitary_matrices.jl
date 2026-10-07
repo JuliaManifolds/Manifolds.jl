@@ -107,9 +107,9 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
 
     @testset "manifold_volume" begin
         @test manifold_volume(UnitaryMatrices(1)) ≈ 2 * π
-        @test manifold_volume(UnitaryMatrices(2)) ≈ 4 * π^3
-        @test manifold_volume(UnitaryMatrices(3)) ≈ sqrt(3) * 2 * π^6
-        @test manifold_volume(UnitaryMatrices(4)) ≈ sqrt(2) * 8 * π^10 / 12
+        @test manifold_volume(UnitaryMatrices(2)) ≈ 8 * π^3
+        @test manifold_volume(UnitaryMatrices(3)) ≈ 32 * π^6
+        @test manifold_volume(UnitaryMatrices(4)) ≈ 256 * π^10 / 3
     end
 
     @testset "Polar retraction" begin
