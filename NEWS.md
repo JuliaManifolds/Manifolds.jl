@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `rand` and `rand!` on the `SpecialUnitaryMatrices`, which draw points of determinant one and tangent vectors of trace zero.
 * `ProjectionRetraction` on the `MultinomialSymmetricPositiveDefinite` manifold.
 * `warn_nonconvergence` keyword for `project` on the doubly stochastic multinomial manifolds, which allows disabling the warning issued when Sinkhorn's algorithm does not converge.
+* `CenteredMatrices` provide `get_coordinates` and `get_vector` in their default orthonormal basis, for real and complex matrices.
 
 ### Changed
 
@@ -137,6 +138,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `manifold_volume` of `OrthogonalMatrices`, `Rotations`, `UnitaryMatrices` and `SpecialUnitaryMatrices` is the volume with respect to the metric of `inner`.
 * `log` on `SpecialUnitaryMatrices` returns the tangent vector of minimal norm, which has trace zero.
 * `project` onto the tangent space of the `Tucker` manifold also works in its allocating form and returns a `TuckerTangentVector`.
+* `AbstractAffineConnection` is available when only `Manifolds` is loaded.
+* `WeiszfeldEstimation` is exported, like the other estimation methods for `mean` and `median`.
+* `check_vector` on the `CholeskySpace` rejects a matrix with a nonzero strictly upper triangular part with the same default tolerance as `check_point`.
+* `project` and `project!` work for the real `Circle` and hence for the `Torus`.
+* `is_flat` on `DeterminantOneMatrices` returns `false` for sizes two and larger.
+* `rand` draws random points and tangent vectors on `CenteredMatrices`, `Elliptope`, `Spectrahedron` and `SPDFixedDeterminant`.
+* `rand` on `DeterminantOneMatrices` draws tangent vectors from the whole tangent space, and `is_vector` there takes a relative tolerance `rtol` and accepts tangent vectors of any length.
 
 ## [0.11.32] 2026-09-30
 

@@ -925,7 +925,7 @@ The scalar curvature is the trace of the Ricci tensor with respect to the invers
 local metric:
 ````math
     R = g^{ij} R_{ij}
-````math
+````
 
 # Arguments
 

@@ -234,6 +234,19 @@ Test.@testset "The circle manifold" begin
             @test inner(Circle(), fill(0.0), fill(1.0), fill(0.1)) == 0.1
             @test inner(Circle(ℂ), 0.0, 1.0im, -1.0im) == -1.0
         end
+        Test.@testset "Projection on the real circle and the torus" begin
+            M = Circle()
+            @test project(M, 4.0) ≈ 4.0 - 2π
+            @test project(M, 0.3, 1.2) == 1.2
+            q = fill(NaN)
+            project!(M, q, 4.0)
+            @test q[] ≈ 4.0 - 2π
+            Y = fill(NaN)
+            project!(M, Y, 0.3, 1.2)
+            @test Y[] == 1.2
+            T = Torus(3)
+            @test is_point(T, project(T, [4.0, 0.0, -7.0]))
+        end
     end
 
     @testset "StaticArrays.jl and vector tests" begin

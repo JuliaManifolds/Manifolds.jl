@@ -159,6 +159,26 @@ function project!(::Spectrahedron, Z, q, Y)
 end
 
 @doc raw"""
+    rand(M::Spectrahedron; vector_at=nothing, σ::Real=1.0)
+    rand!(M::Spectrahedron, pX; vector_at=nothing, σ::Real=1.0)
+
+Project a matrix of independent normally distributed entries with standard deviation `σ`
+onto `M`, or onto the tangent space at `vector_at`.
+"""
+function Random.rand!(
+        rng::AbstractRNG, M::Spectrahedron, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX)))
+    )
+    A = σ .* randn(rng, eltype(pX), representation_size(M))
+    if vector_at === nothing
+        project!(M, pX, A)
+    else
+        project!(M, pX, vector_at, A)
+    end
+    return pX
+end
+
+@doc raw"""
     retract(M::Spectrahedron, q, Y, ::ProjectionRetraction)
 
 compute a projection based retraction by projecting ``q+Y`` back onto the manifold.

@@ -167,6 +167,27 @@ function project!(M::SPDFixedDeterminant, Y, p, X)
     return Y
 end
 
+@doc raw"""
+    rand(M::SPDFixedDeterminant; vector_at=nothing, σ::Real=1.0)
+    rand!(M::SPDFixedDeterminant, pX; vector_at=nothing, σ::Real=1.0)
+
+Draw a random point, or a random tangent vector at `vector_at`, on the
+[`SymmetricPositiveDefinite`](@ref) matrices and project it onto `M`.
+"""
+function Random.rand!(
+        rng::AbstractRNG, M::SPDFixedDeterminant, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX)))
+    )
+    if vector_at === nothing
+        rand!(rng, get_embedding(M), pX; σ = σ)
+        project!(M, pX, pX)
+    else
+        rand!(rng, get_embedding(M), pX; vector_at = vector_at, σ = σ)
+        project!(M, pX, vector_at, pX)
+    end
+    return pX
+end
+
 function Base.show(io::IO, M::SPDFixedDeterminant{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "SPDFixedDeterminant($n, $(M.d))")
 end

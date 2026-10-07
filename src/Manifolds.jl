@@ -220,6 +220,7 @@ using ManifoldsBase:
     ℝ,
     ℂ,
     ℍ,
+    AbstractAffineConnection,
     AbstractApproximationMethod,
     AbstractBasis,
     AbstractDecoratorManifold,
@@ -790,7 +791,8 @@ export AbstractApproximationMethod,
     EfficientEstimator,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius,
-    ExtrinsicEstimation
+    ExtrinsicEstimation,
+    WeiszfeldEstimation
 # Tangent space bases
 export CachedBasis,
     DefaultBasis,

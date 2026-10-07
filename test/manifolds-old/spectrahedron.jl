@@ -65,4 +65,10 @@ end
         @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "Spectrahedron(4, 2; parameter=:field)"
     end
+    @testset "random points and tangent vectors" begin
+        M = Spectrahedron(4, 2)
+        p = rand(MersenneTwister(42), M)
+        @test is_point(M, p)
+        @test is_vector(M, p, rand(MersenneTwister(44), M; vector_at = p))
+    end
 end

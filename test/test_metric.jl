@@ -274,6 +274,7 @@ end
         @test default_vector_transport_method(M, T) == default_vector_transport_method(E, T)
         @test !is_default_connection(TestEuclidean{3}(), LeviCivitaConnection())
         @test Manifolds.connection(TestEuclidean{3}()) == TestConnection()
+        @test isdefined(Manifolds, :AbstractAffineConnection)
     end
 
     @testset "solve_exp_ode error message" begin

@@ -63,6 +63,11 @@ using Manifolds, Test, LinearAlgebra
         @test inner(M, p3, Wt, Wt) ≈ inner(M, p2, W, W)
         @test Manifolds.strictlyLowerTriangular(Wt) == Manifolds.strictlyLowerTriangular(W)
     end
+    @testset "a strictly upper entry of 1e-9 is rejected for points and vectors alike" begin
+        W = [1.0 1.0e-9 0.0; 2.0 3.0 0.0; -1.0 0.5 2.0]
+        @test !is_point(M, W)
+        @test !is_vector(M, p2, W)
+    end
 
     M = CholeskySpace(3; parameter = :field)
     Manifolds.Test.test_manifold(
