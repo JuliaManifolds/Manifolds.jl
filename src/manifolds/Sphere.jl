@@ -416,7 +416,10 @@ function log!(M::AbstractSphere, X, p, q)
         end
         return project!(M, X, p, X)
     end
-    sinθ = sqrt(sin²θ)
+    # q + p may be almost parallel to p, so the rounding error of the projection above can
+    # be as large as the tangent component; orthogonalize once more
+    X .-= real(dot(p, X)) .* p
+    sinθ = norm(X)
     if iszero(sinθ) # opposing points, return deterministic choice from set-valued log
         fill!(X, zero(eltype(X)))
         if abs(real(p[1])) ≈ 1

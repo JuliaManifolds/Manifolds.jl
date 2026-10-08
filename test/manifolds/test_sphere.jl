@@ -226,6 +226,18 @@ using ManifoldDiff
                 @test isapprox(N, -x, exp(N, x, v))
             end
 
+            # nearly opposite points have a unique logarithm
+            x = [1.0, 0.0, 0.0]
+            y = [-cos(1.0e-4), 0.0, sin(1.0e-4)]
+            v = log(M, x, y)
+            @test isapprox(v, [0.0, 0.0, π - 1.0e-4])
+            @test isapprox(M, y, exp(M, x, v))
+            # a Float32 point and the opposite Float64 point
+            x = Float32[0.58818454, -0.40576735, -0.69956553]
+            v = log(M, x, [-0.5881844996901627, 0.4057673266826759, 0.6995654872283419])
+            @test norm(v) ≈ π
+            @test is_vector(M, x, v)
+            
             x = [1, zeros(n)...]
             v = log(M, x, -x)
             @test norm(v) ≈ π
