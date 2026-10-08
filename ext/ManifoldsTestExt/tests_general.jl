@@ -525,7 +525,7 @@ function Manifolds.test_manifold(
             end
             if isa(btype, ProjectedOrthonormalBasis)
                 # check that the basis vectors are tangent vectors
-                atol = is_tangent_atol_multiplier * Manifolds.find_eps(p)
+                atol = sqrt(Manifolds.find_eps(p))
                 for i in 1:N
                     Test.@test is_vector(M, p, bvectors[i]; atol = atol)
                 end
