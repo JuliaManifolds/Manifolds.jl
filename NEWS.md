@@ -187,7 +187,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * The documentation now uses [DocumenterCodeBlocks.jl](https://github.com/fredrikekre/DocumenterCodeBlocks.jl)
 * The documentation now has a landing page using [DocumenterLandingPage.jl](https://github.com/JuliaManifolds/DocumenterLandingPage.jl)
-  [`DocumenterCitations.jl`](https://github.com/JuliaDocs/DocumenterCitations.jl) was bumped to version 1.5.
+* [`DocumenterCitations.jl`](https://github.com/JuliaDocs/DocumenterCitations.jl) was bumped to version 1.5.
 * Several docstrings were rewritten to start with a short summary sentence, such that `DocumenterCodeBlocks.jl` can display them in tooltips.
 * More atlas and chart-related operations are now exported: `get_chart_index`, `transition_map`, `transition_map!`, `transition_map_diff` and `transition_map_diff!`.
 * Chart-based geodesic and parallel-transport ODE solvers use in-place problem definitions for performance.
@@ -270,7 +270,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Improved performance of `embed` for embedding tangent vectors of the `FixedRankMaticesManifold` (#885).
 
-## [0.11.21] 2025-04-03
+## [0.11.21] 2026-04-03
 
 ### Changed
 
@@ -358,13 +358,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Deprecated variants of `det_local_metric`, `einstein_tensor`, `inverse_local_metric`, `local_metric`, `local_metric_jacobian`, `ricci_curvature` that receive a point and a basis as arguments. New variants that work in charts should be used instead.
 
-## [0.11.11] 2025-01-24
+## [0.11.11] 2026-01-24
 
 ### Changed
 
 * `Hyperrectangle` now has `has_components` defined to `true`, as well as r-norm support for `norm` and `distance`.
 
-## [0.11.10] 2025-01-07
+## [0.11.10] 2026-01-07
 
 ### Added
 
@@ -577,14 +577,14 @@ release here, since we do not have a very good reason to yet.
 
 * fix `rand!` to also work on the `Circle(ℂ)`
 
-## [0.10.14] - 2025-02-18
+## [0.10.14] 2025-02-18
 
 ### Changed
 
 * Introduced new implementation of parallel transport on `Rotations(3)` based on Rodrigues' rotation
 formula.
 
-## [0.10.13] - 2025-02-10
+## [0.10.13] 2025-02-10
 
 ### Changed
 
@@ -601,7 +601,7 @@ formula.
   * Renamed `UMVTVector` (now deprecated) to `UMVTangentVector`
 * The internal access `array_value` is now called `internal_value`, compare to its renaming in `ManifoldsBase`
 
-## [0.10.12] - 2025-01-10
+## [0.10.12] 2025-01-10
 
 ### Added
 
@@ -612,20 +612,20 @@ formula.
 
 * Improved performance of selected `get_vector` and `get_coordinates` methods for complex `Euclidean` manifold.
 
-## [0.10.11] - 2025-01-02
+## [0.10.11] 2025-01-02
 
 ### Added
 
 * Bases and rand for `HeisenbergMatrices` and `InvertibleMatrices`.
 
-## [0.10.10] - 2024-12-20
+## [0.10.10] 2024-12-20
 
 ### Added
 
 * the `Segre` manifold
 * the `WarpedMetric` for the `Segre`manifold
 
-## [0.10.9] - 2024-12-16
+## [0.10.9] 2024-12-16
 
 ### Added
 
@@ -637,7 +637,7 @@ formula.
 
 * `about.md` now also lists contributors of manifolds and a very short history of the package.
 
-## [0.10.8] – 2024-11-27
+## [0.10.8] 2024-11-27
 
 ### Changed
 
@@ -645,13 +645,13 @@ formula.
 * Minimum Julia version is now 1.10 (the LTS which replaced 1.6)
 * The dependency ManifoldDiff.jl has been upgraded from v0.3 to v0.4, to bring compatibility with DifferentiationInterface.jl.
 
-## [0.10.7] – 2024-11-16
+## [0.10.7] 2024-11-16
 
 ### Added
 
 * `adjoint_matrix` for Lie groups, with optimized implementations for SO(2), SO(3), SE(2) and SE(3).
 
-## [0.10.6] – 2024-11-06
+## [0.10.6] 2024-11-06
 
 ### Added
 
@@ -659,7 +659,7 @@ formula.
 * New function `quaternion_rotation_matrix` for converting quaternions to rotation matrices.
 * `make.jl` script now has more command line arguments, for example `--exclude-tutorials` when you do not want to build the tutorials but still look at the docs. See `make.jl --help` for more information.
 
-## [0.10.5] – 2024-10-24
+## [0.10.5] 2024-10-24
 
 ### Added
 
@@ -669,7 +669,7 @@ formula.
 
 * rewrote the `CONTRIBUTING.md` and adapt it to today's links and references.
 
-## [0.10.4] - 2024-10-20
+## [0.10.4] 2024-10-20
 
 ### Added
 
@@ -681,7 +681,7 @@ formula.
 * `uniform_distribution` now has an error hint explaining what has to be done to make it work.
 * `lie_bracket` is exactly zero on orthogonal Lie algebra in 2D
 
-## [0.10.3] - 2024-10-04
+## [0.10.3] 2024-10-04
 
 ### Changed
 
@@ -692,7 +692,7 @@ formula.
 * Fixed `solve_exp_ode` only returning the starting position ([#744](https://github.com/JuliaManifolds/Manifolds.jl/issues/744))
 * Fixed documentation of `solve_exp_ode` function signature ([#740](https://github.com/JuliaManifolds/Manifolds.jl/issues/740))
 
-## [0.10.2] - 2024-09-24
+## [0.10.2] 2024-09-24
 
 ### Added
 
@@ -702,13 +702,13 @@ formula.
 
 * fixes a few typographical errors.
 
-## [0.10.1] – 2024-08-29
+## [0.10.1] 2024-08-29
 
 ### Changed
 
 * `identity_element` on `ProductManifold` without `RecursiveArrayTools.jl` now prints a useful error message.
 
-## [0.10.0] – 2024-08-24
+## [0.10.0] 2024-08-24
 
 ### Changed
 
@@ -743,7 +743,7 @@ formula.
   * `uniform_distribution` (not exported).
 * Ability to create non-real `SymplecticStiefel` and `SymplecticGrassmann` manifolds; essential functionality was missing so it was removed until a more developed version is developed.
 
-## [0.9.20] – 2024-06-17
+## [0.9.20] 2024-06-17
 
 ### Added
 
@@ -754,7 +754,7 @@ formula.
 * since now all exp/log/parallel transport are available for all representations of `Grassmann`,
   these are now also set as defaults, since they are more exact.
 
-## [0.9.19] – 2024-06-12
+## [0.9.19] 2024-06-12
 
 ### Changed
 
@@ -766,25 +766,25 @@ formula.
 * a few typos in the doc string of the SPD fixed determinant description
 * several other typographical errors throughout the documentation
 
-## [0.9.18] – 2024-05-07
+## [0.9.18] 2024-05-07
 
 ### Added
 
 * added the injectivity radius for the Stiefel manifold with Euclidean metric
 
-## [0.9.17] – 2024-04-23
+## [0.9.17] 2024-04-23
 
 ### Added
 
 * `Hyperrectangle` manifold with boundary.
 
-## [0.9.16] – 2024-04-01
+## [0.9.16] 2024-04-01
 
 ### Changed
 
 * `NonlinearSolve.jl` and `PythonCall.jl` are no longer an upper bounded dependency (bugs were fixed).
 
-## [0.9.15] – 2024-03-24
+## [0.9.15] 2024-03-24
 
 ### Added
 
@@ -802,7 +802,7 @@ formula.
 * several typographical errors in the docs
 * unifies to use two backticks ``` `` ``` for math instead of ` $ ` further in the docs
 
-## [0.9.14] – 2024-01-31
+## [0.9.14] 2024-01-31
 
 ### Added
 
@@ -810,7 +810,7 @@ formula.
 * `rand` on arbitrary `GroupManifold`s and manifolds with `IsGroupManifold` trait
   generating points and elements from the Lie algebra, respectively
 
-## [0.9.13] – 2024-01-24
+## [0.9.13] 2024-01-24
 
 ### Added
 
@@ -831,19 +831,19 @@ formula.
 
 * a bug that cause `project` for tangent vectors to return wrong results on `MultinomialDoublyStochastic`
 
-## [0.9.12] – 2024-01-21
+## [0.9.12] 2024-01-21
 
 ### Fixed
 
 * Fixed `var` on `TranslationGroup`.
 
-## [0.9.11] – 2023-12-27
+## [0.9.11] 2023-12-27
 
 ### Fixed
 
 * Fixed mixed array index number in-place `parallel_transport_to!` on zero-index `Euclidean`, on Julia 1.6.
 
-## [0.9.10] – 2023-12-27
+## [0.9.10] 2023-12-27
 
 ### Added
 
@@ -854,7 +854,7 @@ formula.
 * Fixed mixed array index number in-place `parallel_transport_to!` on real `Circle`, on Julia 1.6.
 * Violations of MD004 lint rule in this file.
 
-## [0.9.9] – 2023-12-25
+## [0.9.9] 2023-12-25
 
 ### Fixed
 
@@ -863,33 +863,33 @@ formula.
 * `default_estimation_method(M, f)` is deprecated, use `default_approximation_method(M, f)` for your specific method `f` on the manifold `M`.
 * `AbstractEstimationMethod` is deprecated, use `AbstractApproximationMethod` instead.
 
-## [0.9.8] - 2023-11-17
+## [0.9.8] 2023-11-17
 
 ### Fixed
 
 * Improved distribution of random vector generation for rotation matrices and complex circle.
 
-## [0.9.7] – 2023-11-14
+## [0.9.7] 2023-11-14
 
 ### Fixed
 
 * Fixed `is_flat` for `CholeskySpace` and `SymmetricPositiveDefinite` with `LogCholeskyMetric` [https://github.com/JuliaManifolds/Manifolds.jl/issues/684](https://github.com/JuliaManifolds/Manifolds.jl/issues/684).
 
-## [0.9.6] - 2023-11-09
+## [0.9.6] 2023-11-09
 
 ### Fixed
 
 * Fixed real coefficient basis for complex circle (an issue exposed by [https://github.com/JuliaManifolds/ManifoldsBase.jl/pull/173](https://github.com/JuliaManifolds/ManifoldsBase.jl/pull/173)).
 * Fixed `VeeOrthogonalBasis` test for non-real manifolds.
 
-## [0.9.5] - 2023-11-08
+## [0.9.5] 2023-11-08
 
 ### Changed
 
 * `identity_element` now returns a complex matrix for unitary group.
 * `number_of_coordinates` is now exported.
 
-## [0.9.4] - 2023-11-06
+## [0.9.4] 2023-11-06
 
 ### Added
 
@@ -904,13 +904,13 @@ formula.
 
 * Fixed issue with incorrect implementation of `apply_diff_group` in `GroupOperationAction` with left backward and right forward action [#669](https://github.com/JuliaManifolds/Manifolds.jl/issues/669).
 
-## [0.9.3] - 2023-10-28
+## [0.9.3] 2023-10-28
 
 ### Added
 
 * Support for `BoundaryValueDiffEq` v5.
 
-## [0.9.2] - 2023-10-27
+## [0.9.2] 2023-10-27
 
 ### Added
 
@@ -918,13 +918,13 @@ formula.
 * `get_embedding` now works for `GeneralUnitaryMultiplicationGroup`.
 * Github action that checks for NEWS.md changes.
 
-## [0.9.1] - 2023-10-25
+## [0.9.1] 2023-10-25
 
 ### Added
 
 * a new retraction and its inverse for the fixed Rank Manifolds, the orthographic retraction.
 
-## [0.9.0] - 2023-10-24
+## [0.9.0] 2023-10-24
 
 ### Added
 
@@ -1006,7 +1006,7 @@ formula.
 
   ```{julia}
   function Base.show(io::IO, M::CenteredMatrices{T}) where {T}
-      m, n = get_parameter(M)
+      m, n = get_parameter(M.size)
       if T <: TypeParameter
           return print(io, "CenteredMatrices($m, $n)")
       else

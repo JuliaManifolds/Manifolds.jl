@@ -8,12 +8,12 @@ The following is a set of guidelines to [`Manifolds.jl`](https://juliamanifolds.
 #### Table of contents
 
 * [Contributing to `Manifolds.jl`](#contributing-to-manifoldsjl)
-  * [Table of Contents](#table-of-contents)
-  * [How to ask a question](#how-to-ask-a-question)
+  * [Table of contents](#Table-of-contents)
+  * [How to ask a question](#How-to-ask-a-question)
   * [How to file an issue](#How-to-file-an-issue)
   * [How to contribute](#How-to-contribute)
-    * [Add a missing method](#add-a-missing-method)
-    * [Provide a new manifold](#provide-a-new-manifold)
+    * [Add a missing method](#Add-a-missing-method)
+    * [Provide a new manifold](#Provide-a-new-manifold)
   * [Code style](#Code-style)
   * [Spell checking](#Spell-checking)
   * [On the use of AI](#On-the-use-of-AI)

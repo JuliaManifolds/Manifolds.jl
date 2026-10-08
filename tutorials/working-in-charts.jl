@@ -132,12 +132,12 @@ The function returns the full solution to the parallel transport problem, contai
 
 `bvp_i` is needed later for a different purpose, it is the chart index we will use for solving the logarithmic map boundary value problem in.
 
-Next we solve the vector transport problem `solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy])`, sample the result at the selected time steps and store the result in `geo`. The solution includes the geodesic which we extract and convert to a sequence of points digestible by `Makie.jl`, `geo_ps`.
+Next we solve the vector transport problem `solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy], t_end)`, sample the result at the selected time steps and store the result in `geo`. The solution includes the geodesic which we extract and convert to a sequence of points digestible by `Makie.jl`, `geo_ps`.
 `[θₚ, φₚ]` is the parametrization in chart (0, 0) of the starting point of the geodesic.
 The direction of the geodesic is determined by `[θₓ, φₓ]`, coordinates of the tangent vector at the starting point expressed in the induced basis of chart `i_p0x` (which depends on the initial point).
 Finally, `[θy, φy]` are the coordinates of the tangent vector that will be transported along the geodesic, which are also expressed in same basis as `[θₓ, φₓ]`.
 
-We won't draw the transported vector at every point as there would be too many arrows, which is why we select every 100th point only for that purpose with `pt_indices`. Then, `geo_ps_pt` contains points at which the transported vector is tangent to and `geo_Ys` the transported vector at that point, represented in the embedding.
+We won't draw the transported vector at every point as there would be too many arrows, which is why we select every k-th point only for that purpose with `pt_indices`, where k is a tenth of the number of samples in `geo`, rounded down. Then, `geo_ps_pt` contains points at which the transported vector is tangent to and `geo_Ys` the transported vector at that point, represented in the embedding.
 
 The logarithmic map will be solved between points with parametrization `bvp_a1` and `bvp_a2` in chart `bvp_i`.
 The result is assigned to variable `bvp_sol` and then sampled with time step 0.05. The result of this sampling is converted from parameters in chart `bvp_i` to point in the embedding and stored in `geo_r`.

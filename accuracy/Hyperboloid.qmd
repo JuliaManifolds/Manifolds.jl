@@ -1,5 +1,5 @@
 ---
-title: Accurcay tests on the Hyperboloid
+title: Accuracy tests on the Hyperboloid
 ---
 
 
@@ -12,8 +12,10 @@ cd(@__DIR__)
 Pkg.activate("."); # for reproducibility use the local accuracy environment.
 ```
 
-In this small note we compare different implementations of several functions on the [Hyperbolic]().
-We compare the functions prior [PR #]() to vs those introduced therein.
+In this small note we compare different implementations of several functions on the
+[Hyperbolic](../manifolds/hyperbolic.md).
+We compare the functions prior to
+[PR #631](https://github.com/JuliaManifolds/Manifolds.jl/pull/631) to those introduced therein.
 We compare the previous version (always called `_1`) and the new version `_2`, where we leave out the manifold to indicate, that these are the local functions here.
 We compare this to the one given in `Manifolds.jl` at time of writing (which is the first one), on `BigFloat` on several scales of magnitudes.
 
@@ -43,6 +45,7 @@ Xbns = [norm(M, p, X) for X in Xbs]
 qbs = [exp(M, pb, Y) for Y in Xbs]
 Xs = [Float64.(X) for X in Xbs]
 qs = [Float64.(q) for q in qbs]
+Xns = [norm(M, p, Y) for Y in Xs]
 ```
 
 ## Distance
@@ -75,6 +78,10 @@ fig = plot(;
 )
 plot!(fig, lengths, abs.(Xbns .- d_1), color = indigo, label = "1 - acosh-based")
 plot!(fig, lengths, abs.(Xbns .- d_2), color = teal, label = "2 - asinh-based")
+plot!(
+    fig, lengths, abs.(Xbns .- Xns);
+    color = :gray, linestyle = :dash, label = "the reference in Float64",
+)
 ```
 
 ```{julia}
