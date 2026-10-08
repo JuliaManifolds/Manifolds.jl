@@ -2,6 +2,7 @@ using StatsBase: AbstractWeights, pweights, SimpleCovariance
 using Distributions, RecursiveArrayTools
 using Manifolds, ManifoldsBase, Test, Random, LinearAlgebra
 import ManifoldsBase:
+    check_point,
     manifold_dimension,
     exp!,
     log!,
@@ -14,6 +15,15 @@ import Manifolds:
 struct TestStatsSphere{N} <: AbstractManifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
 manifold_dimension(::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
+function check_point(M::TestStatsSphere, p; kwargs...)
+    if !isapprox(norm(p), 1.0; kwargs...)
+        return DomainError(
+            norm(p),
+            "The point $(p) does not lie on the $(M) since its norm is not 1.",
+        )
+    end
+    return nothing
+end
 function exp!(::TestStatsSphere{N}, q, p, X; kwargs...) where {N}
     return exp!(Sphere(N), q, p, X; kwargs...)
 end
@@ -130,6 +140,7 @@ function test_median(
             @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
         else
             @test_throws Exception median(M, x, pweights(ones(n + 1)), method; kwargs...)
+            @test is_point(M, median(M, x, method; kwargs...); atol = 10^-9)
         end
     end
     return nothing
@@ -420,6 +431,7 @@ end
             test_median(M, x; atol = 1.0e-12)
             test_median(M, x; method = CyclicProximalPointEstimation(), atol = 1.0e-12)
             test_median(M, x; method = WeiszfeldEstimation())
+            test_median(M, [[0.0, 0.0, 1.0]]; method = WeiszfeldEstimation())
             method = CyclicProximalPointEstimation()
             w = pweights(ones(n))
             @test median(M, x; stop_iter = 1) == median(M, x, method; stop_iter = 1)
