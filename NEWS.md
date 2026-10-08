@@ -166,6 +166,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `mean` with `GeodesicInterpolation` and a shuffling generator `shuffle_rng` skips exactly the points of weight zero.
 * `median(M, x)` and `median(M, x, w)` pass their keyword arguments to the estimation method.
 * `median` with `WeiszfeldEstimation` returns the point itself for a single point and for coinciding points.
+* `mean_and_var` with `GeodesicInterpolation` returns the weighted mean and variance also when the first points have weight zero.
 
 ## [0.11.32] 2026-09-30
 

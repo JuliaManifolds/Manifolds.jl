@@ -666,6 +666,9 @@ end
                     1 / 2,
                 )
                 @test v5 ≈ var(S, x, pweights([1, 2, 3]), m5)
+                m6, v6 = mean_and_var(S, x, pweights([0, 0, 1]), GeodesicInterpolation())
+                @test m6 ≈ x[3]
+                @test v6 ≈ 0 atol = 1.0e-6
             end
 
             @testset "within radius" begin

@@ -909,6 +909,7 @@ function StatsBase.mean_and_var(
     ytmp = allocate_result(M, mean, y)
     @inbounds for i in 2:n
         j = order[i]
+        iszero(w[j]) && continue
         snew = s + w[j]
         t = w[j] / snew
         inverse_retract!(M, v, y, x[j], inverse_retraction)
