@@ -276,8 +276,8 @@ function Statistics.mean!(
     v = zero_vector(M, q)
     ytmp = allocate_result(M, mean, q)
     @inbounds for i in 2:n
-        iszero(w[i]) && continue
         j = order[i]
+        iszero(w[j]) && continue
         s += w[j]
         t = w[j] / s
         inverse_retract!(M, v, q, x[j], inverse_retraction)

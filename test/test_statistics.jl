@@ -403,6 +403,20 @@ end
                     α in range(0, 2 * π - 2 * π / n, length = n)
             ]
             test_mean(M, x)
+            @testset "geodesic interpolation with a shuffled order" begin
+                wz = pweights([1.0, 0.0, 1.0])
+                ym = shortest_geodesic(M, x[1], x[3], 0.5)
+                for seed in 1:10
+                    y = mean(
+                        M, x, wz, GeodesicInterpolation(); shuffle_rng = MersenneTwister(seed)
+                    )
+                    @test isapprox(M, y, ym; atol = 10^-7)
+                    y2, _ = mean_and_var(
+                        M, x, wz, GeodesicInterpolation(); shuffle_rng = MersenneTwister(seed)
+                    )
+                    @test isapprox(M, y2, ym; atol = 10^-7)
+                end
+            end
             test_median(M, x; atol = 1.0e-12)
             test_median(M, x; method = CyclicProximalPointEstimation(), atol = 1.0e-12)
             test_median(M, x; method = WeiszfeldEstimation())
