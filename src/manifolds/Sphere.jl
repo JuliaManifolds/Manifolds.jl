@@ -595,8 +595,7 @@ Compute the parallel transport on the [`Sphere`](@ref) of the tangent vector `X`
 to `q`, provided, the [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`) between `p` and `q` is unique. The formula reads
 
 ````math
-P_{p←q}(X) = X - \frac{\Re(⟨\log_p q,X⟩_p)}{d^2_𝕊(p,q)}
-\bigl(\log_p q + \log_q p \bigr).
+\mathcal P_{q←p}(X) = X - \frac{2\Re(⟨X,q⟩)}{\lVert p+q \rVert^2}(p+q).
 ````
 """
 parallel_transport_to(::AbstractSphere, ::Any, ::Any, ::Any, ::Any)
