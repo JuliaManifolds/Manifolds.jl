@@ -570,7 +570,7 @@ Statistics.median(
 #
 # dispatch on the method first before allocating to allow Euclidean defaults to hit
 function Statistics.median(M::AbstractManifold, x::AbstractVector; kwargs...)
-    return median(M, x, default_approximation_method(M, median, eltype(x)))
+    return median(M, x, default_approximation_method(M, median, eltype(x)); kwargs...)
 end
 function Statistics.median(
         M::AbstractManifold,
@@ -578,7 +578,7 @@ function Statistics.median(
         w::AbstractVector;
         kwargs...,
     )
-    return median(M, x, w, default_approximation_method(M, median, eltype(x)))
+    return median(M, x, w, default_approximation_method(M, median, eltype(x)); kwargs...)
 end
 
 function Statistics.median(

@@ -164,6 +164,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `FiberBundleProductRetraction` on a `VectorBundle` transports the fiber part with the vertical vector transport method, the one `FiberBundleInverseProductRetraction` uses.
 * `mean(M, x)` and `mean(M, x, w)` pass their keyword arguments to the estimation method, also on decorator manifolds.
 * `mean` with `GeodesicInterpolation` and a shuffling generator `shuffle_rng` skips exactly the points of weight zero.
+* `median(M, x)` and `median(M, x, w)` pass their keyword arguments to the estimation method.
 
 ## [0.11.32] 2026-09-30
 
