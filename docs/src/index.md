@@ -103,7 +103,7 @@ To refer to a specific version, it is recommended to cite, for example,
   Doi = {10.5281/ZENODO.4292129},
   Url = {https://zenodo.org/record/4292129},
   Publisher = {Zenodo},
-  Year = {2021},
+  Year = {2026},
   Copyright = {MIT License}
 }
 ```

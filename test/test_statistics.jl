@@ -1,16 +1,12 @@
 using StatsBase: AbstractWeights, pweights, SimpleCovariance
 using Distributions, RecursiveArrayTools
-using Random: GLOBAL_RNG, seed!
 using Manifolds, ManifoldsBase, Test, Random, LinearAlgebra
 import ManifoldsBase:
     manifold_dimension,
     exp!,
     log!,
     inner,
-    zero_vector!,
-    decorated_manifold,
-    base_manifold,
-    get_embedding
+    zero_vector!
 using Manifolds: normal_tvector_distribution
 import Manifolds:
     cov, mean, mean!, median, median!, var, mean_and_var, default_approximation_method
@@ -60,14 +56,9 @@ function zero_vector!(::TestStatsEuclidean{N}, X, p; kwargs...) where {N}
     return zero_vector!(Euclidean(N), X, p; kwargs...)
 end
 
-struct TestStatsNotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-decorated_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
-get_embedding(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
-base_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
-
 struct TestStatsNotImplementedManifold <: AbstractDecoratorManifold{ℝ} end
 
-function test_mean(M, x, yexp = nothing, method...; kwargs...)
+function test_mean(M, x, yexp = nothing; kwargs...)
     @testset "mean unweighted" begin
         y = mean(M, x; kwargs...)
         @test is_point(M, y; atol = 10^-9)
@@ -242,7 +233,6 @@ function test_std(M, x, sexp = nothing; kwargs...)
 end
 
 function test_moments(M, x)
-    n = length(x)
     @testset "moments unweighted" begin
         m = mean(M, x)
         for i in 1:5
@@ -695,7 +685,6 @@ end
         @testset "Sphere default" begin
             rng = MersenneTwister(47)
             S = Sphere(2)
-            p0 = [1.0, 0, 0]
             x = [normalize(randn(rng, 3)) for _ in 1:10]
             x = [x; -x]
             w = pweights([rand(rng) for _ in 1:length(x)])
@@ -716,7 +705,6 @@ end
         @testset "ProjectiveSpace default" begin
             rng = MersenneTwister(47)
             M = ProjectiveSpace(2)
-            p0 = [1.0, 0, 0]
             x = [normalize(randn(rng, 3)) for _ in 1:10]
             x = [x; -x]
             w = pweights([rand(rng) for _ in 1:length(x)])
@@ -748,8 +736,8 @@ end
             @test m == mg
             @test m != mf
 
-            μ = project(R, randn(3, 3))
-            d = Manifolds.normal_tvector_distribution(R, μ, 0.1)
+            μ = project(R, randn(rng, 3, 3))
+            d = normal_tvector_distribution(R, μ, 0.1)
             x = [exp(R, μ, rand(rng, d)) for _ in 1:10]
             w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(R, x, w)

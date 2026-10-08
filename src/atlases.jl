@@ -68,8 +68,8 @@ end
 """
     affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
 
-Calculate the affine connection on manifold `M` at point with parameters `a` in chart `i` of an
-an [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Zc` and `Yc` in induced basis and save the result
+Calculate the affine connection on manifold `M` at point with parameters `a` in chart `i` of
+an [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Xc` and `Yc` in induced basis and save the result
 in `Zc`.
 """
 affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
