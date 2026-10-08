@@ -214,6 +214,8 @@ function inner(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, X, Y) 
     return X[1][1] * Y[1][1] + (A * p[1][1])^2 * dot(X[2:end], Y[2:end])
 end
 
+@tfvector_inner_via_get_vector (MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}} where {V, A})
+
 @doc raw"""
     log(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, q)
 

@@ -102,6 +102,8 @@ function inner(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, p, X, Y)
     end
 end
 
+@tfvector_inner_via_get_vector MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}
+
 @doc raw"""
     X = inverse_retract(M::MetricManifold{ℝ, Stiefel{ℝ}, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
     inverse_retract!(M::MetricManifold{ℝ, Stiefel{ℝ}, X, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)

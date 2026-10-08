@@ -58,6 +58,13 @@ Pages = ["manifolds/MetricManifold.jl"]
 Order = [:function]
 ```
 
+If a metric provides a closed-form `inner` for arbitrary tangent vectors, the following macros define `inner` and `norm` for tangent vectors given as coefficients in a basis.
+
+```@docs
+Manifolds.@tfvector_inner_via_get_vector
+Manifolds.@tfvector_norm_via_get_vector
+```
+
 ## Metrics, charts and bases of vector spaces
 
 Metric-related functions, similarly to connection-related functions, need to operate in a basis of a vector space, see [here](@ref connections_charts).

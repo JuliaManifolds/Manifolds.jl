@@ -55,6 +55,48 @@ function inner(M::MetricManifold, p, X::TFVector, Y::TFVector)
     return dot(X.data, local_metric(M, p, X.basis) * Y.data)
 end
 
+"""
+    @tfvector_inner_via_get_vector T
+
+Define `inner(M::T, p, X::TFVector, Y::TFVector)`, which converts both coefficient vectors
+to tangent vectors using [`get_vector`](@extref `ManifoldsBase.get_vector`) and calls `inner` on them.
+
+This resolves the ambiguity between `inner(::MetricManifold, p, ::TFVector, ::TFVector)`
+and a closed-form `inner(::T, p, X, Y)` of a metric manifold type `T`, so it should be
+used after each such method. `T` can be a `UnionAll` written as `(T where {...})`.
+"""
+macro tfvector_inner_via_get_vector(T)
+    return esc(
+        quote
+            function inner(M::$T, p, X::TFVector, Y::TFVector)
+                return inner(
+                    M, p, get_vector(M, p, X.data, X.basis), get_vector(M, p, Y.data, Y.basis),
+                )
+            end
+        end,
+    )
+end
+
+"""
+    @tfvector_norm_via_get_vector T
+
+Define `norm(M::T, p, X::TFVector)`, which converts the coefficient vector to a tangent
+vector using [`get_vector`](@extref `ManifoldsBase.get_vector`) and calls `norm` on it.
+
+This resolves the ambiguity between `norm(::MetricManifold, p, ::TFVector)`
+and a closed-form `norm(::T, p, X)` of a metric manifold type `T`, so it should be
+used after each such method. `T` can be a `UnionAll` written as `(T where {...})`.
+"""
+macro tfvector_norm_via_get_vector(T)
+    return esc(
+        quote
+            function norm(M::$T, p, X::TFVector)
+                return norm(M, p, get_vector(M, p, X.data, X.basis))
+            end
+        end,
+    )
+end
+
 @doc raw"""
     sharp(N::MetricManifold{M,G}, p, ξ::CoTFVector)
 

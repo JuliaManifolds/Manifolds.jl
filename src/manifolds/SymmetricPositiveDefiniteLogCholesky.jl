@@ -129,6 +129,8 @@ function inner(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMe
     return inner(CholeskySpace(N; parameter = get_parameter_type(M.manifold)), z, Xz, Yz)
 end
 
+@tfvector_inner_via_get_vector MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}
+
 """
     is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric})
 

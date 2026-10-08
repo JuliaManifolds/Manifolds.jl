@@ -432,6 +432,8 @@ inner(::Euclidean, ::Any...)
     return dot(X, Y)
 end
 
+@tfvector_inner_via_get_vector (MetricManifold{𝔽, <:AbstractManifold, EuclideanMetric} where {𝔽})
+
 function inverse_local_metric(
         M::MetricManifold{𝔽, <:AbstractManifold, EuclideanMetric},
         p,
@@ -649,6 +651,8 @@ function LinearAlgebra.norm(
     )
     return norm(X, r)
 end
+
+@tfvector_norm_via_get_vector MetricManifold{ℝ, <:AbstractManifold, EuclideanMetric}
 
 function project!(
         ::EmbeddedManifold{𝔽, Euclidean{𝔽, nL}, Euclidean{𝔽2, mL}},

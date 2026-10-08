@@ -100,6 +100,8 @@ function inner(M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}
     end
 end
 
+@tfvector_inner_via_get_vector MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}
+
 @doc doc"""
     inverse_retract(
         M::MetricManifold{ℝ,<:Stiefel{ℝ},<:StiefelSubmersionMetric}, p, q,

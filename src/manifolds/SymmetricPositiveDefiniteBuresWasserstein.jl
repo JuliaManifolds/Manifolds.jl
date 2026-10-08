@@ -107,6 +107,10 @@ function inner(
     return 1 / 2 * dot(lyap(p, -X), Y)
 end
 
+@tfvector_inner_via_get_vector MetricManifold{
+    ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric,
+}
+
 """
     is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric})
 

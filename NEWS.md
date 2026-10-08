@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `ProjectionRetraction` on the `MultinomialSymmetricPositiveDefinite` manifold.
 * `warn_nonconvergence` keyword for `project` on the doubly stochastic multinomial manifolds, which allows disabling the warning issued when Sinkhorn's algorithm does not converge.
 * `CenteredMatrices` provide `get_coordinates` and `get_vector` in their default orthonormal basis, for real and complex matrices.
+* `@tfvector_inner_via_get_vector` and `@tfvector_norm_via_get_vector` macros that define `inner` and `norm` of `TFVector`s on a metric manifold with a closed-form `inner` or `norm` by converting them with `get_vector`.
 
 ### Changed
 
@@ -58,6 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `volume_density` on `Rotations` and `OrthogonalMatrices` returns the determinant of the differential of the exponential map.
 * `exp` on the `GeneralizedGrassmann` manifold follows the geodesic in the direction of the given tangent vector.
 * `is_vector` on the `GeneralizedStiefel` and `GeneralizedGrassmann` manifolds accepts complex tangent vectors and those with `p'BX = 0`, with a tolerance relative to the length of the vector.
+* `inner` of two `TFVector`s works on the `Lorentz` manifold and for the canonical and submersion metrics on `Stiefel`, the Bures-Wasserstein, generalized Bures-Wasserstein and log-Cholesky metrics on `SymmetricPositiveDefinite`, and the warped metric on `Segre`.
+* `inner` and `norm` of `TFVector`s work on a `MetricManifold` with the `EuclideanMetric`.
 * `exp`, `log`, `mid_point`, the retractions and the inverse retractions on `Grassmann` and `Stiefel` accept points and tangent vectors given as `StiefelPoint` and `StiefelTangentVector`.
 * `manifold_dimension` on the `HamiltonianMatrices` returns the dimension of the manifold, over the real and over the complex numbers.
 * `rand` on the `HamiltonianMatrices` draws its two off-diagonal blocks independently, as documented.

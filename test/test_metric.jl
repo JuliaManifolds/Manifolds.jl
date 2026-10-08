@@ -739,4 +739,44 @@ end
         @test get_embedding(MM) === get_embedding(M)
         @test get_embedding(MM, Float64) === get_embedding(M, Float64)
     end
+
+    @testset "inner of TFVectors for metrics with a closed-form inner" begin
+        p = [1.0, 2.0, 3.0]
+        B = get_basis(Euclidean(3), p, DefaultOrthonormalBasis())
+        fX = TFVector([1.0, 0.5, -1.0], B)
+        fY = TFVector([0.0, 2.0, 1.0], B)
+        @test inner(Lorentz(3), p, fX, fY) ≈ 2.0
+
+        p_st = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+        p_spd = [2.0 0.5 0.1; 0.5 1.5 -0.3; 0.1 -0.3 1.0]
+        p_segre = [[0.5], [0.6, 0.8], [0.0, 1.0, 0.0]]
+        cases = [
+            (MetricManifold(Stiefel(4, 2), CanonicalMetric()), p_st),
+            (MetricManifold(Stiefel(4, 2), StiefelSubmersionMetric(0.5)), p_st),
+            (MetricManifold(SymmetricPositiveDefinite(3), BuresWassersteinMetric()), p_spd),
+            (
+                MetricManifold(
+                    SymmetricPositiveDefinite(3),
+                    GeneralizedBuresWassersteinMetric([2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0]),
+                ),
+                p_spd,
+            ),
+            (MetricManifold(SymmetricPositiveDefinite(3), LogCholeskyMetric()), p_spd),
+            (MetricManifold(Segre(2, 3), WarpedMetric(1.5)), p_segre),
+        ]
+        for (M, p) in cases
+            B = get_basis(base_manifold(M), p, DefaultOrthonormalBasis())
+            vs = get_vectors(base_manifold(M), p, B)
+            d = length(vs)
+            c1 = collect(range(1.0, 2.0; length = d))
+            c2 = collect(range(-1.0, 0.5; length = d))
+            X = sum(c1[i] * vs[i] for i in 1:d)
+            Y = sum(c2[i] * vs[i] for i in 1:d)
+            @test inner(M, p, TFVector(c1, B), TFVector(c2, B)) ≈ inner(M, p, X, Y)
+        end
+
+        M = MetricManifold(Euclidean(3), EuclideanMetric())
+        @test inner(M, p, fX, fY) ≈ dot([1.0, 0.5, -1.0], [0.0, 2.0, 1.0])
+        @test norm(M, p, fX) ≈ norm([1.0, 0.5, -1.0])
+    end
 end
