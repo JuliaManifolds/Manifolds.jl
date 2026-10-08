@@ -162,6 +162,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `isapprox` on `Grassmann`, `GeneralizedGrassmann` and `KendallsShapeSpace` finds every point approximately equal to itself, also with `atol = 0`.
 * `isapprox` on the `EssentialManifold` reports two representatives of the same point as equal.
 * `FiberBundleProductRetraction` on a `VectorBundle` transports the fiber part with the vertical vector transport method, the one `FiberBundleInverseProductRetraction` uses.
+* `mean(M, x)` and `mean(M, x, w)` pass their keyword arguments to the estimation method, also on decorator manifolds.
 
 ## [0.11.32] 2026-09-30
 

@@ -123,13 +123,13 @@ mean(::AbstractManifold, ::Any...)
 
 #
 # dispatch on method first to allow Euclidean defaults to hit
-function Statistics.mean(M::AbstractManifold, x::AbstractVector, kwargs...)
+function Statistics.mean(M::AbstractManifold, x::AbstractVector; kwargs...)
     return mean(M, x, default_approximation_method(M, mean, eltype(x)); kwargs...)
 end
 function Statistics.mean(
         M::AbstractManifold,
         x::AbstractVector,
-        w::AbstractVector,
+        w::AbstractVector;
         kwargs...,
     )
     return mean(M, x, w, default_approximation_method(M, mean, eltype(x)); kwargs...)
@@ -1083,4 +1083,4 @@ end
 # decorate default method for a few functions
 # TODO: Check how to “ask” the embedding for default approx methods, when it exists,
 # for the functions [mean, median, cov, var, mean_and_std, mean_and_var]
-@trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector)
+@trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector; kwargs...)

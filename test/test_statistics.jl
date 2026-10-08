@@ -520,6 +520,7 @@ end
         p1 = [1.0 2; 4 5; -5 -7]
         p2 = [3.0 1; 2 5; -5 -6]
         @test mean(M, [p1, p2]) == mean([p1, p2])
+        @test mean(M, [p1, p2]; atol = 1.0e-10) == mean([p1, p2])
 
         for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
             @test ManifoldsBase.get_forwarding_type_embedding(
@@ -700,6 +701,10 @@ end
             m = mean(S, x, w)
             mg = mean(S, x, w, GeodesicInterpolation())
             @test m == mg
+            @test mean(S, x, w; shuffle_rng = MersenneTwister(42)) ==
+                mean(S, x, w, GeodesicInterpolation(); shuffle_rng = MersenneTwister(42))
+            @test mean(S, x; shuffle_rng = MersenneTwister(42)) !=
+                mean(S, x, GeodesicInterpolation())
         end
 
         @testset "ProjectiveSpace default" begin
@@ -809,7 +814,7 @@ end
         @test issymmetric(covm)
     end
 
-    @testset "Default Fallbacks for nonimplemented with stop forwarding" begin
+    @testset "Default Fallbacks for non-implemented with stop forwarding" begin
         M = TestStatsNotImplementedManifold()
         a = GradientDescentEstimation()
         @test default_approximation_method(ManifoldsBase.StopForwardingType(), M, cov) === a
