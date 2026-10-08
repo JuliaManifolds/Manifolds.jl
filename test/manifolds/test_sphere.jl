@@ -237,7 +237,7 @@ using ManifoldDiff
             v = log(M, x, [-0.5881844996901627, 0.4057673266826759, 0.6995654872283419])
             @test norm(v) ≈ π
             @test is_vector(M, x, v)
-            
+
             x = [1, zeros(n)...]
             v = log(M, x, -x)
             @test norm(v) ≈ π
