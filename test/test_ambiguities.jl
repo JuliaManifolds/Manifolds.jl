@@ -47,6 +47,9 @@ end
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
         MS_LIMIT = 44
+        if v"1.10" <= VERSION < v"1.11"
+            MS_LIMIT += 7
+        end
         println("Number of Manifolds.jl ambiguities: $(length(ms))")
         if length(ms) > MS_LIMIT
             for amb in ms

@@ -62,6 +62,9 @@ Examples include vector bundles, principal bundles or unit tangent bundles, see 
 * `manifold` – the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
                manifold the Fiber bundle is defined on,
 * `type`     – representing the type of fiber we use.
+* `vector_transport` – the [`FiberBundleProductVectorTransport`](@ref) used by default for
+    vector transport when no specific method is provided. Stores both the horizontal and
+    vertical vector transport methods.
 
 # Constructor
 
