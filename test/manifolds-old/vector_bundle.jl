@@ -216,4 +216,18 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test is_flat(M)
         @test injectivity_radius(M) == Inf
     end
+
+    @testset "product retraction transports the fiber part with the vertical method" begin
+        M = Sphere(2)
+        ppt, prt = ParallelTransport(), ProjectionTransport()
+        B1 = TangentBundle(M, Manifolds.FiberBundleProductVectorTransport(ppt, prt))
+        B2 = TangentBundle(M, Manifolds.FiberBundleProductVectorTransport(prt, ppt))
+        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
+        X = ArrayPartition([0.0, 0.3, 0.0], [0.0, 0.0, 0.5])
+        xq = exp(M, p.x[1], X.x[1])
+        q1 = retract(B1, p, X, m_prod_retr)
+        @test isapprox(M, xq, q1.x[2], project(M, xq, [0.0, 1.0, 0.5]))
+        q2 = retract(B2, p, X, m_prod_retr)
+        @test isapprox(B2, p, inverse_retract(B2, p, q2, m_prod_invretr), X)
+    end
 end

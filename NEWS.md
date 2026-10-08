@@ -158,6 +158,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The exponential map and the parallel transport on `Rotations(3)` and `OrthogonalMatrices(3)` return finite values for tangent vectors shorter than `1e-162`.
 * `isapprox` on `Grassmann`, `GeneralizedGrassmann` and `KendallsShapeSpace` finds every point approximately equal to itself, also with `atol = 0`.
 * `isapprox` on the `EssentialManifold` reports two representatives of the same point as equal.
+* `FiberBundleProductRetraction` on a `VectorBundle` transports the fiber part with the vertical vector transport method, the one `FiberBundleInverseProductRetraction` uses.
 
 ## [0.11.32] 2026-09-30
 
