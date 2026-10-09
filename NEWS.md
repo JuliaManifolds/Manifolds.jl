@@ -169,6 +169,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `mean_and_var` with `GeodesicInterpolation` returns the weighted mean and variance also when the first points have weight zero.
 * `estimated_sectional_curvature` accepts any pair of tangent vectors spanning the plane, as `sectional_curvature` does.
 * `NLSolveInverseRetraction` with `project_point = true` leaves the point it is given unchanged.
+* The plotting recipe of `Sphere(2)` draws the solid surface with the resolution `surface_resolution` also when it differs from `wires`.
 
 ## [0.11.32] 2026-09-30
 
