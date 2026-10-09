@@ -289,7 +289,7 @@ function generic_de_Casteljau(
         n::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
     )
     X = inverse_retract(M, pts[1], pts[2], n)
-    return retract(M, pts[1], X, t, m)
+    return retract(M, pts[1], t * X, m)
 end
 ```
 
@@ -306,13 +306,57 @@ function generic_de_Casteljau(
     p = generic_de_Casteljau(M, t, pts[1:(end - 1)]; m = m, n = n)
     q = generic_de_Casteljau(M, t, pts[2:end]; m = m, n = n)
     X = inverse_retract(M, p, q, n)
-    return retract(M, p, X, t, m)
+    return retract(M, p, t * X, m)
 end
 ```
 
 Note that on a manifold `M` where the exponential map is implemented, the `default_retraction_method(M)` returns ``[`ExponentialRetraction`](@extref ManifoldsBase.ExponentialRetraction)``{=commonmark}, which yields that the `retract` function falls back to calling `exp`.
 
 The same mechanism exists for ``[`parallel_transport_to(M, p, X, q)`](@extref `ManifoldsBase.parallel_transport_to-Tuple{AbstractManifold, Any, Any, Any}`)``{=commonmark} and the more general ``[`vector_transport_to(M, p, X, q, m)`](@extref `ManifoldsBase.vector_transport_to`)``{=commonmark} whose ``[`AbstractVectorTransportMethod`](@extref `ManifoldsBase.AbstractVectorTransportMethod`)``{=commonmark} `m` has a default defined by ``[`default_vector_transport_method(M)`](@extref `ManifoldsBase.default_vector_transport_method-Tuple{AbstractManifold}`)``{=commonmark}.
+
+To illustrate both variants, we take the composite Bézier curve from [BergmannGousenbourger:2018](@cite) on the sphere `M₃`, three segments with four control points each, whose junctions are the points `d0` to `d3`. We sample the curve of `de_Casteljau`, which uses geodesics, as well as the one of `generic_de_Casteljau` with the ``[`ProjectionRetraction`](@extref ManifoldsBase.ProjectionRetraction)``{=commonmark} and the ``[`ProjectionInverseRetraction`](@extref ManifoldsBase.ProjectionInverseRetraction)``{=commonmark}, which replace the geodesics by projected straight lines of the embedding.
+
+```{julia}
+d0, d1, d2, d3 = [0.0, 0.0, 1.0], [0.0, -1.0, 0.0], [-1.0, 0.0, 0.0], [0.0, 0.0, -1.0]
+X1, X2 = π / (4 * √2) .* [1.0, 0.0, 1.0], -π / (4 * √2) .* [0.0, 1.0, -1.0]
+segments = (
+    (d0, exp(M₃, d0, π / (8 * √2) .* [1.0, -1.0, 0.0]), exp(M₃, d1, X1), d1),
+    (d1, exp(M₃, d1, -X1), exp(M₃, d2, X2), d2),
+    (d2, exp(M₃, d2, -X2), exp(M₃, d3, π / (8 * √2) .* [-1.0, 1.0, 0.0]), d3),
+)
+ts = range(0, 1; length = 101)
+curve = [de_Casteljau(M₃, t, seg) for seg in segments for t in ts]
+curve_proj = [
+    generic_de_Casteljau(M₃, t, seg; m = ProjectionRetraction(), n = ProjectionInverseRetraction())
+        for seg in segments for t in ts
+]
+maximum(distance(M₃, p, q) for (p, q) in zip(curve, curve_proj))
+```
+
+With ``[`ManifoldMakie.jl`](@extref ManifoldMakie :doc:`index`)``{=commonmark} we draw the geodesic curve in black, its junctions in orange and the thinner curve of the projection retraction in magenta, together with the de Casteljau algorithm on the middle segment at `t = 2/3`: the control points and the geodesics between them in blue, the points and geodesics of the next two levels in cyan and teal, rspectively, and the resulting point on the curve in magenta.
+
+```{julia}
+using CairoMakie, ManifoldMakie, NamedColors
+using Manifolds: Sphere # Makie exports a Sphere as well
+paul_tol = load_paul_tol()
+fig, ax = sphereplot(M₃; surfacecolor = paul_tol["brightgrey"])
+ax.azimuth = -2.5
+ax.elevation = 0.25
+# the de Casteljau algorithm on the middle segment at t = 2/3
+t = 2 / 3
+b = collect(segments[2])
+c = [shortest_geodesic(M₃, b[i], b[i + 1], t) for i in 1:3]
+e = [shortest_geodesic(M₃, c[i], c[i + 1], t) for i in 1:2]
+for (pts, color) in ((b, "vibrantblue"), (c, "vibrantcyan"), (e, "vibrantteal"))
+    scattergeodesics!(ax, M₃, pts; color = paul_tol[color], linewidth = 2, markersize = 12)
+end
+lines!(ax, M₃, curve; color = :black, linewidth = 3, label = "Bézier curve with geodesics")
+lines!(ax, M₃, curve_proj; color = paul_tol["vibrantmagenta"], linewidth = 2, label = "Bézier curve with the projection retraction")
+scatter!(ax, M₃, [d0, d1, d2, d3]; color = paul_tol["vibrantorange"], markersize = 16)
+scatter!(ax, M₃, [shortest_geodesic(M₃, e[1], e[2], t)]; color = paul_tol["vibrantmagenta"], markersize = 16)
+axislegend(ax; position = :lb)
+fig
+```
 
 ## Allocating and in-place computations
 

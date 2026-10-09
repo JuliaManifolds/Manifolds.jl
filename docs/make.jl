@@ -146,6 +146,7 @@ end
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style = :alpha)
 links = InterLinks(
     "Julia" => "https://docs.julialang.org/en/v1/",
+    "ManifoldMakie" => "https://juliamanifolds.github.io/ManifoldMakie.jl/stable/",
     "ManifoldsBase" => ("https://juliamanifolds.github.io/ManifoldsBase.jl/stable/"),
 )
 
