@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `warn_nonconvergence` keyword for `project` on the doubly stochastic multinomial manifolds, which allows disabling the warning issued when Sinkhorn's algorithm does not converge.
 * `CenteredMatrices` provide `get_coordinates` and `get_vector` in their default orthonormal basis, for real and complex matrices.
 * `@tfvector_inner_via_get_vector` and `@tfvector_norm_via_get_vector` macros that define `inner` and `norm` of `TFVector`s on a metric manifold with a closed-form `inner` or `norm` by converting them with `get_vector`.
+* Chart-based `gaussian_curvature`, equal to half of `ricci_curvature`.
 
 ### Changed
 
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `ProjectionRetraction`.
 * embedding of the `MultinomialSymmetricPositiveDefinite` manifold is changed from `MultinomialMatrices` to `MultinomialSymmetric`, and is marked as `IsometricallyEmbeddedManifoldType` instead of `EmbeddedManifoldType`. Consequently, `inner`, `norm` and `riemannian_gradient` are now also available.
 * `project` onto the tangent space of `MultinomialMatrices` is now orthogonal with respect to the Fisher–Rao metric instead of subtracting the mean of each column.
+* Basis-based methods of `christoffel_symbols_first`, `christoffel_symbols_second`, `christoffel_symbols_second_jacobian`, `det_local_metric`, `einstein_tensor`, `gaussian_curvature`, `inverse_local_metric`, `local_metric`, `local_metric_jacobian`, `log_local_metric_density`, `ricci_curvature`, `ricci_tensor`, `riemann_tensor` and `solve_exp_ode` (taking a point `p` and an `AbstractBasis` `B`) are deprecated. Use their chart-based variants taking an atlas `A`, chart index `i` and parameters `a` instead, for example `ricci_curvature(M, A, i, a)`; `solve_exp_ode` is replaced by `solve_chart_exp_ode`, while `local_metric_jacobian` and `christoffel_symbols_second_jacobian` have no direct replacements and are covered by the chart-based `christoffel_symbols_first`, `christoffel_symbols_second` and `riemann_tensor`.
 
 ### Fixed
 
@@ -41,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `project` onto the tangent space of the `Elliptope` removes the vertical part with the right sign, so that it is a projection onto the horizontal space.
 * `distance` on a complex `Euclidean` space returns a real number.
 * `distance` and `log` on the unsigned `EssentialManifold` choose the closest of the four sign flips, so that they are the same for every representative of a point.
+* `local_metric` on the real `Sphere` in the `StereographicAtlas` returns a `Diagonal` matrix of the size of the parameters instead of a `UniformScaling`, so that chart-based curvature functions such as `ricci_curvature` work in that atlas.
 * `distance` and `log` on the `EssentialManifold` return a number when a turn about the z axis puts one of the two cameras in place.
 * `project` from a `Euclidean` embedding into a `Euclidean` manifold of fewer array dimensions returns the corresponding entries.
 * Random tangent vectors of a `FiberBundle` are drawn in the fiber over the base point of `vector_at`.
