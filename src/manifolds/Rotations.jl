@@ -256,10 +256,12 @@ function jacobian_exp_argument!(
 end
 
 @doc raw"""
-    normal_rotation_distribution(M::Rotations, p, σ::Real)
+    normal_rotation_distribution(M::Rotations, p, σ::Real=1.0)
 
 Return a random point on the manifold [`Rotations`](@ref) `M`
-by generating a (Gaussian) random orthogonal matrix with determinant ``+1``. Let
+by generating a (Gaussian) random orthogonal matrix with determinant ``+1``.
+The function draws samples from the uniform distribution on the manifold,
+regardless of the value of `σ`. Let
 
 ```math
 QR = A
