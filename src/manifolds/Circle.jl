@@ -333,7 +333,7 @@ log(::Circle, ::Any...)
 Base.log(::Circle{ℝ}, p::Real, q::Real) = sym_rem(q - p)
 function Base.log(M::Circle{ℂ}, p::Number, q::Number)
     cosθ = complex_dot(p, q)
-    cosθ = cosθ > 1 ? one(cosθ) : cosθ
+    cosθ = clamp(complex_dot(p, q), -1, 1)
     if cosθ ≈ -1  # appr. opposing points, angle from the coordinate of q along i p
         Xⁱ = complex_dot(im * p, q)
         θ = atan(abs(Xⁱ), complex_dot(p, q))
@@ -356,7 +356,7 @@ end
 log!(::Circle{ℝ}, X, p, q) = (X .= sym_rem(q[] - p[]))
 function log!(M::Circle{ℂ}, X, p, q)
     cosθ = complex_dot(p, q)
-    cosθ = cosθ > 1 ? one(cosθ) : cosθ
+    cosθ = clamp(complex_dot(p, q), -1, 1)
     if cosθ ≈ -1  # appr. opposing points, angle from the coordinate of q along i p
         Xⁱ = complex_dot(im * p, q)
         θ = atan(abs(Xⁱ), complex_dot(p, q))
