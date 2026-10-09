@@ -1,4 +1,4 @@
-using ManifoldDiff, Manifolds, Random, StaticArrays, Test
+using ManifoldDiff, Manifolds, Random, StaticArrays, Test, ManifoldsBase
 
 Test.@testset "The circle manifold" begin
     M = Circle()
@@ -221,6 +221,14 @@ Test.@testset "The circle manifold" begin
             X3 = fill(0.0)
             log!(Mc, X3, fill(0 + 1.0im), fill(0.0 - 1.0im))
             @test isapprox(X3[], X2[])
+            # nearly opposite points have a unique logarithm
+            q = exp((π - 1.0e-4) * im)
+            X4 = log(Mc, 1.0 + 0.0im, q)
+            @test isapprox(X4, (π - 1.0e-4) * im)
+            @test isapprox(Mc, q, exp(Mc, 1.0 + 0.0im, X4))
+            X5 = fill(0.0 + 0.0im)
+            log!(Mc, X5, fill(1.0 + 0.0im), fill(q))
+            @test isapprox(X5[], (π - 1.0e-4) * im)
         end
         Test.@testset "Complex circle midpoint across the branch cut" begin
             Mc = Circle(ℂ)

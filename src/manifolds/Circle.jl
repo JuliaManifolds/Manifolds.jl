@@ -333,13 +333,21 @@ log(::Circle, ::Any...)
 Base.log(::Circle{ℝ}, p::Real, q::Real) = sym_rem(q - p)
 function Base.log(M::Circle{ℂ}, p::Number, q::Number)
     cosθ = complex_dot(p, q)
-    if cosθ ≈ -1  # appr. opposing points, return deterministic choice from set-valued log
+    cosθ = cosθ > 1 ? one(cosθ) : cosθ
+    if cosθ ≈ -1  # appr. opposing points, angle from the coordinate of q along i p
+        Xⁱ = complex_dot(im * p, q)
+        θ = atan(abs(Xⁱ), complex_dot(p, q))
+    else
+        θ = acos(cosθ)
+    end
+    if θ ≈ π  # opposing points, return deterministic choice from set-valued log
         X = abs(real(p)) ≈ 1 ? 1im : 1 + 0im
         X = X - complex_dot(p, X) * p
         X *= π / norm(X)
+    elseif cosθ ≈ -1  # nearly opposing points, scale the tangent part of q to the angle
+        X = Xⁱ * im * p
+        X *= θ / norm(X)
     else
-        cosθ = cosθ > 1 ? one(cosθ) : cosθ
-        θ = acos(cosθ)
         X = (q - cosθ * p) / usinc(θ)
     end
     return project(M, p, X)
@@ -348,13 +356,21 @@ end
 log!(::Circle{ℝ}, X, p, q) = (X .= sym_rem(q[] - p[]))
 function log!(M::Circle{ℂ}, X, p, q)
     cosθ = complex_dot(p, q)
-    if cosθ ≈ -1
+    cosθ = cosθ > 1 ? one(cosθ) : cosθ
+    if cosθ ≈ -1  # appr. opposing points, angle from the coordinate of q along i p
+        Xⁱ = complex_dot(im * p, q)
+        θ = atan(abs(Xⁱ), complex_dot(p, q))
+    else
+        θ = acos(cosθ)
+    end
+    if θ ≈ π  # opposing points, return deterministic choice from set-valued log
         X .= abs(sum(real.(p))) ≈ 1 ? 1.0im : 1.0 + 0.0im
         X .-= complex_dot(p, X) .* p
         X .*= π / norm(X)
+    elseif cosθ ≈ -1  # nearly opposing points, scale the tangent part of q to the angle
+        X .= Xⁱ .* im .* p
+        X .*= θ / norm(X)
     else
-        cosθ = cosθ > 1 ? one(cosθ) : cosθ
-        θ = acos(cosθ)
         X .= (q - cosθ * p) / usinc(θ)
     end
     return project!(M, X, p, X)
