@@ -6,6 +6,22 @@ using Manifolds, Test, Random, StaticArrays, Quaternions, LinearAlgebra
         @test Manifolds.usinc_from_cos(-1) == 0
         @test Manifolds.usinc_from_cos(-1.0) == 0.0
     end
+    @testset "estimated_sectional_curvature" begin
+        # the estimate depends only on the plane spanned by the two tangent vectors
+        M = Sphere(2)
+        p = [1.0, 0.0, 0.0]
+        X = [0.0, 1.0, 0.0]
+        Y = [0.0, 0.0, 1.0]
+        K = Manifolds.estimated_sectional_curvature(M, p, X, Y)
+        @test Manifolds.estimated_sectional_curvature(M, p, 2 .* X, Y) ≈ K
+        @test Manifolds.estimated_sectional_curvature(M, p, X, X .+ Y) ≈ K
+        # X2 and im .* X2 are orthonormal, while their complex inner product is im
+        M2 = Sphere(2, ℂ)
+        p2 = [1.0 + 0.0im, 0.0, 0.0]
+        X2 = [0.0 + 0.0im, 1.0, 0.0]
+        K2 = Manifolds.estimated_sectional_curvature(M2, p2, X2, im .* X2)
+        @test Manifolds.estimated_sectional_curvature(M2, p2, 2 .* X2, im .* X2) ≈ K2
+    end
     @testset "log_safe!" begin
         n = 8
         Q = qr(randn(n, n)).Q

@@ -71,6 +71,12 @@ Random.seed!(10)
                 -p,
                 inv_retr_method,
             )
+            # the point handed in stays as it is when the method projects it
+            q2 = 1.001 .* exp(M, p, [0.0, 0.3, 0.0])
+            q2_copy = copy(q2)
+            m2 = NLSolveInverseRetraction(ExponentialRetraction(); project_point = true)
+            @test inverse_retract(M, p, q2, m2) ≈ [0.0, 0.3, 0.0]
+            @test q2 == q2_copy
         end
     end
 end

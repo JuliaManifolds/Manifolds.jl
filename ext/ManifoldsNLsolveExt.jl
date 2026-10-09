@@ -30,11 +30,11 @@ function _inverse_retract_nlsolve(
         M::AbstractManifold, p, q, m::NLSolveInverseRetraction; kwargs...
     )
     X0 = m.X0 === nothing ? zero_vector(M, p) : m.X0
+    qp = m.project_point ? project(M, q) : q
     function f!(F, X)
         m.project_tangent && project!(M, X, p, X)
         retract!(M, F, p, project(M, p, X), m.retraction; kwargs...)
-        m.project_point && project!(M, q, q)
-        F .-= q
+        F .-= qp
         return F
     end
     res = NLsolve.nlsolve(f!, X0; m.nlsolve_kwargs...)
