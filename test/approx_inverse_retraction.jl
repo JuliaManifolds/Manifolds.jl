@@ -78,5 +78,30 @@ Random.seed!(10)
             @test inverse_retract(M, p, q2, m2) ≈ [0.0, 0.3, 0.0]
             @test q2 == q2_copy
         end
+
+        @testset "Sphere and Rotations at points off the coordinate axes" begin
+            M = Sphere(2)
+            p = [1.0, 2.0, 2.0] ./ 3
+            X = project(M, p, [0.1, -0.2, 0.3])
+            q = exp(M, p, X)
+            Y = inverse_retract(M, p, q, NLSolveInverseRetraction(ExponentialRetraction(); project_tangent = true))
+            @test is_vector(M, p, Y)
+            @test Y ≈ X atol = 1.0e-8
+            N = Rotations(3)
+            e = Matrix{Float64}(I, 3, 3)
+            p2 = exp(N, e, hat(N, e, [0.3, -0.2, 0.5]))
+            X2 = hat(N, p2, [0.1, 0.2, -0.1])
+            q2 = exp(N, p2, X2)
+            Y2 = inverse_retract(N, p2, q2, NLSolveInverseRetraction(ExponentialRetraction(); project_tangent = true))
+            @test Y2 ≈ X2 atol = 1.0e-8
+        end
+        @testset "Rotations with the tangent projection switch" begin
+            M = Rotations(3)
+            e = Matrix{Float64}(I, 3, 3)
+            p = exp(M, e, hat(M, e, [0.3, -0.2, 0.5]))
+            X = hat(M, p, [0.1, 0.2, -0.1])
+            m = NLSolveInverseRetraction(ExponentialRetraction(); project_tangent = true)
+            @test inverse_retract(M, p, exp(M, p, X), m) ≈ X atol = 1.0e-8
+        end
     end
 end
