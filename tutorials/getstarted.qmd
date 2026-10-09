@@ -153,7 +153,7 @@ and for these we again get informative error messages
 
 ```{julia}
 #| error: true
-@expect_error is_vector(M₃, [1, 0, 0], [0.1, 1, 1]; error = :error) DomainError
+is_vector(M₃, [1, 0, 0], [0.1, 1, 1]; error = :error)
 ```
 
 To learn about how to define a manifold yourself check out the ``[How to define your own manifold](@extref ManifoldsBase :doc:`tutorials/implement-a-manifold`)``{=commonmark} tutorial of ``[`ManifoldsBase.jl`](@extref ManifoldsBase :doc:`index`)``{=commonmark}."
