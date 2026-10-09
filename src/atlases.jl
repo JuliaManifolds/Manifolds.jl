@@ -124,7 +124,7 @@ end
     christoffel_symbols_first(M::AbstractManifold, A::AbstractAtlas, i, a; backend::AbstractADType = AutoForwardDiff())
 
 Compute the Christoffel symbols of the first kind ``Γ_{i j k}`` in chart `i` of
-[`AbstractAtlas`] `A` at coordinates `a`.
+[`AbstractAtlas`](@ref) `A` at coordinates `a`.
 
 The symbols are obtained by lowering the first index of the second-kind Christoffel
 symbols:
@@ -416,9 +416,9 @@ end
     log_local_metric_density(M::AbstractManifold, A::AbstractAtlas, i, a)
 
 Return the natural logarithm of the metric density ``ρ`` of `M` at the point with
-parametrization `a` in chart `i` of [`AbstractAtlas`](@ref) `A`, which is given by
+parametrization `a` in chart `i` of [`AbstractAtlas`](@ref) `A`. The density is given by
 ````math
-ρ = \log \sqrt{\lvert \det g_{ij} \rvert}
+ρ = \sqrt{\lvert \det g_{ij} \rvert}
 ````
 for the metric tensor expressed in the same chart.
 
@@ -739,7 +739,7 @@ local_metric(::AbstractManifold, ::Any, ::InducedBasis)
 
 Compute the allocating version of Levi-Civita affine connection on the manifold `M` at a point with parameters `a`
 in chart `i` of an  [`AbstractAtlas`](@ref) `A`. The connection is calculated for vectors
-with coefficients `Xc` and `Yc` in the induced basis, and the result is stored in `Zc`.
+with coefficients `Xc` and `Yc` in the induced basis.
 """
 function levi_civita_affine_connection(M::AbstractManifold, A, i, a, Xc, Yc; backend::AbstractADType = AutoForwardDiff())
     Zc = similar(Xc, Base.promote_type(eltype(Xc), eltype(Yc), eltype(a)))
@@ -1126,7 +1126,7 @@ Compute the action of the Riemann curvature tensor `R` on tangent vectors with c
 `Xc`, `Yc` and `Zc` at the point specified by parameters `a` in chart `i` of atlas `A` on
 manifold `M`.
 
-This function returns the vector `W (in induced-chart coordinates) given by
+This function returns the vector `W` (in induced-chart coordinates) given by
 ``(R(X, Y) Z)``, i.e. the result of applying the curvature operator to `Zc`.
 
 # Arguments

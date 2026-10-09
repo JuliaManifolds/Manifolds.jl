@@ -125,8 +125,8 @@ end
 @doc raw"""
     log_local_metric_density(M::AbstractManifold, p, B::AbstractBasis)
 
-Return the natural logarithm of the metric density ``ρ`` of `M` at `p`, which
-is given by ``ρ = \log \sqrt{|\det [g_{ij}]|}`` for the metric tensor expressed in basis `B`.
+Return the natural logarithm of the metric density ``ρ`` of `M` at `p`. The density
+is given by ``ρ = \sqrt{|\det [g_{ij}]|}`` for the metric tensor expressed in basis `B`.
 
 !!! warning "Deprecated"
     This basis-based method is deprecated and will be removed in a future release.
