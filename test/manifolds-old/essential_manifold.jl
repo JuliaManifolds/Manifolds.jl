@@ -120,4 +120,19 @@ end
             parallel_transport = true,
         )
     end
+
+    @testset "random tangent vectors on the essential manifold are horizontal" begin
+        M = EssentialManifold(true)
+        N = PowerManifold(Rotations(3), NestedPowerRepresentation(), 2)
+        B = DefaultOrthonormalBasis()
+        p = rand(MersenneTwister(5), M)
+        X = rand(MersenneTwister(5), M; vector_at = p)
+        @test distance(M, p, exp(M, p, X)) ≈ norm(M, p, X)
+        # the same draw on the pair of rotations differs from X only by a vertical vector
+        X0 = rand(MersenneTwister(5), N; vector_at = p)
+        @test get_coordinates(M, p, X, B) ≈ get_coordinates(M, p, X0, B)
+        Random.seed!(5)
+        Y = rand(M; vector_at = p)
+        @test norm(get_coordinates(M, p, Y, B)) ≈ norm(M, p, Y)
+    end
 end

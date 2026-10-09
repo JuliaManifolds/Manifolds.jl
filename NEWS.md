@@ -174,6 +174,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `NLSolveInverseRetraction` with `project_point = true` leaves the point it is given unchanged.
 * The plotting recipe of `Sphere(2)` draws the solid surface with the resolution `surface_resolution` also when it differs from `wires`.
 * `inverse_retract` with `NLSolveInverseRetraction` now correctly applies tangent space projections.
+* `rand` on the `EssentialManifold` draws tangent vectors in the horizontal space, so that they have no part along the equivalence class.
 
 ## [0.11.32] 2026-09-30
 

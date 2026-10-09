@@ -556,6 +556,38 @@ function parallel_transport_to!(::EssentialManifold, Y, p, X, q)
 end
 
 @doc raw"""
+    rand(M::EssentialManifold; vector_at = nothing, σ::Real = 1.0)
+
+When `vector_at` is `nothing`, return a random point on the [`EssentialManifold`](@ref) `M`,
+a random point on each of the two [`Rotations`](@ref).
+
+When `vector_at` is a point ``p = (R_1, R_2)``, draw a random tangent vector ``X_i`` at ``R_i`` on
+the [`Rotations`](@ref) with standard deviation `σ` for ``i = 1, 2`` and return the projection
+[`project`](@ref project(::EssentialManifold, ::Any, ::Any))`(M, p, (R_1X_1, R_2X_2))` of
+``X = (X_1, X_2)`` onto the horizontal space,
+````math
+X - \frac{\text{vert\_proj}_p(X)}{2} \begin{bmatrix} R_1^T e_z \\ R_2^T e_z \end{bmatrix}.
+````
+"""
+rand(::EssentialManifold; σ::Real = 1.0)
+
+function Random.rand!(M::EssentialManifold, pX; kwargs...)
+    return rand!(Random.default_rng(), M, pX; kwargs...)
+end
+function Random.rand!(
+        rng::AbstractRNG, M::EssentialManifold, pX; vector_at = nothing, σ::Real = 1.0
+    )
+    N = PowerManifold(M.manifold, NestedPowerRepresentation(), 2)
+    rand!(rng, N, pX; vector_at = vector_at, σ = σ)
+    # project takes the tangent vectors in the embedding, p * X
+    if vector_at !== nothing
+        project!(M, pX, vector_at, map((vi, pXi) -> embed(M.manifold, vi, pXi), vector_at, pX))
+    end
+    return pX
+end
+
+
+@doc raw"""
     vert_proj(M::EssentialManifold, p, X)
 
 Project `X` onto the vertical space ``T_{\text{vp}}\text{SO}(3)^2`` with
