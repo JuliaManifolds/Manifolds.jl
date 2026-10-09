@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_coordinates` on the `CholeskySpace` divides the diagonal entries by the diagonal of the point, so that the coordinates are those of the orthonormal basis and invert `get_vector`.
 * `parallel_transport_to` on the `CholeskySpace` (and hence under the log-Cholesky metric) keeps the strictly lower part of the tangent vector, so that the transport is an isometry.
 * `jacobi_field` and `adjoint_Jacobi_field` on the `Circle` and on the number-valued `Euclidean` space apply the weight function they are given.
-* `log` on the complex `Circle` returns a tangent vector for every pair of opposite points.
+* `log` on the complex `Circle` returns a tangent vector for every pair of opposite points and nearly opposite points.
 * `mid_point` on the complex `Circle` returns the midpoint of the shortest geodesic for every pair of points.
 * `check_vector` on `DeterminantOneMatrices` accepts a trace that vanishes up to rounding, with the tolerance keyword `atol`.
 * `manifold_dimension` on `DeterminantOneMatrices` over the complex numbers counts the determinant condition as the two real conditions it is.
@@ -173,6 +173,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `estimated_sectional_curvature` accepts any pair of tangent vectors spanning the plane, as `sectional_curvature` does.
 * `NLSolveInverseRetraction` with `project_point = true` leaves the point it is given unchanged.
 * The plotting recipe of `Sphere(2)` draws the solid surface with the resolution `surface_resolution` also when it differs from `wires`.
+* `inverse_retract` with `NLSolveInverseRetraction` now correctly applies tangent space projections.
 
 ## [0.11.32] 2026-09-30
 

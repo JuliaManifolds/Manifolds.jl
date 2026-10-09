@@ -1,6 +1,6 @@
-using ManifoldDiff, Manifolds, Random, StaticArrays, Test
+using ManifoldDiff, Manifolds, Random, StaticArrays, Test, ManifoldsBase
 
-Test.@testset "The circle manifold" begin
+@testset "The circle manifold" begin
     M = Circle()
     @test Manifolds.number_of_coordinates(M, DefaultOrthogonalBasis()) == 1
     p1 = π / 2
@@ -137,8 +137,8 @@ Test.@testset "The circle manifold" begin
         expectations
     )
 
-    Test.@testset "Edge cases" begin
-        Test.@testset "Mean" begin
+    @testset "Edge cases" begin
+        @testset "Mean" begin
             M = Circle()
             @test mean(M, [-π / 2, 0.0, π]) ≈ -π / 2
             @test mean(M, [-π / 2, 0.0, π], [1.0, 1.0, 1.0]) == -π / 2
@@ -185,7 +185,7 @@ Test.@testset "The circle manifold" begin
             parallel_transport_to!(M, p, p, [4.0], p)
             @test p ≈ fill(4.0)
         end
-        Test.@testset "retract nonmutating defaults" begin
+        @testset "retract nonmutating defaults" begin
             M = Circle()
             p = π / 3
             X = 0.5
@@ -196,7 +196,7 @@ Test.@testset "The circle manifold" begin
             @test q2 ≈ exp(M, p, X)
             @test vector_transport_direction(M, p, X, d, ParallelTransport()) == parallel_transport_to(M, p, X, d)
         end
-        Test.@testset "ManifoldsDiff cases" begin
+        @testset "ManifoldsDiff cases" begin
             M = Circle()
             @test ManifoldDiff.adjoint_Jacobi_field(
                 M, 0.0, 1.0, 0.5, 2.0,
@@ -212,7 +212,7 @@ Test.@testset "The circle manifold" begin
             @test manifold_volume(M) ≈ 2 * π
             @test volume_density(M, 0.0, 2.0) == 1.0
         end
-        Test.@testset "Complex Circle log boundary case" begin
+        @testset "Complex Circle log boundary case" begin
             Mc = Circle(ℂ)
             X = log(Mc, 1.0 + 0.0im, -1.0 + 0.0im)
             @test isapprox(X, π * 1.0im)
@@ -221,8 +221,16 @@ Test.@testset "The circle manifold" begin
             X3 = fill(0.0)
             log!(Mc, X3, fill(0 + 1.0im), fill(0.0 - 1.0im))
             @test isapprox(X3[], X2[])
+            # nearly opposite points have a unique logarithm
+            q = exp((π - 1.0e-4) * im)
+            X4 = log(Mc, 1.0 + 0.0im, q)
+            @test isapprox(X4, (π - 1.0e-4) * im)
+            @test isapprox(Mc, q, exp(Mc, 1.0 + 0.0im, X4))
+            X5 = fill(0.0 + 0.0im)
+            log!(Mc, X5, fill(1.0 + 0.0im), fill(q))
+            @test isapprox(X5[], (π - 1.0e-4) * im)
         end
-        Test.@testset "Complex circle midpoint across the branch cut" begin
+        @testset "Complex circle midpoint across the branch cut" begin
             Mc = Circle(ℂ)
             p1 = exp(3.0im)
             p2 = exp(-3.0im)
@@ -230,11 +238,25 @@ Test.@testset "The circle manifold" begin
             @test isapprox(m, -1.0 + 0.0im)
             @test distance(Mc, p1, m) ≈ distance(Mc, p1, p2) / 2
         end
-        Test.@testset "inner special cases" begin
+        @testset "Complex circle log for points just outside the circle" begin
+            Mc = Circle(ℂ)
+            p = (1 + 1.0e-8) + 0.0im
+            @test isapprox(log(Mc, p, -p), π * im)
+            @test isapprox(log(Mc, p, (1 + 1.0e-8) * cis(π - 1.0e-6)), (π - 1.0e-6) * im)
+            # a ComplexF32 point and the opposite ComplexF64 point
+            p = -0.69631594f0 - 0.71773547f0im
+            q = 0.6963159100438303 + 0.7177354341397896im
+            @test isapprox(abs(log(Mc, p, q)), π)
+            X = fill(0.0 + 0.0im)
+            log!(Mc, X, fill(p), fill(q))
+            @test isapprox(abs(X[]), π)
+            @test is_vector(Mc, p, X[])
+        end
+        @testset "inner special cases" begin
             @test inner(Circle(), fill(0.0), fill(1.0), fill(0.1)) == 0.1
             @test inner(Circle(ℂ), 0.0, 1.0im, -1.0im) == -1.0
         end
-        Test.@testset "Projection on the real circle and the torus" begin
+        @testset "Projection on the real circle and the torus" begin
             M = Circle()
             @test project(M, 4.0) ≈ 4.0 - 2π
             @test project(M, 0.3, 1.2) == 1.2
