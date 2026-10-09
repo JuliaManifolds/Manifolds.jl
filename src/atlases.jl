@@ -950,6 +950,29 @@ function ricci_curvature(
 end
 
 """
+    gaussian_curvature(M::AbstractManifold, A::AbstractAtlas, i, a; backend=AutoForwardDiff())
+
+Compute the Gaussian curvature of the manifold `M` at the point given by coordinates `a`
+in chart `i` of atlas `A`. This is equal to half of the scalar Ricci curvature,
+see [`ricci_curvature`](@ref).
+
+# Arguments
+
+- `M::AbstractManifold` : manifold
+- `A::AbstractAtlas`   : atlas providing charts / induced basis
+- `i`                  : chart index in `A`
+- `a`                  : coordinates of the point in chart `i` (length `n`)
+- `backend::AbstractADType` : automatic-differentiation backend (default `AutoForwardDiff()`)
+
+# Returns
+
+- scalar (same element type as `a`) equal to the Gaussian curvature at the point
+"""
+function gaussian_curvature(M::AbstractManifold, A::AbstractAtlas, i, a; kwargs...)
+    return ricci_curvature(M, A, i, a; kwargs...) / 2
+end
+
+"""
     ricci_tensor(M::AbstractManifold, A::AbstractAtlas, i, a; backend::AbstractADType=AutoForwardDiff())
 
 Compute the Ricci tensor of the manifold `M` at the point specified by coordinates `a`

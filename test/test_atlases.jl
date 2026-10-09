@@ -11,6 +11,13 @@ using LinearAlgebra
     i = :north
     p = get_point(M, A, i, a)
     B = induced_basis(M, A, i)
+
+    @test local_metric(M, A, i, a) isa Diagonal
+    @test inverse_local_metric(M, A, i, a) ≈ inv(local_metric(M, A, i, a))
+    @test ricci_curvature(M, A, i, a) ≈ 2
+    @test gaussian_curvature(M, A, i, a) ≈ 1
+    @test ricci_curvature(Sphere(3), A, :south, [0.1, 0.4, -0.3]) ≈ 6
+
     for (Xc, Yc) in [([0.8, 0.9], [-0.8, 0.25]), ([0.3, 0.2], [-0.2, 0.25])]
         # tests with & without chart switching
         X = get_vector(M, p, Xc, B)

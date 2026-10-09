@@ -844,7 +844,7 @@ g_a = \frac{4}{(1 + \lVert a \rVert^2)^2} I.
 ````
 """
 function local_metric(M::Sphere{ℝ}, A::StereographicAtlas, i, a)
-    return (4 / (1 + dot(a, a))^2) * I
+    return Diagonal(fill(4 / (1 + dot(a, a))^2, length(a)))
 end
 function det_local_metric(M::Sphere{ℝ}, ::StereographicAtlas, i, a)
     return (4 / (1 + dot(a, a))^2)^manifold_dimension(M)
