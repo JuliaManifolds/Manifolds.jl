@@ -574,7 +574,7 @@ function ManifoldsBase.retract_cayley!(M::SymplecticStiefel, q, p, X)
 end
 
 @doc raw"""
-    X = riemannian_gradient(::SymplecticStiefel, p, Y)
+    X = riemannian_gradient(::SymplecticStiefel, p, Y; embedding_metric::EuclideanMetric=EuclideanMetric())
     riemannian_gradient!(::SymplecticStiefel, X, p, Y; embedding_metric::EuclideanMetric=EuclideanMetric())
 
 Compute the riemannian gradient `X` of `f` on [`SymplecticStiefel`](@ref)  at a point `p`,
@@ -591,7 +591,9 @@ where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes
 
 
 """
-function riemannian_gradient(::SymplecticStiefel, p, Y)
+function riemannian_gradient(
+        ::SymplecticStiefel, p, Y; embedding_metric::EuclideanMetric = EuclideanMetric(),
+    )
     Jp = SymplecticElement(p, Y) * p
     return Y * (p' * p) .+ Jp * (Y' * Jp)
 end

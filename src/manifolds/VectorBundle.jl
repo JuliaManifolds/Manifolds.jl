@@ -291,7 +291,7 @@ function retract_product_fused!(B::VectorBundle, q, p, X, t::Number)
         xp,
         Xp + VXF,
         VXM,
-        B.vector_transport.method_horizontal,
+        B.vector_transport.method_vertical,
     )
     copyto!(B.manifold, xq, xqt)
     return q

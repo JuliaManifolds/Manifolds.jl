@@ -108,8 +108,8 @@ function ManifoldsBase._retract_fused!(
     )
     return retract_polar_light_fused!(M, q, p, X, t; kwargs...)
 end
-function retract_polar_light_fused!(M::AbstractManifold, q, p, X, t::Number)
-    return retract_polar_light!(M, q, p, t * X)
+function retract_polar_light_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+    return retract_polar_light!(M, q, p, t * X; kwargs...)
 end
 
 function allocation_promotion_function(::Stiefel{ℂ}, ::Any, ::Tuple)
@@ -163,6 +163,15 @@ function check_point(M::Stiefel, p; kwargs...)
 end
 
 @doc raw"""
+    is_vector(M::Stiefel, p, X; atol, kwargs...)
+
+Check whether `X` is a tangent vector at `p` on the [`Stiefel`](@ref) `M`, that is whether
+``p^{\mathrm{H}}X = -X^{\mathrm{H}}p`` holds, using `isapprox` with the keyword arguments, where
+`atol` defaults to ``\sqrt{ε}\lVert X\rVert`` with the machine epsilon ``ε``.
+"""
+is_vector(::Stiefel, ::Any, ::Any)
+
+@doc raw"""
     check_vector(M::Stiefel, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
@@ -170,13 +179,16 @@ Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 it (approximately) holds that ``p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0``.
 The settings for approximately can be set with `kwargs...`.
 """
-function check_vector(M::Stiefel, p, X; kwargs...)
+function check_vector(
+        M::Stiefel, p, X;
+        atol::Real = sqrt(eps(real(float(number_eltype(X))))) * norm(X), kwargs...,
+    )
     n, k = get_parameter(M.size)
     cks = check_size(M, p, X)
     cks === nothing || return cks
-    if !isapprox(p' * X, -conj(X' * p); kwargs...)
+    if !isapprox(p' * X, -X' * p; atol = atol, kwargs...)
         return DomainError(
-            norm(p' * X + conj(X' * p)),
+            norm(p' * X + X' * p),
             "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since p'X + X'p is not the zero matrix.",
         )
     end
@@ -270,7 +282,9 @@ inverse_retract(::Stiefel, ::Any, ::Any, ::PolarLightInverseRetraction)
 Compute the inverse retraction based on a qr decomposition
 for two points `p`, `q` on the [`Stiefel`](@ref) manifold `M` and return
 the resulting tangent vector in `X`. The computation follows Algorithm 1
-in [KanekoFioriTanaka:2013](@cite).
+in [KanekoFioriTanaka:2013](@cite). For complex matrices, the upper triangular factor is
+determined by the tangent space condition ``p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0`` and a real
+diagonal, as in the QR retraction.
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
 
@@ -279,8 +293,13 @@ function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
     @inbounds for i in 1:k
         b = zeros(eltype(R), i)
         b[i] = 1
-        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
+        b[1:(end - 1)] = -adjoint(R[1:(i - 1), 1:(i - 1)]) * conj(A[i, 1:(i - 1)])
         R[1:i, i] = A[1:i, 1:i] \ b
+        if eltype(R) <: Complex
+            # imaginary part of (AR)[i, i] that makes R[i, i] real, as in the QR retraction
+            g = A[1:i, 1:i] \ [zeros(eltype(R), i - 1); one(eltype(R))]
+            R[1:i, i] -= (im * imag(R[i, i]) / real(g[i])) * g
+        end
     end
     #TODO: replace with this once it's supported by StaticArrays
     #return mul!(X, q, UpperTriangular(R))
@@ -290,7 +309,7 @@ end
 function _stiefel_inv_retr_qr_mul_by_r!(
         ::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A, ::Type,
     ) where {𝔽, n}
-    @inbounds R = SMatrix{1, 1}(inv(A[1, 1]))
+    @inbounds R = SMatrix{1, 1}(inv(real(A[1, 1])))
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
@@ -305,8 +324,14 @@ end
 function _stiefel_inv_retr_qr_mul_by_r!(
         ::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A, ::Type{ElT},
     ) where {𝔽, n, ElT}
-    R11 = inv(A[1, 1])
-    @inbounds R = hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
+    R11 = inv(real(A[1, 1]))
+    @inbounds R2 = A[SOneTo(2), SOneTo(2)] \ SA[-conj(R11 * A[2, 1]), one(ElT)]
+    if ElT <: Complex
+        # imaginary part of (AR)[2, 2] that makes R[2, 2] real, as in the QR retraction
+        g = A[SOneTo(2), SOneTo(2)] \ SA[zero(ElT), one(ElT)]
+        R2 -= (im * imag(R2[2]) / real(g[2])) * g
+    end
+    R = hcat(SA[R11, zero(ElT)], R2)
     #TODO: replace with this once it's supported by StaticArrays
     #return mul!(X, q, UpperTriangular(R))
     return mul!(X, q, R)
@@ -340,7 +365,7 @@ function inverse_retract_polar!(::Stiefel, X, p, q)
     X .-= p
     return X
 end
-function inverse_retract_polar_light!(::Stiefel, X, p, q)
+function inverse_retract_polar_light!(::Stiefel, X, p, q; kwargs...)
     # n, k = get_parameter(M.size)
     # Inspired by the steps from the original implementation in Python, see
     # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L119-L146
@@ -423,7 +448,7 @@ function Random.rand!(
     ) where {𝔽}
     n, k = get_parameter(M.size)
     if vector_at === nothing
-        A = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, n, k)
+        A = σ * randn(rng, eltype(pX), n, k)
         pX .= Matrix(qr(A).Q)
     else
         Z = σ * randn(rng, eltype(pX), size(pX))
@@ -592,7 +617,7 @@ function ManifoldsBase.retract_qr_fused!(::Stiefel, q, p, X, t::Number)
     return mul!(q, _qrfac_to_q(qrfac), D)
 end
 
-function retract_polar_light!(::Stiefel, q, p, X)
+function retract_polar_light!(::Stiefel, q, p, X; kwargs...)
     # n, k = get_parameter(M.size)
     # Inspired by the steps from the original implementation in Python, see
     # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L86-L115
@@ -911,10 +936,9 @@ function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::QRRetraction
     rf = UpperTriangular(Diagonal(s)' * pdR)
     Xrf = X / rf
     qtXrf = q' * Xrf
-    return copyto!(
-        Y,
-        q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf,
-    )
+    # ρ_skew of Absil et al. 2008, Example 8.1.5, with half the diagonal for the complex case
+    L = LowerTriangular(qtXrf) - Diagonal(qtXrf) / 2
+    return copyto!(Y, q * (L - L') + Xrf - q * qtXrf)
 end
 
 @doc raw"""
@@ -989,7 +1013,7 @@ function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::QRRetraction)
     rf = UpperTriangular(Diagonal(s)' * pdR)
     Xrf = X / rf
     qtXrf = q' * Xrf
-    return copyto!(
-        Y, q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf,
-    )
+    # ρ_skew of Absil et al. 2008, Example 8.1.5, with half the diagonal for the complex case
+    L = LowerTriangular(qtXrf) - Diagonal(qtXrf) / 2
+    return copyto!(Y, q * (L - L') + Xrf - q * qtXrf)
 end

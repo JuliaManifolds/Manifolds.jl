@@ -38,9 +38,8 @@ function Random.rand!(
     else
         # Special case: Rotations(1) is just zero-dimensional
         (manifold_dimension(M) == 0) && return fill!(pX, 0)
-        A = σ .* randn(rng, representation_size(M))
-        pX .= triu(A, 1) .- transpose(triu(A, 1))
-        normalize!(pX)
+        Z = σ .* randn(rng, representation_size(M))
+        project!(M, pX, vector_at, Z)
     end
     return pX
 end

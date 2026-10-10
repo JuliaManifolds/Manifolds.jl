@@ -14,6 +14,7 @@ using LinearAlgebra, Manifolds, Quaternions, Test, Random
                 default_vector_transport_method,
                 get_embedding,
                 injectivity_radius, is_flat,
+                manifold_dimension,
                 rand, repr,
             ],
             :EmbeddedPoints => [p3],
@@ -34,9 +35,9 @@ using LinearAlgebra, Manifolds, Quaternions, Test, Random
     @testset "volume" begin
         @test manifold_volume(OrthogonalMatrices(1)) ≈ 2
         @test manifold_volume(OrthogonalMatrices(2)) ≈ 4 * π * sqrt(2)
-        @test manifold_volume(OrthogonalMatrices(3)) ≈ 16 * π^2 * sqrt(2)
-        @test manifold_volume(OrthogonalMatrices(4)) ≈ 2 * (2 * π)^4 * sqrt(2)
-        @test manifold_volume(OrthogonalMatrices(5)) ≈ 8 * (2 * π)^6 / 6 * sqrt(2)
+        @test manifold_volume(OrthogonalMatrices(3)) ≈ 32 * π^2 * sqrt(2)
+        @test manifold_volume(OrthogonalMatrices(4)) ≈ 16 * (2 * π)^4
+        @test manifold_volume(OrthogonalMatrices(5)) ≈ 256 * (2 * π)^6 / 6
     end
 
     @testset "Field parameter" begin
@@ -49,5 +50,12 @@ using LinearAlgebra, Manifolds, Quaternions, Test, Random
         @test abs(rand(OrthogonalMatrices(1))[]) == 1
         @test abs(rand(MersenneTwister(), OrthogonalMatrices(1))[]) == 1
         @test injectivity_radius(OrthogonalMatrices(1; parameter = :field)) == 0.0
+    end
+
+    @testset "Random tangent vectors scale with σ" begin
+        X = rand(MersenneTwister(42), M; vector_at = p1)
+        Y = rand(MersenneTwister(42), M; vector_at = p1, σ = 2.0)
+        @test is_vector(M, p1, Y)
+        @test Y == 2 .* X
     end
 end

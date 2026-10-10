@@ -88,11 +88,15 @@ using Random
     @testset "conversion between Stiefel and orthogonal coordinates" begin
         p1os = convert(AbstractMatrix, M, p1o)
         @test isapprox(p1, p1os)
+        p2os = convert(AbstractMatrix, M, p2o)
+        @test isapprox(p2, p2os)
 
         X1os = convert(AbstractMatrix, M, p1o, X1o)
         @test isapprox(X1, X1os)
     end
     @test inner(M, p1, X1, X2) ≈ inner(M, p1o, X1o, X2o)
+    @test norm(M, p1, X1) ≈ norm(M, p1o, X1o)
+    @test norm(M, p1o, X1o)^2 ≈ inner(M, p1o, X1o, X1o)
 
     @test eltype(p1o) === Float64
     @test eltype(X1o) === Float64
@@ -156,7 +160,7 @@ using Random
         vector_transport_methods = [ProjectionTransport()],
         vector_transport_retractions = [PolarRetraction()],
         vector_transport_inverse_retractions = [PolarInverseRetraction()],
-        test_vector_transport_direction = [true, true, false],
+        test_vector_transport_direction = [true],
         mid_point12 = nothing,
         test_inplace = true,
         test_rand_point = true,
@@ -236,6 +240,23 @@ using Random
         @test check_vector(M, p1_ortho, X2_ortho_wrong2) isa DomainError
         @test is_point(M, p1_ortho; error = :error)
         @test is_vector(M, p1_ortho, X1_ortho; error = :error)
+        # converted from the Stiefel representation, so block skew only up to rounding
+        @test is_vector(M, p1o, X1o)
+        @test is_vector(M, p1o, X2o)
+        X1_near = copy(X1_ortho.value)
+        X1_near[1, 1] = 1.0e-6
+        X1_near[1, 2] += 1.0e-6
+        X1o_near = Manifolds.OrthogonalTangentVector(X1_near)
+        @test check_vector(M, p1_ortho, X1o_near) isa DomainError
+        @test check_vector(M, p1_ortho, X1o_near; atol = 1.0e-5) === nothing
+        X1_nan = copy(X1_near)
+        X1_nan[1, 1] = NaN
+        X1o_nan = Manifolds.OrthogonalTangentVector(X1_nan)
+        @test check_vector(M, p1_ortho, X1o_nan; atol = 1.0e-5) isa DomainError
+        X_int = Manifolds.OrthogonalTangentVector(
+            [0 -1 2 0 0; 1 0 0 1 0; -2 0 0 0 0; 0 -1 0 0 0; 0 0 0 0 0],
+        )
+        @test check_vector(M, p1_ortho, X_int) === nothing
         @test isapprox(M, p1_ortho, X2_ortho, project(M, p1_ortho, X2_ortho_wrong1))
         @test isapprox(
             M,
@@ -267,6 +288,9 @@ using Random
 
         @test retract(M, p1_ortho, X1_ortho, QRRetraction()).value ≈
             retract(OrthogonalMatrices(5), p1_ortho.value, X1_ortho.value, QRRetraction())
+        @test default_retraction_method(M, typeof(p1_ortho)) === QRRetraction()
+        @test retract(M, p1_ortho, X1_ortho).value ≈
+            retract(M, p1_ortho, X1_ortho, QRRetraction()).value
 
         @testset "field parameters" begin
             M = Flag(5, 1, 2; parameter = :field)
@@ -279,5 +303,14 @@ using Random
         @test Manifolds.get_parameter(M.size)[1] == 5
         @test get_embedding(M) == Stiefel(5, 2; parameter = :field)
         @test repr(M) == "Flag(5, 1, 2; parameter=:field)"
+    end
+
+    @testset "the flag inverse polar retraction inverts the polar retraction" begin
+        M = Flag(4, 1, 2)
+        p = rand(MersenneTwister(42), M)
+        X = rand(MersenneTwister(44), M; vector_at = p)
+        X ./= norm(M, p, X) / 0.05
+        q = retract(M, p, X, PolarRetraction())
+        @test isapprox(M, p, inverse_retract(M, p, q, PolarInverseRetraction()), X; atol = 1.0e-10)
     end
 end

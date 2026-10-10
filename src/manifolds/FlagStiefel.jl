@@ -52,8 +52,9 @@ Compute the inverse retraction for the [`PolarRetraction`](@extref `ManifoldsBas
 """
 inverse_retract(::Flag, ::Any, ::Any, ::PolarInverseRetraction)
 
-function inverse_retract_polar!(::Flag, X, p, q)
-    return copyto!(X, q / (p' * q) - p)
+function inverse_retract_polar!(M::Flag, X, p, q)
+    inverse_retract_polar!(get_embedding(M, typeof(p)), X, p, q)
+    return project!(M, X, p, X)
 end
 
 function _extract_flag_stiefel(M::Flag, pX::AbstractMatrix, i::Int)

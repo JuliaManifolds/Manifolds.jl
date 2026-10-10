@@ -54,18 +54,16 @@ end
 """
     check_vector(M::CholeskySpace, p, X; kwargs... )
 
-Check whether `v` is a tangent vector to `p` on the [`CholeskySpace`](@ref) `M`, i.e.
+Check whether `X` is a tangent vector to `p` on the [`CholeskySpace`](@ref) `M`, i.e.
 after [`check_point`](@ref)`(M,p)`, `X` has to have the same dimension as `p`
-and a symmetric matrix.
+and to be a lower triangular matrix.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_vector(
-        M::CholeskySpace,
-        p,
-        X;
-        atol::Real = sqrt(prod(representation_size(M)) * eps(float(eltype(p)))),
+        M::CholeskySpace, p, X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
-    )
+    ) where {T}
     if !isapprox(norm(strictlyUpperTriangular(X)), 0.0; atol = atol, kwargs...)
         return DomainError(
             norm(UpperTriangular(X) - Diagonal(X)),
@@ -123,7 +121,7 @@ end
 
 function get_coordinates_orthonormal!(M::CholeskySpace, Xⁱ, p, X, ::RealNumbers)
     n = get_parameter(M.size)[1]
-    view(Xⁱ, 1:n) .= diag(X)
+    view(Xⁱ, 1:n) .= diag(X) ./ diag(p)
     xi_ind = n + 1
     for i in 1:n
         for j in (i + 1):n
@@ -174,20 +172,20 @@ Return true. [`CholeskySpace`](@ref) is a flat manifold. See Proposition 8 of [L
 is_flat(M::CholeskySpace) = true
 
 @doc raw"""
-    log(M::CholeskySpace, X, p, q)
+    log(M::CholeskySpace, p, q)
 
 Compute the logarithmic map on the [`CholeskySpace`](@ref) `M` for the geodesic emanating
 from the lower triangular matrix with positive diagonal `p` towards `q`.
 The formula reads
 
 ````math
-\log_p q = ⌊ p ⌋ - ⌊ q ⌋ + \operatorname{diag}(p)\log\bigl(\operatorname{diag}(q)\operatorname{diag}(p)^{-1}\bigr),
+\log_p q = ⌊ q ⌋ - ⌊ p ⌋ + \operatorname{diag}(p)\log\bigl(\operatorname{diag}(q)\operatorname{diag}(p)^{-1}\bigr),
 ````
 
 where ``⌊⋅⌋`` denotes the strictly lower triangular matrix,
 and ``\operatorname{diag}`` extracts the diagonal matrix.
 """
-log(::Cholesky, ::Any...)
+log(::CholeskySpace, ::Any...)
 
 function log!(::CholeskySpace, X, p, q)
     return copyto!(
@@ -251,7 +249,7 @@ and ``\operatorname{diag}`` extracts the diagonal matrix.
 parallel_transport_to(::CholeskySpace, ::Any, ::Any, ::Any)
 
 function parallel_transport_to!(::CholeskySpace, Y, p, X, q)
-    return copyto!(Y, strictlyLowerTriangular(p) + Diagonal(diag(q) .* diag(X) ./ diag(p)))
+    return copyto!(Y, strictlyLowerTriangular(X) + Diagonal(diag(q) .* diag(X) ./ diag(p)))
 end
 
 function Random.rand!(

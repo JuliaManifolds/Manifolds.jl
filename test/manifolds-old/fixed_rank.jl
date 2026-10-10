@@ -58,9 +58,15 @@ include("../header.jl")
         @test is_point(M2, p2)
         @test_throws DomainError is_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]; error = :error)
         @test Manifolds.check_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]) isa DomainError
+        # a point is an m×n matrix of rank exactly k, also in SVD form
+        @test is_point(M2, [1.0 0.0; 0.0 0.0; 0.0 0.0])
+        @test !is_point(M, [1.0 0.0; 0.0 0.0; 0.0 0.0])
+        @test !is_point(
+            M, SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0], [1.0, 0.0], [1.0 0.0; 0.0 1.0])
+        )
 
-        @test default_retraction_method(M) === PolarRetraction()
-        @test default_inverse_retraction_method(M) === PolarInverseRetraction()
+        @test default_retraction_method(M) === OrthographicRetraction()
+        @test default_inverse_retraction_method(M) === OrthographicInverseRetraction()
         @test default_vector_transport_method(M) == ProjectionTransport()
 
         @test !is_vector(
@@ -89,6 +95,23 @@ include("../header.jl")
             UMVTangentVector(X.U, X.M, p.Vt, 2);
             error = :error,
         )
+        M4 = FixedRankMatrices(4, 3, 2)
+        p4 = SVDMPoint(
+            [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0], [2.0, 1.0], [1.0 0.0 0.0; 0.0 1.0 0.0]
+        )
+        X4 = UMVTangentVector(
+            [0.0 0.0; 0.0 0.0; 1.0 0.0; 0.0 1.0], [1.0 2.0; 3.0 4.0], [0.0 0.0 1.0; 0.0 0.0 2.0]
+        )
+        @test is_vector(M4, p4, X4)
+        @test !is_vector(M4, p4, UMVTangentVector(X4.U, X4.M, p4.Vt))
+        @test_throws DomainError is_vector(
+            M4, p4, UMVTangentVector(X4.U, X4.M, p4.Vt); error = :error
+        )
+        # the default retraction and inverse retraction invert each other at a generic point
+        M5 = FixedRankMatrices(5, 4, 2)
+        p5 = SVDMPoint([cos(1.3i - 0.7j) + 0.1 * i * j for i in 1:5, j in 1:4], 2)
+        X5 = project(M5, p5, [sin(0.9i + 1.1j) + 0.2 * (i - j) for i in 1:5, j in 1:4])
+        @test isapprox(M5, p5, inverse_retract(M5, p5, retract(M5, p5, X5)), X5)
 
         @test is_point(M, p)
         @test is_vector(M, p, X)
@@ -167,6 +190,10 @@ include("../header.jl")
                 @test yC.U == y.U
                 @test yC.S == y.S
                 @test yC.Vt == y.Vt
+                pc = copy(p)
+                @test pc == p
+                @test pc.U !== p.U
+                @test is_point(M, pc)
                 # embed
                 N = get_embedding(M)
                 A = embed(M, p)
@@ -186,6 +213,7 @@ include("../header.jl")
                 @test X == w
                 w = allocate(X, number_eltype(X))
                 zero_vector!(M, w, p)
+                @test w == zero_vector(M, p)
                 oneP = SVDMPoint(one(zeros(3, 3)), ones(2), one(zeros(2, 2)), 2)
                 @test oneP == one(p)
 
@@ -228,19 +256,20 @@ include("../header.jl")
                 M,
                 pts,
                 test_exp_log = false,
-                default_inverse_retraction_method = nothing,
+                default_inverse_retraction_method = OrthographicInverseRetraction(),
                 test_injectivity_radius = false,
-                default_retraction_method = PolarRetraction(),
+                default_retraction_method = OrthographicRetraction(),
                 test_is_tangent = false,
                 test_default_vector_transport = false,
                 test_vector_spaces = false,
                 test_tangent_vector_broadcasting = true,
                 projection_atol_multiplier = 15,
+                is_tangent_atol_multiplier = 10,
                 retraction_methods = [PolarRetraction(), OrthographicRetraction()],
                 inverse_retraction_methods = [OrthographicInverseRetraction()],
                 vector_transport_methods = [ProjectionTransport()],
-                vector_transport_retractions = [PolarRetraction()],
-                vector_transport_inverse_retractions = [PolarInverseRetraction()],
+                vector_transport_retractions = [OrthographicRetraction()],
+                vector_transport_inverse_retractions = [OrthographicInverseRetraction()],
                 mid_point12 = nothing,
                 test_inplace = true,
                 test_rand_point = true,
@@ -260,10 +289,68 @@ include("../header.jl")
         G = [1.0 0.0; 0.0 2.0; 0.0 0.0]
         H = [0.0 3.0; 0.0 4.0; 0.0 1.0]
         @test is_vector(M, p, riemannian_Hessian(M, p, G, H, X))
+        M3 = FixedRankMatrices(4, 3, 2)
+        p3 = SVDMPoint(
+            [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0], [2.0, 1.0], [1.0 0.0 0.0; 0.0 1.0 0.0]
+        )
+        X3 = UMVTangentVector(
+            [0.0 0.0; 0.0 0.0; 1.0 0.0; 0.0 1.0], [1.0 2.0; 3.0 4.0], [0.0 0.0 1.0; 0.0 0.0 2.0]
+        )
+        G3 = [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 3.0; 1.0 1.0 1.0]
+        H3 = [0.0 3.0 0.0; 0.0 4.0 0.0; 0.0 1.0 0.0; 2.0 0.0 1.0]
+        Y3 = riemannian_Hessian(M3, p3, G3, H3, X3)
+        @test is_vector(M3, p3, Y3)
+        # projection of H3 plus the curvature terms, computed by hand
+        @test Y3.U ≈ [0.0 0.0; 0.0 0.0; 1.5 7.0; 2.5 2.0]
+        @test Y3.M ≈ [0.0 3.0; 0.0 4.0]
+        @test Y3.Vt ≈ [0.0 0.0 1.5; 0.0 0.0 1.0]
+    end
+    @testset "random points and tangent vectors" begin
+        pc = rand(MersenneTwister(42), Mc)
+        @test number_eltype(pc) === ComplexF64
+        @test is_point(Mc, pc)
+        @test number_eltype(rand(MersenneTwister(43), Mc; vector_at = pc)) === ComplexF64
+        X1 = rand(MersenneTwister(43), M; vector_at = p)
+        X2 = rand(MersenneTwister(43), M; vector_at = p, σ = 2.0)
+        @test isapprox(M, p, 2 * X1, X2)
+        @test rand(MersenneTwister(44), M; σ = 3.0).S == 3 * rand(MersenneTwister(44), M).S
     end
     @testset "field parameter" begin
         M = FixedRankMatrices(3, 2, 2; parameter = :field)
         @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ; parameter=:field)"
         @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
+    end
+    @testset "Orthographic retraction" begin
+        # n = k, so every matrix is tangent and the retraction is p + X
+        M = FixedRankMatrices(3, 2, 2)
+        p = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+        X = UMVTangentVector([0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], zeros(2, 2))
+        q = retract(M, p, X, OrthographicRetraction())
+        @test isapprox(embed(M, q), [2.0 0.0; 0.0 2.0; 1.0 1.0])
+        # n > k, the retraction adds U_X (S + M)^{-1} V_X^T to p + X
+        M2 = FixedRankMatrices(4, 3, 2)
+        p2 = SVDMPoint(
+            [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0], [2.0, 1.0], [1.0 0.0 0.0; 0.0 -1.0 0.0]
+        )
+        X2 = UMVTangentVector(
+            [0.0 0.0; 0.0 0.0; 1.0 0.0; 0.0 1.0], [0.0 1.0; 0.0 0.0], [0.0 0.0 1.0; 0.0 0.0 0.0]
+        )
+        q2 = retract(M2, p2, X2, OrthographicRetraction())
+        @test isapprox(embed(M2, q2), [2.0 -1.0 1.0; 0.0 -1.0 0.0; 1.0 0.0 0.5; 0.0 -1.0 0.0])
+        @test isapprox(M2, p2, inverse_retract(M2, p2, q2, OrthographicInverseRetraction()), X2)
+    end
+    @testset "complex tangent vectors" begin
+        M4c = FixedRankMatrices(4, 3, 2, ℂ)
+        p4c = SVDMPoint(
+            [1.0im 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0], [2.0, 1.0], [1.0 0.0 0.0; 0.0 1.0im 0.0]
+        )
+        X4c = UMVTangentVector(
+            [0.0 0.0; 0.0 0.0; 1.0 0.0; 0.0 im], [1.0 2im; 3.0 4.0], [0.0 0.0 im; 0.0 0.0 2.0]
+        )
+        Y4c = [1.0im -2.0im -1.0; 3.0 4.0im 2.0; 1.0 0.0 0.0; 0.0 -1.0 0.0]
+        @test eltype(zero_vector(M4c, p4c).M) === ComplexF64
+        @test embed(M4c, p4c, X4c) ≈ Y4c
+        @test is_vector(M4c, p4c, X4c)
+        @test isapprox(M4c, p4c, project(M4c, p4c, Y4c), X4c)
     end
 end

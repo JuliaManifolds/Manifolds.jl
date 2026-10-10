@@ -5,6 +5,187 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.33] unreleased
+
+### Added
+
+* `get_basis`, `get_coordinates` and `get_vector` on the `EssentialManifold` with an orthonormal basis of its five-dimensional horizontal space.
+* `log` on the `ProbabilitySimplex` with the `EuclideanMetric`.
+* `PolarRetraction`, `QRRetraction`, `CayleyRetraction`, `PolarInverseRetraction` and `QRInverseRetraction` on the real `GeneralizedStiefel` manifold.
+* `manifold_dimension` and `is_flat` for `MultinomialSymmetricPositiveDefinite`.
+* `rand` and `rand!` on the `SpecialUnitaryMatrices`, which draw points of determinant one and tangent vectors of trace zero.
+* `ProjectionRetraction` on the `MultinomialSymmetricPositiveDefinite` manifold.
+* `warn_nonconvergence` keyword for `project` on the doubly stochastic multinomial manifolds, which allows disabling the warning issued when Sinkhorn's algorithm does not converge.
+* `CenteredMatrices` provide `get_coordinates` and `get_vector` in their default orthonormal basis, for real and complex matrices.
+* `@tfvector_inner_via_get_vector` and `@tfvector_norm_via_get_vector` macros that define `inner` and `norm` of `TFVector`s on a metric manifold with a closed-form `inner` or `norm` by converting them with `get_vector`.
+* Chart-based `gaussian_curvature`, equal to half of `ricci_curvature`.
+* `distance` and `inner` on the `Grassmann` manifold for `ProjectorPoint`s and `ProjectorTangentVector`s.
+
+### Changed
+
+* The default retraction and inverse retraction of `FixedRankMatrices` are `OrthographicRetraction` and `OrthographicInverseRetraction`.
+* `default_retraction_method` on the doubly stochastic multinomial manifolds is now the
+`ProjectionRetraction`.
+* embedding of the `MultinomialSymmetricPositiveDefinite` manifold is changed from `MultinomialMatrices` to `MultinomialSymmetric`, and is marked as `IsometricallyEmbeddedManifoldType` instead of `EmbeddedManifoldType`. Consequently, `inner`, `norm` and `riemannian_gradient` are now also available.
+* `project` onto the tangent space of `MultinomialMatrices` is now orthogonal with respect to the Fisher–Rao metric instead of subtracting the mean of each column.
+* Basis-based methods of `christoffel_symbols_first`, `christoffel_symbols_second`, `christoffel_symbols_second_jacobian`, `det_local_metric`, `einstein_tensor`, `gaussian_curvature`, `inverse_local_metric`, `local_metric`, `local_metric_jacobian`, `log_local_metric_density`, `ricci_curvature`, `ricci_tensor`, `riemann_tensor` and `solve_exp_ode` (taking a point `p` and an `AbstractBasis` `B`) are deprecated. Use their chart-based variants taking an atlas `A`, chart index `i` and parameters `a` instead, for example `ricci_curvature(M, A, i, a)`; `solve_exp_ode` is replaced by `solve_chart_exp_ode`, while `local_metric_jacobian` and `christoffel_symbols_second_jacobian` have no direct replacements and are covered by the chart-based `christoffel_symbols_first`, `christoffel_symbols_second` and `riemann_tensor`.
+
+### Fixed
+
+* `rand` on the `MultinomialSymmetricPositiveDefinite` manifold rejects samples for which Sinkhorn's algorithm did not converge, so that it no longer occasionally returns points whose rows do not sum to one.
+* `kretschmann_scalar` now correctly uses the metric instead of the inverse for one of the contractions.
+* `get_coordinates` on the `CholeskySpace` divides the diagonal entries by the diagonal of the point, so that the coordinates are those of the orthonormal basis and invert `get_vector`.
+* `parallel_transport_to` on the `CholeskySpace` (and hence under the log-Cholesky metric) keeps the strictly lower part of the tangent vector, so that the transport is an isometry.
+* `jacobi_field` and `adjoint_Jacobi_field` on the `Circle` and on the number-valued `Euclidean` space apply the weight function they are given.
+* `log` on the complex `Circle` returns a tangent vector for every pair of opposite points and nearly opposite points.
+* `mid_point` on the complex `Circle` returns the midpoint of the shortest geodesic for every pair of points.
+* `check_vector` on `DeterminantOneMatrices` accepts a trace that vanishes up to rounding, with the tolerance keyword `atol`.
+* `manifold_dimension` on `DeterminantOneMatrices` over the complex numbers counts the determinant condition as the two real conditions it is.
+* `project` onto the tangent space of the `Elliptope` removes the vertical part with the right sign, so that it is a projection onto the horizontal space.
+* `distance` on a complex `Euclidean` space returns a real number.
+* `distance` and `log` on the unsigned `EssentialManifold` choose the closest of the four sign flips, so that they are the same for every representative of a point.
+* `local_metric` on the real `Sphere` in the `StereographicAtlas` returns a `Diagonal` matrix of the size of the parameters instead of a `UniformScaling`, so that chart-based curvature functions such as `ricci_curvature` work in that atlas.
+* `distance` and `log` on the `EssentialManifold` return a number when a turn about the z axis puts one of the two cameras in place.
+* `project` from a `Euclidean` embedding into a `Euclidean` manifold of fewer array dimensions returns the corresponding entries.
+* Random tangent vectors of a `FiberBundle` are drawn in the fiber over the base point of `vector_at`.
+* The tangent checks of the sphere, the projective space, the probability simplex, the hyperbolic space, the centered matrices, the elliptope and the spectrahedron take a relative tolerance `rtol` and accept tangent vectors of any length.
+* `copy` of an `SVDMPoint` or a `TuckerPoint` returns a point with its own arrays.
+* `volume_density` on a `PowerManifold` in a nested representation returns the product of the volume densities of its components.
+* `get_vector` on complex `SymmetricMatrices` returns a Hermitian matrix, so that it inverts `get_coordinates`.
+* `project` onto the tangent space of the complex `SymmetricMatrices` returns the Hermitian part, so that its result is a tangent vector.
+* `check_point` and `check_vector` on a `FiberBundle` check the base part and the fiber part and report the errors of both.
+* `isapprox` for tangent vectors on a `FiberBundle` compares the base part as a tangent vector at the base point.
+* `is_point` on `FixedRankMatrices` accepts a plain matrix of rank `k` for every `k` and requires the rank to be exactly `k`, also for an `SVDMPoint`.
+* `is_vector` on `FixedRankMatrices` returns `false` for a tangent vector whose `Vt` factor is not orthogonal to the point.
+* `retract` with the `OrthographicRetraction` on `FixedRankMatrices` returns the point of its documented formula.
+* `riemannian_Hessian` on `FixedRankMatrices` works for matrices with more columns than the rank.
+* `check_vector` on a `Flag` in the orthogonal representation accepts tangent vectors whose blocks vanish up to rounding, with the tolerance keyword `atol`.
+* `volume_density` on `Rotations` and `OrthogonalMatrices` returns the determinant of the differential of the exponential map.
+* `exp` on the `GeneralizedGrassmann` manifold follows the geodesic in the direction of the given tangent vector.
+* `is_vector` on the `GeneralizedStiefel` and `GeneralizedGrassmann` manifolds accepts complex tangent vectors and those with `p'BX = 0`, with a tolerance relative to the length of the vector.
+* `inner` of two `TFVector`s works on the `Lorentz` manifold and for the canonical and submersion metrics on `Stiefel`, the Bures-Wasserstein, generalized Bures-Wasserstein and log-Cholesky metrics on `SymmetricPositiveDefinite`, and the warped metric on `Segre`.
+* `inner` and `norm` of `TFVector`s work on a `MetricManifold` with the `EuclideanMetric`.
+* `exp`, `log`, `mid_point`, the retractions and the inverse retractions on `Grassmann` and `Stiefel` accept points and tangent vectors given as `StiefelPoint` and `StiefelTangentVector`.
+* `manifold_dimension` on the `HamiltonianMatrices` returns the dimension of the manifold, over the real and over the complex numbers.
+* `rand` on the `HamiltonianMatrices` draws its two off-diagonal blocks independently, as documented.
+* charts of the `DefaultTorusAtlas` are now correctly switched according to the distance of the point from the chart centre (`get_chart_index`, `check_chart_switch`).
+* embedding of the `Flag` manifold is now marked as `EmbeddedManifoldType` instead of `IsometricallyEmbeddedManifoldType`.
+*`norm` in the orthogonal representation of a flag manifold is fixed (it had wrong scaling).
+* `get_vector` on `HeisenbergMatrices` returns the tangent vector for every size `n`, as its in-place variant does.
+* `riemannian_gradient` on the `Hyperbolic` space changes the representer before it projects onto the tangent space, so that it returns the Riemannian gradient.
+* `riemannian_Hessian` on the `Hyperbolic` space follows its documented formula and leaves the Euclidean Hessian it is given unchanged.
+* `volume_density` on the `Hyperbolic` space measures the tangent vector with its Riemannian norm, so that it is the determinant of the differential of the exponential map at every point.
+* `is_point` on the `Hyperrectangle` checks the bounds also when keyword arguments such as `atol` are given.
+* `retract` with the default `ProjectionRetraction` on the `Hyperrectangle` returns a point inside the box.
+* `horizontal_component`, and with it `exp`, `inner` and `norm`, on `KendallsShapeSpace` return a value when the landmarks span fewer dimensions than the space, such as collinear points in the plane.
+* `project` and `rand` on `KendallsShapeSpace` return horizontal tangent vectors, so that the basis from `ProjectedOrthonormalBasis` is orthonormal.
+* `change_metric` for a metric given by its local matrix keeps inner products also when that matrix does not commute with the local matrix of the manifold's metric.
+* `change_representer` for a metric given by its local matrix reproduces the inner products of that metric also when its local matrix does not commute with the local matrix of the manifold's metric.
+* `flat` and `sharp` on a `MetricManifold` apply the local metric to coefficients in an induced basis, as `flat!` and `sharp!` do.
+* `project` of a matrix onto the multinomial doubly stochastic manifolds runs Sinkhorn's algorithm for up to 1000 iterations, stops once every column sum is within `tolerance` of one, and warns when it does not get there.
+* `distance` on the `ProbabilitySimplex` returns a number for every pair of points, also for a point and itself.
+* `exp` on `ProbabilitySimplex(n; boundary = :closed)` follows the geodesic within the face at points with zero entries.
+* `rand` with `vector_at` and `change_metric` on the `ProbabilitySimplex` and the `MultinomialMatrices` work at points with small entries (near the boundary).
+* `Weingarten` on `Rotations`, `OrthogonalMatrices` and `UnitaryMatrices` returns a tangent vector in the Lie algebra, like its tangent vector argument.
+* `check_vector` and the tangent projection of `SPDFixedDeterminant` use the condition that the trace of `p \ X` vanishes, so that a geodesic in an accepted direction keeps the determinant, and the tangent check takes a relative tolerance `rtol`.
+* `embed` and `embed!` of a tangent vector on the `Segre` manifold return the embedded tangent vector, and `embed!` writes it into the given array.
+* `vector_transport_to!` with `ProjectionTransport` on the `Segre` manifold returns the transported vector also when the result is the tangent vector being transported.
+* `exp!`, and with it the in-place `retract!` and `mid_point!`, on the `Segre` manifold and under its `WarpedMetric` return the correct point when the result is the starting point itself.
+* `get_coordinates!` on the `Segre` manifold and under its `WarpedMetric` writes the coordinates into the given vector.
+* `connected_by_geodesic` on the `Segre` manifold with a `WarpedMetric` takes the warping factor into account.
+* `log` on `Sphere` and `ArraySphere` returns a tangent vector for every pair of opposite points and is more accurate.
+* `is_vector` and `project` on the `SpecialUnitaryMatrices` require and return tangent vectors of trace zero.
+* `project` onto the tangent space of the `GeneralizedGrassmann` manifold removes the whole part along the columns of the point, so that it and `rand` return tangent vectors `X` with `p'BX = 0`.
+* `change_metric` on the `GeneralizedGrassmann` manifold returns a tangent vector whose length in the manifold's metric equals the Euclidean length of the given one.
+* `distance` and `log` on the `GeneralizedGrassmann` manifold use the metric given by `B`, and `distance` returns `π/2` for a right principal angle.
+* `distance` on the `Grassmann` manifold returns `π/2` for a right principal angle instead of throwing a `SingularException`.
+* `riemann_tensor` on the real `Grassmann` manifold adds the second term of its documented formula, so that `sectional_curvature` there is never negative.
+* `project` onto the tangent space of `MultinomialDoubleStochastic` returns a tangent vector at every point, also at the uniform matrix of two or four rows.
+* `rand` on `OrthogonalMatrices` with `vector_at` draws the projection of a normally distributed matrix with standard deviation `σ`.
+* `project` onto the tangent space of `MultinomialSymmetric`, and with it `riemannian_gradient` and `riemannian_Hessian`, use the symmetric part of a nonsymmetric input, so that they return the correct tangent vector.
+* `is_flat` on `MultinomialSymmetric(2)` returns `true`.
+* `is_point` on `SymmetricPositiveDefinite` accepts a matrix that is symmetric up to rounding, such as a result of `exp`; the tolerance can be set with the keywords of `isapprox`.
+* `rand` on `SymmetricPositiveDefinite` draws Gaussian tangent vectors whose coordinates in an orthonormal basis at the base point have standard deviation `σ`, by default `1/sqrt(n)`, the `:Rician` draw accepts an `SPDPoint`, and `rand!` into an `SPDPoint` stores the matrix square roots of the drawn point.
+* `distance` on the `SymmetricPositiveDefinite` manifold returns zero only for equal points, also when their eigenvalues differ by many orders of magnitude.
+* `sectional_curvature_min` on `SymmetricPositiveDefinite` returns `-0.5`, the smallest sectional curvature of the affine invariant metric.
+* `volume_density` on `SymmetricPositiveDefinite` uses the eigenvalues of `p^(-1/2) X p^(-1/2)` and half their differences, so that it is the determinant of the differential of the exponential map at `p`.
+* `log` on `SymmetricPositiveDefinite` with the `BuresWassersteinMetric` takes the square roots of the products of the two points, so that it inverts `exp` also for points that do not commute.
+* `distance` under the `BuresWassersteinMetric` and the `GeneralizedBuresWassersteinMetric` returns a real number also when rounding makes the squared distance negative or complex, for example for a point and itself.
+* `get_vector` under the `LogCholeskyMetric` on `SymmetricPositiveDefinite` uses the Cholesky factor of the point, so that it inverts `get_coordinates` and its basis vectors are orthonormal at every point.
+* `log` on the `SymmetricPositiveDefinite` manifold returns a tangent vector whose length is the distance also when `q` is more than sixteen orders of magnitude smaller than `p`, such as `q = 1e-9 * I` and `p = 1e9 * I`.
+* `exp!` into an `SPDPoint` stores an orthonormal eigen decomposition, so the resulting point is correct also when it does not store its matrix, and equals the result of `exp`.
+* `get_coordinates` and `get_vector` on `KendallsPreShapeSpace` use an orthonormal basis of its tangent space.
+* `is_vector` on `Grassmann` requires `p'X = 0` relative to the size of `X` with the keywords `atol` and `rtol`, so that vectors that only rotate the basis of the point are rejected.
+* `is_vector` on `Stiefel` checks that `p'X` is skew-Hermitian with `isapprox` and an absolute tolerance scaled by the size of `X`, so that it accepts complex tangent vectors and the tangent vectors of `Stiefel(n, 1)`.
+* `inverse_retract` with `QRInverseRetraction` on a complex `Stiefel` manifold returns a tangent vector and inverts `retract` with `QRRetraction`.
+* `vector_transport_direction` and `vector_transport_to` with `DifferentiatedRetractionVectorTransport(QRRetraction())` on `Stiefel` compute the derivative of the QR retraction.
+* `exp!` on the `Stiefel` manifold with the `CanonicalMetric` can write its result into its own starting point.
+* The logarithmic map of the `Stiefel` manifold with the `CanonicalMetric` also works for two coinciding or nearly coinciding points when `2k > n`.
+* `rand` on the quaternionic `Stiefel` and `Grassmann` manifolds returns a point.
+* `riemannian_Hessian` on the `Stiefel` manifold with the `CanonicalMetric` or a `StiefelSubmersionMetric` applies the inverse of the metric, so it returns the Hessian with respect to that metric.
+* `project` onto a complex `GeneralizedStiefel` manifold, and its default retraction, return a point of the manifold also when the weight matrix is the identity.
+* `manifold_volume`, `volume_density` and `riemann_tensor` on the `ProbabilitySimplex` return the correct values for every point and tangent vector (sphere radius was incorrectly set to 1 instead of 2 for the diffeomorphism).
+* `retract` with `SoftmaxRetraction` on the `ProbabilitySimplex` applies correct scaling by `p`, keeps zero entries of a point on the closed simplex and does not overflow for large exponents.
+* `Manifolds.Test.test_manifold` compares the expected result of `log` when one is given.
+* `Manifolds.Test.test_manifold` compares the expected sectional curvature and its expected minimum and maximum when they are given.
+* `Manifolds.Test.test_default_retraction` and `Manifolds.Test.test_default_vector_transport_method` compare with an expected value only when one is given.
+* `Manifolds.Test.test_mid_point`, and with it `Manifolds.Test.test_manifold`, compare the mid-points of both argument orders by default and skip this comparison for `test_symmetry = false` or the property `:TestMidpointSymmetry => false`.
+* The `:Seed` property of `Manifolds.Test.test_manifold` and the `seed` keyword of `Manifolds.Test.test_rand` seed the random number generator before sampling.
+* `Manifolds.Test.test_retract`, `test_sectional_curvature`, `test_sharp`, `test_shortest_geodesic` and `test_vector_transport` compare their result with a supplied expected value.
+* `Manifolds.Test.test_geodesic` compares the speed of the geodesic with `norm(M, p, X)`, so that it passes for end times other than one.
+* The point check of `CenteredMatrices` takes a relative tolerance `rtol` and accepts the large points the manifold produces.
+* `rand` with a `vector_at` on the `SymplecticMatrices` uses the generator it is given, so seeded draws repeat.
+* `riemannian_gradient` on `SymplecticMatrices` returns the gradient with respect to the `RealSymplecticMetric`, the metric that `inner` implements.
+* `riemannian_gradient` on the `SymplecticGrassmann` manifold returns the gradient given in its documentation.
+* `riemannian_gradient` on `MultinomialMatrices` returns the Riemannian gradient with respect to the Fisher–Rao metric.
+* `riemannian_gradient` on a `PowerManifold` with the array or the nested representation computes the gradient factor by factor, with the gradient of the factor manifold.
+* `Manifolds.Test.test_mid_point`, and with it `Manifolds.Test.test_manifold`, compare the mid-points of both argument orders by default and skip this comparison for `test_symmetry = false` or the property `:TestMidpointSymmetry => false`.
+* `project` onto a tangent space and `embed` of a tangent vector on the quaternionic `UnitaryMatrices(1, ℍ)` take the point into account, so that they and the default vector transport follow the Lie algebra representation of tangent vectors.
+* `riemannian_Hessian` on `OrthogonalMatrices` and `UnitaryMatrices` returns the correct Hessian at every point.
+* `manifold_volume` of `OrthogonalMatrices`, `Rotations`, `UnitaryMatrices` and `SpecialUnitaryMatrices` is the volume with respect to the metric of `inner`.
+* `log` on `SpecialUnitaryMatrices` returns the tangent vector of minimal norm, which has trace zero.
+* `project` onto the tangent space of the `Tucker` manifold also works in its allocating form and returns a `TuckerTangentVector`.
+* `AbstractAffineConnection` is available when only `Manifolds` is loaded.
+* `WeiszfeldEstimation` is exported, like the other estimation methods for `mean` and `median`.
+* `check_vector` on the `CholeskySpace` rejects a matrix with a nonzero strictly upper triangular part with the same default tolerance as `check_point`.
+* `project` and `project!` work for the real `Circle` and hence for the `Torus`.
+* `log` and `inverse_retract` work on a `PowerManifold` of complex `Circle`s.
+* `is_flat` on `DeterminantOneMatrices` returns `false` for sizes two and larger.
+* `rand` draws random points and tangent vectors on `CenteredMatrices`, `Elliptope`, `Spectrahedron` and `SPDFixedDeterminant`.
+* `rand` on `DeterminantOneMatrices` draws tangent vectors from the whole tangent space, and `is_vector` there takes a relative tolerance `rtol` and accepts tangent vectors of any length.
+* `retract`, `retract_fused` and `inverse_retract` with the `OrthographicRetraction` and the `OrthographicInverseRetraction` on `FixedRankMatrices` accept keyword arguments.
+* `project!` onto the multinomial doubly stochastic manifolds accepts a matrix with integer entries when the result is a floating point matrix.
+* `parallel_transport_direction` on the `Grassmann` manifold allocates its result directly instead of computing a geodesic for it.
+* `riemann_tensor` on the `Segre` manifold, also under a `WarpedMetric`, returns the element type of the point instead of always `Float64`.
+* `retract`, `retract_fused` and `inverse_retract` with the `PolarLightRetraction` and the `PolarLightInverseRetraction` on `Stiefel` accept keyword arguments.
+* `riemannian_gradient` on the `SymplecticStiefel` manifold accepts the `embedding_metric` keyword in its allocating form and returns the same result with it as without it.
+* `mean!(M, y, x)` uses the default estimation method for the type of the points, as `mean(M, x)` does.
+* `Manifolds.Test.test_parallel_transport` and `Manifolds.Test.test_vector_transport` compare the transported vector in the tangent space at the point it is transported to.
+* `parallel_transport_to` and `parallel_transport_direction` work on `OrthogonalMatrices`, `UnitaryMatrices` and `SpecialUnitaryMatrices` as they do on `Rotations`.
+* The exponential map and the parallel transport on `Rotations(3)` and `OrthogonalMatrices(3)` return finite values for tangent vectors shorter than `1e-162`.
+* `isapprox` on `Grassmann`, `GeneralizedGrassmann` and `KendallsShapeSpace` finds every point approximately equal to itself, also with `atol = 0`.
+* `isapprox` on the `EssentialManifold` reports two representatives of the same point as equal.
+* `FiberBundleProductRetraction` on a `VectorBundle` transports the fiber part with the vertical vector transport method, the one `FiberBundleInverseProductRetraction` uses.
+* `mean(M, x)` and `mean(M, x, w)` pass their keyword arguments to the estimation method, also on decorator manifolds.
+* `mean` with `GeodesicInterpolation` and a shuffling generator `shuffle_rng` skips exactly the points of weight zero.
+* `median(M, x)` and `median(M, x, w)` pass their keyword arguments to the estimation method.
+* `median` with `WeiszfeldEstimation` returns the point itself for a single point and for coinciding points.
+* `mean_and_var` with `GeodesicInterpolation` returns the weighted mean and variance also when the first points have weight zero.
+* `estimated_sectional_curvature` accepts any pair of tangent vectors spanning the plane, as `sectional_curvature` does.
+* `NLSolveInverseRetraction` with `project_point = true` leaves the point it is given unchanged.
+* The plotting recipe of `Sphere(2)` draws the solid surface with the resolution `surface_resolution` also when it differs from `wires`.
+* `inverse_retract` with `NLSolveInverseRetraction` now correctly applies tangent space projections.
+* `rand` on the `EssentialManifold` draws tangent vectors in the horizontal space, so that they have no part along the equivalence class.
+* `get_coordinates` on the number-valued `Euclidean` space accepts a tangent vector given as a number, for real and for complex coefficients.
+* `rand` on a complex `FixedRankMatrices` manifold returns complex points and tangent vectors, and its keyword `σ` scales the singular values of a point and the factors of a tangent vector.
+* `project`, `embed`, `zero_vector` and `is_vector` on a complex `FixedRankMatrices` manifold work with complex tangent vectors.
+* `retract` on a `Flag` without a retraction method uses the QR retraction for points in the orthogonal representation.
+* `rand` on a complex `GeneralizedGrassmann` manifold returns a point, and `project` onto it returns a point also when the weight matrix is the identity.
+* `rand` on a complex `GeneralizedStiefel` manifold returns a point or, with `vector_at`, a tangent vector.
+* `diff_canonical_project` and `diff_canonical_project!` on the `Grassmann` manifold compute the differential of the canonical projection from Stiefel points onto projectors.
+* `vector_transport_to` on the `GeneralizedGrassmann` manifold uses `ProjectionTransport` by default.
+* `vector_transport_to` with `ProjectionTransport` on a complex `Tucker` manifold returns the projection onto the tangent space at the target point.
+
 ## [0.11.32] 2026-09-30
 
 ### Added
@@ -33,7 +214,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * The documentation now uses [DocumenterCodeBlocks.jl](https://github.com/fredrikekre/DocumenterCodeBlocks.jl)
 * The documentation now has a landing page using [DocumenterLandingPage.jl](https://github.com/JuliaManifolds/DocumenterLandingPage.jl)
-  [`DocumenterCitations.jl`](https://github.com/JuliaDocs/DocumenterCitations.jl) was bumped to version 1.5.
+* [`DocumenterCitations.jl`](https://github.com/JuliaDocs/DocumenterCitations.jl) was bumped to version 1.5.
 * Several docstrings were rewritten to start with a short summary sentence, such that `DocumenterCodeBlocks.jl` can display them in tooltips.
 * More atlas and chart-related operations are now exported: `get_chart_index`, `transition_map`, `transition_map!`, `transition_map_diff` and `transition_map_diff!`.
 * Chart-based geodesic and parallel-transport ODE solvers use in-place problem definitions for performance.
@@ -116,7 +297,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Improved performance of `embed` for embedding tangent vectors of the `FixedRankMaticesManifold` (#885).
 
-## [0.11.21] 2025-04-03
+## [0.11.21] 2026-04-03
 
 ### Changed
 
@@ -204,13 +385,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Deprecated variants of `det_local_metric`, `einstein_tensor`, `inverse_local_metric`, `local_metric`, `local_metric_jacobian`, `ricci_curvature` that receive a point and a basis as arguments. New variants that work in charts should be used instead.
 
-## [0.11.11] 2025-01-24
+## [0.11.11] 2026-01-24
 
 ### Changed
 
 * `Hyperrectangle` now has `has_components` defined to `true`, as well as r-norm support for `norm` and `distance`.
 
-## [0.11.10] 2025-01-07
+## [0.11.10] 2026-01-07
 
 ### Added
 
@@ -423,14 +604,14 @@ release here, since we do not have a very good reason to yet.
 
 * fix `rand!` to also work on the `Circle(ℂ)`
 
-## [0.10.14] - 2025-02-18
+## [0.10.14] 2025-02-18
 
 ### Changed
 
 * Introduced new implementation of parallel transport on `Rotations(3)` based on Rodrigues' rotation
 formula.
 
-## [0.10.13] - 2025-02-10
+## [0.10.13] 2025-02-10
 
 ### Changed
 
@@ -447,7 +628,7 @@ formula.
   * Renamed `UMVTVector` (now deprecated) to `UMVTangentVector`
 * The internal access `array_value` is now called `internal_value`, compare to its renaming in `ManifoldsBase`
 
-## [0.10.12] - 2025-01-10
+## [0.10.12] 2025-01-10
 
 ### Added
 
@@ -458,20 +639,20 @@ formula.
 
 * Improved performance of selected `get_vector` and `get_coordinates` methods for complex `Euclidean` manifold.
 
-## [0.10.11] - 2025-01-02
+## [0.10.11] 2025-01-02
 
 ### Added
 
 * Bases and rand for `HeisenbergMatrices` and `InvertibleMatrices`.
 
-## [0.10.10] - 2024-12-20
+## [0.10.10] 2024-12-20
 
 ### Added
 
 * the `Segre` manifold
 * the `WarpedMetric` for the `Segre`manifold
 
-## [0.10.9] - 2024-12-16
+## [0.10.9] 2024-12-16
 
 ### Added
 
@@ -483,7 +664,7 @@ formula.
 
 * `about.md` now also lists contributors of manifolds and a very short history of the package.
 
-## [0.10.8] – 2024-11-27
+## [0.10.8] 2024-11-27
 
 ### Changed
 
@@ -491,13 +672,13 @@ formula.
 * Minimum Julia version is now 1.10 (the LTS which replaced 1.6)
 * The dependency ManifoldDiff.jl has been upgraded from v0.3 to v0.4, to bring compatibility with DifferentiationInterface.jl.
 
-## [0.10.7] – 2024-11-16
+## [0.10.7] 2024-11-16
 
 ### Added
 
 * `adjoint_matrix` for Lie groups, with optimized implementations for SO(2), SO(3), SE(2) and SE(3).
 
-## [0.10.6] – 2024-11-06
+## [0.10.6] 2024-11-06
 
 ### Added
 
@@ -505,7 +686,7 @@ formula.
 * New function `quaternion_rotation_matrix` for converting quaternions to rotation matrices.
 * `make.jl` script now has more command line arguments, for example `--exclude-tutorials` when you do not want to build the tutorials but still look at the docs. See `make.jl --help` for more information.
 
-## [0.10.5] – 2024-10-24
+## [0.10.5] 2024-10-24
 
 ### Added
 
@@ -515,7 +696,7 @@ formula.
 
 * rewrote the `CONTRIBUTING.md` and adapt it to today's links and references.
 
-## [0.10.4] - 2024-10-20
+## [0.10.4] 2024-10-20
 
 ### Added
 
@@ -527,7 +708,7 @@ formula.
 * `uniform_distribution` now has an error hint explaining what has to be done to make it work.
 * `lie_bracket` is exactly zero on orthogonal Lie algebra in 2D
 
-## [0.10.3] - 2024-10-04
+## [0.10.3] 2024-10-04
 
 ### Changed
 
@@ -538,7 +719,7 @@ formula.
 * Fixed `solve_exp_ode` only returning the starting position ([#744](https://github.com/JuliaManifolds/Manifolds.jl/issues/744))
 * Fixed documentation of `solve_exp_ode` function signature ([#740](https://github.com/JuliaManifolds/Manifolds.jl/issues/740))
 
-## [0.10.2] - 2024-09-24
+## [0.10.2] 2024-09-24
 
 ### Added
 
@@ -548,13 +729,13 @@ formula.
 
 * fixes a few typographical errors.
 
-## [0.10.1] – 2024-08-29
+## [0.10.1] 2024-08-29
 
 ### Changed
 
 * `identity_element` on `ProductManifold` without `RecursiveArrayTools.jl` now prints a useful error message.
 
-## [0.10.0] – 2024-08-24
+## [0.10.0] 2024-08-24
 
 ### Changed
 
@@ -589,7 +770,7 @@ formula.
   * `uniform_distribution` (not exported).
 * Ability to create non-real `SymplecticStiefel` and `SymplecticGrassmann` manifolds; essential functionality was missing so it was removed until a more developed version is developed.
 
-## [0.9.20] – 2024-06-17
+## [0.9.20] 2024-06-17
 
 ### Added
 
@@ -600,7 +781,7 @@ formula.
 * since now all exp/log/parallel transport are available for all representations of `Grassmann`,
   these are now also set as defaults, since they are more exact.
 
-## [0.9.19] – 2024-06-12
+## [0.9.19] 2024-06-12
 
 ### Changed
 
@@ -612,25 +793,25 @@ formula.
 * a few typos in the doc string of the SPD fixed determinant description
 * several other typographical errors throughout the documentation
 
-## [0.9.18] – 2024-05-07
+## [0.9.18] 2024-05-07
 
 ### Added
 
 * added the injectivity radius for the Stiefel manifold with Euclidean metric
 
-## [0.9.17] – 2024-04-23
+## [0.9.17] 2024-04-23
 
 ### Added
 
 * `Hyperrectangle` manifold with boundary.
 
-## [0.9.16] – 2024-04-01
+## [0.9.16] 2024-04-01
 
 ### Changed
 
 * `NonlinearSolve.jl` and `PythonCall.jl` are no longer an upper bounded dependency (bugs were fixed).
 
-## [0.9.15] – 2024-03-24
+## [0.9.15] 2024-03-24
 
 ### Added
 
@@ -648,7 +829,7 @@ formula.
 * several typographical errors in the docs
 * unifies to use two backticks ``` `` ``` for math instead of ` $ ` further in the docs
 
-## [0.9.14] – 2024-01-31
+## [0.9.14] 2024-01-31
 
 ### Added
 
@@ -656,7 +837,7 @@ formula.
 * `rand` on arbitrary `GroupManifold`s and manifolds with `IsGroupManifold` trait
   generating points and elements from the Lie algebra, respectively
 
-## [0.9.13] – 2024-01-24
+## [0.9.13] 2024-01-24
 
 ### Added
 
@@ -677,19 +858,19 @@ formula.
 
 * a bug that cause `project` for tangent vectors to return wrong results on `MultinomialDoublyStochastic`
 
-## [0.9.12] – 2024-01-21
+## [0.9.12] 2024-01-21
 
 ### Fixed
 
 * Fixed `var` on `TranslationGroup`.
 
-## [0.9.11] – 2023-12-27
+## [0.9.11] 2023-12-27
 
 ### Fixed
 
 * Fixed mixed array index number in-place `parallel_transport_to!` on zero-index `Euclidean`, on Julia 1.6.
 
-## [0.9.10] – 2023-12-27
+## [0.9.10] 2023-12-27
 
 ### Added
 
@@ -700,7 +881,7 @@ formula.
 * Fixed mixed array index number in-place `parallel_transport_to!` on real `Circle`, on Julia 1.6.
 * Violations of MD004 lint rule in this file.
 
-## [0.9.9] – 2023-12-25
+## [0.9.9] 2023-12-25
 
 ### Fixed
 
@@ -709,33 +890,33 @@ formula.
 * `default_estimation_method(M, f)` is deprecated, use `default_approximation_method(M, f)` for your specific method `f` on the manifold `M`.
 * `AbstractEstimationMethod` is deprecated, use `AbstractApproximationMethod` instead.
 
-## [0.9.8] - 2023-11-17
+## [0.9.8] 2023-11-17
 
 ### Fixed
 
 * Improved distribution of random vector generation for rotation matrices and complex circle.
 
-## [0.9.7] – 2023-11-14
+## [0.9.7] 2023-11-14
 
 ### Fixed
 
 * Fixed `is_flat` for `CholeskySpace` and `SymmetricPositiveDefinite` with `LogCholeskyMetric` [https://github.com/JuliaManifolds/Manifolds.jl/issues/684](https://github.com/JuliaManifolds/Manifolds.jl/issues/684).
 
-## [0.9.6] - 2023-11-09
+## [0.9.6] 2023-11-09
 
 ### Fixed
 
 * Fixed real coefficient basis for complex circle (an issue exposed by [https://github.com/JuliaManifolds/ManifoldsBase.jl/pull/173](https://github.com/JuliaManifolds/ManifoldsBase.jl/pull/173)).
 * Fixed `VeeOrthogonalBasis` test for non-real manifolds.
 
-## [0.9.5] - 2023-11-08
+## [0.9.5] 2023-11-08
 
 ### Changed
 
 * `identity_element` now returns a complex matrix for unitary group.
 * `number_of_coordinates` is now exported.
 
-## [0.9.4] - 2023-11-06
+## [0.9.4] 2023-11-06
 
 ### Added
 
@@ -750,13 +931,13 @@ formula.
 
 * Fixed issue with incorrect implementation of `apply_diff_group` in `GroupOperationAction` with left backward and right forward action [#669](https://github.com/JuliaManifolds/Manifolds.jl/issues/669).
 
-## [0.9.3] - 2023-10-28
+## [0.9.3] 2023-10-28
 
 ### Added
 
 * Support for `BoundaryValueDiffEq` v5.
 
-## [0.9.2] - 2023-10-27
+## [0.9.2] 2023-10-27
 
 ### Added
 
@@ -764,13 +945,13 @@ formula.
 * `get_embedding` now works for `GeneralUnitaryMultiplicationGroup`.
 * Github action that checks for NEWS.md changes.
 
-## [0.9.1] - 2023-10-25
+## [0.9.1] 2023-10-25
 
 ### Added
 
 * a new retraction and its inverse for the fixed Rank Manifolds, the orthographic retraction.
 
-## [0.9.0] - 2023-10-24
+## [0.9.0] 2023-10-24
 
 ### Added
 
@@ -852,7 +1033,7 @@ formula.
 
   ```{julia}
   function Base.show(io::IO, M::CenteredMatrices{T}) where {T}
-      m, n = get_parameter(M)
+      m, n = get_parameter(M.size)
       if T <: TypeParameter
           return print(io, "CenteredMatrices($m, $n)")
       else

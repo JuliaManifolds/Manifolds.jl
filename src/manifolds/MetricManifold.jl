@@ -7,7 +7,7 @@ function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     x = get_coordinates(M, p, X, B)
     C1 = cholesky(G1).L
     C2 = cholesky(G2).L
-    z = (C1 \ C2)'x
+    z = C1' \ (C2' * x)
     return get_vector!(M, Y, p, z, B)
 end
 
@@ -18,7 +18,7 @@ function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     G1 = local_metric(M, p, B)
     G2 = local_metric(G(M), p, B)
     x = get_coordinates(M, p, X, B)
-    z = (G1 \ G2)'x
+    z = (G1 \ G2) * x
     return get_vector!(M, Y, p, z, B)
 end
 
@@ -37,6 +37,11 @@ where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@r
 """
 flat(::MetricManifold, ::Any, ::TFVector)
 
+function flat(M::MetricManifold, p, X::TFVector{<:Any, <:InducedBasis})
+    (metric(M.manifold) == M.metric) && (return flat(M.manifold, p, X))
+    return CoTFVector(local_metric(M, p, X.basis) * X.data, dual_basis(M, p, X.basis))
+end
+
 function flat!(M::AbstractManifold, ξ::CoTFVector, p, X::TFVector)
     (metric(M.manifold) == M.metric) && (return flat!(M.manifold, ξ, p, X))
     g = local_metric(M, p, ξ.basis)
@@ -48,6 +53,48 @@ function inner(M::MetricManifold, p, X::TFVector, Y::TFVector)
     X.basis === Y.basis ||
         error("calculating inner product of vectors from different bases is not supported")
     return dot(X.data, local_metric(M, p, X.basis) * Y.data)
+end
+
+"""
+    @tfvector_inner_via_get_vector T
+
+Define `inner(M::T, p, X::TFVector, Y::TFVector)`, which converts both coefficient vectors
+to tangent vectors using [`get_vector`](@extref `ManifoldsBase.get_vector`) and calls `inner` on them.
+
+This resolves the ambiguity between `inner(::MetricManifold, p, ::TFVector, ::TFVector)`
+and a closed-form `inner(::T, p, X, Y)` of a metric manifold type `T`, so it should be
+used after each such method. `T` can be a `UnionAll` written as `(T where {...})`.
+"""
+macro tfvector_inner_via_get_vector(T)
+    return esc(
+        quote
+            function inner(M::$T, p, X::TFVector, Y::TFVector)
+                return inner(
+                    M, p, get_vector(M, p, X.data, X.basis), get_vector(M, p, Y.data, Y.basis),
+                )
+            end
+        end,
+    )
+end
+
+"""
+    @tfvector_norm_via_get_vector T
+
+Define `norm(M::T, p, X::TFVector)`, which converts the coefficient vector to a tangent
+vector using [`get_vector`](@extref `ManifoldsBase.get_vector`) and calls `norm` on it.
+
+This resolves the ambiguity between `norm(::MetricManifold, p, ::TFVector)`
+and a closed-form `norm(::T, p, X)` of a metric manifold type `T`, so it should be
+used after each such method. `T` can be a `UnionAll` written as `(T where {...})`.
+"""
+macro tfvector_norm_via_get_vector(T)
+    return esc(
+        quote
+            function norm(M::$T, p, X::TFVector)
+                return norm(M, p, get_vector(M, p, X.data, X.basis))
+            end
+        end,
+    )
 end
 
 @doc raw"""
@@ -65,6 +112,12 @@ where ``G_p`` is the local matrix representation of `G`, i.e. one employs
 [`inverse_local_metric`](@ref) here to obtain ``G_p^{-1}``.
 """
 sharp(::MetricManifold, ::Any, ::CoTFVector)
+
+function sharp(M::MetricManifold, p, ξ::CoTFVector{<:Any, <:InducedBasis})
+    (metric(M.manifold) == M.metric) && (return sharp(M.manifold, p, ξ))
+    B = dual_basis(M, p, ξ.basis)
+    return TFVector(inverse_local_metric(M, p, B) * ξ.data, B)
+end
 
 function sharp!(M::MetricManifold, X::TFVector, p, ξ::CoTFVector)
     (metric(M.manifold) == M.metric) && (return sharp!(M.manifold, X, p, ξ))

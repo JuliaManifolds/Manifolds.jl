@@ -23,6 +23,7 @@ include("../header.jl")
         @test_throws ManifoldDomainError is_point(M, C; error = :error)
         @test_throws ManifoldDomainError is_point(M, D; error = :error) #embedding changes type
         @test check_vector(M, B_sym, B_sym) === nothing
+        @test Weingarten!(M, similar(B_sym), B_sym, B_sym, B_sym) == zero(B_sym)
         @test_throws DomainError is_vector(M, B_sym, A; error = :error)
         @test_throws ManifoldDomainError is_vector(M, A, B_sym; error = :error)
         @test_throws ManifoldDomainError is_vector(M, B_sym, D; error = :error)
@@ -36,11 +37,17 @@ include("../header.jl")
         @test manifold_dimension(M_complex) == 9
         @test A_sym2 == project!(M, A_sym, A_sym)
         @test A_sym2 == project(M, A_sym, A_sym)
+        @test project(M, A) == [1 3 5; 3 5 7; 5 7 9] # the point projection symmetrizes
+        @test project(M, B_sym, A) == [1 3 5; 3 5 7; 5 7 9] # and so does the tangent one
         A_sym3 = similar(A_sym)
         embed!(M, A_sym3, A_sym)
         A_sym4 = embed(M, A_sym)
         @test A_sym3 == A_sym
         @test A_sym4 == A_sym
+        # the projection onto the tangent space is the Hermitian part
+        C_sym = ComplexF64[1 2 + 3im 0; 2 - 3im 4 0; 0 0 5]
+        @test is_vector(M_complex, C_sym, C_sym)
+        @test project(M_complex, C_sym, C_sym) == C_sym
     end
     types = [Matrix{Float64}]
 
@@ -63,9 +70,14 @@ include("../header.jl")
                 is_tangent_atol_multiplier = 1,
                 test_inplace = true,
             )
+            pts_complex = [
+                convert(Matrix{ComplexF64}, A_sym) + [0 im 2im; -im 0 -im; -2im im 0],
+                convert(Matrix{ComplexF64}, B_sym) + [0 -2im im; 2im 0 3im; -im -3im 0],
+                convert(Matrix{ComplexF64}, X),
+            ]
             Manifolds.test_manifold(
                 M_complex,
-                pts,
+                pts_complex,
                 test_injectivity_radius = false,
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
@@ -83,6 +95,13 @@ include("../header.jl")
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end # testset type $T
     end # for
+    @testset "complex coordinates" begin
+        Y = ComplexF64[1 2 + 3im 0; 2 - 3im 4 0; 0 0 5]
+        c = get_coordinates(M_complex, Y, Y, DefaultOrthonormalBasis())
+        Z = get_vector(M_complex, Y, c, DefaultOrthonormalBasis())
+        @test is_vector(M_complex, Y, Z)
+        @test isapprox(Z, Y)
+    end
     @testset "field parameter" begin
         M = SymmetricMatrices(3, ℝ; parameter = :field)
         @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}

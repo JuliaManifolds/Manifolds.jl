@@ -1,5 +1,12 @@
 include("../header.jl")
 
+@testset "tangent vectors of the spectrahedron of any length" begin
+    M = Spectrahedron(3, 2)
+    q = [1.0 2.0; 3.0 4.0; 5.0 6.0] / norm([1.0 2.0; 3.0 4.0; 5.0 6.0])
+    @test is_vector(M, q, project(M, q, [100.0 -50.0; 30.0 20.0; -10.0 5.0]))
+    @test !is_vector(M, q, project(M, q, [1.0 -0.5; 0.3 0.2; -0.1 0.4]) .+ 1.0e-6 .* q)
+end
+
 @testset "Spectrahedron" begin
     M = Spectrahedron(4, 2)
     @test repr(M) == "Spectrahedron(4, 2)"
@@ -57,5 +64,11 @@ include("../header.jl")
         M = Spectrahedron(4, 2; parameter = :field)
         @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "Spectrahedron(4, 2; parameter=:field)"
+    end
+    @testset "random points and tangent vectors" begin
+        M = Spectrahedron(4, 2)
+        p = rand(MersenneTwister(42), M)
+        @test is_point(M, p)
+        @test is_vector(M, p, rand(MersenneTwister(44), M; vector_at = p))
     end
 end

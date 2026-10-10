@@ -45,6 +45,9 @@ end
 function inner(::Lorentz{<:Any, MinkowskiMetric}, p, X, Y)
     return minkowski_metric(X, Y)
 end
+
+@tfvector_inner_via_get_vector Lorentz{<:Any, MinkowskiMetric}
+
 @doc raw"""
     minkowski_metric(a, b)
 

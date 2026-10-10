@@ -256,10 +256,12 @@ function jacobian_exp_argument!(
 end
 
 @doc raw"""
-    normal_rotation_distribution(M::Rotations, p, σ::Real)
+    normal_rotation_distribution(M::Rotations, p, σ::Real=1.0)
 
 Return a random point on the manifold [`Rotations`](@ref) `M`
-by generating a (Gaussian) random orthogonal matrix with determinant ``+1``. Let
+by generating a (Gaussian) random orthogonal matrix with determinant ``+1``.
+The function draws samples from the uniform distribution on the manifold,
+regardless of the value of `σ`. Let
 
 ```math
 QR = A
@@ -346,82 +348,6 @@ function Random.rand!(
     return pX
 end
 
-"""
-    _exp_half(::Rotations, d)
-
-Calculate `exp(d / 2)`.
-"""
-_exp_half(::Rotations, d) = exp(d / 2)
-"""
-    _exp_half(::Rotations{TypeParameter{Tuple{3}}}, d)
-
-Calculate `exp(d / 2)` for the manifold of `Rotations(3)` based on the Rodrigues' rotation
-formula.
-"""
-function _exp_half(::Rotations{TypeParameter{Tuple{3}}}, d)
-    θ = norm(d) / (2 * sqrt(2))
-    if θ ≈ 0
-        a = 1 - θ^2 / 6
-        b = θ / 2
-    else
-        a = sin(θ) / θ
-        b = (1 - cos(θ)) / θ^2
-    end
-    a /= 2
-    b /= 4
-
-    return I + a .* d .+ b .* (d^2)
-end
-
-@doc raw"""
-    parallel_transport_direction(M::Rotations, p, X, d)
-
-Compute parallel transport of vector `X` tangent at `p` on the [`Rotations`](@ref)
-manifold in the direction `d`. The formula, provided in [Rentmeesters:2011](@cite), reads:
-
-```math
-\mathcal P_{q\gets p}X = q^\mathrm{T}p \operatorname{Exp}(d/2) X \operatorname{Exp}(d/2)
-```
-where ``q=\exp_p d``.
-
-The formula simplifies to identity for 2-D rotations.
-"""
-parallel_transport_direction(::Rotations, p, X, d)
-function parallel_transport_direction(M::Rotations, p, X, d)
-    expdhalf = _exp_half(M, d)
-    q = exp(M, p, d)
-    return transpose(q) * p * expdhalf * X * expdhalf
-end
-parallel_transport_direction(::Rotations{TypeParameter{Tuple{2}}}, p, X, d) = X
-
-function parallel_transport_direction!(M::Rotations, Y, p, X, d)
-    expdhalf = _exp_half(M, d)
-    q = exp(M, p, d)
-    return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
-end
-function parallel_transport_direction!(::Rotations{TypeParameter{Tuple{2}}}, Y, p, X, d)
-    return copyto!(Y, X)
-end
-
-function parallel_transport_to!(M::Rotations, Y, p, X, q)
-    d = log(M, p, q)
-    expdhalf = _exp_half(M, d)
-    return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
-end
-function parallel_transport_to!(::Rotations{TypeParameter{Tuple{2}}}, Y, p, X, q)
-    return copyto!(Y, X)
-end
-function parallel_transport_to!(M::Rotations{TypeParameter{Tuple{3}}}, Y, p, X, q)
-    d = log(M, p, q)
-    expdhalf = _exp_half(M, d)
-    return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
-end
-function parallel_transport_to(M::Rotations, p, X, q)
-    d = log(M, p, q)
-    expdhalf = _exp_half(M, d)
-    return transpose(q) * p * expdhalf * X * expdhalf
-end
-parallel_transport_to(::Rotations{TypeParameter{Tuple{2}}}, p, X, q) = X
 
 function Base.show(io::IO, ::Rotations{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "Rotations($(n))")
@@ -488,14 +414,15 @@ tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal
 The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 
 ```math
-\mathcal W_p(X,V) = -\frac{1}{2}p\bigl(V^{\mathrm{T}}X - X^\mathrm{T}V\bigr)
+\mathcal W_p(X,V) = -\frac{1}{2}\bigl(XS + SX\bigr),
+\qquad S = p^{\mathrm{T}}V
 ```
 """
 Weingarten(::Rotations, p, X, V)
 
 function Weingarten!(::Rotations, Y, p, X, V)
-    Y .= V' * X
-    Y .= -p * 1 / 2 * (Y - Y')
+    S = p' * V
+    Y .= -(X * S .+ S * X) ./ 2
     return Y
 end
 

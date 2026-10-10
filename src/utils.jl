@@ -317,6 +317,7 @@ which states that
 where ``C(r)`` is the circumference of the circle of radius ``r`` around `p` in submanifold
 of `M` spanned by `X` and `Y`. The circumference calculation method has a tendency to
 return curvature values larger than the exact ones.
+`X` and `Y` are orthonormalized internally, so the estimate depends only on the plane they span.
 """
 function estimated_sectional_curvature(
         M::AbstractManifold,
@@ -326,14 +327,17 @@ function estimated_sectional_curvature(
         r::Real = 1.0e-3,
         N::Int = 10000,
     )
+    Xn = X ./ norm(M, p, X)
+    Yo = Y .- real(inner(M, p, Xn, Y)) .* Xn
+    Yn = Yo ./ norm(M, p, Yo)
     circumference = 0.0
     p_i = similar(p)
     p_ip1 = similar(p)
     for i in 1:N
         θ_i = 2π * (i - 1) / N
         θ_ip1 = 2π * (i) / N
-        exp!(M, p_i, p, r .* (sin(θ_i) .* X .+ cos(θ_i) .* Y))
-        exp!(M, p_ip1, p, r .* (sin(θ_ip1) .* X .+ cos(θ_ip1) .* Y))
+        exp!(M, p_i, p, r .* (sin(θ_i) .* Xn .+ cos(θ_i) .* Yn))
+        exp!(M, p_ip1, p, r .* (sin(θ_ip1) .* Xn .+ cos(θ_ip1) .* Yn))
 
         circumference += distance(M, p_i, p_ip1)
     end
@@ -378,5 +382,5 @@ function _ensure_nonzero_rng_determinant!(
     while abs(det(pX)) < atol
         rand!(rng, M, pX; kwargs...)
     end
-    return
+    return pX
 end

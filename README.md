@@ -97,7 +97,7 @@ For example to refer to the most recent version
   Doi = {10.5281/zenodo.4292129},
   Url = {https://zenodo.org/record/4292129},
   Publisher = {Zenodo},
-  Year = {2021},
+  Year = {2026},
   Copyright = {MIT License}
 }
 ```

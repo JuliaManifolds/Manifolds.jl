@@ -95,7 +95,9 @@ and taking the square root of the matrix.
 change_metric(::ProbabilitySimplex, ::EuclideanMetric, ::Any, ::Any)
 
 function change_metric!(::ProbabilitySimplex, Y, ::EuclideanMetric, p, X)
-    return Y .= sqrt(Diagonal(p) - p * p') * X
+    # the matrix is positive semidefinite; negative eigenvalues are rounding errors
+    e = eigen(Symmetric(Diagonal(p) - p * p'))
+    return Y .= e.vectors * Diagonal(sqrt.(max.(e.values, 0))) * e.vectors' * X
 end
 
 """
@@ -130,19 +132,22 @@ end
 """
     check_vector(M::ProbabilitySimplex, p, X; kwargs... )
 
-Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`, i.e.
-after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
-`X` has to be of same dimension as `p` and its elements have to sum to one.
-The tolerance for the last test can be set using the `kwargs...`.
+Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`.
+After [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
+`X` has to be of same dimension as `p` and its elements have to sum to zero
+up to `max(atol, rtol * sqrt(length(X)) * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
         M::ProbabilitySimplex,
         p,
         X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
-    if !isapprox(sum(X), 0.0; atol = atol, kwargs...)
+    r = abs(sum(X))
+    if !(r <= atol || r <= rtol * sqrt(length(X)) * norm(X))
         return DomainError(
             sum(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its elements do not sum up to 0.",
@@ -167,7 +172,7 @@ function distance(::ProbabilitySimplex, p, q)
     @inbounds for i in eachindex(p, q)
         sumsqrt += sqrt(p[i] * q[i])
     end
-    return 2 * acos(sumsqrt)
+    return 2 * acos(clamp(sumsqrt, -1, 1))
 end
 
 embed(::ProbabilitySimplex, p) = p
@@ -189,9 +194,11 @@ operations $X_p^2$ and $\sqrt{p}$.
 """
 exp(::ProbabilitySimplex, ::Any...)
 
-function exp!(::ProbabilitySimplex, q, p, X)
+function exp!(::ProbabilitySimplex{<:Any, boundary}, q, p, X) where {boundary}
     s = sqrt.(p)
     Xs = X ./ s ./ 2
+    # closed simplex: where p and X both vanish, the geodesic stays in that face
+    (boundary === :closed) && (Xs = ifelse.(iszero.(s) .& iszero.(X), zero(eltype(Xs)), Xs))
     θ = norm(Xs)
     q .= (cos(θ) .* s .+ usinc(θ) .* Xs) .^ 2
     return q
@@ -278,16 +285,17 @@ end
 
 Compute a first order approximation by projection. The formula reads
 ````math
-\operatorname{retr}^{-1}_p q = \bigl( I_{n+1} - \frac{1}{n}\mathbb{1}^{n+1,n+1} \bigr)(\log(q)-\log(p))
+\operatorname{retr}^{-1}_p q = p ⊙ \bigl( I_{n+1} - \mathbb{1}_{n+1}p^{\mathrm{T}} \bigr)(\log(q)-\log(p))
 ````
-where $\mathbb{1}^{m,n}$ is the size `(m,n)` matrix containing ones, and $\log$ is applied elementwise.
+where ``\mathbb{1}_{n+1}`` is the vector of length ``n+1`` containing ones, ``⊙`` is the
+elementwise product, and ``\log`` is applied elementwise.
 """
 inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
 
 function inverse_retract_softmax!(::ProbabilitySimplex, X, p, q)
     X .= log.(q) .- log.(p)
-    meanlogdiff = mean(X)
-    X .-= meanlogdiff
+    c = dot(p, X)
+    X .= p .* (X .- c)
     return X
 end
 
@@ -335,13 +343,13 @@ manifold_dimension(M::ProbabilitySimplex) = get_parameter(M.size)[1]
 @doc raw"""
     manifold_volume(::ProbabilitySimplex)
 
-Return the volume of the [`ProbabilitySimplex`](@ref), i.e. volume of the `n`-dimensional
-[`Sphere`](@ref) divided by ``2^{n+1}``, corresponding to the volume of its positive
-orthant.
+Return the volume of the [`ProbabilitySimplex`](@ref), i.e. the volume of the `n`-dimensional
+[`Sphere`](@ref) of radius 2 divided by ``2^{n+1}``, corresponding to the volume of its
+positive orthant.
 """
 function manifold_volume(M::ProbabilitySimplex)
     n = get_parameter(M.size)[1]
-    return manifold_volume(Sphere(n)) / 2^(n + 1)
+    return 2^n * manifold_volume(Sphere(n)) / 2^(n + 1)
 end
 
 @doc raw"""
@@ -468,10 +476,13 @@ end
 Compute a first order approximation by applying the softmax function. The formula reads
 
 ````math
-\operatorname{retr}_p X = \frac{p\mathrm{e}^X}{⟨p,\mathrm{e}^X⟩},
+\operatorname{retr}_p X = \frac{p\mathrm{e}^{X/p}}{⟨p,\mathrm{e}^{X/p}⟩},
 ````
 
 where multiplication, exponentiation and division are meant elementwise.
+The largest exponent is subtracted from all exponents, which leaves the quotient unchanged
+and keeps the exponential from overflowing; on the closed simplex an entry with ``p_i = 0``
+stays zero.
 """
 retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxRetraction)
 
@@ -479,9 +490,15 @@ function ManifoldsBase.retract_softmax!(M::ProbabilitySimplex, q, p, X)
     return ManifoldsBase.retract_softmax_fused!(M, q, p, X, one(eltype(p)))
 end
 function ManifoldsBase.retract_softmax_fused!(::ProbabilitySimplex, q, p, X, t::Number)
+    m = maximum(t * X[i] / p[i] for i in eachindex(p, X) if !iszero(p[i]))
     s = zero(eltype(q))
     @inbounds for i in eachindex(q, p, X)
-        q[i] = p[i] * exp(t * X[i])
+        if iszero(p[i])
+            # a zero entry of p on the closed simplex stays zero
+            q[i] = p[i]
+        else
+            q[i] = p[i] * exp(t * X[i] / p[i] - m)
+        end
         s += q[i]
     end
     q ./= s
@@ -524,11 +541,11 @@ function riemann_tensor!(M::ProbabilitySimplex, Xresult, p, X, Y, Z)
     Xrs = riemann_tensor(
         Sphere(n),
         pe,
-        simplex_to_amplitude_diff(M, p, X),
-        simplex_to_amplitude_diff(M, p, Y),
-        simplex_to_amplitude_diff(M, p, Z),
+        simplex_to_amplitude_diff(M, p, X) / 2,
+        simplex_to_amplitude_diff(M, p, Y) / 2,
+        simplex_to_amplitude_diff(M, p, Z) / 2,
     )
-    amplitude_to_simplex_diff!(M, Xresult, pe, Xrs)
+    amplitude_to_simplex_diff!(M, Xresult, pe, 2 .* Xrs)
     return Xresult
 end
 
@@ -552,7 +569,7 @@ vector `X`. It is computed using isometry with positive orthant of a sphere.
 function volume_density(M::ProbabilitySimplex, p, X)
     n = get_parameter(M.size)[1]
     pe = simplex_to_amplitude(M, p)
-    return volume_density(Sphere(n), pe, simplex_to_amplitude_diff(M, p, X))
+    return volume_density(Sphere(n), pe, simplex_to_amplitude_diff(M, p, X) / 2)
 end
 
 @doc raw"""

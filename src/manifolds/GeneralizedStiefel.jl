@@ -30,10 +30,13 @@ The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
 
 # Constructor
-    GeneralizedStiefel(n, k, B=I_n, F=ℝ)
+    GeneralizedStiefel(n, k, B=I_n, F=ℝ; parameter::Symbol=:type)
 
 Generate the (real-valued) Generalized Stiefel manifold of ``n×k`` dimensional
 orthonormal matrices with scalar product `B`.
+
+`parameter`: whether a type parameter should be used to store `n` and `k`. By default size
+is stored in type. Value can either be `:field` or `:type`.
 """
 struct GeneralizedStiefel{𝔽, T, TB <: AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
     size::T
@@ -79,18 +82,25 @@ function check_size(M::GeneralizedStiefel, p::P, X) where {P}
 end
 
 @doc raw"""
-    check_vector(M::GeneralizedStiefel, p, X; kwargs...)
+    check_vector(M::GeneralizedStiefel, p, X; atol, rtol, kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
 `M`=``\operatorname{St}(n,k,B)``.
 This requires that the [`AbstractNumbers`](@extref ManifoldsBase number-system) fits,
 `p` is a valid point on `M` and it (approximately) holds that
-``p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0``, where `kwargs...` is passed to the `isapprox`.
+``p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp = 0``, that is, the norm of the left hand side is at most
+`atol` or at most `rtol` times ``2\lVert X \rVert_p``, the largest value this norm can attain.
 """
-function check_vector(M::GeneralizedStiefel, p, X; kwargs...)
-    if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
+function check_vector(
+        M::GeneralizedStiefel, p, X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
+        kwargs...,
+    ) where {T}
+    r = norm(p' * M.B * X + X' * M.B * p)
+    if !(r <= atol || r <= rtol * 2 * norm(M, p, X))
         return DomainError(
-            norm(p' * M.B * X + conj(X' * M.B * p)),
+            r,
             "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since x'Bv + v'Bx is not the zero matrix.",
         )
     end
@@ -168,7 +178,7 @@ project(::GeneralizedStiefel, ::Any)
 
 function project!(M::GeneralizedStiefel, q, p)
     s = svd(p)
-    e = eigen(s.U' * M.B * s.U)
+    e = eigen(Hermitian(s.U' * M.B * s.U))
     qsinv = e.vectors ./ sqrt.(transpose(e.values))
     q .= s.U * qsinv * e.vectors' * s.V'
     return q
@@ -212,7 +222,7 @@ rand(::GeneralizedStiefel; σ::Real = 1.0)
 
 function Random.rand!(
         rng::AbstractRNG,
-        M::GeneralizedStiefel{ℝ},
+        M::GeneralizedStiefel,
         pX;
         vector_at = nothing,
         σ::Real = one(real(eltype(pX))),
@@ -230,20 +240,41 @@ function Random.rand!(
 end
 
 @doc raw"""
-    retract(M::GeneralizedStiefel, p, X)
-    retract(M::GeneralizedStiefel, p, X, ::PolarRetraction)
     retract(M::GeneralizedStiefel, p, X, ::ProjectionRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
-[`GeneralizedStiefel`](@ref) manifold `M`.
-In this case this is the same as the projection based retraction, which employs the
-exponential map in the embedding and projects the result back to the manifold.
+Compute the projection based retraction on the [`GeneralizedStiefel`](@ref) manifold `M`,
+which employs the exponential map in the embedding and projects the result back to the manifold,
 
-The default retraction for this manifold is the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`).
+````math
+\operatorname{retr}_p X = U(U^{\mathrm{H}}BU)^{-1/2}V^{\mathrm{H}},
+````
+
+where ``UΣV^{\mathrm{H}} = p + X`` is the singular value decomposition.
 """
-retract(::GeneralizedStiefel, ::Any...)
+retract(::GeneralizedStiefel, ::Any, ::Any, ::ProjectionRetraction)
 
+"""
+    default_retraction_method(M::GeneralizedStiefel)
+
+Return [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) as the default retraction for the
+[`GeneralizedStiefel`](@ref) manifold.
+"""
 default_retraction_method(::GeneralizedStiefel) = ProjectionRetraction()
+
+@doc raw"""
+    retract(M::GeneralizedStiefel, p, X, ::PolarRetraction)
+
+Compute the [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the [`GeneralizedStiefel`](@ref)
+manifold `M`. For real matrices this is the polar decomposition of ``p + X`` with respect to ``B``,
+
+````math
+\operatorname{retr}_p X = (p + X)(I_k + X^{\mathrm{T}}BX)^{-1/2},
+````
+
+see Eq. (3.3) in [ShustinAvron:2023](@cite).
+For complex matrices it is the projection of ``p + X`` onto the manifold.
+"""
+retract(::GeneralizedStiefel, ::Any, ::Any, ::PolarRetraction)
 
 function ManifoldsBase.retract_polar!(M::GeneralizedStiefel, q, p, X)
     return ManifoldsBase.retract_polar_fused!(M, q, p, X, one(eltype(p)))
@@ -252,6 +283,105 @@ function ManifoldsBase.retract_polar_fused!(M::GeneralizedStiefel, q, p, X, t::N
     q .= p .+ t .* X
     project!(M, q, q)
     return q
+end
+function ManifoldsBase.retract_polar_fused!(M::GeneralizedStiefel{ℝ}, q, p, X, t::Number)
+    q .= (p .+ t .* X) / sqrt(Symmetric(I + t^2 * (X' * M.B * X)))
+    return q
+end
+
+@doc raw"""
+    inverse_retract(M::GeneralizedStiefel{ℝ}, p, q, ::PolarInverseRetraction)
+
+Compute the inverse of the [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the real
+[`GeneralizedStiefel`](@ref) manifold `M` for `q` close enough to `p`,
+
+````math
+\operatorname{retr}_p^{-1} q = qZ - p,
+````
+
+where ``Z`` is the symmetric positive definite solution of the Lyapunov equation
+``p^{\mathrm{T}}BqZ + Zq^{\mathrm{T}}Bp = 2I_k``, see Eqs. (3.4) and (3.5) in [ShustinAvron:2023](@cite).
+"""
+inverse_retract(::GeneralizedStiefel{ℝ}, ::Any, ::Any, ::PolarInverseRetraction)
+
+function inverse_retract_polar!(M::GeneralizedStiefel{ℝ}, X, p, q)
+    Z = lyap(p' * M.B * q, -2 * one(p' * p))
+    mul!(X, q, Z)
+    X .-= p
+    return X
+end
+
+@doc raw"""
+    retract(M::GeneralizedStiefel{ℝ}, p, X, ::QRRetraction)
+
+Compute the [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) on the real [`GeneralizedStiefel`](@ref)
+manifold `M`, the QR decomposition of ``p + X`` with respect to ``B``,
+
+````math
+\operatorname{retr}_p X = (p + X)R^{-1},
+````
+
+where ``R^{\mathrm{T}}R = (p + X)^{\mathrm{T}}B(p + X)`` is the Cholesky decomposition,
+see Eq. (3.6) in [ShustinAvron:2023](@cite).
+"""
+retract(::GeneralizedStiefel{ℝ}, ::Any, ::Any, ::QRRetraction)
+
+function ManifoldsBase.retract_qr!(M::GeneralizedStiefel{ℝ}, q, p, X)
+    return ManifoldsBase.retract_qr_fused!(M, q, p, X, one(eltype(p)))
+end
+function ManifoldsBase.retract_qr_fused!(M::GeneralizedStiefel{ℝ}, q, p, X, t::Number)
+    q .= p .+ t .* X
+    R = cholesky(Symmetric(q' * M.B * q)).U
+    return rdiv!(q, R)
+end
+
+@doc raw"""
+    inverse_retract(M::GeneralizedStiefel{ℝ}, p, q, ::QRInverseRetraction)
+
+Compute the inverse of the [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) on the real
+[`GeneralizedStiefel`](@ref) manifold `M` for `q` close enough to `p`,
+
+````math
+\operatorname{retr}_p^{-1} q = qR - p,
+````
+
+where ``R`` is the upper triangular solution with positive diagonal of
+``p^{\mathrm{T}}BqR + R^{\mathrm{T}}q^{\mathrm{T}}Bp = 2I_k``, see Eqs. (3.7) and (3.8) in [ShustinAvron:2023](@cite).
+"""
+inverse_retract(::GeneralizedStiefel{ℝ}, ::Any, ::Any, ::QRInverseRetraction)
+
+function inverse_retract_qr!(M::GeneralizedStiefel{ℝ}, X, p, q)
+    n, k = get_parameter(M.size)
+    _stiefel_inv_retr_qr_mul_by_r!(Stiefel(n, k), X, q, p' * M.B * q, eltype(X))
+    X .-= p
+    return X
+end
+
+@doc raw"""
+    retract(M::GeneralizedStiefel{ℝ}, p, X, ::CayleyRetraction)
+
+Compute the [`CayleyRetraction`](@extref `ManifoldsBase.CayleyRetraction`) on the real [`GeneralizedStiefel`](@ref)
+manifold `M`, the Cayley transform with respect to ``B``,
+
+````math
+\operatorname{retr}_p X = \Bigl(I_n - \frac{1}{2}W\Bigr)^{-1}\Bigl(I_n + \frac{1}{2}W\Bigr)p,
+\qquad
+W = \Bigl(I_n - \frac{1}{2}pp^{\mathrm{T}}B\Bigr)Xp^{\mathrm{T}}B - pX^{\mathrm{T}}\Bigl(I_n - \frac{1}{2}Bpp^{\mathrm{T}}\Bigr)B,
+````
+
+see Eq. (3.9) in [ShustinAvron:2023](@cite).
+"""
+retract(::GeneralizedStiefel{ℝ}, ::Any, ::Any, ::CayleyRetraction)
+
+function ManifoldsBase.retract_pade!(M::GeneralizedStiefel{ℝ}, q, p, X, m::PadeRetraction{1})
+    return ManifoldsBase.retract_pade_fused!(M, q, p, X, one(eltype(p)), m)
+end
+function ManifoldsBase.retract_pade_fused!(
+        M::GeneralizedStiefel{ℝ}, q, p, X, t::Number, ::PadeRetraction{1},
+    )
+    tX = t * X
+    W = (I - p * p' * M.B / 2) * tX * p' * M.B - p * tX' * (I - M.B * p * p' / 2) * M.B
+    return copyto!(q, (I - W / 2) \ ((I + W / 2) * p))
 end
 
 function ManifoldsBase.retract_project!(M::GeneralizedStiefel, q, p, X)

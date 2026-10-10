@@ -24,7 +24,7 @@ In principle, there are many ways in which a manifold can be equipped with a mea
 One of the most popular ways is based on pushing the Lebesgue measure on a tangent space through the exponential map.
 Any other suitable atlas could be used, not just the one defined by normal coordinates, though each one requires different volume density corrections due to the Jacobian determinant of the pushforward.
 `Manifolds.jl` provides the function [`volume_density`](@ref) that calculates that quantity, denoted $\theta_p(X)$.
-See for example [LeBrignantPuechmorel:2019](@cite), Definition 11, for a precise description using Jacobi fields.
+See for example [LeBrigantPuechmorel:2019](@cite), Definition 11, for a precise description using Jacobi fields.
 
 While many sources define volume density as a function of two points, `Manifolds.jl` decided to use the more general point-tangent vector formulation. The two-points variant can be implemented as
 ```{julia}
@@ -107,7 +107,7 @@ f(q) = \frac{1}{n h^d} \sum_{i=1}^n \frac{1}{\theta_q(\log_q(p_i))}K\left( \frac
 
 where $h$ is the bandwidth, a small positive number less than the injectivity radius of $\mathcal M$ and $K\colonℝ\toℝ$ is a kernel function.
 Note that Pelletier's estimator can only use radially-symmetric kernels.
-The radially symmetric multivariate Epanechnikov kernel used in the example below is described in [LangreneMarin:2019](@cite).
+The radially symmetric multivariate Epanechnikov kernel used in the example below is described in [LangreneWarin:2019](@cite).
 
 ```{julia}
 struct PelletierKDE{TM <: AbstractManifold, TPts <: AbstractVector}

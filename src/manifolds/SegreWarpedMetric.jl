@@ -32,7 +32,9 @@ function connected_by_geodesic(
         p,
         q,
     ) where {V, A}
-    return connected_by_geodesic(M.manifold, p, q)
+    q = deepcopy(q)
+    closest_representative!(M, q, p)
+    return A * spherical_angle_sum(M, p, q) < pi
 end
 
 function closest_representative!(
@@ -109,9 +111,10 @@ function exp!(::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, q, p, X) wh
         ),
     )
 
+    f = pi / 2 - atan((p[1][1] + X[1][1]) / (p[1][1] * A * m))
+
     q[1][1] = sqrt((p[1][1] + X[1][1])^2 + (p[1][1] * A * m)^2)
 
-    f = pi / 2 - atan((p[1][1] + X[1][1]) / (p[1][1] * A * m))
     if m == 0
         for (x, y) in zip(p[2:end], q[2:end])
             y .= x
@@ -149,7 +152,7 @@ function get_coordinates_orthonormal!(
         ::RealNumbers;
         kwargs...,
     ) where {𝔽, V, A}
-    return c = vcat(
+    return c .= vcat(
         X[1],
         A *
             p[1][1] *
@@ -211,6 +214,8 @@ function inner(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, X, Y) 
     return X[1][1] * Y[1][1] + (A * p[1][1])^2 * dot(X[2:end], Y[2:end])
 end
 
+@tfvector_inner_via_get_vector (MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}} where {V, A})
+
 @doc raw"""
     log(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, q)
 
@@ -271,16 +276,17 @@ function riemann_tensor(
         Y,
         Z,
     ) where {V, A}
+    z = zero(p[1][1])
     return [
-        [0.0],
+        [z],
         [
             riemann_tensor(Sphere(n - 1), x, xdot1, xdot2, xdot3) for
                 (n, x, xdot1, xdot2, xdot3) in zip(V, p[2:end], X[2:end], Y[2:end], Z[2:end])
         ]...,
     ] +
         (1 / p[1][1]^2) * (
-        inner(M, p, [[0.0], X[2:end]...], [[0.0], Z[2:end]...]) * [[0.0], Y[2:end]...] -
-            inner(M, p, [[0.0], Y[2:end]...], [[0.0], Z[2:end]...]) * [[0.0], X[2:end]...]
+        inner(M, p, [[z], X[2:end]...], [[z], Z[2:end]...]) * [[z], Y[2:end]...] -
+            inner(M, p, [[z], Y[2:end]...], [[z], Z[2:end]...]) * [[z], X[2:end]...]
     )
 end
 

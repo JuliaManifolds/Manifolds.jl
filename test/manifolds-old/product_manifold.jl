@@ -320,14 +320,8 @@ using RecursiveArrayTools: ArrayPartition
                 ParallelTransport(),
             ),
         )
-        @test Manifolds.default_vector_transport_method(Mstb, T_p_ap) ===
-            ProductVectorTransport(
-            ParallelTransport(),
-            Manifolds.FiberBundleProductVectorTransport(
-                ParallelTransport(),
-                ParallelTransport(),
-            ),
-        )
+        @test Manifolds.default_vector_transport_method(Mse) ===
+            ProductVectorTransport(ParallelTransport(), ParallelTransport())
     end
 
     @testset "ManifoldDiff" begin
@@ -406,7 +400,6 @@ using RecursiveArrayTools: ArrayPartition
         M = Sphere(2)
         N = M × M
         p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0, 1.0])
-        q = 1 / sqrt(2) * ArrayPartition([1.0, 1.0, 0.0], [0.0, 1.0, 1.0])
         q = 1 / sqrt(2) * ArrayPartition([0.0, 1.0, 1.0], [1.0, 1.0, 0.0])
         r = 1 / sqrt(3) * ArrayPartition([1.0, 1.0, 1.0], [1.0, 1.0, 1.0])
         X = log(M, p, q)

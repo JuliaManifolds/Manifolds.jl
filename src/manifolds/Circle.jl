@@ -16,8 +16,8 @@ struct Circle{𝔽} <: AbstractManifold{𝔽} end
 
 Circle(𝔽::AbstractNumbers = ℝ) = Circle{𝔽}()
 
-function adjoint_Jacobi_field(::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
-    return X
+function adjoint_Jacobi_field(M::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 ManifoldsBase.allocate_on(::Circle{ℝ}) = Array{Float64, 0}(undef)
@@ -313,8 +313,8 @@ Return true. [`Circle`](@ref) is a flat manifold.
 """
 is_flat(M::Circle) = true
 
-function jacobi_field(::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
-    return X
+function jacobi_field(M::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 @doc raw"""
@@ -333,13 +333,21 @@ log(::Circle, ::Any...)
 Base.log(::Circle{ℝ}, p::Real, q::Real) = sym_rem(q - p)
 function Base.log(M::Circle{ℂ}, p::Number, q::Number)
     cosθ = complex_dot(p, q)
-    if cosθ ≈ -1  # appr. opposing points, return deterministic choice from set-valued log
-        X = real(p) ≈ 1 ? 1im : 1 + 0im
+    cosθ = clamp(complex_dot(p, q), -1, 1)
+    if cosθ ≈ -1  # appr. opposing points, angle from the coordinate of q along i p
+        Xⁱ = complex_dot(im * p, q)
+        θ = atan(abs(Xⁱ), complex_dot(p, q))
+    else
+        θ = acos(cosθ)
+    end
+    if θ ≈ π  # opposing points, return deterministic choice from set-valued log
+        X = abs(real(p)) ≈ 1 ? 1im : 1 + 0im
         X = X - complex_dot(p, X) * p
         X *= π / norm(X)
+    elseif cosθ ≈ -1  # nearly opposing points, scale the tangent part of q to the angle
+        X = Xⁱ * im * p
+        X *= θ / norm(X)
     else
-        cosθ = cosθ > 1 ? one(cosθ) : cosθ
-        θ = acos(cosθ)
         X = (q - cosθ * p) / usinc(θ)
     end
     return project(M, p, X)
@@ -348,13 +356,21 @@ end
 log!(::Circle{ℝ}, X, p, q) = (X .= sym_rem(q[] - p[]))
 function log!(M::Circle{ℂ}, X, p, q)
     cosθ = complex_dot(p, q)
-    if cosθ ≈ -1
-        X .= sum(real.(p)) ≈ 1 ? 1.0im : 1.0 + 0.0im
-        X .= X - complex_dot(p, X) * p
-        X .*= π / norm(X)
+    cosθ = clamp(complex_dot(p, q), -1, 1)
+    if cosθ ≈ -1  # appr. opposing points, angle from the coordinate of q along i p
+        Xⁱ = complex_dot(im * p, q)
+        θ = atan(abs(Xⁱ), complex_dot(p, q))
     else
-        cosθ = cosθ > 1 ? one(cosθ) : cosθ
         θ = acos(cosθ)
+    end
+    if θ ≈ π  # opposing points, return deterministic choice from set-valued log
+        X .= abs(sum(real.(p))) ≈ 1 ? 1.0im : 1.0 + 0.0im
+        X .-= complex_dot(p, X) .* p
+        X .*= π / norm(X)
+    elseif cosθ ≈ -1  # nearly opposing points, scale the tangent part of q to the angle
+        X .= Xⁱ .* im .* p
+        X .*= θ / norm(X)
+    else
         X .= (q - cosθ * p) / usinc(θ)
     end
     return project!(M, X, p, X)
@@ -434,7 +450,7 @@ function Statistics.mean(
 end
 
 mid_point(M::Circle{ℝ}, p1, p2) = exp(M, p1, 0.5 * log(M, p1, p2))
-mid_point(::Circle{ℂ}, p1::Complex, p2::Complex) = exp(im * (angle(p1) + angle(p2)) / 2)
+mid_point(M::Circle{ℂ}, p1::Complex, p2::Complex) = exp(M, p1, 0.5 * log(M, p1, p2))
 mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = Scalar(mid_point(M, p1[], p2[]))
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
@@ -442,12 +458,16 @@ mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = Scalar(mid_point(M
 number_of_coordinates(::Circle, ::AbstractBasis) = 1
 
 @doc raw"""
-    project(M::Circle{ℂ}, p)
+    project(M::Circle, p)
 
-Project a point `p` onto the complex [`Circle`](@ref) `M`, i.e. the unit circle in the complex plane.
+Project a point `p` onto the [`Circle`](@ref) `M`.
+For the real-valued case this is the symmetric remainder [`sym_rem`](@ref) of `p`,
+for the complex-valued case it is the projection onto the unit circle in the complex plane.
 """
 project(::Circle, ::Any)
+project(::Circle{ℝ}, p::Real) = sym_rem(p)
 project(::Circle{ℂ}, p::Number) = p / abs(p)
+project!(::Circle{ℝ}, q, p) = (q .= sym_rem(p))
 project!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 @doc raw"""
@@ -455,12 +475,16 @@ project!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 Project a value `X` onto the tangent space of the point `p` on the [`Circle`](@ref) `M`.
 
+For the real-valued case the tangent space is all of ``ℝ``, so `X` is returned unchanged.
+
 For the complex valued case `X` is projected onto the line in the complex plane
 that is parallel to the tangent to `p` on the unit circle and contains `0`.
 """
 project(::Circle, ::Any, ::Any)
+project(::Circle{ℝ}, p::Real, X::Real) = X
 project(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
-project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
+project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
+project!(::Circle{ℂ}, Y, p, X) = (Y .= X .- complex_dot(p, X) .* p)
 
 @doc raw"""
     Random.rand(M::Circle{ℝ}; vector_at = nothing, σ::Real=1.0)

@@ -2,6 +2,15 @@ include("../header.jl")
 using DiffEqCallbacks, OrdinaryDiffEq
 using ForwardDiff
 
+@testset "Grassmann distance at a right and at a small angle" begin
+    M = Grassmann(4, 2)
+    p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+    q = [0.0 0.0; 0.0 1.0; 1.0 0.0; 0.0 0.0]
+    @test distance(M, p, q) ≈ π / 2
+    t = 1.0e-10
+    @test distance(M, p, [cos(t) 0.0; 0.0 1.0; sin(t) 0.0; 0.0 0.0]) ≈ t
+end
+
 @testset "Grassmann" begin
     @testset "Real" begin
         M = Grassmann(3, 2)
@@ -96,6 +105,7 @@ using ForwardDiff
                 is_point_atol_multiplier = 10.0,
                 projection_atol_multiplier = 10.0,
                 retraction_atol_multiplier = 10.0,
+                test_inplace = true,
             )
 
             @testset "inner/norm" begin
@@ -109,7 +119,8 @@ using ForwardDiff
                 @test norm(M, pts[1], X1) isa Real
                 @test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
             end
-            @test riemann_tensor(M, p1, X, Y, 2 * X + Y) ≈ [0 -2; 0 1; 2 0]
+            @test riemann_tensor(M, p1, X, Y, 2 * X + Y) ≈ [-2 -2; 0 -1; -2 2]
+            @test sectional_curvature(M, p1, X, [0.0 0.0; 0.0 0.0; 1.0 0.0]) ≈ 1.0
             @testset "gradient and metric conversion" begin
                 Y = change_metric(M, EuclideanMetric(), p1, X)
                 @test Y == X
@@ -149,6 +160,19 @@ using ForwardDiff
             pS = StiefelPoint(p)
             @test default_vector_transport_method(M, typeof(p)) == ParallelTransport()
             @test default_vector_transport_method(M, typeof(pS)) == ParallelTransport()
+        end
+        @testset "Grassmann and Stiefel in the StiefelPoint representation" begin
+            for M2 in [Grassmann(4, 2), Stiefel(4, 2)]
+                p2 = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+                X2 = [0.0 0.0; 0.0 0.0; 0.1 0.2; -0.3 0.4]
+                q2 = exp(M2, p2, X2)
+                pS2, XS2, qS2 = StiefelPoint(p2), StiefelTangentVector(X2), StiefelPoint(q2)
+                @test exp(M2, pS2, XS2).value ≈ q2
+                @test log(M2, pS2, qS2).value ≈ log(M2, p2, q2)
+                @test retract(M2, pS2, XS2).value ≈ retract(M2, p2, X2)
+                @test inverse_retract(M2, pS2, qS2).value ≈ inverse_retract(M2, p2, q2)
+                @test mid_point(M2, pS2, qS2).value ≈ mid_point(M2, p2, q2)
+            end
         end
         @testset "A short ONB test" begin
             M = Grassmann(4, 2)
@@ -247,9 +271,16 @@ using ForwardDiff
         p = reshape([im, 0.0, 0.0], 3, 1)
         @test is_point(G, p)
         X = reshape([-0.5; 0.5; 0], 3, 1)
-        @test_throws ManifoldDomainError is_vector(G, p, X; error = :error)
+        @test_throws DomainError is_vector(G, p, X; error = :error)
         Y = project(G, p, X)
         @test is_vector(G, p, Y)
+    end
+
+    @testset "Quaternionic" begin
+        G = Grassmann(3, 2, ℍ)
+        p = rand(MersenneTwister(42), G)
+        @test is_point(G, p; error = :error)
+        @test !is_point(G, 2 .* p)
     end
 
     @testset "Projector representation" begin
@@ -259,6 +290,8 @@ using ForwardDiff
         pS = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
         Xs = StiefelTangentVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
         @test representation_size(M, p) == (3, 3)
+        @test ManifoldsBase.check_size(M, p; atol = 1.0e-8) === nothing
+        @test ManifoldsBase.check_size(Grassmann(4, 2), p; atol = 1.0e-8) isa DomainError
 
         q = embed(M, p)
         @test q == p.value
@@ -301,6 +334,10 @@ using ForwardDiff
         Y2 = ProjectorTangentVector(similar(X.value))
         Manifolds.diff_canonical_project!(M, Y2, pS.value, Xs.value)
         @test Y2.value == Yc
+        Xh = StiefelTangentVector([0.0 0.0; 0.0 0.0; 0.3 -0.2])
+        Y3 = diff_canonical_project(M, pS, Xh)
+        @test Y3 isa ProjectorTangentVector
+        @test Y3.value == Xh.value * pS.value' + pS.value * Xh.value'
 
         @test horizontal_lift(Stiefel(3, 2), pS.value, X) == X.value[:, 1:2]
 
@@ -316,12 +353,31 @@ using ForwardDiff
         @test Xp.value == Yc2
     end
 
+    @testset "Projector representation agrees with the Stiefel one" begin
+        M = Grassmann(4, 2)
+        p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+        q = [1 / sqrt(2) 0.0; 0.0 1.0; 1 / sqrt(2) 0.0; 0.0 0.0]
+        X = [0.0 0.0; 0.0 0.0; 0.3 0.0; 0.0 -0.2]
+        Y = [0.0 0.0; 0.0 0.0; 0.1 0.4; 0.5 0.0]
+        P = convert(ProjectorPoint, p)
+        Q = convert(ProjectorPoint, q)
+        XP = ProjectorTangentVector(X * p' + p * X')
+        YP = ProjectorTangentVector(Y * p' + p * Y')
+        @test distance(M, P, Q) ≈ distance(M, p, q)
+        @test distance(M, Q, Q) ≈ 0 atol = sqrt(eps())
+        @test inner(M, P, XP, YP) ≈ inner(M, p, X, Y)
+        @test norm(M, P, XP) ≈ norm(M, p, X)
+    end
+
     @testset "is_point & convert & show" begin
         M = Grassmann(3, 2)
         p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
         X = StiefelTangentVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
         @test is_point(M, p; error = :error)
-        @test is_vector(M, p, X; error = :error)
+        @test !is_vector(M, p, X) # X only rotates the basis of p
+        @test is_vector(M, p, StiefelTangentVector([0.0 0.0; 0.0 0.0; 1.0 0.0]); error = :error)
+        pg = project(M, [1.0 0.0; 1.0 1.0; 0.0 2.0])
+        @test is_vector(M, pg, project(M, pg, [0.1 0.2; -0.3 0.4; 0.5 -0.6]))
         @test repr(p) == "StiefelPoint($(p.value))"
         @test repr(X) == "StiefelTangentVector($(X.value))"
         M2 = Stiefel(3, 2)
@@ -443,6 +499,8 @@ using ForwardDiff
                 @test Manifolds.inner(M, A, i, a, c, c) ≈ Manifolds.inner(M, p, X, X)
                 @test Manifolds.inner(M, A, i, a, c, d) ≈ Manifolds.inner(M, p, X, Y)
                 @test Manifolds.det_local_metric(M, A, i, a) > 0
+                @test get_coordinates(M, p, riemann_tensor(M, p, X, Y, Y), B) ≈
+                    riemann_tensor(M, A, i, a, c, d, d)
 
                 # TODO: check against the embedding-based implementation of the Levi-Civita connection
                 Zc = affine_connection(M, A, i, a, c, d)

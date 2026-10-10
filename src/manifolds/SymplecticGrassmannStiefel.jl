@@ -168,6 +168,6 @@ function riemannian_gradient!(M::SymplecticGrassmann, X, p, Y; kwargs...)
     # Since J' = -J We can write (J'YJ) = -J * (YJ)
     JTYJ = (-J * (Y * J))
     H = (I - p * symplectic_inverse(p)) * JTYJ
-    X .= (-J * (H * J)) * (p' * p) .- JTYJ * (H' * p)
+    X .= (-J * (H * J)) * (p' * p) .- (-J * (p * J)) * (H' * p)
     return X
 end

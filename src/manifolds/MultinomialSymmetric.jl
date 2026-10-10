@@ -92,11 +92,12 @@ function ManifoldsBase.get_embedding_type(::MultinomialSymmetric)
 end
 
 """
-    is_flat(::MultinomialSymmetric)
+    is_flat(M::MultinomialSymmetric)
 
-Return false. [`MultinomialSymmetric`](@ref) is not a flat manifold.
+Return true if the [`MultinomialSymmetric`](@ref) `M` is one-dimensional, that is for ``n = 2``,
+and false otherwise. Every Riemannian 1-manifold is flat, see p. 222 of [Lee:2019](@cite).
 """
-is_flat(M::MultinomialSymmetric) = false
+is_flat(M::MultinomialSymmetric) = manifold_dimension(M) == 1
 
 @doc raw"""
     manifold_dimension(M::MultinomialSymmetric)
@@ -116,6 +117,8 @@ end
     project(M::MultinomialSymmetric, p, Y)
 
 Project `Y` onto the tangent space at `p` on the [`MultinomialSymmetric`](@ref) `M`, return the result in `X`.
+A nonsymmetric `Y` is first replaced by its symmetric part ``\frac{1}{2}(Y+Y^{\mathrm{T}})``,
+since the formula below is stated for symmetric matrices.
 
 The formula from [DouikHassibi:2019](@cite), Sec. VI reads
 
@@ -133,8 +136,9 @@ project(::MultinomialSymmetric, ::Any, ::Any)
 
 function project!(M::MultinomialSymmetric, X, p, Y)
     n = get_parameter(M.size)[1]
-    α = (I + p) \ sum(Y, dims = 2) # Formula (49) from 1802.02628
-    return X .= Y .- (repeat(α, 1, n) .+ repeat(α', n, 1)) .* p
+    Ys = (Y .+ Y') ./ 2
+    α = (I + p) \ sum(Ys, dims = 2) # Formula (49) from 1802.02628
+    return X .= Ys .- (repeat(α, 1, n) .+ repeat(α', n, 1)) .* p
 end
 
 @doc raw"""
@@ -210,11 +214,13 @@ function riemannian_Hessian!(M::MultinomialSymmetric, Y, p, G, H, X)
     n = get_parameter(M.size)[1]
     ov = ones(n) # \bf 1
     I_p = lu(I + p)
-    γ = G .* p
+    Gs = (G .+ G') ./ 2
+    Hs = (H .+ H') ./ 2
+    γ = Gs .* p
     α = I_p \ (γ * ov)
     α_sq = (repeat(α, 1, n) .+ repeat(α', n, 1))
     δ = γ .- α_sq .* p
-    γ_dot = H .* p + G .* X
+    γ_dot = Hs .* p + Gs .* X
     α_dot = (I_p \ γ_dot .- (I_p \ X) * (I_p \ γ)) * ov
     δ_dot = γ_dot .- (repeat(α_dot, 1, n) .+ repeat(α_dot', n, 1)) .* p .- α_sq .* X
     project!(M, Y, p, δ_dot .- 0.5 * ((δ .* X) ./ p))

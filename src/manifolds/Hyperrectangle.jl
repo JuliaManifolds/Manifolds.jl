@@ -28,7 +28,7 @@ struct Hyperrectangle{T <: AbstractArray} <: AbstractDecoratorManifold{ℝ}
     end
 end
 
-function check_point(M::Hyperrectangle, p)
+function check_point(M::Hyperrectangle, p; kwargs...)
     if !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
@@ -364,9 +364,12 @@ project(::Hyperrectangle, ::Any, ::Any)
 function project!(M::Hyperrectangle, Y, p, X)
     copyto!(Y, X)
     for i in eachindex(M.lb, Y)
+        # intentionally no `else` to allow for the case of a point being at both bounds,
+        # which is possible for a zero-width Hyperrectangle
         if M.ub[i] == p[i]
             Y[i] = min(Y[i], 0)
-        elseif M.lb[i] == p[i]
+        end
+        if M.lb[i] == p[i]
             Y[i] = max(Y[i], 0)
         end
     end
@@ -415,7 +418,7 @@ representation_size(M::Hyperrectangle) = size(M.lb)
 
 function ManifoldsBase.retract_project!(M::Hyperrectangle, r, q, Y)
     r .= q .+ Y
-    project(M, r, r)
+    project!(M, r, r)
     return r
 end
 function ManifoldsBase.retract_project_fused!(M::Hyperrectangle, r, q, Y, t::Number)

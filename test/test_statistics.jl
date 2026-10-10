@@ -1,16 +1,13 @@
 using StatsBase: AbstractWeights, pweights, SimpleCovariance
 using Distributions, RecursiveArrayTools
-using Random: GLOBAL_RNG, seed!
 using Manifolds, ManifoldsBase, Test, Random, LinearAlgebra
 import ManifoldsBase:
+    check_point,
     manifold_dimension,
     exp!,
     log!,
     inner,
-    zero_vector!,
-    decorated_manifold,
-    base_manifold,
-    get_embedding
+    zero_vector!
 using Manifolds: normal_tvector_distribution
 import Manifolds:
     cov, mean, mean!, median, median!, var, mean_and_var, default_approximation_method
@@ -18,6 +15,15 @@ import Manifolds:
 struct TestStatsSphere{N} <: AbstractManifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
 manifold_dimension(::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
+function check_point(M::TestStatsSphere, p; kwargs...)
+    if !isapprox(norm(p), 1.0; kwargs...)
+        return DomainError(
+            norm(p),
+            "The point $(p) does not lie on the $(M) since its norm is not 1.",
+        )
+    end
+    return nothing
+end
 function exp!(::TestStatsSphere{N}, q, p, X; kwargs...) where {N}
     return exp!(Sphere(N), q, p, X; kwargs...)
 end
@@ -60,14 +66,9 @@ function zero_vector!(::TestStatsEuclidean{N}, X, p; kwargs...) where {N}
     return zero_vector!(Euclidean(N), X, p; kwargs...)
 end
 
-struct TestStatsNotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-decorated_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
-get_embedding(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
-base_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
-
 struct TestStatsNotImplementedManifold <: AbstractDecoratorManifold{ℝ} end
 
-function test_mean(M, x, yexp = nothing, method...; kwargs...)
+function test_mean(M, x, yexp = nothing; kwargs...)
     @testset "mean unweighted" begin
         y = mean(M, x; kwargs...)
         @test is_point(M, y; atol = 10^-9)
@@ -139,6 +140,7 @@ function test_median(
             @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
         else
             @test_throws Exception median(M, x, pweights(ones(n + 1)), method; kwargs...)
+            @test is_point(M, median(M, x, method; kwargs...); atol = 10^-9)
         end
     end
     return nothing
@@ -242,7 +244,6 @@ function test_std(M, x, sexp = nothing; kwargs...)
 end
 
 function test_moments(M, x)
-    n = length(x)
     @testset "moments unweighted" begin
         m = mean(M, x)
         for i in 1:5
@@ -305,6 +306,12 @@ function mean(
     )
     return fill(3, 1)
 end
+function mean!(::TestStatsOverload1, y, ::AbstractVector, ::AbstractWeights, ::TestStatsMethod1)
+    return fill!(y, 5)
+end
+function default_approximation_method(::TestStatsOverload1, ::typeof(mean), ::Type{<:Number})
+    return TestStatsMethod1()
+end
 
 function median(
         ::TestStatsOverload1,
@@ -361,6 +368,7 @@ end
             @test mean!(M, y, x, w, GradientDescentEstimation()) == [3.0]
             @test mean(M, x, GradientDescentEstimation()) == [3.0]
             @test mean!(M, y, x, GradientDescentEstimation()) == [3.0]
+            @test mean!(M, fill(0.0), [0.0]) == mean(M, [0.0]) == fill(5.0)
         end
 
         @testset "median" begin
@@ -406,9 +414,28 @@ end
                     α in range(0, 2 * π - 2 * π / n, length = n)
             ]
             test_mean(M, x)
+            @testset "geodesic interpolation with a shuffled order" begin
+                wz = pweights([1.0, 0.0, 1.0])
+                ym = shortest_geodesic(M, x[1], x[3], 0.5)
+                for seed in 1:10
+                    y = mean(
+                        M, x, wz, GeodesicInterpolation(); shuffle_rng = MersenneTwister(seed)
+                    )
+                    @test isapprox(M, y, ym; atol = 10^-7)
+                    y2, _ = mean_and_var(
+                        M, x, wz, GeodesicInterpolation(); shuffle_rng = MersenneTwister(seed)
+                    )
+                    @test isapprox(M, y2, ym; atol = 10^-7)
+                end
+            end
             test_median(M, x; atol = 1.0e-12)
             test_median(M, x; method = CyclicProximalPointEstimation(), atol = 1.0e-12)
             test_median(M, x; method = WeiszfeldEstimation())
+            test_median(M, [[0.0, 0.0, 1.0]]; method = WeiszfeldEstimation())
+            method = CyclicProximalPointEstimation()
+            w = pweights(ones(n))
+            @test median(M, x; stop_iter = 1) == median(M, x, method; stop_iter = 1)
+            @test median(M, x, w; stop_iter = 1) == median(M, x, w, method; stop_iter = 1)
             test_var(M, x)
             test_std(M, x)
             test_moments(M, x)
@@ -523,6 +550,7 @@ end
         p1 = [1.0 2; 4 5; -5 -7]
         p2 = [3.0 1; 2 5; -5 -6]
         @test mean(M, [p1, p2]) == mean([p1, p2])
+        @test mean(M, [p1, p2]; atol = 1.0e-10) == mean([p1, p2])
 
         for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
             @test ManifoldsBase.get_forwarding_type_embedding(
@@ -638,6 +666,9 @@ end
                     1 / 2,
                 )
                 @test v5 ≈ var(S, x, pweights([1, 2, 3]), m5)
+                m6, v6 = mean_and_var(S, x, pweights([0, 0, 1]), GeodesicInterpolation())
+                @test m6 ≈ x[3]
+                @test v6 ≈ 0 atol = 1.0e-6
             end
 
             @testset "within radius" begin
@@ -688,7 +719,6 @@ end
         @testset "Sphere default" begin
             rng = MersenneTwister(47)
             S = Sphere(2)
-            p0 = [1.0, 0, 0]
             x = [normalize(randn(rng, 3)) for _ in 1:10]
             x = [x; -x]
             w = pweights([rand(rng) for _ in 1:length(x)])
@@ -704,12 +734,15 @@ end
             m = mean(S, x, w)
             mg = mean(S, x, w, GeodesicInterpolation())
             @test m == mg
+            @test mean(S, x, w; shuffle_rng = MersenneTwister(42)) ==
+                mean(S, x, w, GeodesicInterpolation(); shuffle_rng = MersenneTwister(42))
+            @test mean(S, x; shuffle_rng = MersenneTwister(42)) !=
+                mean(S, x, GeodesicInterpolation())
         end
 
         @testset "ProjectiveSpace default" begin
             rng = MersenneTwister(47)
             M = ProjectiveSpace(2)
-            p0 = [1.0, 0, 0]
             x = [normalize(randn(rng, 3)) for _ in 1:10]
             x = [x; -x]
             w = pweights([rand(rng) for _ in 1:length(x)])
@@ -741,8 +774,8 @@ end
             @test m == mg
             @test m != mf
 
-            μ = project(R, randn(3, 3))
-            d = Manifolds.normal_tvector_distribution(R, μ, 0.1)
+            μ = project(R, randn(rng, 3, 3))
+            d = normal_tvector_distribution(R, μ, 0.1)
             x = [exp(R, μ, rand(rng, d)) for _ in 1:10]
             w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(R, x, w)
@@ -814,7 +847,7 @@ end
         @test issymmetric(covm)
     end
 
-    @testset "Default Fallbacks for nonimplemented with stop forwarding" begin
+    @testset "Default Fallbacks for non-implemented with stop forwarding" begin
         M = TestStatsNotImplementedManifold()
         a = GradientDescentEstimation()
         @test default_approximation_method(ManifoldsBase.StopForwardingType(), M, cov) === a

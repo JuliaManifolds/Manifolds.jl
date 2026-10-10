@@ -81,6 +81,7 @@ as the point that satisfies the minimizer
 where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 
 In the general case, the [`GradientDescentEstimation`](@extref `ManifoldsBase.GradientDescentEstimation`) is used to compute the mean.
+
     mean(
         M::AbstractManifold,
         x::AbstractVector,
@@ -122,13 +123,13 @@ mean(::AbstractManifold, ::Any...)
 
 #
 # dispatch on method first to allow Euclidean defaults to hit
-function Statistics.mean(M::AbstractManifold, x::AbstractVector, kwargs...)
+function Statistics.mean(M::AbstractManifold, x::AbstractVector; kwargs...)
     return mean(M, x, default_approximation_method(M, mean, eltype(x)); kwargs...)
 end
 function Statistics.mean(
         M::AbstractManifold,
         x::AbstractVector,
-        w::AbstractVector,
+        w::AbstractVector;
         kwargs...,
     )
     return mean(M, x, w, default_approximation_method(M, mean, eltype(x)); kwargs...)
@@ -173,7 +174,7 @@ function Statistics.mean!(
         M::AbstractManifold,
         y,
         x::AbstractVector,
-        method::AbstractApproximationMethod = default_approximation_method(M, mean);
+        method::AbstractApproximationMethod = default_approximation_method(M, mean, eltype(x));
         kwargs...,
     )
     w = _unit_weights(length(x))
@@ -275,8 +276,8 @@ function Statistics.mean!(
     v = zero_vector(M, q)
     ytmp = allocate_result(M, mean, q)
     @inbounds for i in 2:n
-        iszero(w[i]) && continue
         j = order[i]
+        iszero(w[j]) && continue
         s += w[j]
         t = w[j] / s
         inverse_retract!(M, v, q, x[j], inverse_retraction)
@@ -569,7 +570,7 @@ Statistics.median(
 #
 # dispatch on the method first before allocating to allow Euclidean defaults to hit
 function Statistics.median(M::AbstractManifold, x::AbstractVector; kwargs...)
-    return median(M, x, default_approximation_method(M, median, eltype(x)))
+    return median(M, x, default_approximation_method(M, median, eltype(x)); kwargs...)
 end
 function Statistics.median(
         M::AbstractManifold,
@@ -577,7 +578,7 @@ function Statistics.median(
         w::AbstractVector;
         kwargs...,
     )
-    return median(M, x, w, default_approximation_method(M, median, eltype(x)))
+    return median(M, x, w, default_approximation_method(M, median, eltype(x)); kwargs...)
 end
 
 function Statistics.median(
@@ -714,6 +715,7 @@ function Statistics.median!(
         d .= [distance(M, q, xi) for xi in x] # compute distances
         # compute new weights / exclude points xi=q
         d .= [di > 0 ? wi / di : zero(typeof(wi / di)) for (di, wi) in zip(d, w)]
+        iszero(sum(d)) && break # no point with positive weight differs from the iterate
         copyto!(yold, q)
         zero_vector!(M, v, q)
         for j in 1:n
@@ -907,6 +909,7 @@ function StatsBase.mean_and_var(
     ytmp = allocate_result(M, mean, y)
     @inbounds for i in 2:n
         j = order[i]
+        iszero(w[j]) && continue
         snew = s + w[j]
         t = w[j] / snew
         inverse_retract!(M, v, y, x[j], inverse_retraction)
@@ -1082,4 +1085,4 @@ end
 # decorate default method for a few functions
 # TODO: Check how to “ask” the embedding for default approx methods, when it exists,
 # for the functions [mean, median, cov, var, mean_and_std, mean_and_var]
-@trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector)
+@trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector; kwargs...)

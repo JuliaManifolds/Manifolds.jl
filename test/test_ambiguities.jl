@@ -30,7 +30,7 @@ function has_type_in_signature(sig, T::Type)
 end
 
 @testset "Ambiguities" begin
-    if VERSION.prerelease == () && !Sys.iswindows() && VERSION < v"1.11.0"
+    if VERSION.prerelease == () && !Sys.iswindows() && VERSION < v"1.14.0"
         mbs = Test.detect_ambiguities(ManifoldsBase)
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
@@ -46,7 +46,10 @@ end
         ms = Test.detect_ambiguities(Manifolds)
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
-        MS_LIMIT = 60
+        MS_LIMIT = 44
+        if v"1.10" <= VERSION < v"1.11"
+            MS_LIMIT += 7
+        end
         println("Number of Manifolds.jl ambiguities: $(length(ms))")
         if length(ms) > MS_LIMIT
             for amb in ms

@@ -100,6 +100,10 @@ include("../header.jl")
             u = allocate(v)
             copyto!(u, v)
             @test u == v
+            pc = copy(p)
+            @test pc == p
+            @test pc.hosvd.U[1] !== p.hosvd.U[1]
+            @test is_point(M, pc)
 
             # broadcasting
             @test axes(v) === ()
@@ -301,6 +305,9 @@ include("../header.jl")
         Y_manual = project!(M, Y_manual, q, embed(M, p, X))
         Y = vector_transport_to!(M, Y, p, X, q, ProjectionTransport())
         @test isapprox(M, q, Y_manual, Y, atol = atol, rtol = rtol)
+        # the allocating projection agrees with the in-place one
+        Y_alloc = project(M, q, embed(M, p, X))
+        @test isapprox(M, q, Y_manual, Y_alloc, atol = atol, rtol = rtol)
 
         # test transport for in-place update
         p = allocate(p̃)
@@ -313,6 +320,24 @@ include("../header.jl")
         Y_manual = project!(M, Y_manual, q, embed(M, p, X))
         vector_transport_to!(M, X, p, X, q, ProjectionTransport())
         @test isapprox(M, q, Y_manual, X, atol = atol, rtol = rtol)
+    end
+
+    @testset "projection transport on complex tensors" begin
+        M = Tucker((4, 5, 6), (2, 3, 4), ℂ)
+        A = reshape([complex(mod(17k, 23) / 23, mod(11k, 19) / 19) for k in 1:120], 4, 5, 6)
+        B = reshape([complex(mod(13k, 29) / 29, mod(7k, 31) / 31) for k in 1:120], 4, 5, 6)
+        p = TuckerPoint(A, (2, 3, 4))
+        q = TuckerPoint(B, (2, 3, 4))
+        U̇ = map(p.hosvd.U) do U
+            n = size(U, 1)
+            Z = reshape([complex(mod(3k, 7) / 7, mod(2k, 5) / 5) for k in 1:(n^2)], n, n)
+            return Z * U - U * (U' * Z * U)
+        end
+        X = TuckerTangentVector((0.5 + 0.25im) * p.hosvd.core, U̇)
+        Y = vector_transport_to(M, p, X, q, ProjectionTransport())
+        # the columns of J are an orthonormal basis of the complex tangent space at q
+        J = convert(Matrix, get_basis(M, q, DefaultOrthonormalBasis()))
+        @test vec(embed(M, q, Y)) ≈ J * (J' * vec(embed(M, p, X)))
     end
 
     @testset "product of Tucker manifolds" begin

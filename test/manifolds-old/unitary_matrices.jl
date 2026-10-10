@@ -68,9 +68,9 @@ end
 
 @testset "Special unitary matrices" begin
     @test manifold_volume(SpecialUnitaryMatrices(1)) ≈ 1
-    @test manifold_volume(SpecialUnitaryMatrices(2)) ≈ 2 * π^2
-    @test manifold_volume(SpecialUnitaryMatrices(3)) ≈ sqrt(3) * π^5
-    @test manifold_volume(SpecialUnitaryMatrices(4)) ≈ sqrt(2) * 4 * π^9 / 12
+    @test manifold_volume(SpecialUnitaryMatrices(2)) ≈ 4 * sqrt(2) * π^2
+    @test manifold_volume(SpecialUnitaryMatrices(3)) ≈ 16 * sqrt(3) * π^5
+    @test manifold_volume(SpecialUnitaryMatrices(4)) ≈ 256 * π^9 / 3
 
     @test manifold_dimension(SpecialUnitaryMatrices(2)) == 3
     @test manifold_dimension(SpecialUnitaryMatrices(3)) == 8
@@ -79,6 +79,37 @@ end
     @test injectivity_radius(SpecialUnitaryMatrices(2)) == π * sqrt(2)
     @test injectivity_radius(SpecialUnitaryMatrices(3)) == π * sqrt(2)
     @test injectivity_radius(SpecialUnitaryMatrices(4)) == π * sqrt(2)
+
+    @testset "traceless tangent vectors" begin
+        M = SpecialUnitaryMatrices(3)
+        p = Matrix{ComplexF64}(I, 3, 3)
+        @test !is_vector(M, p, 1.0im * Matrix{ComplexF64}(I, 3, 3))
+        @test !is_vector(M, p, 1.0e-9im * Matrix{ComplexF64}(I, 3, 3))
+        Z = ComplexF64[1.0 0.2im -0.3; 0.4 -0.5im 0.6; 0.7 0.8 -0.9im]
+        X = project(M, p, Z)
+        # the skew-Hermitian part of Z has the trace -1.4im
+        @test X ≈ (Z - Z') / 2 + 1.4im / 3 * I
+        @test is_vector(M, p, X)
+        @test is_point(M, exp(M, p, X))
+        @test is_vector(M, p, project(M, p, 1.0e9 * Z))
+        # skew-Hermitian up to 1e-7, so accepted only with a larger tolerance
+        Y = ComplexF64[1.0e-7 1.0 0.0; -1.0 -1.0e-7 0.0; 0.0 0.0 0.0]
+        @test !is_vector(M, p, Y)
+        @test is_vector(M, p, Y; atol = 1.0e-6)
+    end
+
+    @testset "rand" begin
+        M = SpecialUnitaryMatrices(3)
+        p = rand(MersenneTwister(4711), M)
+        @test is_point(M, p)
+        @test det(p) ≈ 1
+        X = rand(MersenneTwister(4711), M; vector_at = p)
+        @test is_vector(M, p, X)
+        @test is_point(M, exp(M, p, X))
+        q = similar(p)
+        rand!(MersenneTwister(4711), M, q)
+        @test is_point(M, q)
+    end
 end
 
 @testset "Quaternionic Unitary Matrices" begin
@@ -92,12 +123,13 @@ end
         @test is_point(M, p)
         X = rand(MersenneTwister(), M; vector_at = p)
         @test is_vector(M, p, X)
+        @test zero_vector(M, p) == zero(p)
     end
 
     # wrong length of size
     @test_throws DomainError is_point(M, zeros(2, 2); error = :error)
 
-    # Determinant not one
+    # wrong length of size again
     pF2 = [quat(0, 1, 0, 0) 1.0; 0.0 -quat(0, 1, 0, 0)]
     @test_throws DomainError is_point(M, pF2; error = :error)
     p = QuaternionF64(
@@ -106,6 +138,9 @@ end
         -0.2322369798903669,
         0.5909181717450419,
     )
+    @test is_point(M, fill(p, 1, 1); error = :error)
+    # Determinant not one
+    @test_throws DomainError is_point(M, fill(2 * p, 1, 1); error = :error)
 end
 
 @testset "SO(4) and O(4) exp/log edge cases" begin
@@ -130,7 +165,7 @@ end
                 p = exp(X)
                 @test p ≈ exp(M, E, X)
                 p3 = exp(M, E, log(M, E, p))
-                # broken for 9 of the 10
+                # the last vector, with nearly equal angles, is off by less than 1e-10
                 @test isapprox(M, p, p3; atol = 1.0e-4)
             end
         end
@@ -149,4 +184,22 @@ end
     X3a = log(Rotations(4), E, R3)
     @test is_vector(Rotations(4), E, X3a)
     @test X3a[2, 3] ≈ π
+end
+
+@testset "logarithm of the special unitary matrices of minimal norm" begin
+    M = SpecialUnitaryMatrices(3)
+    p = Matrix{ComplexF64}(I, 3, 3)
+    q = Matrix{ComplexF64}(Diagonal([cis(1.6), cis(1.6), cis(-3.2)]))
+    X = log(M, p, q)
+    @test is_vector(M, p, X)
+    @test sort(imag.(eigvals(X))) ≈ [-3.2, 1.6, 1.6]
+    @test isapprox(M, exp(M, p, X), q)
+    @test distance(M, p, q) ≈ norm([1.6, 1.6, -3.2])
+    Y = [0.0 0.5im 0.2; -0.2 0.3im 0.1im; 0.0 0.1im -0.3im]
+    r = exp(M, p, Y - Y')
+    @test isapprox(M, exp(M, r, log(M, r, q * r)), q * r)
+    @test distance(M, r, q * r) ≈ norm([1.6, 1.6, -3.2])
+    Z = log(M, p, q')
+    @test sort(imag.(eigvals(Z))) ≈ [-1.6, -1.6, 3.2]
+    @test log(M, SMatrix{3, 3}(p), SMatrix{3, 3}(q)) ≈ X
 end

@@ -413,7 +413,6 @@ end
         M = Sphere(2)
         N = PowerManifold(M, 2)
         p = [1.0 0.0; 0.0 0.0; 1.0 0.0]
-        q = 1 / sqrt(2) * [1.0 0.0; 1.0 1.0; 0.0 1.0]
         q = 1 / sqrt(2) * [0.0 1.0; 1.0 1.0; 1.0 0.0]
         r = 1 / sqrt(3) * [1.0 1.0; 1.0 1.0; 1.0 1.0]
         X = log(M, p, q)
@@ -463,15 +462,15 @@ end
         }
 
         pse_ap = ArrayPartition(
-            SA[1.0, 2.0],
-            SA[
+            [1.0, 2.0],
+            [
                 0.5403023058681398 -0.8414709848078965
                 0.8414709848078965 0.5403023058681398
             ],
         )
         p2_ap = [pse_ap, pse_ap]
         @test allocate(PSE2, p2_ap) isa Vector{
-            ArrayPartition{Float64, Tuple{SVector{2, Float64}, SMatrix{2, 2, Float64, 4}}},
+            ArrayPartition{Float64, Tuple{Vector{Float64}, Matrix{Float64}}},
         }
     end
 
@@ -480,6 +479,9 @@ end
         p = repeat([1.0, 0.0, 0.0], 1, 5)
         X = repeat([0.0, 1.0, 0.0], 1, 5)
         @test volume_density(Ms1, p, X) ≈ volume_density(Ms, p[:, 1], X[:, 1])^5
+        Msn1 = PowerManifold(Ms, NestedPowerRepresentation(), 5)
+        @test volume_density(Msn1, [p[:, i] for i in 1:5], [X[:, i] for i in 1:5]) ≈
+            volume_density(Ms, p[:, 1], X[:, 1])^5
     end
 
     @testset "Static type parameter" begin
@@ -487,4 +489,20 @@ end
         @test sprint(show, "text/plain", Ms1s) ==
             "PowerManifold(Sphere(2), 5, parameter=:type)"
     end
+end
+
+@testset "Riemannian gradient on a power of hyperboloids" begin
+    M = PowerManifold(Hyperbolic(2), 2)
+    p = [[1.0, 1.0, sqrt(3)] [0.0, 0.0, 1.0]]
+    G = [[0.4, -0.7, 1.1] [0.2, 0.1, -0.3]]
+    Y = riemannian_gradient(M, p, G)
+    @test is_vector(M, p, Y)
+    for V in (
+            project(M, p, [[1.0, 0.0, 0.0] [0.0, 1.0, 0.0]]),
+            project(M, p, [[0.0, 1.0, 0.0] [1.0, 0.0, 0.0]]),
+        )
+        @test inner(M, p, Y, V) ≈ dot(G, V)
+    end
+    N = PowerManifold(Hyperbolic(2), NestedPowerRepresentation(), 2)
+    @test riemannian_gradient(N, [p[:, 1], p[:, 2]], [G[:, 1], G[:, 2]]) ≈ [Y[:, 1], Y[:, 2]]
 end

@@ -166,13 +166,14 @@ include("../header.jl")
             X2 = log(SOn, pts[1], p)
             @test distance(SOn, p, exp(SOn, pts[1], X2)) < 25 * eps()
             p2 = ManifoldsBase.exp_fused(SOn, pts[1], X, 1.0)
-            X3 = log(SOn, pts[1], p)
-            @test distance(SOn, p, exp(SOn, pts[1], X3)) < 25 * eps()
+            @test isapprox(SOn, p2, p)
+            X3 = log(SOn, pts[1], p2)
+            @test distance(SOn, p2, exp(SOn, pts[1], X3)) < 25 * eps()
 
             @testset "gradient and metric conversion" begin
-                Y = change_metric(M, EuclideanMetric(), p, X)
+                Y = change_metric(SOn, EuclideanMetric(), p, X)
                 @test Y == X
-                Z = change_representer(M, EuclideanMetric(), p, X)
+                Z = change_representer(SOn, EuclideanMetric(), p, X)
                 @test Z == X
             end
         end
@@ -250,8 +251,8 @@ include("../header.jl")
         M = Rotations(2)
         p = Matrix{Float64}(I, 2, 2)
         X = [0.0 3.0; -3.0 0.0]
-        V = [1.0 0.0; 1.0 0.0]
-        @test Weingarten(M, p, X, V) == -1 / 2 * p * (V' * X - X' * V)
+        q = [0.0 -1.0; 1.0 0.0]
+        @test Weingarten(M, q, X, q * [1.0 0.0; 0.0 2.0]) == [0.0 -4.5; 4.5 0.0]
         G = [0.0 1.0; 0.0 0.0]
         H = [0.0 0.0; 2.0 0.0]
         @test riemannian_Hessian(M, p, G, H, X) == [0.0 -1.0; 1.0 0.0]
@@ -333,6 +334,11 @@ include("../header.jl")
             0.32587783145998306 0.0 -0.49138641089195584
             -0.3903114578816011 0.4913864108919558 0.0
         ]
+        # a tangent vector whose angle squared underflows to zero
+        Xs = 1.0e-170 .* X
+        @test exp(M, p, Xs) ≈ p
+        @test exp(M, Matrix(p), Matrix(Xs)) ≈ p
+        @test parallel_transport_direction(M, p, X, Xs) ≈ X
     end
     @testset "Jacobians" begin
         M = Rotations(2)
@@ -374,9 +380,11 @@ include("../header.jl")
     @testset "manifold_volume and volume_density" begin
         @test manifold_volume(Rotations(1)) ≈ 1
         @test manifold_volume(Rotations(2)) ≈ 2 * π * sqrt(2)
-        @test manifold_volume(Rotations(3)) ≈ 8 * π^2 * sqrt(2)
-        @test manifold_volume(Rotations(4)) ≈ (2 * π)^4 * sqrt(2)
-        @test manifold_volume(Rotations(5)) ≈ 4 * (2 * π)^6 / 6 * sqrt(2)
+        @test manifold_volume(Rotations(3)) ≈ 16 * π^2 * sqrt(2)
+        @test manifold_volume(Rotations(4)) ≈ 8 * (2 * π)^4
+        @test manifold_volume(Rotations(5)) ≈ 128 * (2 * π)^6 / 6
+        @test volume_density(Rotations(2), [1.0 0.0; 0.0 1.0], [0.0 0.5; -0.5 0.0]) == 1.0
+        @test volume_density(OrthogonalMatrices(2), [1.0 0.0; 0.0 1.0], [0.0 0.5; -0.5 0.0]) == 1.0
 
         M = Rotations(3)
         p = [
@@ -389,8 +397,9 @@ include("../header.jl")
             0.30777760628130063 0.0 -0.32059980100053004
             -0.5499897386953444 0.32059980100053004 0.0
         ]
-        @test volume_density(M, p, X) ≈ 0.8440563052346255
+        @test volume_density(M, p, X) ≈ 0.9590216116974793
         @test volume_density(M, p, zero(X)) ≈ 1.0
+        @test volume_density(M, p, 1.0e-12 * X) ≈ 1.0
 
         M = Rotations(4)
         p = [
@@ -405,6 +414,10 @@ include("../header.jl")
             -0.26356215573144676 0.04594199053786204 0.0 0.43156436122007846
             0.4070678736115306 0.10586374034761421 -0.43156436122007846 0.0
         ]
-        @test volume_density(M, p, X) ≈ 0.710713830700454
+        @test volume_density(M, p, X) ≈ 0.9195936931567809
+        # at this vector some zero eigenvalues are computed as rounding errors
+        p = Matrix{Float64}(I, 4, 4)
+        X = get_vector(M, p, [-0.94, 0.45, 0.83, -0.66, -0.66, 0.83], DefaultOrthonormalBasis())
+        @test volume_density(M, p, X) ≈ 0.7531906207139224
     end
 end

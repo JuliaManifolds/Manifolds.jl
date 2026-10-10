@@ -41,7 +41,7 @@ check_size(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number) = noth
 
 embed(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p::Number) = SMatrix{1, 1}(p)
 
-embed(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number) = SMatrix{1, 1}(X)
+embed(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number) = SMatrix{1, 1}(p * X)
 
 function exp(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number)
     return p * exp(X)
@@ -171,7 +171,10 @@ number_of_coordinates(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, ::Abstrac
 
 project(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p) = sign(p)
 
-project(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X) = (X - conj(X)) / 2
+function project(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X)
+    Y = conj(p) * X
+    return (Y - conj(Y)) / 2
+end
 
 function Random.rand(M::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}; vector_at = nothing)
     if vector_at === nothing
@@ -249,9 +252,10 @@ and that means the inverse has to be applied to the (Euclidean) Hessian
 to map it into the Lie algebra.
 """
 riemannian_Hessian(M::UnitaryMatrices, p, G, H, X)
-function riemannian_Hessian!(M::UnitaryMatrices, Y, p, G, H, X)
+function riemannian_Hessian!(M::UnitaryMatrices{𝔽}, Y, p, G, H, X) where {𝔽}
+    n = get_parameter(M.size)[1]
     symmetrize!(Y, G' * p)
-    project!(M, Y, p, p' * H - X * Y)
+    project!(SkewHermitianMatrices(n, 𝔽), Y, p' * H - X * Y)
     return Y
 end
 
@@ -264,14 +268,15 @@ tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal
 The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 
 ```math
-\mathcal W_p(X,V) = -\frac{1}{2}p\bigl(V^{\mathrm{H}}X - X^\mathrm{H}V\bigr).
+\mathcal W_p(X,V) = -\frac{1}{2}\bigl(XS + SX\bigr),
+\qquad S = p^{\mathrm{H}}V.
 ```
 """
 Weingarten(::UnitaryMatrices, p, X, V)
 
 function Weingarten!(::UnitaryMatrices, Y, p, X, V)
-    Y .= V' * X
-    Y .= -p * 1 / 2 * (Y - Y')
+    S = p' * V
+    Y .= -(X * S .+ S * X) ./ 2
     return Y
 end
 

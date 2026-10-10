@@ -1,4 +1,5 @@
 include("../header.jl")
+using ADTypes
 using FiniteDifferences
 using Manifolds: RiemannianProjectionBackend
 using ManifoldDiff
@@ -15,7 +16,7 @@ function Ω(::SymplecticStiefel, p, X)
     return Ω
 end
 
-function exp_naiive!(M::SymplecticStiefel, q, p, X)
+function exp_naive!(M::SymplecticStiefel, q, p, X)
     Ω_X = Ω(M, p, X)
     q .= exp(Ω_X - Ω_X') * exp(Array(Ω_X')) * p
     return q
@@ -186,6 +187,12 @@ end
             inverse_retract(M, p_6_4, q_6_4, CayleyInverseRetraction())
         @test isapprox(X_inv_cayley_retraction, X_inv_cayley_retraction_2; atol = 1.0e-16)
         @test isapprox(X_inv_cayley_retraction, X1; atol = 1.0e-12)
+        # exp agrees with its definition, evaluated directly by exp_naive!
+        pc = convert(Matrix{Float64}, close_points[1])
+        Xc = inverse_retract(
+            M, pc, convert(Matrix{Float64}, close_points[2]), CayleyInverseRetraction()
+        )
+        @test isapprox(exp(M, pc, Xc), exp_naive!(M, similar(pc), pc, Xc))
     end
     @testset "Riemannian Metric" begin
         X1_norm = 37.85466645
@@ -293,6 +300,8 @@ end
             return Q_grad * p * (euc_grad_f') * Q_grad * p + euc_grad_f * p' * p
         end
         p_grad = convert(Array{Float64}, points[1])
+        X_r = riemannian_gradient(M, points[1], X2)
+        @test riemannian_gradient(M, points[1], X2; embedding_metric = EuclideanMetric()) == X_r
         fd_diff = RiemannianProjectionBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 
         @test isapprox(

@@ -59,8 +59,22 @@ include("../header.jl")
         M = MultinomialMatrices(3, 2)
         p = [0.5 0.4 0.1; 0.5 0.4 0.1]'
         Y = [1.0 -1.0; 0.0 0.0; -1.0 1.0]
-        G = project(M, p, p .* Y)
         X = riemannian_gradient(M, p, Y)
-        @test isapprox(M, p, G, X)
+        @test isapprox(M, p, X, [0.3 -0.3; -0.16 0.16; -0.14 0.14])
+        # the Riemannian gradient satisfies ⟨X, V⟩_p = ⟨Y, V⟩ for tangent vectors V
+        V = [1.0 0.0; -1.0 1.0; 0.0 -1.0]
+        @test inner(M, p, X, V) ≈ dot(Y, V)
+    end
+    @testset "Tangent space projection" begin
+        M = MultinomialMatrices(3, 2)
+        p = [0.5 0.4 0.1; 0.5 0.4 0.1]'
+        Y = [1.0 -1.0; 0.5 0.0; -1.0 2.0]
+        X = project(M, p, Y)
+        @test is_vector(M, p, X)
+        @test isapprox(M, p, X, [0.75 -1.5; 0.3 -0.4; -1.05 1.9])
+        # the projection is orthogonal with respect to the Fisher–Rao metric
+        V = [1.0 0.0; -1.0 1.0; 0.0 -1.0]
+        @test isapprox(inner(M, p, Y - X, V), 0.0; atol = 1.0e-15)
+        @test project(M, p, X) ≈ X
     end
 end

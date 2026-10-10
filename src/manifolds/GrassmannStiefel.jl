@@ -31,6 +31,31 @@ ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTangentVec
 ManifoldsBase.@default_manifold_fallbacks (Stiefel{ℝ}) StiefelPoint StiefelTangentVector value value
 ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTangentVector value value
 
+@doc raw"""
+    is_vector(M::Grassmann, p, X; atol, rtol, kwargs...)
+
+Check whether `X` is a tangent vector at `p` on the [`Grassmann`](@ref) `M`, that is whether
+``p^{\mathrm{H}}X = 0`` holds up to `max(atol, rtol * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
+"""
+is_vector(::Grassmann, ::Any, ::Any)
+
+function check_vector(
+        M::Grassmann, p, X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
+        kwargs...,
+    ) where {T}
+    r = norm(p' * X)
+    if !(r <= atol || r <= rtol * norm(X))
+        return DomainError(
+            r,
+            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X is not the zero matrix.",
+        )
+    end
+    return nothing
+end
+
 function default_vector_transport_method(::Grassmann, ::Type{<:AbstractArray})
     return ParallelTransport()
 end
@@ -41,16 +66,26 @@ default_vector_transport_method(::Grassmann, ::Type{<:StiefelPoint}) = ParallelT
 
 Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M```= \mathrm{Gr}(n,k)``.
 
-The distance is given by
+The distance is the arc length
 
 ````math
-d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\log_p(q)).
+d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\log_p(q)) = \Bigl(\sum_{i=1}^k θ_i^2\Bigr)^{1/2}
 ````
+
+of the principal angles ``θ_i`` between the spans of `p` and `q`, see Section 4.3 of [EdelmanAriasSmith:1998](@cite).
+The angles are ``θ_i = \arccos(σ_i)`` for the singular values ``σ_i`` of ``p^{\mathrm{H}}q``; the small ones
+are recomputed with the arc sine, see Algorithm 3.2 of [KnyazevArgentati:2002](@cite).
 """
 function distance(::Grassmann, p, q)
-    z = p' * q
-    S = svd(q / z - p).S
-    return norm(map(atan, S))
+    F = svd(p' * q)
+    s = min.(F.S, 1)
+    θ = acos.(s)
+    small = s .^ 2 .>= 1 / 2
+    if any(small)
+        R = q * F.V[:, small]
+        θ[small] = asin.(min.(svdvals(R - p * (p' * R)), 1))
+    end
+    return norm(θ)
 end
 
 embed(::Grassmann, p) = p
@@ -146,11 +181,11 @@ function ManifoldsBase.get_embedding_type(::Grassmann)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
-function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::Type{<:StiefelPoint})
-    return ManifoldsBase.EmbeddedForwardingType()
+function ManifoldsBase.get_embedding_type(::Grassmann, ::Type{<:StiefelPoint})
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
-function ManifoldsBase.get_forwarding_type(::Stiefel, f, ::Type{<:StiefelPoint})
-    return ManifoldsBase.EmbeddedForwardingType()
+function ManifoldsBase.get_embedding_type(::Stiefel, ::Type{<:StiefelPoint})
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 @doc raw"""
@@ -288,7 +323,7 @@ parallel_transport_direction(M::Grassmann, p, X, Y)
 
 # Hook into default since here we have direction first
 function parallel_transport_direction(M::Grassmann, p, X, Y)
-    Z = zero_vector(M, exp(M, p, X))
+    Z = allocate_result(M, vector_transport_direction, X, p, Y)
     return parallel_transport_direction!(M, Z, p, X, Y)
 end
 
@@ -369,7 +404,7 @@ function Random.rand!(
     ) where {𝔽}
     if vector_at === nothing
         n, k = get_parameter(M.size)
-        V = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
+        V = σ * randn(rng, eltype(pX), (n, k))
         pX .= qr(V).Q[:, 1:k]
     else
         Z = σ * randn(rng, eltype(pX), size(pX))
@@ -478,7 +513,7 @@ function riemann_tensor!(::Grassmann{ℝ}, Xresult, p, X, Y, Z)
     YXᵀ = XYᵀ'
     YᵀX = Y' * X
     XᵀY = YᵀX'
-    Xresult .= (XYᵀ - YXᵀ) * Z .- Z * (YᵀX - XᵀY)
+    Xresult .= (XYᵀ - YXᵀ) * Z .+ Z * (YᵀX - XᵀY)
     return Xresult
 end
 

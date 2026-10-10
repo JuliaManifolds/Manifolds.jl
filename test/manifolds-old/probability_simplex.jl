@@ -1,5 +1,18 @@
 include("../header.jl")
 
+@testset "tangent vectors of the probability simplex of any length" begin
+    M = ProbabilitySimplex(2)
+    p = [0.2, 0.3, 0.5]
+    @test is_vector(M, p, project(M, p, [100.0, -50.0, 30.0]))
+    @test !is_vector(M, p, [1.0, -1.0, 1.0e-6])
+end
+
+@testset "distance of a point of the probability simplex from itself" begin
+    M = ProbabilitySimplex(3)
+    p = [0.2, 0.4, 0.3, 0.1]
+    @test distance(M, p, p) == 0.0
+end
+
 @testset "Probability simplex" begin
     M = ProbabilitySimplex(2)
     M_euc = MetricManifold(M, EuclideanMetric())
@@ -67,10 +80,11 @@ include("../header.jl")
             @test exp!(M_euc, X, pts[1], [0.0, 0.1, -0.1]) ≈ [0.5, 0.4, 0.1]
             @test ManifoldsBase.exp_fused!(M_euc, X, pts[1], [0.0, 0.1, -0.1], 1.0) ≈
                 [0.5, 0.4, 0.1]
+            @test log(M_euc, pts[1], pts[2]) ≈ pts[2] - pts[1]
+            @test distance(M_euc, pts[1], pts[2]) ≈ norm(pts[2] - pts[1])
             Manifolds.test_manifold(
                 M_euc,
                 pts,
-                test_exp_log = false,
                 test_injectivity_radius = false,
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
@@ -95,6 +109,11 @@ include("../header.jl")
         # Check adaption of metric and representer
         Y1 = change_metric(M, EuclideanMetric(), p, X)
         @test Y1 ≈ [-0.17062114054478128, 0.04002429219016789, 0.13059684835461377]
+        # p3 is a point close to the boundary of the simplex, so the metric is nearly singular
+        p3 = [0.05218307154737151, 0.9471667513325462, 0.0006501771200825463]
+        Y3 = change_metric(M, EuclideanMetric(), p3, [1.0, -0.5, -0.5])
+        @test is_vector(M, p3, Y3)
+        @test inner(M, p3, Y3, Y3) ≈ 1.5
         Y2 = change_representer(M, EuclideanMetric(), p, X)
         @test Y2 ≈ [-0.10040964054128285, 0.03818665287320871, 0.06222298766807415]
 
@@ -131,6 +150,11 @@ include("../header.jl")
         @test is_point(Mb, p)
         @test_throws DomainError is_point(Mb, p .- 1; error = :error)
         @test inner(Mb, p, X, Y) == 8
+        Mb3 = ProbabilitySimplex(3; boundary = :closed)
+        pb = [0.0, 0.2, 0.3, 0.5]
+        qb = [0.0, 0.5, 0.25, 0.25]
+        # a vanishing entry stays zero, so exp inverts log on that face
+        @test isapprox(Mb3, exp(Mb3, pb, log(Mb3, pb, qb)), qb)
 
         @test_throws ArgumentError ProbabilitySimplex(2; boundary = :tomato)
     end
@@ -156,19 +180,46 @@ include("../header.jl")
         Y = [0.05, 0.05, -0.1]
         Z = [-0.1, 0.15, -0.05]
         @test riemann_tensor(M, p, X, Y, Z) ≈
-            [-0.0034821428571428577, -0.005625, 0.009107142857142857]
+            [-0.0008705357142857144, -0.0014062500000000002, 0.0022767857142857143]
     end
 
     @testset "Volume density" begin
-        @test manifold_volume(M) ≈ pi / 2
-        @test volume_density(M, p, Y) ≈ 0.986956111346216
+        pv = [0.1, 0.7, 0.2]
+        Yv = [0.05, 0.05, -0.1]
+        @test manifold_volume(M) ≈ 2 * pi
+        @test volume_density(M, pv, Yv) ≈ 0.9967294043214631
         @test manifold_volume(M_euc) ≈ sqrt(3) / 2
-        @test volume_density(M_euc, p, Y) ≈ 1.0
+        @test volume_density(M_euc, pv, Yv) ≈ 1.0
     end
 
     @testset "field parameter" begin
         M = ProbabilitySimplex(2; parameter = :field)
         @test repr(M) == "ProbabilitySimplex(2; boundary=:open, parameter=:field)"
         @test get_embedding(M) === Euclidean(3; parameter = :field)
+    end
+
+    @testset "the softmax retraction agrees with exp to first order" begin
+        M = ProbabilitySimplex(2)
+        p = [0.1, 0.7, 0.2]
+        X = [0.05, 0.05, -0.1]
+        d(t) = distance(M, exp(M, p, t * X), retract(M, p, t * X, SoftmaxRetraction()))
+        @test d(0.2) / d(0.1) ≈ 4 atol = 0.05
+        @test isapprox(
+            M, p,
+            inverse_retract(M, p, retract(M, p, X, SoftmaxRetraction()), SoftmaxInverseRetraction()),
+            X,
+        )
+    end
+
+    @testset "boundary conditions" begin
+        # a zero entry of a point on the closed simplex stays zero
+        Mb = ProbabilitySimplex(3; boundary = :closed)
+        qb = retract(Mb, [0.0, 0.2, 0.3, 0.5], [0.0, 0.1, 0.05, -0.15], SoftmaxRetraction())
+        @test is_point(Mb, qb)
+        @test qb[1] == 0
+        # an exponent of 1000 does not overflow
+        Mc = ProbabilitySimplex(2; boundary = :closed)
+        pc = [1.0e-6, 0.5, 0.499999]
+        @test retract(Mc, pc, [0.001, -0.0005, -0.0005], SoftmaxRetraction()) == [1.0, 0.0, 0.0]
     end
 end

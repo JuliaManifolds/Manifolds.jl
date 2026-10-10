@@ -151,12 +151,13 @@ Embed tangent vector ``X = (ν, u_1, …, u_d)`` at ``p ≐ (λ, x_1, …, x_d)`
 """
 function embed!(::Segre{𝔽, V}, u, p, X) where {𝔽, V}
     # Product rule
-    return u = sum(
+    u .= sum(
         [
             kron([i == j ? xdot : x for (j, (x, xdot)) in enumerate(zip(p, X))]...) for
                 (i, _) in enumerate(p)
         ]
     )
+    return u
 end
 
 
@@ -224,6 +225,7 @@ function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
     d = length(V)
     λ = q[1][1]
 
+    Y === X && (X = deepcopy(X))
     for Yi in Y
         fill!(Yi, zero(eltype(Yi)))
     end
@@ -381,9 +383,10 @@ function exp!(::Segre{ℝ, V}, q, p, X) where {V}
         ),
     )
 
+    f = pi / 2 - atan((p[1][1] + X[1][1]) / (p[1][1] * m))
+
     q[1][1] = sqrt((p[1][1] + X[1][1])^2 + (p[1][1] * m)^2)
 
-    f = pi / 2 - atan((p[1][1] + X[1][1]) / (p[1][1] * m))
     if m == 0
         for (x, y) in zip(p[2:end], q[2:end])
             y .= x
@@ -415,7 +418,7 @@ function get_coordinates_orthonormal!(
         ::RealNumbers;
         kwargs...,
     ) where {V}
-    return c = vcat(
+    return c .= vcat(
         X[1],
         p[1][1] * [
             get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis(); kwargs...) for (n, x, xdot) in zip(V, p[2:end], X[2:end])
@@ -590,16 +593,17 @@ If ``p ≐ (λ, x_1, …, x_d) ∈ \mathcal{S}`` and ``X``, ``Y``, ``Z ∈ T_p (
 ``R_{\mathcal{S}}`` is zero in the remaining (orthogonal) directions.
 """
 function riemann_tensor(M::Segre{ℝ, V}, p, X, Y, Z) where {V}
+    z = zero(p[1][1])
     return [
-        [0.0],
+        [z],
         [
             riemann_tensor(Sphere(n - 1), x, xdot1, xdot2, xdot3) for
                 (n, x, xdot1, xdot2, xdot3) in zip(V, p[2:end], X[2:end], Y[2:end], Z[2:end])
         ]...,
     ] +
         (1 / p[1][1]^2) * (
-        inner(M, p, [[0.0], X[2:end]...], [[0.0], Z[2:end]...]) * [[0.0], Y[2:end]...] -
-            inner(M, p, [[0.0], Y[2:end]...], [[0.0], Z[2:end]...]) * [[0.0], X[2:end]...]
+        inner(M, p, [[z], X[2:end]...], [[z], Z[2:end]...]) * [[z], Y[2:end]...] -
+            inner(M, p, [[z], Y[2:end]...], [[z], Z[2:end]...]) * [[z], X[2:end]...]
     )
 end
 

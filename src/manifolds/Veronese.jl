@@ -174,8 +174,8 @@ end
     check_size(M::Veronese, p)
     check_size(M::Veronese, p, X)
 
-For `M = Veronese(N, D)`, check that a stored point `p = ([λ], x)` and,
-optionally, a tangent vector `X = ([ν], u)` use two-component tuple
+For `M = Veronese(N, D)`, check the sizes of a stored point `p = ([λ], x)` and,
+optionally, of a tangent vector `X = ([ν], u)`. Both use two-component tuple
 representations with component sizes `(1,)` and `(N,)`, corresponding
 respectively to their radial and spherical parts.
 """

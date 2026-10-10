@@ -58,7 +58,7 @@ end
 Check that the [`ProjectorPoint`](@ref) is of correct size, i.e. from ``\mathbb F^{n×n}``
 """
 function check_size(M::Grassmann, p::ProjectorPoint; kwargs...)
-    return check_size(get_embedding(M, typeof(p)), p.value; kwargs...)
+    return check_size(get_embedding(M, typeof(p)), p.value)
 end
 
 @doc raw"""
@@ -150,9 +150,19 @@ function allocate_result(M::Grassmann, ::typeof(canonical_project), p::StiefelPo
     n, k = get_parameter(M.size)
     return ProjectorPoint(allocate(p.value, (n, n)))
 end
+function allocate_result(
+        M::Grassmann,
+        ::typeof(diff_canonical_project),
+        X::StiefelTangentVector,
+        p::StiefelPoint,
+    )
+    n, k = get_parameter(M.size)
+    return ProjectorTangentVector(allocate(X.value, (n, n)))
+end
 
 @doc raw"""
-    diff_canonical_project!(M::Grassmann, q::ProjectorPoint, p)
+    diff_canonical_project(M::Grassmann, p::StiefelPoint, X::StiefelTangentVector)
+    diff_canonical_project!(M::Grassmann, Y::ProjectorTangentVector, p, X)
 
 Compute the differential of canonical projection ``π(p)`` from the [`Stiefel`](@ref) manifold onto the [`Grassmann`](@ref)
 manifold when represented as [`ProjectorPoint`](@ref), i.e.
@@ -200,6 +210,67 @@ function exp!(::Grassmann, q::ProjectorPoint, p::ProjectorPoint, X::ProjectorTan
     q.value .= exp_xppx * p.value / exp_xppx
     return q
 end
+
+@doc raw"""
+    distance(M::Grassmann, p::ProjectorPoint, q::ProjectorPoint)
+
+Compute the Riemannian distance between two [`ProjectorPoint`](@ref)s `p` and `q` on the [`Grassmann`](@ref) manifold `M`.
+
+The projectors are written as ``p = UU^{\mathrm{H}}`` and ``q = VV^{\mathrm{H}}``, where the columns of
+``U, V ∈ 𝔽^{n×k}`` are the eigenvectors of `p` and `q` for their ``k`` largest eigenvalues, which are one,
+see Section 2.1, p. 6, of [BendokatZimmermannAbsil:2024](@cite).
+The result is the distance `distance(M, U, V)` of these Stiefel representatives,
+
+```math
+d_{\mathrm{Gr}(n,k)}(p,q) = \Bigl(\sum_{i=1}^k θ_i^2\Bigr)^{1/2},
+```
+
+where ``θ_i`` are the principal angles between the spans of ``U`` and ``V``,
+see Section 5.1, equation (5.3), p. 29, of [BendokatZimmermannAbsil:2024](@cite).
+"""
+function distance(M::Grassmann, p::ProjectorPoint, q::ProjectorPoint)
+    n, k = get_parameter(M.size)
+    U = eigvecs(Hermitian(p.value))[:, (n - k + 1):n]
+    V = eigvecs(Hermitian(q.value))[:, (n - k + 1):n]
+    return distance(M, U, V)
+end
+
+@doc raw"""
+    inner(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector, Y::ProjectorTangentVector)
+
+Compute the inner product of two [`ProjectorTangentVector`](@ref)s `X` and `Y` at `p` on the [`Grassmann`](@ref) manifold `M`.
+
+It is half the Frobenius inner product, see Section 3.1, equation (3.2), p. 14, of
+[BendokatZimmermannAbsil:2024](@cite),
+
+```math
+g_p(X,Y) = \frac{1}{2}\operatorname{tr}(X^{\mathrm{H}}Y).
+```
+"""
+function inner(
+        ::Grassmann, ::ProjectorPoint, X::ProjectorTangentVector, Y::ProjectorTangentVector,
+    )
+    return dot(X.value, Y.value) / 2
+end
+
+@doc raw"""
+    norm(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector)
+
+Compute the norm of a [`ProjectorTangentVector`](@ref) `X` at `p` on the [`Grassmann`](@ref) manifold `M`.
+
+It is the norm of the inner product, see Section 3.1, p. 15, of [BendokatZimmermannAbsil:2024](@cite),
+
+```math
+\lVert X \rVert_p = \frac{1}{\sqrt{2}}\lVert X \rVert_{\mathrm{F}},
+```
+
+where ``\lVert ⋅ \rVert_{\mathrm{F}}`` denotes the Frobenius norm.
+"""
+function norm(::Grassmann, ::ProjectorPoint, X::ProjectorTangentVector)
+    nX = norm(X.value)
+    return nX / sqrt(oftype(nX, 2))
+end
+
 @doc raw"""
     horizontal_lift(N::Stiefel{n,k}, q, X::ProjectorTangentVector)
 

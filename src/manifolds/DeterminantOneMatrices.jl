@@ -49,17 +49,26 @@ function check_point(M::DeterminantOneMatrices, p; kwargs...)
 end
 
 """
-    check_vector(M::DeterminantOneMatrices{n,𝔽}, p, X; kwargs... )
+    check_vector(M::DeterminantOneMatrices{n,𝔽}, p, X; atol, rtol, kwargs...)
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`DeterminantOneMatrices`](@ref) `M`, which are all matrices of size ``n×n``
 with trace 0.
+
+The trace is compared to zero up to `max(atol, rtol * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
-function check_vector(M::DeterminantOneMatrices, p, X; kwargs...)
-    if !isapprox(tr(X), 0; kwargs...)
+function check_vector(
+        M::DeterminantOneMatrices, p, X;
+        atol::Real = sqrt(eps(float(real(eltype(X))))),
+        rtol::Real = sqrt(eps(float(real(eltype(X))))),
+        kwargs...,
+    )
+    abstr = abs(tr(X))
+    if !(abstr <= atol || abstr <= rtol * norm(X))
         return DomainError(
             tr(X),
-            "The tangent vector $(X) does not lie in the Tangent space at $(p) of $(M), since its trace is $(tr(X)) and not zero.",
+            "The tangent vector $(X) does not lie in the Tangent space at $(p) of $(M), since its trace is $(tr(X)) and not zero (tolerance: $(max(atol, rtol * norm(X)))).",
         )
     end
     return nothing
@@ -79,14 +88,23 @@ function ManifoldsBase.get_embedding_type(::DeterminantOneMatrices)
     return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
+"""
+    is_flat(M::DeterminantOneMatrices)
+
+Return `true` for ``n = 1``, where the [`DeterminantOneMatrices`](@ref) are a single point, and
+`false` otherwise, since they have nonzero sectional curvature for ``n ≥ 2``.
+"""
+is_flat(M::DeterminantOneMatrices) = get_parameter(M.size)[1] == 1
+
 @doc raw"""
     manifold_dimension(M::DeterminantOneMatrices{n,𝔽})
 
 Return the dimension of the [`DeterminantOneMatrices`](@ref) matrix `M` over the number system
-`𝔽`, which is one dimension less than its embedding, the [`Euclidean`](@ref)`(n, n; field=𝔽)`.
+`𝔽`. It is the dimension of its embedding, the [`Euclidean`](@ref)`(n, n; field=𝔽)`,
+reduced by the real dimension of `𝔽`, since ``\det(p) = 1`` is a single equation over ``𝔽``.
 """
-function manifold_dimension(M::DeterminantOneMatrices{<:Any, 𝔽}) where {𝔽}
-    return manifold_dimension(get_embedding(M)) - 1
+function manifold_dimension(M::DeterminantOneMatrices{𝔽}) where {𝔽}
+    return manifold_dimension(get_embedding(M)) - real_dimension(𝔽)
 end
 
 @doc raw"""
@@ -149,7 +167,8 @@ end
     Random.rand(M::DeterminantOneMatrices; vector_at=nothing, kwargs...)
 
 If `vector_at` is `nothing`, return a random point on the [`DeterminantOneMatrices`](@ref)
-manifold `M` by using `rand` in the embedding.
+manifold `M` by using `rand` in the embedding. The point is drawn again while the absolute
+value of its determinant is below the square root of the machine epsilon of its entries.
 
 If `vector_at` is not `nothing`, return a random tangent vector from the tangent space of
 the point `vector_at` on the [`DeterminantOneMatrices`](@ref) by using by using `rand` in the
@@ -175,7 +194,8 @@ function Random.rand!(
         pX[1, :] ./= sign(det_pX)
         pX ./= abs(det_pX)^(1 / n)
     else # tangent vectors: trace 0
-        pX[diagind(pX)] .= 0
+        n = size(pX)[1]
+        pX[diagind(pX)] .-= tr(pX) / n
     end
     return pX
 end

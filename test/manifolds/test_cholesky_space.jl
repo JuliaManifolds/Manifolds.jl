@@ -9,7 +9,7 @@ using Manifolds, Test, LinearAlgebra
     p2 = cholesky([2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]).L
     p3 = cholesky(A(π / 6) * [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1] * transpose(A(π / 6))).L
 
-    # Tangent vectors are symmetric matrices
+    # Tangent vectors are lower triangular matrices
     X1 = [3.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1.0]
     X2 = [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 3.0]
 
@@ -17,7 +17,7 @@ using Manifolds, Test, LinearAlgebra
     q2 = [1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 1.0] # nonpos diag
     q3 = [2.0 0.0 1.0; 0.0 1.0 0.0; 0.0 0.0 4.0] # no lower and nonsym
 
-    Y = [0.0 1.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0] # not symmetric
+    Y = [0.0 1.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0] # not lower triangular
     Manifolds.Test.test_manifold(
         M,
         Dict(
@@ -27,7 +27,7 @@ using Manifolds, Test, LinearAlgebra
                 get_coordinates, get_vector,
                 log, manifold_dimension,
                 parallel_transport_to, rand, repr, representation_size,
-                zero_vector,
+                vector_transport_to, zero_vector,
             ],
             :Bases => [DefaultOrthonormalBasis()],
             :Coordinates => [[1.0, 0.0, 0.0, 0.0, 0.0, 0.0]],
@@ -50,6 +50,24 @@ using Manifolds, Test, LinearAlgebra
             representation_size => (3, 3),
         )
     )
+
+    @testset "coordinates are orthonormal at a point with a non-unit diagonal" begin
+        W = [1.0 0.0 0.0; 2.0 3.0 0.0; -1.0 0.5 2.0]
+        c = get_coordinates(M, p2, W, DefaultOrthonormalBasis())
+        @test norm(c) ≈ norm(M, p2, W)
+        @test get_vector(M, p2, c, DefaultOrthonormalBasis()) ≈ W
+    end
+    @testset "parallel transport is an isometry and keeps the strictly lower part" begin
+        W = [1.0 0.0 0.0; 2.0 3.0 0.0; -1.0 0.5 2.0]
+        Wt = parallel_transport_to(M, p2, W, p3)
+        @test inner(M, p3, Wt, Wt) ≈ inner(M, p2, W, W)
+        @test Manifolds.strictlyLowerTriangular(Wt) == Manifolds.strictlyLowerTriangular(W)
+    end
+    @testset "a strictly upper entry of 1e-9 is rejected for points and vectors alike" begin
+        W = [1.0 1.0e-9 0.0; 2.0 3.0 0.0; -1.0 0.5 2.0]
+        @test !is_point(M, W)
+        @test !is_vector(M, p2, W)
+    end
 
     M = CholeskySpace(3; parameter = :field)
     Manifolds.Test.test_manifold(

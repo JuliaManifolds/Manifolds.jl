@@ -1,10 +1,10 @@
-using ManifoldDiff, Manifolds, Random, StaticArrays, Test
+using ManifoldDiff, Manifolds, Random, StaticArrays, Test, ManifoldsBase
 
-Test.@testset "The circle manifold" begin
+@testset "The circle manifold" begin
     M = Circle()
     @test Manifolds.number_of_coordinates(M, DefaultOrthogonalBasis()) == 1
     p1 = π / 2
-    p2 = -π / 2
+    p2 = -π / 4
     X1 = 1.0
     X2 = -1.0
 
@@ -16,6 +16,7 @@ Test.@testset "The circle manifold" begin
         manifold_dimension => 1,
         representation_size => (),
         repr => "Circle(ℝ)",
+        is_flat => true,
         manifold_volume => 2π,
     )
     Manifolds.Test.test_manifold(
@@ -29,6 +30,8 @@ Test.@testset "The circle manifold" begin
                 manifold_dimension, manifold_volume, mid_point,
                 parallel_transport_direction, parallel_transport_to,
                 repr, representation_size,
+                vector_transport_to,
+                zero_vector,
             ],
             :Bases => [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(X1)],
             :Coordinates => [[π / 2], [-π / 2]],
@@ -52,12 +55,14 @@ Test.@testset "The circle manifold" begin
                 log,
                 manifold_dimension, manifold_volume, mid_point,
                 repr, representation_size,
+                vector_transport_to,
             ],
             :Bases => [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis([X1])],
             :Coordinates => [[π / 2], [-π / 2]],
             :InvalidPoints => fill.([q1]),
             :Points => fill.([p1, p2]),
             :Vectors => fill.([X1, X2]),
+            :SecondVector => fill(X2),
             :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()],
         ),
         expectations,
@@ -77,6 +82,7 @@ Test.@testset "The circle manifold" begin
         manifold_dimension => 1,
         representation_size => (),
         repr => "Circle(ℂ)",
+        is_flat => true,
         manifold_volume => 2π,
         get_embedding => Euclidean(; field = ℂ),
         :atols => Dict(parallel_transport_to => 1.0e-14),
@@ -102,6 +108,7 @@ Test.@testset "The circle manifold" begin
             :Mutating => false,
             :Points => [pc1, pc2],
             :Vectors => [Xc1, Xc2],
+            :SecondVector => 0.25,
         ),
         expectations
     )
@@ -125,12 +132,13 @@ Test.@testset "The circle manifold" begin
             :InvalidVectors => fill.([Yc1]),
             :Points => fill.([pc1, pc2]),
             :Vectors => fill.([Xc1, Xc2]),
+            :SecondVector => fill(0.25),
         ),
         expectations
     )
 
-    Test.@testset "Edge cases" begin
-        Test.@testset "Mean" begin
+    @testset "Edge cases" begin
+        @testset "Mean" begin
             M = Circle()
             @test mean(M, [-π / 2, 0.0, π]) ≈ -π / 2
             @test mean(M, [-π / 2, 0.0, π], [1.0, 1.0, 1.0]) == -π / 2
@@ -162,7 +170,7 @@ Test.@testset "The circle manifold" begin
             @test is_point(M, p)
         end
         @testset "small and large distance tests" begin
-            M = Circle(ℂ)
+            Mc = Circle(ℂ)
             p = -0.42681766710748265 + 0.9043377018818392im
             q = -0.42681766710748226 + 0.9043377018818393im
             @test isapprox(distance(Mc, p, q), 4.041272810440265e-16)
@@ -177,7 +185,7 @@ Test.@testset "The circle manifold" begin
             parallel_transport_to!(M, p, p, [4.0], p)
             @test p ≈ fill(4.0)
         end
-        Test.@testset "retract nonmutating defaults" begin
+        @testset "retract nonmutating defaults" begin
             M = Circle()
             p = π / 3
             X = 0.5
@@ -188,23 +196,23 @@ Test.@testset "The circle manifold" begin
             @test q2 ≈ exp(M, p, X)
             @test vector_transport_direction(M, p, X, d, ParallelTransport()) == parallel_transport_to(M, p, X, d)
         end
-        Test.@testset "ManifoldsDiff cases" begin
+        @testset "ManifoldsDiff cases" begin
             M = Circle()
             @test ManifoldDiff.adjoint_Jacobi_field(
                 M, 0.0, 1.0, 0.5, 2.0,
                 ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-            ) === 2.0
+            ) === 1.0
             @test ManifoldDiff.diagonalizing_projectors(M, 0.0, 2.0) == ((0.0, ManifoldDiff.ProjectorOntoVector(M, 0.0, SA[1.0])),)
             @test ManifoldDiff.jacobi_field(
                 M, 0.0, 1.0, 0.5, 2.0,
                 ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-            ) === 2.0
+            ) === 1.0
 
             # volume
             @test manifold_volume(M) ≈ 2 * π
             @test volume_density(M, 0.0, 2.0) == 1.0
         end
-        Test.@testset "Complex Circle log boundary case" begin
+        @testset "Complex Circle log boundary case" begin
             Mc = Circle(ℂ)
             X = log(Mc, 1.0 + 0.0im, -1.0 + 0.0im)
             @test isapprox(X, π * 1.0im)
@@ -213,10 +221,53 @@ Test.@testset "The circle manifold" begin
             X3 = fill(0.0)
             log!(Mc, X3, fill(0 + 1.0im), fill(0.0 - 1.0im))
             @test isapprox(X3[], X2[])
+            # nearly opposite points have a unique logarithm
+            q = exp((π - 1.0e-4) * im)
+            X4 = log(Mc, 1.0 + 0.0im, q)
+            @test isapprox(X4, (π - 1.0e-4) * im)
+            @test isapprox(Mc, q, exp(Mc, 1.0 + 0.0im, X4))
+            X5 = fill(0.0 + 0.0im)
+            log!(Mc, X5, fill(1.0 + 0.0im), fill(q))
+            @test isapprox(X5[], (π - 1.0e-4) * im)
         end
-        Test.@testset "inner special cases" begin
+        @testset "Complex circle midpoint across the branch cut" begin
+            Mc = Circle(ℂ)
+            p1 = exp(3.0im)
+            p2 = exp(-3.0im)
+            m = mid_point(Mc, p1, p2)
+            @test isapprox(m, -1.0 + 0.0im)
+            @test distance(Mc, p1, m) ≈ distance(Mc, p1, p2) / 2
+        end
+        @testset "Complex circle log for points just outside the circle" begin
+            Mc = Circle(ℂ)
+            p = (1 + 1.0e-8) + 0.0im
+            @test isapprox(log(Mc, p, -p), π * im)
+            @test isapprox(log(Mc, p, (1 + 1.0e-8) * cis(π - 1.0e-6)), (π - 1.0e-6) * im)
+            # a ComplexF32 point and the opposite ComplexF64 point
+            p = -0.69631594f0 - 0.71773547f0im
+            q = 0.6963159100438303 + 0.7177354341397896im
+            @test isapprox(abs(log(Mc, p, q)), π)
+            X = fill(0.0 + 0.0im)
+            log!(Mc, X, fill(p), fill(q))
+            @test isapprox(abs(X[]), π)
+            @test is_vector(Mc, p, X[])
+        end
+        @testset "inner special cases" begin
             @test inner(Circle(), fill(0.0), fill(1.0), fill(0.1)) == 0.1
             @test inner(Circle(ℂ), 0.0, 1.0im, -1.0im) == -1.0
+        end
+        @testset "Projection on the real circle and the torus" begin
+            M = Circle()
+            @test project(M, 4.0) ≈ 4.0 - 2π
+            @test project(M, 0.3, 1.2) == 1.2
+            q = fill(NaN)
+            project!(M, q, 4.0)
+            @test q[] ≈ 4.0 - 2π
+            Y = fill(NaN)
+            project!(M, Y, 0.3, 1.2)
+            @test Y[] == 1.2
+            T = Torus(3)
+            @test is_point(T, project(T, [4.0, 0.0, -7.0]))
         end
     end
 
@@ -248,5 +299,26 @@ Test.@testset "The circle manifold" begin
     @testset "allocate_on" begin
         @test ManifoldsBase.allocate_on(M) isa Array{Float64, 0}
         @test ManifoldsBase.allocate_on(Mc) isa Array{ComplexF64, 0}
+    end
+    @testset "antipodal points on the real circle" begin
+        for (p, q) in [(π / 2, -π / 2), (fill(π / 2), fill(-π / 2))]
+            @test distance(M, p, q) ≈ π
+            X = log(M, p, q)
+            @test norm(M, p, X) ≈ π
+            @test isapprox(M, exp(M, p, X), q)
+            m = mid_point(M, p, q)
+            @test distance(M, p, m) ≈ π / 2
+            @test distance(M, q, m) ≈ π / 2
+        end
+    end
+    @testset "logarithm on a power of complex circles" begin
+        N = PowerManifold(Circle(ℂ), 3)
+        p = [1.0 + 0.0im, 1.0im, -1.0 + 0.0im]
+        q = [exp(0.3im), exp(1.2im), exp(-2.5im)]
+        X = log(N, p, q)
+        @test is_vector(N, p, X)
+        @test isapprox(N, exp(N, p, X), q)
+        @test isapprox(N, p, inverse_retract(N, p, q), X)
+        @test isapprox(N, p, log(N, p, -p), [π * im, π, π * im])
     end
 end

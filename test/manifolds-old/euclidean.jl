@@ -189,6 +189,18 @@ using FiniteDifferences
         end
     end
 
+    @testset "Coordinates of the number valued Euclidean space" begin
+        B = DefaultOrthonormalBasis()
+        Bc = DefaultOrthonormalBasis(ℂ)
+        for param in [:type, :field]
+            M = Euclidean(; parameter = param)
+            @test get_coordinates(M, 0.3, 1.2, B) == 1.2
+            Mc = Euclidean(; field = ℂ, parameter = param)
+            @test get_coordinates(Mc, 0.3im, 1.2 + 2.0im, B) == [1.2, 2.0]
+            @test get_coordinates(Mc, 0.3im, 1.2 + 2.0im, Bc) == 1.2 + 2.0im
+        end
+    end
+
     @testset "hat/vee" begin
         E = Euclidean(3, 2)
         p = collect(reshape(1.0:6.0, (3, 2)))
@@ -237,11 +249,14 @@ using FiniteDifferences
         O2 = EmbeddedManifold(M, Euclidean(4, 4, 3))
         q2M = embed(O2, p)
         @test norm(q2T - q2M) == 0
+        @test norm(project(O2, q2M) - p) == 0
         # wrong size error checks
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(3, 3, 5))
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
         @test_throws DomainError project!(O, zeros(3, 3, 5), zeros(3, 3))
         @test_throws DomainError project!(O, zeros(4, 4), zeros(3, 3))
+        @test_throws "shorter than the Euclidean" project!(O, zeros(3, 3, 5), zeros(3, 3))
+        @test_throws "entry smaller than the Euclidean" project!(O, zeros(4, 4), zeros(3, 3))
     end
 
     @testset "Embedding Real into Complex" begin
@@ -298,6 +313,7 @@ using FiniteDifferences
         p = zeros(3)
         M = DefaultManifold()
         TpM = TangentSpace(M, p)
+        @test base_manifold(TpM) === M
         B = induced_basis(M, Manifolds.get_default_atlas(M), p, TangentSpaceType())
         MM = MetricManifold(M, EuclideanMetric())
         @test local_metric(MM, p, B) == Diagonal(ones(3))
@@ -363,6 +379,13 @@ using FiniteDifferences
         @test distance(M, 2.0, 4.0) == 2.0
     end
 
+    @testset "the distance on a complex space is a real number" begin
+        M = Euclidean(2; field = ℂ)
+        d = distance(M, [1.0 + 0im, 2.0 + 0im], [0.0im, 0.0im])
+        @test d isa Float64
+        @test d ≈ sqrt(5)
+    end
+
     @testset "errors" begin
         M = Euclidean(4)
         @test_throws DimensionMismatch distance(M, [1, 2, 3, 4], [1 2; 3 4])
@@ -378,7 +401,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
         @test ManifoldDiff.diagonalizing_projectors(M0, 0.0, 2.0) ==
             ((0.0, ManifoldDiff.IdentityProjector()),)
         @test ManifoldDiff.jacobi_field(
@@ -388,7 +411,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
     end
 
     @testset "Weingarten & Hessian" begin
@@ -418,6 +441,7 @@ using FiniteDifferences
         @test manifold_dimension(M0s) == 1
         @test project(M0s, 4.0) == 4.0
         @test project(M0s, 2.0, 4.0) == 4.0
+        @test zero_vector(M0s, 2.0) == 0.0
         @test retract(M0s, 2.0, 4.0) == 6.0
         @test retract(M0s, 2.0, 4.0, ExponentialRetraction()) == 6.0
 
@@ -428,7 +452,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
         @test ManifoldDiff.diagonalizing_projectors(M0s, 0.0, 2.0) ==
             ((0.0, ManifoldDiff.IdentityProjector()),)
         @test ManifoldDiff.jacobi_field(
@@ -438,7 +462,7 @@ using FiniteDifferences
             0.5,
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
-        ) === 2.0
+        ) === 1.0
     end
 
     @testset "Mixed array dimensions for exp and PT" begin

@@ -80,7 +80,8 @@ Check whether ``X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}`` is a tangent vector to
 i.e. `Y` has to be of same dimension as `q` and a ``X`` has to be a symmetric matrix with
 zero diagonal.
 
-The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
+The diagonal has to vanish up to `max(atol, 2 * rtol * norm(Y))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 Note that symmetric of ``X`` holds by construction an is not explicitly checked.
 """
 function check_vector(
@@ -88,11 +89,13 @@ function check_vector(
         q,
         Y::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
     X = q * Y' + Y * q'
     n = diag(X)
-    if !all(isapprox.(n, 0.0; atol = atol, kwargs...))
+    r = maximum(abs, n)
+    if !(r <= atol || r <= 2 * rtol * norm(Y))
         return DomainError(
             n,
             "The vector $(X) is not a tangent to a point on $(M) (represented py $(q) and $(Y), since its diagonal is nonzero.",
@@ -153,8 +156,28 @@ project(::Elliptope, ::Any...)
 
 function project!(::Elliptope, Z, q, Y)
     Y2 = (Y' - q' .* sum(q' .* Y', dims = 1))'
-    Z .= Y2 - q * lyap(q' * q, q' * Y2 - Y2' * q)
+    Z .= Y2 - q * lyap(q' * q, -(q' * Y2 - Y2' * q))
     return Z
+end
+
+@doc raw"""
+    rand(M::Elliptope; vector_at=nothing, σ::Real=1.0)
+    rand!(M::Elliptope, pX; vector_at=nothing, σ::Real=1.0)
+
+Project a matrix of independent normally distributed entries with standard deviation `σ`
+onto `M`, or onto the tangent space at `vector_at`.
+"""
+function Random.rand!(
+        rng::AbstractRNG, M::Elliptope, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX)))
+    )
+    A = σ .* randn(rng, eltype(pX), representation_size(M))
+    if vector_at === nothing
+        project!(M, pX, A)
+    else
+        project!(M, pX, vector_at, A)
+    end
+    return pX
 end
 
 @doc raw"""

@@ -24,6 +24,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
         @test embed(M, A, A) === A
         @test manifold_dimension(M) == 9
         @test Weingarten(M, A, A, A) == zero(A)
+        @test Weingarten!(M, similar(A), A, A, A) == zero(A)
 
         @test is_point(M, rand(M))
         @test is_point(M, rand(Random.MersenneTwister(), M))
