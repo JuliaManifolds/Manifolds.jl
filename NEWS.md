@@ -184,6 +184,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `rand` on a complex `GeneralizedStiefel` manifold returns a point or, with `vector_at`, a tangent vector.
 * `diff_canonical_project` and `diff_canonical_project!` on the `Grassmann` manifold compute the differential of the canonical projection from Stiefel points onto projectors.
 * `vector_transport_to` on the `GeneralizedGrassmann` manifold uses `ProjectionTransport` by default.
+* `vector_transport_to` with `ProjectionTransport` on a complex `Tucker` manifold returns the projection onto the tangent space at the target point.
 
 ## [0.11.32] 2026-09-30
 

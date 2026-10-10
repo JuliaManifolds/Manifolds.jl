@@ -416,10 +416,12 @@ p = (C_p, U_p^1, …, U_p^D), \qquad X = (C_X, U_X^1, …, U_X^D) ∈ T_p M, \qq
 This means that
 ````math 
     X = C_X ×_{j = 1, …, D} U_p^j + \sum_{k = 1}^D C_p ×_{j ≠ k} U_p^j ×_k U_X^k
-```` 
+````
 as an embedded vector.
+For complex tensors, every transpose ``(⋅)^T`` below is the Hermitian adjoint ``(⋅)^{\mathrm{H}}``,
+see [Hackbusch:2019](@cite), Lemma 17.8.
 Let
-````math 
+````math
 C_Y = X ×_{j} (U_q^j)^T =  C_X ×_{j = 1, …, D} U_p^j (U_q^j)^T + \sum_{k = 1}^D C_p ×_{j ≠ k} U_p^j (U_q^j)^T ×_k U_X^k(U_q^k)^T
 ```` 
 and
@@ -454,16 +456,16 @@ function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T, D}, p
     Ui = [Matrix{T}(undef, dims[i], ranks[i]) for i in 1:D]
     Vi = [Matrix{T}(undef, dims[i], ranks[i]) for i in 1:D]
 
-    # compute p.hosvd.U[i] * q.hosvd.U[i] and store as intermediate result
+    # compute transpose(q.hosvd.U[i]' * p.hosvd.U[i]) and store as intermediate result
     pUi_qUi = [Matrix{T}(undef, r, r) for r in ranks]
     for i in 1:D
-        pUi_qUi[i] .= p.hosvd.U[i]' * q.hosvd.U[i]
+        pUi_qUi[i] .= conj.(p.hosvd.U[i]' * q.hosvd.U[i])
     end
 
-    # compute X.U̇[i] * q.hosvd.U[i] and store as intermediate result
+    # compute transpose(q.hosvd.U[i]' * X.U̇[i]) and store as intermediate result
     XUi_qUi = [Matrix{T}(undef, r, r) for r in ranks]
     for i in 1:D
-        XUi_qUi[i] .= X.U̇[i]' * q.hosvd.U[i]
+        XUi_qUi[i] .= conj.(X.U̇[i]' * q.hosvd.U[i])
     end
 
     # compute Y.U[i]
@@ -1038,9 +1040,9 @@ and
 `` 
 \mathrm{factors} = (F_1, F_2, \ldots, F_D)\, .
 ``
-This function computes 
+This function computes
 ```math
-[\mathrm{core} ×_{j ≠ i} F_j ×_i U_i (I - U_q^i (U_q^i)^T)]_{(i)} \cdot (C_q)_{(i)}^T \cdot Σ^{-1}\, .
+[\mathrm{core} ×_{j ≠ i} F_j ×_i U_i (I - U_q^i (U_q^i)^{\mathrm{H}})]_{(i)} \cdot (C_q)_{(i)}^{\mathrm{H}} \cdot Σ^{-1}\, .
 ```
 If `add_to_result == true`, the result is added to the matrix `result`, otherwise, `result` is overwritten.
 Note that `buffer` is a 5-tuple of arrays that are used only to store intermediate results of the computation.
@@ -1064,7 +1066,7 @@ function compute_projection_summand!(
     _contract_core_with_ginv!(E, T1, q.hosvd.core, Σ⁻¹, Val(i))
     mul!(U, Uᵢ, E)
     V .= U
-    @tullio V[n, r] += (-1) * U[j, r] * q.hosvd.U[$i][j, k] * q.hosvd.U[$i][n, k]
+    @tullio V[n, r] += (-1) * U[j, r] * conj(q.hosvd.U[$i][j, k]) * q.hosvd.U[$i][n, k]
     if add_to_result
         result .+= V
     else
@@ -1143,17 +1145,17 @@ for d in 2:16
         R = [Symbol(:n, i) for i in 1:d]
         R[J] = :r
         """
-        Computes the in-place contraction of `core1` with the Moore-Penrose inverse of core2, which is given by 
-        `core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D] * Σ⁻¹[r]` because `core2` is all-orthogonal.
+        Computes the in-place contraction of `core1` with the Moore-Penrose inverse of core2, which is given by
+        `conj(core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D]) * Σ⁻¹[r]` because `core2` is all-orthogonal.
         Altogether, the computed contraction is
         ``
-            result[n, r] = core1[n_1, …, n_{k-1}, n, n_{k_1}, n_D] * core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D] * Σ⁻¹[r]
+            result[n, r] = core1[n_1, …, n_{k-1}, n, n_{k_1}, n_D] * conj(core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D]) * Σ⁻¹[r]
         ``
-        For D=3, J=1 e.g. result[n, r] = core1[n, n_2, n_3] * core2[r, n_2, n_3] * Σ⁻¹[r]
+        For D=3, J=1 e.g. result[n, r] = core1[n, n_2, n_3] * conj(core2[r, n_2, n_3]) * Σ⁻¹[r]
         """
         ex = quote
             function _contract_core_with_ginv!(result::Matrix{T}, core1::Array{T, $(d)}, core2::Array{T, $(d)}, Σ⁻¹::Vector{T}, ::Val{$J}) where {T}
-                return @tullio result[n, r] = core1[$(N...)] * core2[$(R...)] * Σ⁻¹[r]
+                return @tullio result[n, r] = core1[$(N...)] * conj(core2[$(R...)]) * Σ⁻¹[r]
             end
         end
         eval(ex)
