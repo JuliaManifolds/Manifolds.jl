@@ -30,10 +30,13 @@ The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
 
 # Constructor
-    GeneralizedStiefel(n, k, B=I_n, F=ℝ)
+    GeneralizedStiefel(n, k, B=I_n, F=ℝ; parameter::Symbol=:type)
 
 Generate the (real-valued) Generalized Stiefel manifold of ``n×k`` dimensional
 orthonormal matrices with scalar product `B`.
+
+`parameter`: whether a type parameter should be used to store `n` and `k`. By default size
+is stored in type. Value can either be `:field` or `:type`.
 """
 struct GeneralizedStiefel{𝔽, T, TB <: AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
     size::T
@@ -219,7 +222,7 @@ rand(::GeneralizedStiefel; σ::Real = 1.0)
 
 function Random.rand!(
         rng::AbstractRNG,
-        M::GeneralizedStiefel{ℝ},
+        M::GeneralizedStiefel,
         pX;
         vector_at = nothing,
         σ::Real = one(real(eltype(pX))),

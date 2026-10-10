@@ -232,6 +232,24 @@ end
 function get_coordinates_orthonormal(::Euclidean{ℂ}, p, X, ::ComplexNumbers)
     return vec(X)
 end
+function get_coordinates_orthonormal(
+        ::Union{Euclidean{ℝ, TypeParameter{Tuple{}}}, Euclidean{ℝ, Tuple{}}},
+        p, X::Number, ::RealNumbers,
+    )
+    return X
+end
+function get_coordinates_orthonormal(
+        ::Union{Euclidean{ℂ, TypeParameter{Tuple{}}}, Euclidean{ℂ, Tuple{}}},
+        p, X::Number, ::RealNumbers,
+    )
+    return @SVector [real(X), imag(X)]
+end
+function get_coordinates_orthonormal(
+        ::Union{Euclidean{ℂ, TypeParameter{Tuple{}}}, Euclidean{ℂ, Tuple{}}},
+        p, X::Number, ::ComplexNumbers,
+    )
+    return X
+end
 
 function get_coordinates_orthonormal!(::Euclidean{ℝ}, c, p, X, ::RealNumbers)
     copyto!(c, vec(X))
@@ -665,12 +683,12 @@ function project!(
     lm = length(m)
     (length(n) < length(m)) && throw(
         DomainError(
-            "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
+            "Invalid projection, since the embedding dimension ($(n)) is shorter than the Euclidean dimension $(m).",
         ),
     )
     any(n[1:lm] .< m) && throw(
         DomainError(
-            "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
+            "Invalid projection, since the embedding dimension ($(n)) has an entry smaller than the Euclidean dimensions ($(m)).",
         ),
     )
     #  fill q with the „top left edge“ of p.

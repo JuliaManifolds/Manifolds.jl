@@ -209,7 +209,8 @@ end
 function allocate_result_embedding(M::FixedRankMatrices, ::typeof(project), X, p, vals...)
     m, n, k = get_parameter(M.size)
     # vals are p and X, so we can use their fields to set up those of the UMVTangentVector
-    return UMVTangentVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))
+    T = number_eltype(p)
+    return UMVTangentVector(allocate(p.U, T, m, k), allocate(p.S, T, k, k), allocate(p.Vt, T, k, n))
 end
 
 Base.copy(p::SVDMPoint) = SVDMPoint(copy(p.U), copy(p.S), copy(p.Vt))
@@ -353,7 +354,7 @@ function check_vector(
         M::FixedRankMatrices,
         p::SVDMPoint,
         X::UMVTangentVector;
-        atol::Real = sqrt(prod(representation_size(M)) * eps(float(eltype(p.U)))),
+        atol::Real = sqrt(prod(representation_size(M)) * eps(real(float(eltype(p.U))))),
         kwargs...,
     )
     m, n, k = get_parameter(M.size)
@@ -438,7 +439,7 @@ U_pMV_p^{\mathrm{H}} + U_XV_p^{\mathrm{H}} + U_pV_X^{\mathrm{H}}
 """
 function embed(M::FixedRankMatrices, p::SVDMPoint, X::UMVTangentVector)
     m, n, k = get_parameter(M.size)
-    Y = Matrix{eltype(p)}(undef, m, n)
+    Y = Matrix{number_eltype(p)}(undef, m, n)
     return embed!(M, Y, p, X)
 end
 
@@ -580,54 +581,51 @@ function project!(::FixedRankMatrices, Y::UMVTangentVector, p::SVDMPoint, A::Abs
 end
 
 @doc raw"""
-    Random.rand(M::FixedRankMatrices; vector_at=nothing, kwargs...)
+    Random.rand(M::FixedRankMatrices; vector_at=nothing, σ=1.0, kwargs...)
 
 If `vector_at` is `nothing`, return a random point on the [`FixedRankMatrices`](@ref)
 manifold. The orthogonal matrices are sampled from the [`Stiefel`](@ref) manifold
-and the singular values are sampled uniformly at random.
+and the singular values are sampled uniformly at random from `[0, σ)`.
 
 If `vector_at` is not `nothing`, generate a random tangent vector in the tangent space of
-the point `vector_at` on the `FixedRankMatrices` manifold `M`.
+the point `vector_at` on the `FixedRankMatrices` manifold `M`, whose factors are normally
+distributed with standard deviation `σ`.
 """
 function Random.rand(M::FixedRankMatrices; vector_at = nothing, kwargs...)
     return rand(Random.default_rng(), M; vector_at = vector_at, kwargs...)
 end
-function Random.rand(rng::AbstractRNG, M::FixedRankMatrices; vector_at = nothing, kwargs...)
+function Random.rand(
+        rng::AbstractRNG, M::FixedRankMatrices{𝔽}; vector_at = nothing, kwargs...
+    ) where {𝔽}
     m, n, k = get_parameter(M.size)
+    T = 𝔽 === ℝ ? Float64 : ComplexF64
     if vector_at === nothing
-        p = SVDMPoint(
-            Matrix{Float64}(undef, m, k),
-            Vector{Float64}(undef, k),
-            Matrix{Float64}(undef, k, n),
-        )
+        p = SVDMPoint(Matrix{T}(undef, m, k), Vector{real(T)}(undef, k), Matrix{T}(undef, k, n))
         return rand!(rng, M, p; kwargs...)
     else
         X = UMVTangentVector(
-            Matrix{Float64}(undef, m, k),
-            Matrix{Float64}(undef, k, k),
-            Matrix{Float64}(undef, k, n),
+            Matrix{T}(undef, m, k),
+            Matrix{T}(undef, k, k),
+            Matrix{T}(undef, k, n),
         )
         return rand!(rng, M, X; vector_at, kwargs...)
     end
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::FixedRankMatrices,
-        pX;
-        vector_at = nothing,
-        kwargs...,
-    )
+        rng::AbstractRNG, M::FixedRankMatrices{𝔽}, pX;
+        vector_at = nothing, σ::Real = one(real(number_eltype(pX))), kwargs...
+    ) where {𝔽}
     m, n, k = get_parameter(M.size)
     if vector_at === nothing
-        U = rand(rng, Stiefel(m, k); kwargs...)
-        S = sort(rand(rng, k); rev = true)
-        V = rand(rng, Stiefel(n, k); kwargs...)
+        U = rand(rng, Stiefel(m, k, 𝔽); kwargs...)
+        S = sort(σ * rand(rng, k); rev = true)
+        V = rand(rng, Stiefel(n, k, 𝔽); kwargs...)
         copyto!(pX, SVDMPoint(U, S, V'))
     else
-        Up = randn(rng, m, k)
-        Vp = randn(rng, n, k)
-        A = randn(rng, k, k)
+        Up = σ * randn(rng, number_eltype(pX), m, k)
+        Vp = σ * randn(rng, number_eltype(pX), n, k)
+        A = σ * randn(rng, number_eltype(pX), k, k)
         copyto!(
             pX,
             UMVTangentVector(
@@ -840,11 +838,8 @@ structure are zero matrices.
 """
 function zero_vector(M::FixedRankMatrices, p::SVDMPoint)
     m, n, k = get_parameter(M.size)
-    v = UMVTangentVector(
-        zeros(eltype(p.U), m, k),
-        zeros(eltype(p.S), k, k),
-        zeros(eltype(p.Vt), k, n),
-    )
+    T = number_eltype(p)
+    v = UMVTangentVector(zeros(T, m, k), zeros(T, k, k), zeros(T, k, n))
     return v
 end
 

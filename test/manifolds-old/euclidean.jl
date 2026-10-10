@@ -189,6 +189,18 @@ using FiniteDifferences
         end
     end
 
+    @testset "Coordinates of the number valued Euclidean space" begin
+        B = DefaultOrthonormalBasis()
+        Bc = DefaultOrthonormalBasis(ℂ)
+        for param in [:type, :field]
+            M = Euclidean(; parameter = param)
+            @test get_coordinates(M, 0.3, 1.2, B) == 1.2
+            Mc = Euclidean(; field = ℂ, parameter = param)
+            @test get_coordinates(Mc, 0.3im, 1.2 + 2.0im, B) == [1.2, 2.0]
+            @test get_coordinates(Mc, 0.3im, 1.2 + 2.0im, Bc) == 1.2 + 2.0im
+        end
+    end
+
     @testset "hat/vee" begin
         E = Euclidean(3, 2)
         p = collect(reshape(1.0:6.0, (3, 2)))
@@ -243,6 +255,8 @@ using FiniteDifferences
         @test_throws DomainError embed!(O, zeros(3, 3), zeros(4, 4))
         @test_throws DomainError project!(O, zeros(3, 3, 5), zeros(3, 3))
         @test_throws DomainError project!(O, zeros(4, 4), zeros(3, 3))
+        @test_throws "shorter than the Euclidean" project!(O, zeros(3, 3, 5), zeros(3, 3))
+        @test_throws "entry smaller than the Euclidean" project!(O, zeros(4, 4), zeros(3, 3))
     end
 
     @testset "Embedding Real into Complex" begin

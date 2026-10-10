@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `CenteredMatrices` provide `get_coordinates` and `get_vector` in their default orthonormal basis, for real and complex matrices.
 * `@tfvector_inner_via_get_vector` and `@tfvector_norm_via_get_vector` macros that define `inner` and `norm` of `TFVector`s on a metric manifold with a closed-form `inner` or `norm` by converting them with `get_vector`.
 * Chart-based `gaussian_curvature`, equal to half of `ricci_curvature`.
+* `distance` and `inner` on the `Grassmann` manifold for `ProjectorPoint`s and `ProjectorTangentVector`s.
 
 ### Changed
 
@@ -175,6 +176,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The plotting recipe of `Sphere(2)` draws the solid surface with the resolution `surface_resolution` also when it differs from `wires`.
 * `inverse_retract` with `NLSolveInverseRetraction` now correctly applies tangent space projections.
 * `rand` on the `EssentialManifold` draws tangent vectors in the horizontal space, so that they have no part along the equivalence class.
+* `get_coordinates` on the number-valued `Euclidean` space accepts a tangent vector given as a number, for real and for complex coefficients.
+* `rand` on a complex `FixedRankMatrices` manifold returns complex points and tangent vectors, and its keyword `σ` scales the singular values of a point and the factors of a tangent vector.
+* `project`, `embed`, `zero_vector` and `is_vector` on a complex `FixedRankMatrices` manifold work with complex tangent vectors.
+* `retract` on a `Flag` without a retraction method uses the QR retraction for points in the orthogonal representation.
+* `rand` on a complex `GeneralizedGrassmann` manifold returns a point, and `project` onto it returns a point also when the weight matrix is the identity.
+* `rand` on a complex `GeneralizedStiefel` manifold returns a point or, with `vector_at`, a tangent vector.
+* `diff_canonical_project` and `diff_canonical_project!` on the `Grassmann` manifold compute the differential of the canonical projection from Stiefel points onto projectors.
+* `vector_transport_to` on the `GeneralizedGrassmann` manifold uses `ProjectionTransport` by default.
 
 ## [0.11.32] 2026-09-30
 

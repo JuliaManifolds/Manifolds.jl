@@ -97,7 +97,7 @@ get_iterator(M::EdgeGraphManifold) = 1:ne(M.graph)
 get_iterator(M::VertexGraphManifold) = 1:nv(M.graph)
 
 @doc raw"""
-    incident_log(M::GraphManifold, x)
+    incident_log(M::GraphManifold{𝔽,G,TM,VertexManifold}, p)
 
 Return the tangent vector on the (vertex) [`GraphManifold`](@ref), where at
 each node the sum of the [`log`](@extref `Base.log-Tuple{AbstractManifold, Any, Any}`)s to incident nodes is computed.

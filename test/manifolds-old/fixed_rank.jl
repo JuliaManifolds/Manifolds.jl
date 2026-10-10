@@ -305,6 +305,16 @@ include("../header.jl")
         @test Y3.M ≈ [0.0 3.0; 0.0 4.0]
         @test Y3.Vt ≈ [0.0 0.0 1.5; 0.0 0.0 1.0]
     end
+    @testset "random points and tangent vectors" begin
+        pc = rand(MersenneTwister(42), Mc)
+        @test number_eltype(pc) === ComplexF64
+        @test is_point(Mc, pc)
+        @test number_eltype(rand(MersenneTwister(43), Mc; vector_at = pc)) === ComplexF64
+        X1 = rand(MersenneTwister(43), M; vector_at = p)
+        X2 = rand(MersenneTwister(43), M; vector_at = p, σ = 2.0)
+        @test isapprox(M, p, 2 * X1, X2)
+        @test rand(MersenneTwister(44), M; σ = 3.0).S == 3 * rand(MersenneTwister(44), M).S
+    end
     @testset "field parameter" begin
         M = FixedRankMatrices(3, 2, 2; parameter = :field)
         @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ; parameter=:field)"
@@ -328,5 +338,19 @@ include("../header.jl")
         q2 = retract(M2, p2, X2, OrthographicRetraction())
         @test isapprox(embed(M2, q2), [2.0 -1.0 1.0; 0.0 -1.0 0.0; 1.0 0.0 0.5; 0.0 -1.0 0.0])
         @test isapprox(M2, p2, inverse_retract(M2, p2, q2, OrthographicInverseRetraction()), X2)
+    end
+    @testset "complex tangent vectors" begin
+        M4c = FixedRankMatrices(4, 3, 2, ℂ)
+        p4c = SVDMPoint(
+            [1.0im 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0], [2.0, 1.0], [1.0 0.0 0.0; 0.0 1.0im 0.0]
+        )
+        X4c = UMVTangentVector(
+            [0.0 0.0; 0.0 0.0; 1.0 0.0; 0.0 im], [1.0 2im; 3.0 4.0], [0.0 0.0 im; 0.0 0.0 2.0]
+        )
+        Y4c = [1.0im -2.0im -1.0; 3.0 4.0im 2.0; 1.0 0.0 0.0; 0.0 -1.0 0.0]
+        @test eltype(zero_vector(M4c, p4c).M) === ComplexF64
+        @test embed(M4c, p4c, X4c) ≈ Y4c
+        @test is_vector(M4c, p4c, X4c)
+        @test isapprox(M4c, p4c, project(M4c, p4c, Y4c), X4c)
     end
 end

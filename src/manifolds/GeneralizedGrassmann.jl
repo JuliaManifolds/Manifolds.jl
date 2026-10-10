@@ -318,7 +318,7 @@ project(::GeneralizedGrassmann, ::Any)
 
 function project!(M::GeneralizedGrassmann, q, p)
     s = svd(p)
-    e = eigen(s.U' * M.B * s.U)
+    e = eigen(Hermitian(s.U' * M.B * s.U))
     qsinv = e.vectors ./ sqrt.(transpose(e.values))
     q .= s.U * qsinv * e.vectors' * s.V'
     return q
@@ -362,7 +362,7 @@ rand(::GeneralizedGrassmann; σ::Real = 1.0)
 
 function Random.rand!(
         rng::AbstractRNG,
-        M::GeneralizedGrassmann{ℝ},
+        M::GeneralizedGrassmann,
         pX;
         vector_at = nothing,
         σ::Real = one(real(eltype(pX))),
@@ -413,6 +413,14 @@ function ManifoldsBase.retract_project_fused!(M::GeneralizedGrassmann, q, p, X, 
     project!(M, q, q)
     return q
 end
+
+"""
+    default_vector_transport_method(M::GeneralizedGrassmann)
+
+Return the [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`)
+as the default vector transport method for the [`GeneralizedGrassmann`](@ref) manifold.
+"""
+default_vector_transport_method(::GeneralizedGrassmann) = ProjectionTransport()
 
 function Base.show(
         io::IO,

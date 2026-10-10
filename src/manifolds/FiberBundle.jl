@@ -18,9 +18,10 @@ and the space corresponding to the fiber.
 # Constructor
 
     FiberBundleProductVectorTransport(
-        M::AbstractManifold=DefaultManifold();
+        M::AbstractManifold=DefaultManifold(),
+        fiber::FiberType=TangentSpaceType();
         vector_transport_method_horizontal::AbstractVectorTransportMethod = default_vector_transport_method(M),
-        vector_transport_method_vertical::AbstractVectorTransportMethod = default_vector_transport_method(M),
+        vector_transport_method_vertical::AbstractVectorTransportMethod = fiber_bundle_transport(M, fiber),
     )
 
 Construct the `FiberBundleProductVectorTransport` using the [`default_vector_transport_method`](@ref),
@@ -68,7 +69,7 @@ Examples include vector bundles, principal bundles or unit tangent bundles, see 
 
 # Constructor
 
-    FiberBundle(M::AbstractManifold, type::FiberType)
+    FiberBundle(fiber::FiberType, M::AbstractManifold)
 """
 struct FiberBundle{
         𝔽,

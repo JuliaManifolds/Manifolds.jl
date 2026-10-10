@@ -334,6 +334,10 @@ end
         Y2 = ProjectorTangentVector(similar(X.value))
         Manifolds.diff_canonical_project!(M, Y2, pS.value, Xs.value)
         @test Y2.value == Yc
+        Xh = StiefelTangentVector([0.0 0.0; 0.0 0.0; 0.3 -0.2])
+        Y3 = diff_canonical_project(M, pS, Xh)
+        @test Y3 isa ProjectorTangentVector
+        @test Y3.value == Xh.value * pS.value' + pS.value * Xh.value'
 
         @test horizontal_lift(Stiefel(3, 2), pS.value, X) == X.value[:, 1:2]
 
@@ -347,6 +351,22 @@ end
         Yc2 = edppd * X.value / edppd
         Xp = parallel_transport_direction(M, p, X, d)
         @test Xp.value == Yc2
+    end
+
+    @testset "Projector representation agrees with the Stiefel one" begin
+        M = Grassmann(4, 2)
+        p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+        q = [1 / sqrt(2) 0.0; 0.0 1.0; 1 / sqrt(2) 0.0; 0.0 0.0]
+        X = [0.0 0.0; 0.0 0.0; 0.3 0.0; 0.0 -0.2]
+        Y = [0.0 0.0; 0.0 0.0; 0.1 0.4; 0.5 0.0]
+        P = convert(ProjectorPoint, p)
+        Q = convert(ProjectorPoint, q)
+        XP = ProjectorTangentVector(X * p' + p * X')
+        YP = ProjectorTangentVector(Y * p' + p * Y')
+        @test distance(M, P, Q) ≈ distance(M, p, q)
+        @test distance(M, Q, Q) ≈ 0 atol = sqrt(eps())
+        @test inner(M, P, XP, YP) ≈ inner(M, p, X, Y)
+        @test norm(M, P, XP) ≈ norm(M, p, X)
     end
 
     @testset "is_point & convert & show" begin

@@ -143,6 +143,8 @@ end
         retract!(M, e, p, X)
         @test e == exp(M, p, X)
         @test vector_transport_to(M, p, X, q, ProjectionTransport()) == project(M, q, X)
+        @test default_vector_transport_method(M) === ProjectionTransport()
+        @test vector_transport_to(M, p, X, q) == project(M, q, X)
         @testset "Type $T" for T in types
             pts = convert.(T, [p, q, r])
             @test !is_point(M, 2 * p)
@@ -184,6 +186,16 @@ end
             x = [1im 0.0; 0.0 0.5im; 0.0 0.0]
             @test is_point(M, x)
             @test !is_point(M, 2 * x)
+        end
+        @testset "rand and project" begin
+            F = ComplexF64[1.0 2.0im; 3.0 4.0; 5.0im 6.0]
+            @testset for N in (M, GeneralizedGrassmann(3, 2, Matrix{ComplexF64}(I, 3, 3), ℂ))
+                p = rand(MersenneTwister(42), N)
+                @test eltype(p) == ComplexF64
+                @test is_point(N, p)
+                @test is_vector(N, p, rand(MersenneTwister(43), N; vector_at = p))
+                @test is_point(N, project(N, F))
+            end
         end
     end
 

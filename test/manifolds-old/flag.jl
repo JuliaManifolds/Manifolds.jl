@@ -288,6 +288,9 @@ using Random
 
         @test retract(M, p1_ortho, X1_ortho, QRRetraction()).value ≈
             retract(OrthogonalMatrices(5), p1_ortho.value, X1_ortho.value, QRRetraction())
+        @test default_retraction_method(M, typeof(p1_ortho)) === QRRetraction()
+        @test retract(M, p1_ortho, X1_ortho).value ≈
+            retract(M, p1_ortho, X1_ortho, QRRetraction()).value
 
         @testset "field parameters" begin
             M = Flag(5, 1, 2; parameter = :field)

@@ -47,6 +47,14 @@ function check_vector(
     return nothing
 end
 
+"""
+    default_retraction_method(M::Flag, ::Type{<:OrthogonalPoint})
+
+Return [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`)
+as the default retraction for the [`Flag`](@ref) manifold in the orthogonal matrix representation.
+"""
+default_retraction_method(::Flag, ::Type{<:OrthogonalPoint}) = QRRetraction()
+
 embed(::Flag, p::OrthogonalPoint) = p.value
 embed!(::Flag, q, p::OrthogonalPoint) = copyto!(q, p.value)
 embed(::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector) = X.value

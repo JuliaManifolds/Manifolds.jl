@@ -138,6 +138,10 @@ include("../header.jl")
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8
             @test !is_flat(M)
+            p = rand(MersenneTwister(42), M)
+            @test eltype(p) == ComplexF64
+            @test is_point(M, p)
+            @test is_vector(M, p, rand(MersenneTwister(43), M; vector_at = p))
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             x = [1im 0.0; 0.0 0.5im; 0.0 0.0]
