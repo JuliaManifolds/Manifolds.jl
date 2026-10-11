@@ -315,6 +315,22 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
     end
 end
 
+for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
+    @eval function Random.rand!(
+            rng::AbstractRNG, M::Hyperbolic, pX::Union{$P, $T};
+            vector_at = nothing, σ::Real = one(eltype(pX.value)) / sqrt(manifold_dimension(M)),
+        )
+        if vector_at === nothing
+            pX.value .= convert($P, rand(rng, M; σ = σ)).value
+        else
+            p = convert(AbstractVector, vector_at)
+            pX.value .= convert($T, p, rand(rng, M; vector_at = p, σ = σ)).value
+        end
+        return pX
+    end
+    @eval allocate_result_type(::Hyperbolic, ::typeof(rand), ::Tuple{$P}) = $T
+end
+
 @doc raw"""
     manifold_dimension(M::Hyperbolic)
 
@@ -407,7 +423,10 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
         return Y
     end
     @eval zero_vector(::Hyperbolic, p::$P) = $T(zero(p.value))
-    @eval zero_vector!(::Hyperbolic, X::$T, ::$P) = fill!(X.value, 0)
+    @eval function zero_vector!(::Hyperbolic, X::$T, ::$P)
+        fill!(X.value, 0)
+        return X
+    end
 end
 
 @doc raw"""

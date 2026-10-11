@@ -72,7 +72,7 @@ function check_vector(M::MultinomialSymmetric, p, X; kwargs...)
     n = get_parameter(M.size)[1]
     s = check_vector(SymmetricMatrices(n, ℝ), p, X; kwargs...)
     !isnothing(s) && return s
-    s2 = check_vector(MultinomialMatrices(n, n), p, X)
+    s2 = check_vector(MultinomialMatrices(n, n), p, X; kwargs...)
     return s2
 end
 

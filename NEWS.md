@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Chart-based `gaussian_curvature`, equal to half of `ricci_curvature`.
 * `distance` and `inner` on the `Grassmann` manifold for `ProjectorPoint`s and `ProjectorTangentVector`s.
 * `PolarInverseRetraction` on the `GeneralizedGrassmann` manifold.
+* `project` on the `HamiltonianMatrices`, for points and for tangent vectors.
+* `is_flat` for the `Lorentz` manifold with the `MinkowskiMetric`.
 
 ### Changed
 
@@ -187,6 +189,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `vector_transport_to` on the `GeneralizedGrassmann` manifold uses `ProjectionTransport` by default.
 * `vector_transport_to` with `ProjectionTransport` on a complex `Tucker` manifold returns the projection onto the tangent space at the target point.
 * Two generalized Stiefel, generalized Grassmann or graph manifolds, and two generalized Bures–Wasserstein metrics, with equal contents compare equal and hash alike.
+* `rand` with `vector_at` on `Stiefel`, `GeneralizedStiefel`, `Grassmann` and `GeneralizedGrassmann` scales the random tangent vector by `σ`, as documented.
+* `retract` with `QRRetraction` on `Grassmann` multiplies each column by the sign of its own diagonal entry of the triangular factor, as documented.
+* `check_point` and `check_vector` on `HeisenbergMatrices` use the tolerances passed to them and report the size of the deviation they found.
+* `distance` on the hyperboloid model of the `Hyperbolic` space keeps the number type of its points, so that single precision points give a single precision distance.
+* `rand` and `rand!` on the `Hyperbolic` space accept points and tangent vectors of the hyperboloid, the Poincaré ball and the Poincaré half space types.
+* `project!` on all three models of `Hyperbolic` and `zero_vector!` on the Poincaré ball and half space return the tangent vector they fill.
+* Two `Hyperrectangle`s with equal bounds compare equal and hash alike.
+* `get_coordinates`, `get_vector` and `get_basis` on the complex `InvertibleMatrices` work for real and for complex coefficients, in the basis of the embedding.
+* `rand` on `KendallsPreShapeSpace` and `KendallsShapeSpace` draws in the number type of the array it fills, so that random points in `BigFloat` pass `is_point`.
+* `rand` on the `Hyperbolic` space draws tangent vectors whose coordinates in an orthonormal basis are independent normal with standard deviation `σ` at every base point.
+* `check_vector` and `is_vector` on `MultinomialSymmetric` apply a given `atol` and `rtol` also to the row sums.
 
 ## [0.11.32] 2026-09-30
 

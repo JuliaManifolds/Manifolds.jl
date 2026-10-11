@@ -7,6 +7,24 @@ include("../header.jl")
     @test !is_vector(M, p, [1.0, 0.0, 0.0])
 end
 
+@testset "random tangent vectors of the hyperbolic space far from the apex" begin
+    M = Hyperbolic(2)
+    p = [0.6 * sinh(3.0), 0.8 * sinh(3.0), cosh(3.0)]
+    X = rand(MersenneTwister(42), M; vector_at = p, σ = 0.5)
+    @test is_vector(M, p, X)
+    @test norm(M, p, X) ≈ 0.5 * norm(randn(MersenneTwister(42), 3)[1:2])
+    @test rand(MersenneTwister(42), M; vector_at = SVector{3}(p), σ = 0.5) ≈ X
+end
+
+@testset "distance of single precision points on the hyperboloid" begin
+    M = Hyperbolic(2)
+    p = Manifolds._hyperbolize(M, Float32[0.3, 0.4])
+    q = Manifolds._hyperbolize(M, Float32[-0.2, 0.1])
+    @test distance(M, p, q) isa Float32
+    @test distance(M, HyperboloidPoint(p), HyperboloidPoint(q)) isa Float32
+    @test distance(M, p, q) ≈ distance(M, Float64.(p), Float64.(q))
+end
+
 @testset "Hyperbolic Space" begin
     M = Hyperbolic(2)
     @testset "Hyperbolic Basics" begin
@@ -67,6 +85,7 @@ end
             @test XC == X # does copyto store the right value?
             @test XC.value == X.value # another check
             @test zero_vector(M, p) isa T
+            @test zero_vector!(M, XC, p) === XC
         end
     end
     @testset "Hyperbolic Representation Conversion I" begin
@@ -218,8 +237,8 @@ end
                 test_tangent_vector_broadcasting = is_plain_array,
                 test_vector_spaces = is_plain_array,
                 test_inplace = true,
-                test_rand_point = is_plain_array,
-                test_rand_tvector = is_plain_array,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
         end
     end
@@ -331,7 +350,7 @@ end
         p = PoincareBallPoint([0.5, 0.0])
         X = PoincareBallTangentVector([0.2, 0.2])
         Y = PoincareBallTangentVector(allocate(X.value))
-        project!(M, Y, p, X)
+        @test project!(M, Y, p, X) === Y
         @test Y == X
         Z = project(M, p, X)
         @test isa(Z, PoincareBallTangentVector)
@@ -339,11 +358,14 @@ end
         p2 = PoincareHalfSpacePoint([1.1, 1.1])
         X2 = PoincareHalfSpaceTangentVector([0.2, 0.2])
         Y2 = PoincareHalfSpaceTangentVector(allocate(X2.value))
-        project!(M, Y2, p2, X2)
+        @test project!(M, Y2, p2, X2) === Y2
         @test Y2 == X2
         Z2 = project(M, p2, X2)
         @test isa(Z2, PoincareHalfSpaceTangentVector)
         @test Z2 == X2
+        pH = HyperboloidPoint([1.0, 0.0, sqrt(2.0)])
+        YH = HyperboloidTangentVector(zeros(3))
+        @test project!(M, YH, pH, [0.0, 1.0, 0.0]) === YH
     end
     @testset "Metric conversion on Hyperboloid" begin
         M = Hyperbolic(2)

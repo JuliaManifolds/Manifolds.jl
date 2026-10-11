@@ -42,7 +42,7 @@ function flat(M::MetricManifold, p, X::TFVector{<:Any, <:InducedBasis})
     return CoTFVector(local_metric(M, p, X.basis) * X.data, dual_basis(M, p, X.basis))
 end
 
-function flat!(M::AbstractManifold, ξ::CoTFVector, p, X::TFVector)
+function flat!(M::MetricManifold, ξ::CoTFVector, p, X::TFVector)
     (metric(M.manifold) == M.metric) && (return flat!(M.manifold, ξ, p, X))
     g = local_metric(M, p, ξ.basis)
     copyto!(ξ.data, g * X.data)

@@ -22,7 +22,7 @@ default_retraction_method(::AbstractMultinomialDoublyStochastic) = ProjectionRet
     representation_size(M::AbstractMultinomialDoublyStochastic)
 
 return the representation size of doubly stochastic matrices, which are embedded
-in the ``ℝ^{n×n}`` matrices and hence the answer here is ``
+in the ``ℝ^{n×n}`` matrices and hence the answer here is ``(n,n)``.
 """
 function representation_size(M::AbstractMultinomialDoublyStochastic)
     n = get_parameter(M.size)[1]
@@ -53,7 +53,7 @@ function riemannian_gradient!(M::AbstractMultinomialDoublyStochastic, X, p, Y; k
 end
 
 @doc raw"""
-    MultinomialDoublyStochastic{T} <: AbstractMultinomialDoublyStochastic
+    MultinomialDoubleStochastic{T} <: AbstractMultinomialDoublyStochastic
 
 The set of doubly stochastic multinomial matrices consists of all ``n×n`` matrices with
 stochastic columns and rows, i.e.
@@ -68,12 +68,11 @@ stochastic columns and rows, i.e.
 
 where ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
 
-The tangent space can be written as
+The tangent space is given in Proposition 3.1 of [Douik:2020](@cite) as
 
 ````math
 T_p\mathcal{DP}(n) \coloneqq \bigl\{
-X ∈ ℝ^{n×n}\ \big|\ X = X^{\mathrm{T}} \text{ and }
-X\mathbf{1}_n = X^{\mathrm{T}}\mathbf{1}_n = \mathbf{0}_n
+X ∈ ℝ^{n×n}\ \big|\ X\mathbf{1}_n = X^{\mathrm{T}}\mathbf{1}_n = \mathbf{0}_n
 \bigr\},
 ````
 
@@ -85,7 +84,7 @@ More details can be found in Section III [DouikHassibi:2019](@cite).
 
     MultinomialDoubleStochastic(n::Int; parameter::Symbol=:type)
 
-Generate the manifold of matrices ``ℝ^{n×n}`` that are doubly stochastic and symmetric.
+Generate the manifold of matrices ``ℝ^{n×n}`` that are doubly stochastic.
 """
 struct MultinomialDoubleStochastic{T} <: AbstractMultinomialDoublyStochastic
     size::T

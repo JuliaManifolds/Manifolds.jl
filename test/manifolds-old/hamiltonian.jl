@@ -50,6 +50,13 @@ include("../header.jl")
         @test get_embedding(Mf) == Euclidean(4, 4; field = ℝ, parameter = :field)
         @test embed(M, p) == p
         @test embed(M, p, p) == p
+        A_h = [1.0 -2.0 0.5 3.0; 4.0 1.5 -1.0 2.0; -3.0 0.25 2.0 -1.0; 0.5 5.0 -2.5 1.0]
+        P_h = project(M, A_h)
+        @test is_point(M, P_h)
+        @test project(M, P_h) == P_h
+        @test dot(A_h - P_h, p) == 0
+        @test project(M, p, A_h) == P_h
+        @test project(HamiltonianMatrices(4, ℂ), A_h + im * p) == P_h + im * p
         @test is_flat(M)
         @test manifold_dimension(M) == (2 * 2 + 1) * 2
         @test manifold_dimension(Mf) == manifold_dimension(M)

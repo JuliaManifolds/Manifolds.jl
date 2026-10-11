@@ -694,6 +694,12 @@ end
             fX3b = allocate(fX3a)
             sharp!(MM2, fX3b, p, cofX)
             @test isapprox(fX3a.data, fX3b.data)
+
+            S = Sphere(2)
+            fXS = ManifoldsBase.TFVector([1.0, 0.0], DefaultOrthonormalBasis())
+            coXS = ManifoldsBase.CoTFVector([0.0, 0.0], DefaultOrthonormalBasis())
+            @test_throws MethodError flat!(S, coXS, [1.0, 0.0, 0.0], fXS)
+            @test_throws MethodError sharp!(S, fXS, [1.0, 0.0, 0.0], coXS)
         end
     end
 

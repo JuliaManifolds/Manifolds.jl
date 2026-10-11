@@ -49,5 +49,11 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
         @test_throws DomainError is_point(Mc, Bc; error = :error)
         @test_throws DomainError is_point(Mc, B; error = :error)
         @test is_point(Mc, A; error = :error)
+        cr = [real(vec(Ac)); imag(vec(Ac))]
+        @test get_coordinates(Mc, Ac, Ac, DefaultOrthonormalBasis()) == cr
+        @test get_vector(Mc, Ac, cr, DefaultOrthonormalBasis()) == Ac
+        for Bs in [DefaultOrthogonalBasis(), DefaultOrthonormalBasis(ℂ)]
+            @test get_vector(Mc, Ac, get_coordinates(Mc, Ac, Ac, Bs), Bs) == Ac
+        end
     end
 end

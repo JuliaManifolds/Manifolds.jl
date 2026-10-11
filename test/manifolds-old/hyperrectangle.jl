@@ -3,6 +3,10 @@ include("../header.jl")
 @testset "Hyperrectangle" begin
     M = Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 9.0])
     @test repr(M) == "Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 9.0])"
+    @test M == Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 9.0])
+    @test hash(M) == hash(Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 9.0]))
+    @test M != Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 10.0])
+    @test !isequal(Hyperrectangle([-0.0], [1.0]), Hyperrectangle([0.0], [1.0]))
 
     @test_throws ArgumentError Hyperrectangle([1.0, 2.0], [-1.0, 5.0])
 

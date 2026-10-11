@@ -37,6 +37,14 @@ function Lorentz(E::Euclidean{𝔽, T}, m::LorentzMetric = MinkowskiMetric()) wh
     return Lorentz{T, typeof(m)}(E, m)
 end
 
+"""
+    is_flat(M::Lorentz{<:Any, MinkowskiMetric})
+
+Return whether the [`Lorentz`](@ref) manifold `M` is flat. This is the case for the
+[`MinkowskiMetric`](@ref), since it is the same matrix at every point.
+"""
+is_flat(M::Lorentz{<:Any, MinkowskiMetric}) = true
+
 function local_metric(M::Lorentz{<:Any, MinkowskiMetric}, p)
     n = get_parameter(M.manifold.size)[1]
     return Diagonal([ones(n - 1)..., -1])

@@ -384,7 +384,6 @@ function Random.rand!(
     else
         Z = σ * randn(rng, eltype(pX), size(pX))
         project!(M, pX, vector_at, Z)
-        normalize!(pX)
     end
     return pX
 end

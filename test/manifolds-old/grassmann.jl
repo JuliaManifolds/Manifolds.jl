@@ -457,6 +457,14 @@ end
         Z = [0.0 -1.0; 1.0 0.0; 1.0 0.0]
         @test riemannian_Hessian(M, p, Y, Z, X) == [0.0 0.0; 0.0 0.0; 2.0 0.0]
     end
+    @testset "QR retraction with one sign per column" begin
+        p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        X = [0.0 0.0; 0.0 0.0; 1.0 0.0]
+        q = retract(Grassmann(3, 2), p, X, QRRetraction())
+        @test q ≈ [1 / sqrt(2) 0.0; 0.0 1.0; 1 / sqrt(2) 0.0]
+        qc = retract(Grassmann(3, 2, ℂ), complex(p), im * X, QRRetraction())
+        @test qc ≈ [1 / sqrt(2) 0.0; 0.0 1.0; im / sqrt(2) 0.0]
+    end
     @testset "field parameter" begin
         M = Grassmann(3, 2; parameter = :field)
         @test repr(M) == "Grassmann(3, 2, ℝ; parameter=:field)"
@@ -530,4 +538,13 @@ end
             @test isapprox(M, q_chart, q; atol = 1.0e-8)
         end
     end
+end
+
+@testset "random tangent vectors scale with σ" begin
+    M = Grassmann(4, 2)
+    p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+    X = rand(MersenneTwister(42), M; vector_at = p)
+    Y = rand(MersenneTwister(42), M; vector_at = p, σ = 2.0)
+    @test is_vector(M, p, Y)
+    @test Y == 2 .* X
 end

@@ -290,5 +290,6 @@ function project!(
         ::PoincareHalfSpacePoint,
         X::PoincareHalfSpaceTangentVector,
     )
-    return (Y.value .= X.value)
+    Y.value .= X.value
+    return Y
 end

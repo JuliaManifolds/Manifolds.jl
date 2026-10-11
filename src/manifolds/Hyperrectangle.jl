@@ -28,6 +28,16 @@ struct Hyperrectangle{T <: AbstractArray} <: AbstractDecoratorManifold{ℝ}
     end
 end
 
+function Base.:(==)(M::Hyperrectangle, N::Hyperrectangle)
+    return M.lb == N.lb && M.ub == N.ub
+end
+function Base.isequal(M::Hyperrectangle, N::Hyperrectangle)
+    return isequal(M.lb, N.lb) && isequal(M.ub, N.ub)
+end
+function Base.hash(M::Hyperrectangle, h::UInt)
+    return hash(M.ub, hash(M.lb, hash(:Hyperrectangle, h)))
+end
+
 function check_point(M::Hyperrectangle, p; kwargs...)
     if !(eltype(p) <: Real)
         return DomainError(
@@ -246,9 +256,10 @@ function manifold_dimension(M::Hyperrectangle)
 end
 
 """
-    manifold_volume(::Hyperrectangle)
+    manifold_volume(M::Hyperrectangle)
 
-Return volume of the [`Hyperrectangle`](@ref) manifold, i.e. infinity.
+Return the volume of the [`Hyperrectangle`](@ref) manifold `M`, that is, the product of the
+differences between its upper and its lower bound in every coordinate.
 """
 function manifold_volume(M::Hyperrectangle)
     vol = one(eltype(M.lb))
@@ -337,8 +348,8 @@ parallel_transport_to!(::Hyperrectangle, Y, ::Any, X, ::Any) = copyto!(Y, X)
 @doc raw"""
     project(M::Hyperrectangle, p)
 
-Project an arbitrary point `p` onto the [`Hyperrectangle`](@ref) manifold `M`, which
-is of course just the identity map.
+Project an arbitrary point `p` onto the [`Hyperrectangle`](@ref) manifold `M`, that is, clamp
+every coordinate of `p` into the interval between the lower and the upper bound at that index.
 """
 project(::Hyperrectangle, ::Any)
 
@@ -355,8 +366,8 @@ end
 
 Project an arbitrary vector `X` into the tangent space of a point `p` on the
 [`Hyperrectangle`](@ref) `M`. For coordinates `i` at which `p[i]` is equal to the
-lower bound of `M`, `X[i]` is upper-bounded at 0. `M`. For coordinates `i` at which `p[i]`
-is equal to the upper bound of `M`, `X[i]` is lower-bounded at 0. Otherwise, `X` is
+upper bound of `M`, `X[i]` is upper-bounded at 0. For the remaining coordinates `i` at which
+`p[i]` is equal to the lower bound of `M`, `X[i]` is lower-bounded at 0. Otherwise, `X` is
 not changed.
 """
 project(::Hyperrectangle, ::Any, ::Any)

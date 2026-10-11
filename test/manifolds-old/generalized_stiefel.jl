@@ -184,3 +184,12 @@ include("../header.jl")
         @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int64, Int64}}
     end
 end
+
+@testset "random tangent vectors scale with σ" begin
+    M = GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0])
+    p = [1.0 0.0; 0.0 0.5; 0.0 0.0]
+    X = rand(MersenneTwister(42), M; vector_at = p)
+    Y = rand(MersenneTwister(42), M; vector_at = p, σ = 2.0)
+    @test is_vector(M, p, Y)
+    @test Y == 2 .* X
+end

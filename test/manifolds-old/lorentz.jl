@@ -2,6 +2,8 @@ include("../header.jl")
 
 @testset "Lorentz Manifold" begin
     M = Lorentz(3)
+    @test is_flat(M)
+    @test is_flat(Lorentz(3; parameter = :field))
     @testset "Minkowski Metric" begin
         N = MetricManifold(Euclidean(3), MinkowskiMetric())
         @test N == M

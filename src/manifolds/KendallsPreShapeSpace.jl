@@ -27,7 +27,7 @@ end
 representation_size(M::KendallsPreShapeSpace) = get_parameter(M.size)
 
 """
-    check_point(M::KendallsPreShapeSpace, p; atol=sqrt(max_eps(X, Y)), kwargs...)
+    check_point(M::KendallsPreShapeSpace, p; atol=sqrt(eps(float(eltype(p)))), kwargs...)
 
 Check whether `p` is a valid point on [`KendallsPreShapeSpace`](@ref), i.e. whether
 each row has zero mean. Other conditions are checked via embedding in [`ArraySphere`](@ref).
@@ -50,7 +50,7 @@ function check_point(
 end
 
 """
-    check_vector(M::KendallsPreShapeSpace, p, X; kwargs... )
+    check_vector(M::KendallsPreShapeSpace, p, X; atol=sqrt(eps(float(eltype(X)))), kwargs...)
 
 Check whether `X` is a valid tangent vector on [`KendallsPreShapeSpace`](@ref), i.e. whether
 each row has zero mean. Other conditions are checked via embedding in [`ArraySphere`](@ref).
@@ -201,9 +201,9 @@ function Random.rand!(
         σ = one(eltype(pX)),
     )
     if vector_at === nothing
-        project!(M, pX, randn(rng, representation_size(M)))
+        project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
     else
-        n = σ * randn(rng, size(pX)) # Gaussian in embedding
+        n = σ * randn(rng, eltype(pX), size(pX)) # Gaussian in embedding
         project!(M, pX, vector_at, n) #project to TpM (keeps Gaussianness)
     end
     return pX

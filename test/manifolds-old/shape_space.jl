@@ -38,6 +38,13 @@ include("../header.jl")
         test_rand_tvector = true,
         rand_tvector_atol_multiplier = 5,
     )
+    @testset "random points and vectors use the element type of the array" begin
+        p = rand!(MersenneTwister(42), M, zeros(BigFloat, 2, 3))
+        @test p == project(M, randn(MersenneTwister(42), BigFloat, 2, 3))
+        @test is_point(M, p; error = :error)
+        X = rand!(MersenneTwister(7), M, zeros(BigFloat, 2, 3); vector_at = p)
+        @test X == project(M, p, randn(MersenneTwister(7), BigFloat, 2, 3))
+    end
     @testset "field parameter" begin
         M = KendallsPreShapeSpace(2, 3; parameter = :field)
         @test repr(M) == "KendallsPreShapeSpace(2, 3; parameter=:field)"

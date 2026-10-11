@@ -57,6 +57,21 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
         ),
     )
 
+    @testset "check_point and check_vector with tolerances" begin
+        M2 = HeisenbergMatrices(2)
+        p = [1.0 1.5 -0.5 2.0; 0.0 1.0 0.0 0.7; 0.0 0.0 1.0 -1.2; 0.0 0.0 0.0 1.0]
+        q = copy(p)
+        q[3, 1] = 1.0e-12
+        q[4, 4] += 1.0e-12
+        @test is_point(M2, q; atol = 1.0e-5)
+        Y = [0.0 0.3 -0.4 1.1; 0.0 0.0 0.0 0.2; 0.0 0.0 0.0 -0.6; 1.0e-12 0.0 0.0 0.0]
+        @test is_vector(M2, p, Y; atol = 1.0e-5)
+        q1 = [1.0 1.5 -0.5 2.0; 0.0 1.0 0.0 0.7; 1.0e-3 0.0 1.0 -1.2; 0.0 0.0 0.0 1.0]
+        @test check_point(M2, q1).val == 1.0e-3
+        q2 = [1.0 1.5 -0.5 2.0; 0.0 2.0 0.0 0.7; 0.0 0.0 1.0 -1.2; 0.0 0.0 0.0 1.0]
+        @test check_point(M2, q2).val == 1.0
+    end
+
     Mf = HeisenbergMatrices(1; parameter = :field)
     Manifolds.Test.test_manifold(
         Mf,

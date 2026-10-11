@@ -409,7 +409,6 @@ function Random.rand!(
     else
         Z = σ * randn(rng, eltype(pX), size(pX))
         project!(M, pX, vector_at, Z)
-        pX ./= norm(pX)
     end
     return pX
 end
@@ -452,9 +451,9 @@ Compute the QR-based retraction [`QRRetraction`](@extref `ManifoldsBase.QRRetrac
 ````math
 \operatorname{retr}_p X = QD,
 ````
-where D is a ``m×n`` matrix with
+where D is a ``k×k`` matrix with
 ````math
-D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_{i=1}^n \right).
+D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_{i=1}^k \right).
 ````
 """
 retract(::Grassmann, ::Any, ::Any, ::QRRetraction)
@@ -467,7 +466,7 @@ function ManifoldsBase.retract_qr_fused!(::Grassmann, q, p, X, t::Number)
     qrfac = qr(q)
     d = diag(qrfac.R)
     copyto!(q, qrfac.Q)
-    q .*= Diagonal(sign.(transpose(d) .+ 1 // 2))
+    rmul!(q, Diagonal(sign.(d .+ 1 // 2)))
     return q
 end
 

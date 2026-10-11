@@ -18,6 +18,9 @@ include("../header.jl")
     @test_throws ManifoldDomainError is_vector(M, p, Xf1; error = :error)
     Xf2 = [0.0 -1.0 0.0; -1.0 0.0 0.0; 0.0 0.0 0.0] # nonzero sums
     @test_throws ManifoldDomainError is_vector(M, p, Xf2; error = :error)
+    Xf3 = [-0.1 0.0 0.1; 0.0 0.2 -0.2; 0.1 -0.2 0.1] .+ 1.0e-6 / 3 # row sums 1.0e-6
+    @test !is_vector(M, p, Xf3)
+    @test is_vector(M, p, Xf3; atol = 1.0e-3)
     @test representation_size(M) == (3, 3)
     @test !is_flat(M)
     @test is_flat(MultinomialSymmetric(2))

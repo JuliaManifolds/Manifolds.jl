@@ -180,6 +180,41 @@ function is_hamiltonian(A::Hamiltonian; kwargs...)
     return isapprox((A^+).value, -A.value; kwargs...)
 end
 
+@doc raw"""
+    project(::HamiltonianMatrices, p)
+    project!(::HamiltonianMatrices, q, p)
+
+Project a matrix ``p ∈ 𝔽^{2n×2n}`` onto the [`HamiltonianMatrices`](@ref) ``\mathfrak{sp}(2n,𝔽)``
+relative to the Euclidean metric of the embedding ``𝔽^{2n×2n}``, that is
+
+````math
+    \operatorname{proj}_{\mathfrak{sp}(2n,𝔽)}(p) = \frac{1}{2}\bigl( p - p^{+} \bigr),
+````
+
+where ``p^+`` denotes the [`symplectic_inverse`](@ref) of ``p``.
+For ``𝔽 = ℝ`` this is Proposition 2 in [GaoSonAbsilStykel:2021:2](@cite) at the identity,
+whose tangent space is ``\mathfrak{sp}(2n,ℝ)`` by Corollary 3.46 in [Hall:2015](@cite).
+For ``𝔽 = ℂ`` the real and the imaginary part are projected separately, see Proposition 3.38 in [Hall:2015](@cite).
+"""
+project(::HamiltonianMatrices, ::Any)
+
+function project!(::HamiltonianMatrices, q, p)
+    q .= (p .- symplectic_inverse(p)) ./ 2
+    return q
+end
+
+@doc raw"""
+    project(::HamiltonianMatrices, p, X)
+    project!(::HamiltonianMatrices, Y, p, X)
+
+Project a matrix ``X ∈ 𝔽^{2n×2n}`` onto the tangent space ``T_p\mathfrak{sp}(2n,𝔽)`` of the
+[`HamiltonianMatrices`](@ref) at ``p``, which is ``\mathfrak{sp}(2n,𝔽)`` itself, so that
+``\operatorname{proj}_p(X) = \frac{1}{2}\bigl( X - X^{+} \bigr)`` as for points.
+"""
+project(::HamiltonianMatrices, ::Any, ::Any)
+
+project!(M::HamiltonianMatrices, Y, p, X) = project!(M, Y, X)
+
 function Base.show(io::IO, ::HamiltonianMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return print(io, "HamiltonianMatrices($(2n), $(𝔽))")
 end

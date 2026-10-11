@@ -113,6 +113,14 @@ Return true. [`InvertibleMatrices`](@ref) is a flat manifold.
 """
 is_flat(M::InvertibleMatrices) = true
 
+function get_coordinates_orthonormal!(M::InvertibleMatrices, c, p, X, N)
+    return get_coordinates_orthonormal!(get_embedding(M), c, p, X, N)
+end
+
+function get_vector_orthonormal!(M::InvertibleMatrices, X, p, c, N)
+    return get_vector_orthonormal!(get_embedding(M), X, p, c, N)
+end
+
 @doc raw"""
     manifold_dimension(M::InvertibleMatrices{n,𝔽})
 
