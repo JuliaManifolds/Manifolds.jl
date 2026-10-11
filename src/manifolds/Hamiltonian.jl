@@ -7,7 +7,7 @@
 A type to store a Hamiltonian matrix, that is a square matrix for which ``A^+ = -A`` where
 
 ```math
-A^+ = J_{2n}A^{\mathrm{T}}J_{2n}, \qquad J_{2n} \begin{pmatrix} 0 & I_n\\-I_n & 0 \end{pmatrix},
+A^+ = J_{2n}^{\mathrm{T}}A^{\mathrm{T}}J_{2n}, \qquad J_{2n} = \begin{pmatrix} 0 & I_n\\-I_n & 0 \end{pmatrix},
 ```
 
 and ``I_n`` denotes the ``n×n``
@@ -44,7 +44,7 @@ The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
 consisting of (real-valued) hamiltonian matrices of size ``n×n``, i.e. the set
 
 ````math
-\mathfrak{sp}(2n,𝔽) = \bigl\{p  ∈ 𝔽^{2n×2n}\ \big|\ p^+ = p \bigr\},
+\mathfrak{sp}(2n,𝔽) = \bigl\{p  ∈ 𝔽^{2n×2n}\ \big|\ p^+ = -p \bigr\},
 ````
 where ``⋅^{+}`` denotes the [`symplectic_inverse`](@ref), and ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
