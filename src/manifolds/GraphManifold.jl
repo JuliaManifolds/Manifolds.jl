@@ -36,6 +36,21 @@ struct GraphManifold{𝔽, G <: AbstractGraph, TM, T <: GraphManifoldType} <:
     manifold::TM
 end
 
+function Base.:(==)(
+        M::GraphManifold{𝔽, G, TM, T}, N::GraphManifold{𝔽, G, TM, T}
+    ) where {𝔽, G, TM, T}
+    return M.graph == N.graph && M.manifold == N.manifold
+end
+function Base.isequal(
+        M::GraphManifold{𝔽, G, TM, T}, N::GraphManifold{𝔽, G, TM, T}
+    ) where {𝔽, G, TM, T}
+    return isequal(M.graph, N.graph) && isequal(M.manifold, N.manifold)
+end
+function Base.hash(M::GraphManifold{𝔽, G, TM, T}, h::UInt) where {𝔽, G, TM, T}
+    # not every graph type hashes by content
+    return hash(M.manifold, hash(nv(M.graph), hash(T, h)))
+end
+
 function GraphManifold(
         g::G,
         M::TM,

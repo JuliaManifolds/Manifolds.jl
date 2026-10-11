@@ -48,6 +48,16 @@ struct GeneralizedGrassmann{𝔽, T, TB <: AbstractMatrix} <: AbstractDecoratorM
     B::TB
 end
 
+function Base.:(==)(M::GeneralizedGrassmann{𝔽}, N::GeneralizedGrassmann{𝔽}) where {𝔽}
+    return M.size == N.size && M.B == N.B
+end
+function Base.isequal(M::GeneralizedGrassmann{𝔽}, N::GeneralizedGrassmann{𝔽}) where {𝔽}
+    return isequal(M.size, N.size) && isequal(M.B, N.B)
+end
+function Base.hash(M::GeneralizedGrassmann, h::UInt)
+    return hash(M.B, hash(M.size, hash(:GeneralizedGrassmann, h)))
+end
+
 function GeneralizedGrassmann(
         n::Int,
         k::Int,
@@ -421,6 +431,25 @@ Return the [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`)
 as the default vector transport method for the [`GeneralizedGrassmann`](@ref) manifold.
 """
 default_vector_transport_method(::GeneralizedGrassmann) = ProjectionTransport()
+
+@doc raw"""
+    inverse_retract(M::GeneralizedGrassmann, p, q, ::PolarInverseRetraction)
+
+Compute the inverse of the [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
+[`GeneralizedGrassmann`](@ref) manifold `M`, i.e.
+
+````math
+\operatorname{retr}_p^{-1}q = q(p^{\mathrm{H}}Bq)^{-1} - p,
+````
+
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
+"""
+inverse_retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarInverseRetraction)
+
+function inverse_retract_polar!(M::GeneralizedGrassmann, X, p, q)
+    X .= q / (p' * M.B' * q) .- p
+    return X
+end
 
 function Base.show(
         io::IO,

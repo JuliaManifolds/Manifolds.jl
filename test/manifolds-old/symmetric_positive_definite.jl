@@ -95,6 +95,10 @@ include("../header.jl")
         y = 2 .* (Z * p * M6.metric.M + M6.metric.M * p' * Z)
         Y = change_representer(M6, em, p, Z)
         @test isapprox(y, Y)
+        @test M6.metric == GeneralizedBuresWassersteinMetric(copy(M6.metric.M))
+        @test hash(M6.metric) == hash(GeneralizedBuresWassersteinMetric(copy(M6.metric.M)))
+        g6 = GeneralizedBuresWassersteinMetric([2.0 1.0 -0.0; 1.0 2.0 1.0; 0.0 1.0 2.0])
+        @test !isequal(M6.metric, g6)
     end
     @testset "Bures-Wasserstein logarithm of points whose product is not symmetric" begin
         p2 = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1.0]

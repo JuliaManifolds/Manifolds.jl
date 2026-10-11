@@ -58,6 +58,11 @@ end
                 "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
+            @test M == GeneralizedGrassmann(3, 2, copy(B))
+            @test hash(M) == hash(GeneralizedGrassmann(3, 2, copy(B)))
+            @test M != GeneralizedGrassmann(3, 2, B, ℂ)
+            Bs = [1.0 -0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
+            @test !isequal(M, GeneralizedGrassmann(3, 2, Bs))
             @test base_manifold(M) === M
             @test !is_flat(M)
             @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0]; error = :error)
@@ -145,6 +150,9 @@ end
         @test vector_transport_to(M, p, X, q, ProjectionTransport()) == project(M, q, X)
         @test default_vector_transport_method(M) === ProjectionTransport()
         @test vector_transport_to(M, p, X, q) == project(M, q, X)
+        Zg = inverse_retract(M, p, q, PolarInverseRetraction())
+        @test norm(p' * M.B * Zg) < 1.0e-14
+        @test distance(M, retract(M, p, Zg, PolarRetraction()), q) < 1.0e-14
         @testset "Type $T" for T in types
             pts = convert.(T, [p, q, r])
             @test !is_point(M, 2 * p)

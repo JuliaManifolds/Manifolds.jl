@@ -12,6 +12,11 @@ include("../header.jl")
                 "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
+            @test M == GeneralizedStiefel(3, 2, copy(B))
+            @test hash(M) == hash(GeneralizedStiefel(3, 2, copy(B)))
+            @test M != GeneralizedStiefel(3, 2, B, ℂ)
+            Bs = [1.0 -0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
+            @test !isequal(M, GeneralizedStiefel(3, 2, Bs))
             @test base_manifold(M) === M
             @test !is_flat(M)
             @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0]; error = :error)

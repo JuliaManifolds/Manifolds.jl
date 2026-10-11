@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `@tfvector_inner_via_get_vector` and `@tfvector_norm_via_get_vector` macros that define `inner` and `norm` of `TFVector`s on a metric manifold with a closed-form `inner` or `norm` by converting them with `get_vector`.
 * Chart-based `gaussian_curvature`, equal to half of `ricci_curvature`.
 * `distance` and `inner` on the `Grassmann` manifold for `ProjectorPoint`s and `ProjectorTangentVector`s.
+* `PolarInverseRetraction` on the `GeneralizedGrassmann` manifold.
 
 ### Changed
 
@@ -185,6 +186,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `diff_canonical_project` and `diff_canonical_project!` on the `Grassmann` manifold compute the differential of the canonical projection from Stiefel points onto projectors.
 * `vector_transport_to` on the `GeneralizedGrassmann` manifold uses `ProjectionTransport` by default.
 * `vector_transport_to` with `ProjectionTransport` on a complex `Tucker` manifold returns the projection onto the tangent space at the target point.
+* Two generalized Stiefel, generalized Grassmann or graph manifolds, and two generalized Bures–Wasserstein metrics, with equal contents compare equal and hash alike.
 
 ## [0.11.32] 2026-09-30
 

@@ -11,6 +11,18 @@ struct GeneralizedBuresWassersteinMetric{T <: AbstractMatrix} <: RiemannianMetri
     GeneralizedBuresWassersteinMetric(MM::TT) where {TT <: AbstractMatrix} = new{TT}(MM)
 end
 
+function Base.:(==)(g::GeneralizedBuresWassersteinMetric, h::GeneralizedBuresWassersteinMetric)
+    return g.M == h.M
+end
+function Base.isequal(
+        g::GeneralizedBuresWassersteinMetric, h::GeneralizedBuresWassersteinMetric
+    )
+    return isequal(g.M, h.M)
+end
+function Base.hash(g::GeneralizedBuresWassersteinMetric, h::UInt)
+    return hash(g.M, hash(:GeneralizedBuresWassersteinMetric, h))
+end
+
 @doc raw"""
     change_representer(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric}, E::EuclideanMetric, p, X)
 

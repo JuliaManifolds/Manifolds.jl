@@ -43,6 +43,16 @@ struct GeneralizedStiefel{𝔽, T, TB <: AbstractMatrix} <: AbstractDecoratorMan
     B::TB
 end
 
+function Base.:(==)(M::GeneralizedStiefel{𝔽}, N::GeneralizedStiefel{𝔽}) where {𝔽}
+    return M.size == N.size && M.B == N.B
+end
+function Base.isequal(M::GeneralizedStiefel{𝔽}, N::GeneralizedStiefel{𝔽}) where {𝔽}
+    return isequal(M.size, N.size) && isequal(M.B, N.B)
+end
+function Base.hash(M::GeneralizedStiefel, h::UInt)
+    return hash(M.B, hash(M.size, hash(:GeneralizedStiefel, h)))
+end
+
 function GeneralizedStiefel(
         n::Int,
         k::Int,
