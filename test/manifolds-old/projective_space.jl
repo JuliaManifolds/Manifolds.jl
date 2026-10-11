@@ -342,6 +342,8 @@ end
     @testset "field parameter" begin
         M = ProjectiveSpace(2; parameter = :field)
         @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int}}
+        @test typeof(get_embedding(ArrayProjectiveSpace(2, 3; parameter = :field))) ===
+            Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "ProjectiveSpace(2, ℝ; parameter=:field)"
         @test repr(ArrayProjectiveSpace(2, 3; parameter = :field)) ==
             "ArrayProjectiveSpace(2, 3; field=ℝ, parameter=:field)"

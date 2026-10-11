@@ -148,6 +148,9 @@ end
 function decorated_manifold(M::ProjectiveSpace{𝔽, <:Tuple}) where {𝔽}
     return Euclidean(representation_size(M)...; field = 𝔽, parameter = :field)
 end
+function decorated_manifold(M::ArrayProjectiveSpace{𝔽, <:Tuple}) where {𝔽}
+    return Euclidean(representation_size(M)...; field = 𝔽, parameter = :field)
+end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
 

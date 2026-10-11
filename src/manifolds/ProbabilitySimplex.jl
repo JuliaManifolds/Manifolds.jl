@@ -310,12 +310,13 @@ is_flat(M::ProbabilitySimplex) = false
     log(M::ProbabilitySimplex, p, q)
 
 Compute the logarithmic map of `p` and `q` on the [`ProbabilitySimplex`](@ref) `M`.
+The formula, Eq. (7.16b) in [AastroemPetraSchmitzerSchnoerr:2017](@cite), reads
 
 ````math
-\log_pq = \frac{d_{Δ^n}(p,q)}{\sqrt{1-⟨\sqrt{p},\sqrt{q}⟩}}(\sqrt{pq} - ⟨\sqrt{p},\sqrt{q}⟩p),
+\log_pq = \frac{d_{Δ^n}(p,q)}{\sqrt{1-⟨\sqrt{p},\sqrt{q}⟩^2}}(\sqrt{pq} - ⟨\sqrt{p},\sqrt{q}⟩p),
 ````
 
-where $pq$ and $\sqrt{p}$ is meant elementwise.
+where $pq$ and $\sqrt{p}$ is meant elementwise. For `p ≈ q` the zero vector is returned.
 """
 log(::ProbabilitySimplex, ::Any...)
 
@@ -422,7 +423,7 @@ the [`ProbabilitySimplex`](@ref) `M`. The formula reads
 
 ````math
 \operatorname{proj}_{Δ^n}(p,Y) = Y - \bar{Y}
-```
+````
 where ``\bar{Y}`` denotes mean of ``Y``.
 """
 project(::ProbabilitySimplex, ::Any, ::Any)
