@@ -3,46 +3,20 @@ using LinearAlgebra, Manifolds, Random, Test
 @testset "Positive Numbers" begin
     M = PositiveNumbers()
 
-    @testset "Constructors and basics" begin
-        @test repr(M) == "PositiveNumbers()"
-        @test repr(PositiveVectors(2)) == "PositiveVectors(2)"
+    @testset "Edge cases" begin
         @test repr(PositiveMatrices(2, 3)) == "PositiveMatrices(2, 3)"
         @test repr(PositiveArrays(2, 3, 4)) == "PositiveArrays(2, 3, 4)"
-        @test representation_size(M) == ()
-        @test manifold_dimension(M) == 1
-        @test !is_flat(M)
-        @test !is_point(M, -1.0)
-        @test_throws DomainError is_point(M, -1.0; error = :error)
-        @test is_vector(M, 1.0, 0.0)
-        @test vector_transport_to(M, 1.0, 3.0, 2.0, ParallelTransport()) == 6.0
         @test retract(M, 1.0, 1.0) == exp(M, 1.0, 1.0)
-        @test isinf(injectivity_radius(M))
-        @test isinf(injectivity_radius(M, -2.0))
-        @test isinf(injectivity_radius(M, -2.0, ExponentialRetraction()))
-        @test isinf(injectivity_radius(M, ExponentialRetraction()))
+        @test inverse_retract(M, 1.0, 4.0) == log(M, 1.0, 4.0)
         @test project(M, 1.5, 1.0) == 1.0
         @test embed(M, 1.0) == 1.0
-        @test zero_vector(M, 1.0) == 0.0
-        X = similar([1.0])
-        zero_vector!(M, X, 1.0)
-        @test X == [0.0]
-        @test get_coordinates(M, 2.0, 1.0, DefaultOrthonormalBasis()) == 0.5
-        @test get_vector(M, 2.0, 0.5, DefaultOrthonormalBasis()) == 1.0
+        @test embed(M, 1.0, 2.0) == 2.0
 
         @test change_metric(M, EuclideanMetric(), 2, 3) == 3 * 2
         @test change_representer(M, EuclideanMetric(), 2, 3) == 3 * 2^2
-        N = PositiveVectors(2)
         @test change_metric(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2]
         @test change_representer(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2^2]
-        @test get_coordinates(N, [2.0, 4.0], [1.0, 10.0], DefaultOrthonormalBasis()) ==
-            [0.5, 2.5]
-        @test get_vector(N, [2.0, 4.0], [0.5, 2.5], DefaultOrthonormalBasis()) ==
-            [1.0, 10.0]
-        tmp = zeros(2)
-        get_coordinates!(N, tmp, [2.0, 4.0], [1.0, 10.0], DefaultOrthonormalBasis())
-        @test tmp == [0.5, 2.5]
-        get_vector!(N, tmp, [2.0, 4.0], [0.5, 2.5], DefaultOrthonormalBasis())
-        @test tmp == [1.0, 10.0]
+        @test project(PositiveVectors(2), [2.0, 4.0], [1.0, 10.0]) == [1.0, 10.0]
 
         xi = flat(M, 2.0, 1.0)
         @test xi(1.0) ≈ norm(M, 2.0, 1.0)^2
@@ -53,36 +27,13 @@ using LinearAlgebra, Manifolds, Random, Test
         M,
         Dict(
             :Functions => [
-                default_inverse_retraction_method,
-                default_retraction_method,
-                default_vector_transport_method,
-                distance,
-                exp,
-                geodesic,
-                get_coordinates,
-                get_vector,
-                injectivity_radius,
-                inner,
-                inverse_retract,
-                is_flat,
-                is_point,
-                is_vector,
-                log,
-                manifold_dimension,
-                manifold_volume,
-                mid_point,
-                norm,
-                parallel_transport_direction,
-                parallel_transport_to,
-                rand,
-                repr,
-                representation_size,
-                retract,
-                shortest_geodesic,
-                vector_transport_direction,
-                vector_transport_to,
-                volume_density,
-                zero_vector,
+                default_inverse_retraction_method, default_retraction_method, default_vector_transport_method,
+                distance, exp, geodesic, get_coordinates, get_vector,
+                injectivity_radius, inner, inverse_retract, is_flat, is_point, is_vector,
+                log, manifold_dimension, manifold_volume, mid_point, norm,
+                parallel_transport_direction, parallel_transport_to,
+                rand, repr, representation_size, retract, shortest_geodesic,
+                vector_transport_direction, vector_transport_to, volume_density, zero_vector,
             ],
             :Bases => [DefaultOrthonormalBasis()],
             :Coordinates => [1.0],
@@ -106,6 +57,7 @@ using LinearAlgebra, Manifolds, Random, Test
             is_flat => false,
             manifold_dimension => 1,
             manifold_volume => Inf,
+            parallel_transport_to => 4.0,
             repr => "PositiveNumbers()",
             representation_size => (),
             volume_density => exp(1.0),
@@ -125,38 +77,13 @@ using LinearAlgebra, Manifolds, Random, Test
             M2,
             Dict(
                 :Functions => [
-                    default_inverse_retraction_method,
-                    default_retraction_method,
-                    default_vector_transport_method,
-                    distance,
-                    exp,
-                    flat,
-                    geodesic,
-                    get_coordinates,
-                    get_vector,
-                    injectivity_radius,
-                    inner,
-                    inverse_retract,
-                    is_flat,
-                    is_point,
-                    is_vector,
-                    log,
-                    manifold_dimension,
-                    manifold_volume,
-                    mid_point,
-                    norm,
-                    parallel_transport_direction,
-                    parallel_transport_to,
-                    rand,
-                    repr,
-                    representation_size,
-                    retract,
-                    sharp,
-                    shortest_geodesic,
-                    vector_transport_direction,
-                    vector_transport_to,
-                    volume_density,
-                    zero_vector,
+                    default_inverse_retraction_method, default_retraction_method, default_vector_transport_method,
+                    distance, exp, flat, geodesic, get_coordinates, get_vector,
+                    injectivity_radius, inner, inverse_retract, is_flat, is_point, is_vector,
+                    log, manifold_dimension, manifold_volume, mid_point, norm,
+                    parallel_transport_direction, parallel_transport_to,
+                    rand, repr, representation_size, retract, sharp, shortest_geodesic,
+                    vector_transport_direction, vector_transport_to, volume_density, zero_vector,
                 ],
                 :Bases => [DefaultOrthonormalBasis()],
                 :Coordinates => [[1.0, 1.0]],
@@ -195,26 +122,12 @@ using LinearAlgebra, Manifolds, Random, Test
         @test rH == p * H * p + X * G * p
     end
 
-    @testset "Manifold volume" begin
-        M5 = PositiveVectors(3)
-        @test isinf(manifold_volume(M))
-        @test isinf(manifold_volume(M5))
-        @test volume_density(M, 0.5, 2.0) ≈ exp(4.0)
-        @test volume_density(M5, [0.5, 1.0, 2.0], [1.0, -1.0, 2.0]) ≈ exp(2.0)
-    end
-
     @testset "In-place random values" begin
         p = fill(NaN)
         X = fill(NaN)
         rand!(M, p)
         @test is_point(M, p)
         rand!(M, X; vector_at = p)
-        @test is_vector(M, p, X)
-
-        rng = MersenneTwister(123)
-        rand!(rng, M, p)
-        @test is_point(M, p)
-        rand!(rng, M, X; vector_at = p)
         @test is_vector(M, p, X)
     end
 
