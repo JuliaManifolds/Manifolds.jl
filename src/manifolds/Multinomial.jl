@@ -79,6 +79,16 @@ function get_iterator(M::MultinomialMatrices)
     return Base.OneTo(m)
 end
 
+@doc raw"""
+    get_embedding(M::MultinomialMatrices)
+
+Return the embedding of the [`MultinomialMatrices`](@ref) manifold `M`, the [`Euclidean`](@ref) ``ℝ^{n×m}``.
+"""
+function get_embedding(M::MultinomialMatrices)
+    n, m = get_parameter(M.size)
+    return Euclidean(n, m; parameter = :field)
+end
+
 function manifold_dimension(M::MultinomialMatrices)
     n, m = get_parameter(M.size)
     return (n - 1) * m

@@ -68,6 +68,18 @@ and hence ``Z = p^2X``
 change_representer(::PositiveNumbers, ::EuclideanMetric, ::Any, ::Any)
 change_representer(::PositiveNumbers, ::EuclideanMetric, p::Real, X::Real) = p * X * p
 
+@doc raw"""
+    riemannian_gradient(M::PositiveNumbers, p, X)
+
+Convert the Euclidean gradient `X` of a function at `p` on the [`PositiveNumbers`](@ref) `M`
+into its Riemannian gradient ``p^2X``, the [`change_representer`](@ref) of `X` to the metric of `M`.
+"""
+riemannian_gradient(::PositiveNumbers, ::Any, ::Any)
+
+function riemannian_gradient(M::PositiveNumbers, p::Real, X::Real; kwargs...)
+    return change_representer(M, EuclideanMetric(), p, X)
+end
+
 function change_representer!(::PositiveNumbers, Y, ::EuclideanMetric, p, X)
     Y .= p .* X .* p
     return Y
@@ -341,7 +353,7 @@ function Random.rand!(
 end
 
 @doc raw"""
-    riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)
+    riemannian_Hessian(M::PositiveNumbers, p, G, H, X)
 
 The Riemannian Hessian can be computed as stated in Eq. (7.3) [Nguyen:2023](@cite).
 Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
@@ -353,6 +365,11 @@ Then the formula reads
 ```
 """
 riemannian_Hessian(::PositiveNumbers, p, G, H, X) = p * H * p + X * G * p
+
+function riemannian_Hessian!(::PositiveNumbers, Y, p, G, H, X)
+    Y .= p .* H .* p .+ X .* G .* p
+    return Y
+end
 
 function vector_transport_direction(
         M::PositiveNumbers,

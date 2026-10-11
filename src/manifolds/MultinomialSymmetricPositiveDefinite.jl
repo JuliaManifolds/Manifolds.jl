@@ -114,12 +114,13 @@ end
 
 """
     Random.rand!(
-        rng::AbstractRNG,
-        M::MultinomialSymmetricPositiveDefinite,
-        p::AbstractMatrix,
+        rng::AbstractRNG, M::MultinomialSymmetricPositiveDefinite, p::AbstractMatrix;
+        vector_at = nothing, kwargs...,
     )
 
 Generate a random point on [`MultinomialSymmetricPositiveDefinite`](@ref) manifold.
+If `vector_at` is given, a tangent vector is drawn with `rand!` of the embedding
+[`MultinomialSymmetric`](@ref) instead, and `kwargs...` are passed on.
 The steps are as follows:
 1. Generate a random [totally positive matrix](https://en.wikipedia.org/wiki/Totally_positive_matrix)
     a. Construct a vector `L` of `n` random positive increasing real numbers.
@@ -138,10 +139,12 @@ The steps are as follows:
 This method roughly follows the procedure described in https://math.stackexchange.com/questions/2773460/how-to-generate-a-totally-positive-matrix-randomly-using-software-like-maple
 """
 function Random.rand!(
-        rng::AbstractRNG,
-        M::MultinomialSymmetricPositiveDefinite,
-        p::AbstractMatrix,
+        rng::AbstractRNG, M::MultinomialSymmetricPositiveDefinite, p::AbstractMatrix;
+        vector_at = nothing, kwargs...,
     )
+    if vector_at !== nothing
+        return rand!(rng, get_embedding(M), p; vector_at = vector_at, kwargs...)
+    end
     n = get_parameter(M.size)[1]
     is_spd = false
     while !is_spd

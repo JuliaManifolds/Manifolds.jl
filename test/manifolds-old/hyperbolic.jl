@@ -336,6 +336,13 @@ end
         B3 = DiagonalizingOrthonormalBasis(-V[2])
         V3 = get_vectors(M, p, get_basis(M, p, B3))
         @test isapprox(M, p, V3[1], -V[2])
+        pH, XH = HyperboloidPoint(p), HyperboloidTangentVector(X)
+        B2H = DiagonalizingOrthonormalBasis(XH)
+        cH = get_coordinates(M, p, X, B2)
+        @test get_coordinates(M, pH, XH, B2H) == cH
+        @test get_coordinates!(M, similar(cH), pH, XH, B2H) == cH
+        @test get_vector(M, pH, cH, B2H).value ≈ X
+        @test get_vector!(M, HyperboloidTangentVector(similar(X)), pH, cH, B2H).value ≈ X
     end
     @testset "Hyperboloid Minkowski Metric tests" begin
         p = Manifolds._hyperbolize(M, [0.0, 1.0])

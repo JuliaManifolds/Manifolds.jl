@@ -61,11 +61,21 @@ end
 
 get_iterator(M::Oblique) = Base.OneTo(get_parameter(M.size)[2])
 
+@doc raw"""
+    get_embedding(M::Oblique)
+
+Return the embedding of the [`Oblique`](@ref) manifold `M`, the [`Euclidean`](@ref) ``𝔽^{n×m}``.
+"""
+function get_embedding(M::Oblique{𝔽}) where {𝔽}
+    n, m = get_parameter(M.size)
+    return Euclidean(n, m; field = 𝔽, parameter = :field)
+end
+
 function manifold_dimension(M::Oblique{𝔽}) where {𝔽}
     n, m = get_parameter(M.size)
     return (n * real_dimension(𝔽) - 1) * m
 end
-power_dimensions(M::Oblique) = get_parameter(M.size)[2]
+power_dimensions(M::Oblique) = (get_parameter(M.size)[2],)
 
 representation_size(M::Oblique) = get_parameter(M.size)
 
@@ -79,9 +89,9 @@ doing a column wise parallel transport on the [`Sphere`](@ref)
 parallel_transport_to(::Oblique, p, X, q)
 
 function Base.show(io::IO, ::Oblique{𝔽, TypeParameter{Tuple{n, m}}}) where {n, m, 𝔽}
-    return print(io, "Oblique($(n), $(m); field=$(𝔽))")
+    return print(io, "Oblique($(n), $(m), $(𝔽))")
 end
 function Base.show(io::IO, M::Oblique{𝔽, Tuple{Int, Int}}) where {𝔽}
     n, m = get_parameter(M.size)
-    return print(io, "Oblique($(n), $(m); field=$(𝔽), parameter=:field)")
+    return print(io, "Oblique($(n), $(m), $(𝔽); parameter=:field)")
 end

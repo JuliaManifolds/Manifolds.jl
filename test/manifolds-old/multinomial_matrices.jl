@@ -14,6 +14,7 @@ include("../header.jl")
         @test representation_size(M) == (3, 2)
         @test manifold_dimension(M) == 4
         @test !is_flat(M)
+        @test get_embedding(M) == Euclidean(3, 2; parameter = :field)
         @test Manifolds.get_iterator(ProbabilitySimplex(3)^4) === Base.OneTo(4)
         p = [2, 0, 0]
         p2 = [p p]
@@ -54,6 +55,7 @@ include("../header.jl")
 
         M = MultinomialMatrices(3, 2; parameter = :field)
         @test repr(M) == "MultinomialMatrices(3, 2; parameter=:field)"
+        @test get_embedding(M) == Euclidean(3, 2; parameter = :field)
     end
     @testset "Riemannian Gradient" begin
         M = MultinomialMatrices(3, 2)

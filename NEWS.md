@@ -200,6 +200,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `rand` on `KendallsPreShapeSpace` and `KendallsShapeSpace` draws in the number type of the array it fills, so that random points in `BigFloat` pass `is_point`.
 * `rand` on the `Hyperbolic` space draws tangent vectors whose coordinates in an orthonormal basis are independent normal with standard deviation `σ` at every base point.
 * `check_vector` and `is_vector` on `MultinomialSymmetric` apply a given `atol` and `rtol` also to the row sums.
+* `get_coordinates` and `get_vector` on the `Hyperbolic` space accept a diagonalizing basis whose direction is a `HyperboloidTangentVector`.
+* `rand` on `MultinomialSymmetricPositiveDefinite` returns a random point, and with `vector_at` a random tangent vector drawn as on `MultinomialSymmetric`.
+* `get_embedding` on the `Oblique` and `MultinomialMatrices` manifolds returns the space of matrices of their size, so that the extrinsic mean and `embed` on a `ValidationManifold` work for them.
+* `power_dimensions` on the `Oblique` manifold returns a one-element tuple, like the other power manifolds.
+* The `Oblique` manifold prints its number system as the positional argument its constructor takes, so that its printed form evaluates back to it.
+* `riemannian_gradient` on `PositiveNumbers` accepts a point and a Euclidean gradient given as numbers.
+* `riemannian_Hessian` works on `PositiveVectors`, `PositiveMatrices` and `PositiveArrays`.
 
 ## [0.11.32] 2026-09-30
 

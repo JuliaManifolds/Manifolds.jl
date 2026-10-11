@@ -80,8 +80,13 @@ include("../header.jl")
         G = 2.0
         H = 3.0
         X = 4.0
+        @test riemannian_gradient(M, 2.0, 3.0) == 12.0
         rH = riemannian_Hessian(M, p, G, H, X)
         @test rH == p * H * p + X * G * p
+        M2 = PositiveVectors(3)
+        p2 = [1.0, 2.0, 3.0]
+        @test riemannian_Hessian(M2, p2, fill(G, 3), fill(H, 3), fill(X, 3)) ≈
+            p2 .* H .* p2 .+ X .* G .* p2
     end
 
     @testset "Manifold volume" begin

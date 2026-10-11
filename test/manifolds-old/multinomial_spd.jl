@@ -39,6 +39,10 @@ include("../header.jl")
         q = zeros(3, 3)
         M = MultinomialSymmetricPositiveDefinite(3)
         @test is_point(M, rand!(MersenneTwister(), M, q); error = :error, atol = 5.0e-14)
+        @test is_point(M, rand(MersenneTwister(31), M); error = :error)
+        p = [0.6 0.2 0.2; 0.2 0.6 0.2; 0.2 0.2 0.6]
+        X = rand(MersenneTwister(31), M; vector_at = p)
+        @test is_vector(M, p, X; error = :error)
     end
 
     @testset "Fisher metric, tangent projection and retraction" begin

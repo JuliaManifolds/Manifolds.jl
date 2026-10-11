@@ -345,7 +345,8 @@ function get_coordinates_diagonalizing!(
         X,
         B::DiagonalizingOrthonormalBasis,
     )
-    c = get_coordinates!(M, c, p, X, get_basis_diagonalizing(M, p, B))
+    Bp = DiagonalizingOrthonormalBasis(convert(AbstractVector, B.frame_direction))
+    c = get_coordinates!(M, c, p, X, get_basis_diagonalizing(M, p, Bp))
     return c
 end
 
@@ -362,8 +363,9 @@ function get_vector_orthonormal!(M::Hyperbolic, X, p, c, r::RealNumbers)
     X = get_vector!(M, X, p, c, get_basis(M, p, DefaultOrthonormalBasis(r)))
     return X
 end
-function get_vector!(M::Hyperbolic, X, p, c, B::DiagonalizingOrthonormalBasis)
-    X = get_vector!(M, X, p, c, get_basis(M, p, B))
+function get_vector_diagonalizing!(M::Hyperbolic, X, p, c, B::DiagonalizingOrthonormalBasis)
+    Bp = DiagonalizingOrthonormalBasis(convert(AbstractVector, B.frame_direction))
+    X = get_vector!(M, X, p, c, get_basis(M, p, Bp))
     return X
 end
 
