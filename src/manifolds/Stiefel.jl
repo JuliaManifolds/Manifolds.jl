@@ -391,6 +391,15 @@ function inverse_retract_qr!(M::Stiefel, X, p, q)
     return X
 end
 
+@doc raw"""
+    isapprox(M::Stiefel, p, X, Y; kwargs...)
+
+Test whether two tangent vectors `X`, `Y` at `p` on the [`Stiefel`](@ref) manifold `M` are (approximately)
+the same, that is whether ``\lVert X - Y \rVert_p \approx 0`` with the classical `isapprox`.
+The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(X, Y))`.
+"""
+isapprox(::Stiefel, ::Any, ::Any, ::Any)
+
 function _isapprox(M::Stiefel, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end

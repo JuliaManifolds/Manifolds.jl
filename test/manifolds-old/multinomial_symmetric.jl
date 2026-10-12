@@ -91,6 +91,10 @@ include("../header.jl")
         @test is_point(M, p)
         X = rand(M; vector_at = p)
         @test is_vector(M, p, X)
+        Y = rand(MersenneTwister(2), M; vector_at = p, σ = 3.0)
+        @test Y ≈ 3 .* rand(MersenneTwister(2), M; vector_at = p)
+        A = rand(MersenneTwister(1), SymmetricMatrices(3))
+        @test rand(MersenneTwister(1), M; tolerance = 0.1) == project(M, A; tolerance = 0.1)
     end
     @testset "Hessian call" begin
         p = ones(3, 3) ./ 3

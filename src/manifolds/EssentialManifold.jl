@@ -124,6 +124,16 @@ exp(::EssentialManifold, ::Any...)
 
 get_iterator(::EssentialManifold) = Base.OneTo(2)
 
+@doc raw"""
+    isapprox(M::EssentialManifold, p, q; kwargs...)
+
+Test whether two points `p`, `q` on the [`EssentialManifold`](@ref) `M` are (approximately) the same.
+Since this is a quotient manifold, the test is performed by checking their distance, that is
+``d_{\mathcal M}(p,q) \approx 0`` with the classical `isapprox`. The `kwargs...` are passed on
+to this; `atol` defaults to 18 times the machine epsilon of the entries of `q`.
+"""
+isapprox(::EssentialManifold, ::Any, ::Any)
+
 function _isapprox(
         M::EssentialManifold,
         p,

@@ -243,6 +243,25 @@ where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian
 """
 inner(M::GeneralizedGrassmann, p, X, Y) = dot(X, M.B, Y)
 
+@doc raw"""
+    isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
+
+Test whether two tangent vectors `X`, `Y` at `p` on the [`GeneralizedGrassmann`](@ref) manifold `M` are (approximately)
+the same, that is whether ``\lVert X - Y \rVert_p \approx 0`` with the classical `isapprox`.
+The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(X, Y))`.
+"""
+isapprox(::GeneralizedGrassmann, ::Any, ::Any, ::Any)
+
+@doc raw"""
+    isapprox(M::GeneralizedGrassmann, p, q; kwargs...)
+
+Test whether two points `p`, `q` on the [`GeneralizedGrassmann`](@ref) manifold `M` are (approximately) the same.
+Since this is a quotient manifold, the test is performed by checking their distance if they are
+not equal, that is ``d_{\mathcal M}(p,q) \approx 0`` with the classical `isapprox`.
+The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(p, q))`.
+"""
+isapprox(::GeneralizedGrassmann, ::Any, ::Any)
+
 function _isapprox(M::GeneralizedGrassmann, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end

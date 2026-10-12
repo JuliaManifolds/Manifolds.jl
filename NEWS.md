@@ -210,6 +210,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The embedding of an `ArrayProjectiveSpace` that stores its size in a field stores its size in a field as well.
 * `is_point` on `SymmetricPositiveSemidefiniteFixedRank` checks the rank of `q*q'`, so that it accepts a point of rank `k` with a small last singular value.
 * `metric` returns `EuclideanMetric()` on the projective spaces, `Elliptope`, `Spectrahedron`, `SymmetricPositiveSemidefiniteFixedRank`, `KendallsShapeSpace` and `ParametricSurface`, so that `riemannian_gradient` converts a Euclidean gradient on them.
+* `rand` on `MultinomialSymmetric` passes its keyword arguments other than `σ` to the projection onto the manifold, as documented.
 
 ## [0.11.32] 2026-09-30
 
