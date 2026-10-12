@@ -12,8 +12,8 @@ apa^{\mathrm{H}} \geq 0 \text{ for all } a ∈ 𝔽
 ````
 where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
 and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
-We sometimes ``\operatorname{SPS}_{k,𝔽}(n)``, when distinguishing the real- and complex-valued
-manifold is important.
+We sometimes write ``\operatorname{SPS}_{k,𝔽}(n)`` when distinguishing the real- and
+complex-valued manifold is important.
 
 An element is represented by ``q ∈ 𝔽^{n×k}`` from the factorization ``p = qq^{\mathrm{H}}``.
 Note that since for any unitary (orthogonal) ``A ∈ 𝔽^{n×n}`` we have
@@ -61,12 +61,12 @@ Check whether `q` is a valid manifold point on the [`SymmetricPositiveSemidefini
 whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corresponding
 [`AbstractNumbers`](@extref ManifoldsBase number-system) `𝔽`.
 The symmetry of `p` is not explicitly checked since by using `q` p is symmetric by construction.
-The tolerance for the symmetry of `p` can and the rank of `q*q'` be set using `kwargs...`.
+The tolerance for the rank of `q*q'` can be set using `kwargs...`.
 """
 function check_point(M::SymmetricPositiveSemidefiniteFixedRank, q; kwargs...)
     n, k = get_parameter(M.size)
     p = q * q'
-    r = rank(p * p'; kwargs...)
+    r = rank(p; kwargs...)
     if r < k
         return DomainError(
             r,

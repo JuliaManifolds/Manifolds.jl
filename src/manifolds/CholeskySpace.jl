@@ -24,7 +24,7 @@ end
     check_point(M::CholeskySpace, p; kwargs...)
 
 Check whether the matrix `p` lies on the [`CholeskySpace`](@ref) `M`, i.e.
-it's size fits the manifold, it is a lower triangular matrix and has positive
+its size fits the manifold, it is a lower triangular matrix and has positive
 entries on the diagonal.
 The tolerance for the tests can be set using the `kwargs...`.
 """
@@ -39,13 +39,13 @@ function check_point(
     if !isapprox(norm(strictlyUpperTriangular(p)), 0.0; atol = atol, kwargs...)
         return DomainError(
             norm(UpperTriangular(p) - Diagonal(p)),
-            "The point $(p) does not lie on $(M), since it strictly upper triangular nonzero entries",
+            "The point $(p) does not lie on $(M), since it has nonzero entries in its strictly upper triangular part",
         )
     end
     if any(diag(p) .<= 0)
         return DomainError(
             min(diag(p)...),
-            "The point $(p) does not lie on $(M), since it hast nonpositive entries on the diagonal",
+            "The point $(p) does not lie on $(M), since it has nonpositive entries on the diagonal",
         )
     end
     return nothing

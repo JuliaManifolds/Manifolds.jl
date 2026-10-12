@@ -22,7 +22,7 @@ end
     distance(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
 
 Compute the distance on the manifold of [`SymmetricPositiveDefinite`](@ref)
-nmatrices, i.e. between two symmetric positive definite matrices `p` and `q`
+matrices, i.e. between two symmetric positive definite matrices `p` and `q`
 with respect to the [`LogCholeskyMetric`](@ref). The formula reads
 
 ````math
@@ -32,7 +32,7 @@ d_{\mathcal P(n)}(p,q) = \sqrt{
 ````
 
 where ``x`` and ``y`` are the Cholesky factors of ``p`` and ``q``, respectively,
-``⌊⋅⌋`` denbotes the strictly lower triangular matrix of its argument,
+``⌊⋅⌋`` denotes the strictly lower triangular matrix of its argument,
 and ``\lVert⋅\rVert_{\mathrm{F}}`` the Frobenius norm.
 """
 function distance(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, p, q)
@@ -176,7 +176,7 @@ The parallel transport is based on the parallel transport on [`CholeskySpace`](@
 Let ``x`` and ``y`` denote the Cholesky factors of `p` and `q`, respectively and
 ``W = x(x^{-1}Xx^{-\mathrm{T}})_\frac{1}{2}``, where ``(⋅)_\frac{1}{2}`` denotes the lower
 triangular matrix with the diagonal multiplied by ``\frac{1}{2}``. With ``V`` the parallel
-transport on [`CholeskySpace`](@ref) from ``x`` to ``y``. The formula hear reads
+transport of ``W`` on [`CholeskySpace`](@ref) from ``x`` to ``y``, the formula here reads
 
 ````math
 \mathcal P_{q←p}X = yV^{\mathrm{T}} + Vy^{\mathrm{T}}.

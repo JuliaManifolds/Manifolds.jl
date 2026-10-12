@@ -208,6 +208,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `riemannian_gradient` on `PositiveNumbers` accepts a point and a Euclidean gradient given as numbers.
 * `riemannian_Hessian` works on `PositiveVectors`, `PositiveMatrices` and `PositiveArrays`.
 * The embedding of an `ArrayProjectiveSpace` that stores its size in a field stores its size in a field as well.
+* `is_point` on `SymmetricPositiveSemidefiniteFixedRank` checks the rank of `q*q'`, so that it accepts a point of rank `k` with a small last singular value.
 
 ## [0.11.32] 2026-09-30
 
