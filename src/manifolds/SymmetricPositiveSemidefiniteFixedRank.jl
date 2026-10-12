@@ -104,6 +104,8 @@ function ManifoldsBase.get_embedding_type(::SymmetricPositiveSemidefiniteFixedRa
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
+metric(::SymmetricPositiveSemidefiniteFixedRank) = EuclideanMetric()
+
 @doc raw"""
     distance(M::SymmetricPositiveSemidefiniteFixedRank, p, q)
 

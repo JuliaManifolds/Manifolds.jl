@@ -54,6 +54,8 @@ using RecursiveArrayTools
     @test norm(M, p, X) ≈ sqrt(inner(M, p, X, X))
     @test project(M, p) ≈ p
     @test project(M, p, [1.0, 2.0, 3.0]) ≈ J * (J \ [1.0, 2.0, 3.0])
+    @test metric(M) == EuclideanMetric()
+    @test riemannian_gradient(M, p, [1.0, 2.0, 3.0]) == project(M, p, [1.0, 2.0, 3.0])
 
     @testset "forwarded atlas" begin
         A_parametric = get_default_atlas(M)

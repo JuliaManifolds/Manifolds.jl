@@ -158,6 +158,8 @@ function ManifoldsBase.get_embedding_type(::AbstractProjectiveSpace)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
+metric(::AbstractProjectiveSpace) = EuclideanMetric()
+
 embed(::AbstractProjectiveSpace, p) = p
 embed(::AbstractProjectiveSpace, p, X) = X
 
