@@ -116,6 +116,8 @@ function ManifoldsBase.get_embedding_type(::Elliptope)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
+metric(::Elliptope) = EuclideanMetric()
+
 """
     is_flat(::Elliptope)
 

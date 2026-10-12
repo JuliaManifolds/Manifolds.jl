@@ -110,6 +110,9 @@ end
 
     @test_throws ManifoldDomainError is_point(M, [1 0 1; 1 -1 0]; error = :error)
     @test_throws ManifoldDomainError is_vector(M, p1, [1 0 1; 1 -1 0]; error = :error)
+    @test metric(M) == EuclideanMetric()
+    Yamb = [0.3 -0.2 0.5; 0.1 0.4 -0.6]
+    @test riemannian_gradient(M, p1, Yamb) == project(M, p1, Yamb)
 
     @testset "exp/distance/norm" begin
         q1 = exp(M, p1, X1)

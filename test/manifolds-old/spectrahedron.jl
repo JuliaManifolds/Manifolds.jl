@@ -24,6 +24,8 @@ end
     @test is_vector(M, q, Y; error = :error)
     YN = [0.1 1.0; 1.0 0.1; 0.0 0.0; 0.0 0.0]
     @test_throws DomainError is_vector(M, q, YN; error = :error)
+    @test metric(M) == EuclideanMetric()
+    @test riemannian_gradient(M, q, YN) == project(M, q, YN)
     qE = similar(q)
     embed!(M, qE, q)
     qE2 = embed(M, q)

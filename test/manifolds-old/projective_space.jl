@@ -15,6 +15,8 @@ end
             @test representation_size(M) == (3,)
             @test manifold_dimension(M) == 2
             @test !is_flat(M)
+            @test metric(M) == EuclideanMetric()
+            @test riemannian_gradient(M, [1.0, 0.0, 0.0], [1.0, 1.0, 1.0]) == [0.0, 1.0, 1.0]
             @test is_flat(ProjectiveSpace(1))
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0])

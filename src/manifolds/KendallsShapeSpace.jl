@@ -94,6 +94,8 @@ function ManifoldsBase.get_embedding_type(::KendallsShapeSpace)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
+metric(::KendallsShapeSpace) = EuclideanMetric()
+
 """
     horizontal_component(::KendallsShapeSpace, p, X)
 

@@ -40,6 +40,8 @@ end
     Z = project(M, q, Yamb)
     @test isapprox(Z, project(M, q, Z); atol = 1.0e-14) # the projection is idempotent
     @test isapprox(q' * Z, (q' * Z)'; atol = 1.0e-14) # and lands in the horizontal space
+    @test metric(M) == EuclideanMetric()
+    @test riemannian_gradient(M, q, Yamb) == Z
 
     types = [Matrix{Float64}]
 

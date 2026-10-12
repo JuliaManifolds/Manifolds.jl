@@ -114,6 +114,8 @@ function ManifoldsBase.get_embedding_type(::Spectrahedron)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
+metric(::Spectrahedron) = EuclideanMetric()
+
 """
     is_flat(::Spectrahedron)
 
