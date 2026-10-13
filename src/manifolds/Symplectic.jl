@@ -2,11 +2,11 @@
     SymplecticMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The symplectic manifold consists of all ``2n×2n`` matrices which preserve
-the canonical symplectic form over ``𝔽^{2n×2n}×𝔽^{2n×2n}`` given by
+the canonical symplectic form over ``𝔽^{2n}×𝔽^{2n}`` given by
 
 ```math
-  \omega\colon 𝔽^{2n×2n}×𝔽^{2n×2n} → 𝔽,
-  \quad \omega(x, y) = p^{\mathrm{T}} J_{2n} q, \  x, y \in 𝔽^{2n×2n},
+  \omega\colon 𝔽^{2n}×𝔽^{2n} → 𝔽,
+  \quad \omega(x, y) = x^{\mathrm{T}} J_{2n} y, \  x, y \in 𝔽^{2n},
 ```
 
 where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
@@ -73,7 +73,7 @@ The extension of the [`RealSymplecticMetric`](@ref) at a point ``p \in \mathrm{S
 as an inner product over the embedding space ``ℝ^{2n×2n}``, i.e.
 
 ```math
-    ⟨x, y⟩_p = ⟨p^{-1}x, p^{-1}⟩_{\mathrm{Fr}}
+    ⟨x, y⟩_p = ⟨p^{-1}x, p^{-1}y⟩_{\mathrm{Fr}}
     = \operatorname{tr}(x^{\mathrm{T}}(pp^{\mathrm{T}})^{-1}y), \text{ for all } x, y \in ℝ^{2n×2n}.
 ```
 """
@@ -705,7 +705,7 @@ tangent vector ``X \in T_p\mathrm{Sp}(2n)`` if `vector_at` is set to
 a point ``p \in \mathrm{Sp}(2n)``.
 
 A random point on ``\mathrm{Sp}(2n)`` is constructed by generating a
-random Hamiltonian matrix ``Ω \in \mathfrak{sp}(2n,F)`` with norm `σ`,
+random Hamiltonian matrix ``Ω \in \mathfrak{sp}(2n,F)`` from Gaussian entries scaled by `σ`,
 and then transforming it to a symplectic matrix by applying the Cayley transform
 
 ```math

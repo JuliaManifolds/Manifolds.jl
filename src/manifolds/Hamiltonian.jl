@@ -10,7 +10,7 @@ A type to store a Hamiltonian matrix, that is a square matrix for which ``A^+ = 
 A^+ = J_{2n}^{\mathrm{T}}A^{\mathrm{T}}J_{2n}, \qquad J_{2n} = \begin{pmatrix} 0 & I_n\\-I_n & 0 \end{pmatrix},
 ```
 
-and ``I_n`` denotes the ``n×n``
+and ``I_n`` denotes the ``n×n`` identity matrix.
 """
 struct Hamiltonian{T, S <: AbstractMatrix{<:T}} <: AbstractMatrix{T}
     value::S
@@ -41,7 +41,7 @@ size(A::Hamiltonian) = size(A.value)
     HamiltonianMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
-consisting of (real-valued) hamiltonian matrices of size ``n×n``, i.e. the set
+consisting of Hamiltonian matrices of size ``2n×2n``, i.e. the set
 
 ````math
 \mathfrak{sp}(2n,𝔽) = \bigl\{p  ∈ 𝔽^{2n×2n}\ \big|\ p^+ = -p \bigr\},

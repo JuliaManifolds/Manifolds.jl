@@ -27,7 +27,7 @@ The symplectic Stiefel tangent space at ``p`` can be parametrized as [BendokatZi
 \end{align*}
 ```
 
-where ``Ω ∈ \mathfrak{sp}(2n,F)`` is [`Hamiltonian`](@ref) and ``p^s`` means
+where ``Ω ∈ \mathfrak{sp}(2k,F)`` is [`Hamiltonian`](@ref) and ``p^s`` means
 the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``.
 Here ``p^+`` denotes the [`symplectic_inverse`](@ref).
 
@@ -116,7 +116,7 @@ function check_point(M::SymplecticStiefel{ℝ}, p; kwargs...)
 end
 
 @doc raw"""
-    check_vector(M::SymplecticMatrices, p, X; kwargs...)
+    check_vector(M::SymplecticStiefel, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`SymplecticStiefel`](@ref),
 ``\mathrm{SpSt}(2n, 2k)`` manifold.
@@ -299,7 +299,7 @@ function get_total_space(M::SymplecticStiefel{ℝ, Tuple{Int, Int}})
 end
 
 @doc raw"""
-    inner(M::SymplecticStiefel, p, X. Y)
+    inner(M::SymplecticStiefel, p, X, Y)
 
 Compute the Riemannian inner product ``g^{\mathrm{SpSt}}`` at
 ``p ∈ \mathrm{SpSt}`` of tangent vectors ``Y, X ∈ T_p\mathrm{SpSt}``.
@@ -337,7 +337,7 @@ A =
 \begin{bmatrix}
 A_{1, 1} & A_{1, 2} \\
 A_{2, 1} & A_{2, 2}
-\end{bmatrix}, \quad A_{i, j} ∈ ℝ^{2n×2k}
+\end{bmatrix}, \quad A_{i, j} ∈ ℝ^{n×k}
 ````
 
 the symplectic inverse is defined as:
@@ -492,8 +492,8 @@ this code exploits the second tangent vector space parametrization of
 [`SymplecticStiefel`](@ref), that any ``X ∈ T_p\mathrm{SpSt}(2n, 2k)``
 can be written as ``X = pΩ_X + p^sB_X``.
 To generate random tangent vectors at ``p`` then, this function sets ``B_X = 0``
-and generates a random Hamiltonian matrix ``Ω_X ∈ \mathfrak{sp}(2n,F)`` with
-Frobenius norm of `σ` before returning ``X = pΩ_X``.
+and generates a random Hamiltonian matrix ``Ω_X ∈ \mathfrak{sp}(2k,F)`` from
+Gaussian entries scaled by `σ` before returning ``X = pΩ_X``.
 """
 rand(M::SymplecticStiefel; σ::Real = 1.0, kwargs...)
 
