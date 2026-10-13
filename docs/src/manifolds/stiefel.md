@@ -24,9 +24,9 @@ Any ``X∈T_p\mathcal M``, ``p∈\mathcal M``, can be written as
 ```math
 X = pA + (I_n-pp^{\mathrm{T}})B,
 \quad
-A ∈ ℝ^{p×p} \text{ skew-symmetric},
+A ∈ ℝ^{k×k} \text{ skew-symmetric},
 \quad
-B ∈ ℝ^{n×p} \text{ arbitrary.}
+B ∈ ℝ^{n×k} \text{ arbitrary.}
 ```
 
 In the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`), the elements from ``A`` are counted twice (i.e. weighted with a factor of 2).

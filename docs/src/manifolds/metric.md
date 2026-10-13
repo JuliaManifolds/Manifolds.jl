@@ -32,14 +32,6 @@ log_local_metric_density(::AbstractManifold, ::Any, ::AbstractBasis)
 det_local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 ```
 
-## Types
-
-```@autodocs
-Modules = [Manifolds, ManifoldsBase]
-Pages = ["manifolds/MetricManifold.jl"]
-Order = [:type]
-```
-
 ## Implement Different Metrics on the same Manifold
 
 In order to distinguish different metrics on one manifold, one can introduce two [`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`)s and use this type to dispatch on the metric, see [`SymmetricPositiveDefinite`](@ref).

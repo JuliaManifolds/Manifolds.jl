@@ -142,7 +142,7 @@ For the case of [`Hyperbolic`](@ref)`(2)` there is a plotting available based on
     [RecipesBase.jl](http://juliaplots.org/RecipesBase.jl/stable/) is loaded.
 
 We again have two different recipes, one for points, one for tangent vectors, where the first one again can be equipped with geodesics between the points.
-In the following example we generate 7 points on an ellipse in the [Hyperboloid model](#hyperboloid-model).
+In the following example we generate 7 points on an ellipse in the [hyperboloid model](@ref hyperboloid_model).
 
 ```@example poincarehalfplane
 using Manifolds, Plots

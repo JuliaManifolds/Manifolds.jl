@@ -51,7 +51,7 @@ for (name, file) in tutorials_menu.second
         global all_tutorials_exist = false
         if !run_quarto
             @warn "Tutorial $name does not exist at $fn."
-            if (!isfile(fn)) && (endswith(file, "getstarted.md"))
+            if (!isfile(fn)) && (basename(file) in ("getstarted.md", "hand-gestures.md"))
                 @warn "Generating empty file, since this tutorial is linked to from the documentation."
                 touch(fn)
             end
