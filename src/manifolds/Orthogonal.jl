@@ -12,7 +12,7 @@ This is the same manifold as the [`Stiefel`](@ref)`(n, n, ℂ)` manifold.
 
 # Constructor
 
-    OrthogonalMatrices(n)
+    OrthogonalMatrices(n; parameter::Symbol=:type)
 """
 const OrthogonalMatrices{n} = GeneralUnitaryMatrices{ℝ, n, AbsoluteDeterminantOneMatrixType}
 

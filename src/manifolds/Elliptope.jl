@@ -17,7 +17,7 @@ symmetric positive semidefinite matrices of rank ``k`` with unit diagonal, i.e.,
 And this manifold is working solely on the matrices ``q``. Note that this ``q`` is not unique,
 indeed for any orthogonal matrix ``A`` we have ``(qA)(qA)^{\mathrm{T}} = qq^{\mathrm{T}} = p``,
 so the manifold implemented here is the quotient manifold. The unit diagonal translates to
-unit norm columns of ``q``.
+unit norm rows of ``q``.
 
 The tangent space at ``p``, denoted ``T_p\mathcal E(n,k)``, is also represented by matrices
 ``Y\in ℝ^{n×k}`` and reads as
@@ -56,10 +56,10 @@ end
 
 checks, whether `q` is a valid representation of a point ``p=qq^{\mathrm{T}}`` on the
 [`Elliptope`](@ref) `M`, i.e. is a matrix
-of size `(N,K)`, such that ``p`` is symmetric positive semidefinite and has unit trace.
+of size `(N,K)`, such that ``p`` is symmetric positive semidefinite and has unit diagonal.
 Since by construction ``p`` is symmetric, this is not explicitly checked.
 Since ``p`` is by construction positive semidefinite, this is not checked.
-The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
+The tolerance for the unit diagonal can be set using the `kwargs...`.
 """
 function check_point(M::Elliptope, q; kwargs...)
     row_norms_sq = sum(abs2, q; dims = 2)
@@ -77,12 +77,12 @@ end
 
 Check whether ``X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}`` is a tangent vector to
 ``p=qq^{\mathrm{T}}`` on the [`Elliptope`](@ref) `M`,
-i.e. `Y` has to be of same dimension as `q` and a ``X`` has to be a symmetric matrix with
+i.e. `Y` has to be of same dimension as `q` and `X` has to be a symmetric matrix with
 zero diagonal.
 
 The diagonal has to vanish up to `max(atol, 2 * rtol * norm(Y))`.
 The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
-Note that symmetric of ``X`` holds by construction an is not explicitly checked.
+Note that symmetry of `X` holds by construction and is not explicitly checked.
 """
 function check_vector(
         M::Elliptope,

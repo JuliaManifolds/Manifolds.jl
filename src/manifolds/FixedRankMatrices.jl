@@ -32,7 +32,7 @@ The (default) metric of this manifold is obtained by restricting the metric
 on ``ℝ^{m×n}`` to the tangent bundle [Vandereycken:2013](@cite).
 
 # Constructor
-    FixedRankMatrices(m, n, k[, field=ℝ])
+    FixedRankMatrices(m, n, k[, field=ℝ]; parameter::Symbol=:type)
 
 Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
 """

@@ -758,14 +758,14 @@ Return the array dimensions required to represent an element on the
 """
 representation_size(M::Euclidean) = get_parameter(M.size)
 
-function retract(M::Euclidean{𝔽, TypeParameter{Tuple{}}}, p::Number, q::Number) where {𝔽}
-    return retract(M, p, q, ExponentialRetraction())
+function retract(M::Euclidean{𝔽, TypeParameter{Tuple{}}}, p::Number, X::Number) where {𝔽}
+    return retract(M, p, X, ExponentialRetraction())
 end
 function retract(
         M::Euclidean{𝔽, TypeParameter{Tuple{}}},
-        p::Number, q::Number, ::ExponentialRetraction,
+        p::Number, X::Number, ::ExponentialRetraction,
     ) where {𝔽}
-    return exp(M, p, q)
+    return exp(M, p, X)
 end
 
 @doc raw"""

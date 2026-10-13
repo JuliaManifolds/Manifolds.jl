@@ -92,7 +92,7 @@ end
     struct FiberBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
 
 Inverse retraction of the point `y` at point `p` from vector bundle `B` over manifold
-`B.fiber` (denoted ``\mathcal M``). The inverse retraction is derived as a product manifold-style
+`B.manifold` (denoted ``\mathcal M``). The inverse retraction is derived as a product manifold-style
 approximation to the logarithmic map in the Sasaki metric. The considered product manifold
 is the product between the manifold ``\mathcal M`` and the topological vector space isometric
 to the fiber.
@@ -120,7 +120,7 @@ struct FiberBundleInverseProductRetraction <: AbstractInverseRetractionMethod en
     struct FiberBundleProductRetraction <: AbstractRetractionMethod end
 
 Product retraction map of tangent vector ``X`` at point ``p`` from vector bundle `B` over
-manifold `B.fiber` (denoted ``\mathcal M``). The retraction is derived as a product manifold-style
+manifold `B.manifold` (denoted ``\mathcal M``). The retraction is derived as a product manifold-style
 approximation to the exponential map in the Sasaki metric. The considered product manifold
 is the product between the manifold ``\mathcal M`` and the topological vector space isometric
 to the fiber.
@@ -393,7 +393,7 @@ end
     zero_vector(B::FiberBundle, p)
 
 Zero tangent vector at point `p` from the fiber bundle `B`
-over manifold `B.fiber` (denoted ``\mathcal M``). The zero vector belongs to the space ``T_{p}B``
+over manifold `B.manifold` (denoted ``\mathcal M``). The zero vector belongs to the space ``T_{p}B``
 
 Notation:
   * The point ``p = (x_p, V_p)`` where ``x_p ∈ \mathcal M`` and ``V_p`` belongs to the

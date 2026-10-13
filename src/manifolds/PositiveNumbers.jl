@@ -278,8 +278,8 @@ project(::PositiveNumbers, ::Real, X::Real) = X
 
 project!(::PositiveNumbers, Y, p, X) = (Y .= X)
 
-retract(M::PositiveNumbers, p, q) = retract(M, p, q, ExponentialRetraction())
-retract(M::PositiveNumbers, p, q, ::ExponentialRetraction) = exp(M, p, q)
+retract(M::PositiveNumbers, p, X) = retract(M, p, X, ExponentialRetraction())
+retract(M::PositiveNumbers, p, X, ::ExponentialRetraction) = exp(M, p, X)
 
 representation_size(::PositiveNumbers) = ()
 

@@ -11,7 +11,7 @@ where the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 # Constructor
 
-    InvertibleMatrices(n::Int, field::AbstractNumbers=ℝ)
+    InvertibleMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of ``n×n`` invertible matrices.
 """

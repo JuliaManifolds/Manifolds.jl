@@ -40,7 +40,7 @@ This is equivalent to [`SkewHermitianMatrices(n, ℝ)`](@ref).
 
 # Constructor
 
-    SkewSymmetricMatrices(n::Int)
+    SkewSymmetricMatrices(n::Int; parameter::Symbol=:type)
 """
 const SkewSymmetricMatrices{T} = SkewHermitianMatrices{ℝ, T}
 

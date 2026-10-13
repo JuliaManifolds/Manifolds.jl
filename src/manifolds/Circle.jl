@@ -394,10 +394,10 @@ manifold_volume(::Circle) = 2 * π
 @doc raw"""
     mean(M::Circle{ℝ}, x::AbstractVector[, w::AbstractWeights])
 
-Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
-the [`Circle`](@ref) ``𝕊^1``, represented by real numbers, i.e. the angular mean
+Compute the (optionally weighted) angular mean of the ``n`` points `x` on the
+[`Circle`](@ref) ``𝕊^1``, represented by real numbers, i.e.
 ````math
-\operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\sin(x_i) \Bigr).
+\operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\cos(x_i) \Bigr).
 ````
 """
 mean(::Circle{ℝ}, ::Any)
@@ -526,8 +526,8 @@ function Random.rand!(
     return pX
 end
 
-retract(M::Circle, p, q) = retract(M, p, q, ExponentialRetraction())
-retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)
+retract(M::Circle, p, X) = retract(M, p, X, ExponentialRetraction())
+retract(M::Circle, p, X, m::ExponentialRetraction) = exp(M, p, X)
 
 representation_size(::Circle) = ()
 

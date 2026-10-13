@@ -101,7 +101,7 @@ triangular matrix with positive diagonal `p` towards the lower triangular matrix
 The formula reads
 
 ````math
-\exp_p X = ⌊ p ⌋ + ⌊ X ⌋ + \operatorname{diag}(p)
+\exp_p X = ⌊ p ⌋ + ⌊ X ⌋ +
 \operatorname{diag}(p)\exp\bigl( \operatorname{diag}(X)\operatorname{diag}(p)^{-1}\bigr),
 ````
 

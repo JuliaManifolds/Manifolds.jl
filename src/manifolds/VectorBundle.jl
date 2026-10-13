@@ -117,7 +117,7 @@ end
     inner(B::VectorBundle, p, X, Y)
 
 Inner product of tangent vectors `X` and `Y` at point `p` from the
-vector bundle `B` over manifold `B.fiber` (denoted ``\mathcal M``).
+vector bundle `B` over manifold `B.manifold` (denoted ``\mathcal M``).
 
 Notation:
   * The point ``p = (x_p, V_p)`` where ``x_p ∈ \mathcal M`` and ``V_p`` belongs to the
@@ -184,7 +184,7 @@ is_flat(M::VectorBundle) = is_flat(M.manifold)
     project(B::VectorBundle, p)
 
 Project the point `p` from the ambient space of the vector bundle `B`
-over manifold `B.fiber` (denoted ``\mathcal M``) to the vector bundle.
+over manifold `B.manifold` (denoted ``\mathcal M``) to the vector bundle.
 
 Notation:
   * The point ``p = (x_p, V_p)`` where ``x_p`` belongs to the ambient space of ``\mathcal M``

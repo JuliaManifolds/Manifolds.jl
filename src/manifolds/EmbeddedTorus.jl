@@ -41,7 +41,7 @@ function check_point(M::EmbeddedTorus, p; kwargs...)
 end
 
 @doc raw"""
-    check_vector(M::EmbeddedTorus, p, X; atol=eps(eltype(p)), kwargs...)
+    check_vector(M::EmbeddedTorus, p, X; atol=eps(float(eltype(p))), kwargs...)
 
 Check whether `X` is a valid vector tangent to `p` on the [`EmbeddedTorus`](@ref) `M`.
 The method checks if the vector `X` is orthogonal to the vector normal to the torus,

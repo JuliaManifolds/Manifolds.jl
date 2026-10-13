@@ -17,7 +17,7 @@ The tangent space at any point `p` is the set of matrices with trace 0.
 
 # Constructor
 
-    DeterminantOneMatrices(n::Int, field::AbstractNumbers=ℝ)
+    DeterminantOneMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of ``n×n`` matrices of determinant one.
 """

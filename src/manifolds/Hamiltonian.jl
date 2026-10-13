@@ -56,7 +56,7 @@ matrix multiplication as group operation.
 
 # Constructor
 
-    HamiltonianMatrices(2n::Int, field::AbstractNumbers=ℝ)
+    HamiltonianMatrices(2n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of ``2n×2n`` Hamiltonian matrices.
 """

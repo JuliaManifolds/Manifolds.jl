@@ -4,8 +4,8 @@
 The essential manifold is the space of the essential matrices which is represented as
 a quotient space of the [`Rotations`](@ref) manifold product ``\mathrm{SO}(3)^2``.
 
-Let ``R_x(θ), R_y(θ), R_x(θ) \in ℝ^{x×3}`` denote the rotation around the ``z``,
-``y``, and ``x`` axis in ``ℝ^3``, respectively, and further the groups
+Let ``R_x(θ), R_y(θ), R_z(θ) \in ℝ^{3×3}`` denote the rotation around the ``x``,
+``y``, and ``z`` axis in ``ℝ^3``, respectively, and further the groups
 
 ```math
 H_z = \bigl\{(R_z(θ),R_z(θ))\ \big|\ θ ∈ [-π,π) \bigr\}
@@ -216,7 +216,6 @@ function log!(M::EssentialManifold, X, p, q)
         t, _ = dist_min_angle_pair(p, q2)
     end
     Rz = [cos(t) -sin(t) 0; sin(t) cos(t) 0; 0 0 1]
-    representative_q = zeros(size(q2))
     representative_q = [Rz * q2[1], Rz * q2[2]]
 
     # use the logarithmic map in SO(3)^2 and the corresponding geodesic between p and representative_q to compute the solution
@@ -419,7 +418,7 @@ function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t
 end
 
 @doc raw"""
-    manifold_dimension(M::EssentialManifold{is_signed, ℝ})
+    manifold_dimension(M::EssentialManifold)
 
 Return the manifold dimension of the [`EssentialManifold`](@ref), which is `5`[TronDaniilidis:2017](@cite).
 """

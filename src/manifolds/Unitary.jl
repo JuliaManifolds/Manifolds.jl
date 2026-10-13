@@ -25,7 +25,7 @@ If you prefer the representation as `X` you can use the [`Stiefel`](@ref)`(n, n,
 
 # Constructor
 
-    UnitaryMatrices(n, 𝔽::AbstractNumbers=ℂ)
+    UnitaryMatrices(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
 
 see also [`OrthogonalMatrices`](@ref) for the real valued case.
 """
