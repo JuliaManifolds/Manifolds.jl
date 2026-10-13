@@ -16,13 +16,13 @@ see [`minkowski_metric`](@ref) for the formula.
 struct MinkowskiMetric <: LorentzMetric end
 
 @doc raw"""
-    Lorentz{T} = MetricManifold{Euclidean{T,ℝ},LorentzMetric}
+    Lorentz{T} = MetricManifold{ℝ,Euclidean{ℝ,T},<:LorentzMetric}
 
 The Lorentz manifold (or Lorentzian) is a pseudo-Riemannian manifold.
 
 # Constructor
 
-    Lorentz(n[, metric=MinkowskiMetric()])
+    Lorentz(n[, m=MinkowskiMetric()]; parameter::Symbol=:type)
 
 Generate the Lorentz manifold of dimension `n` with the [`LorentzMetric`](@ref) `m`,
 which is by default set to the [`MinkowskiMetric`](@ref).

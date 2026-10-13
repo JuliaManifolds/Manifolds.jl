@@ -12,6 +12,8 @@ translation and scaling and rotation of all points [Kendall:1984](@cite)[Kendall
     KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
 
 # References
+
+[Kendall:1984](@cite), [Kendall:1989](@cite)
 """
 struct KendallsShapeSpace{T} <: AbstractDecoratorManifold{ℝ}
     size::T
@@ -171,7 +173,7 @@ is_flat(M::KendallsShapeSpace) = false
     log(M::KendallsShapeSpace, p, q)
 
 Compute the logarithmic map on [`KendallsShapeSpace`](@ref) `M`.
-See the [`exp`](@ref exp(::KendallsShapeSpace, ::Any, ::Any)onential map for more details
+See the [`exp`](@ref exp(::KendallsShapeSpace, ::Any, ::Any))onential map for more details.
 """
 log(M::KendallsShapeSpace, p, q)
 

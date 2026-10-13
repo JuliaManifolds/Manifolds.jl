@@ -8,21 +8,21 @@ positive entries such that each column sums to one, i.e.
 ````math
 \begin{aligned}
 \mathcal{SP}^+(n) \coloneqq \bigl\{
-    p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m,\\
+    p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,n,\\
 & p^\mathrm{T} = p,\\
-& p\mathbf{1}_n = \mathbf{1}_n\\
-a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{\mathbf{0}_n\}
+& p\mathbf{1}_n = \mathbf{1}_n,\\
+& a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{\mathbf{0}_n\}
 \bigr\},
 \end{aligned}
 ````
 
-where ``\mathbf{1}_n`` and ``\mathbr{0}_n`` are the vectors of length ``n``
+where ``\mathbf{1}_n`` and ``\mathbf{0}_n`` are the vectors of length ``n``
 containing ones and zeros, respectively. More details about this manifold can be found in
 [DouikHassibi:2019](@cite).
 
 # Constructor
 
-    MultinomialSymmetricPositiveDefinite(n)
+    MultinomialSymmetricPositiveDefinite(n::Int; parameter::Symbol=:type)
 
 Generate the manifold of matrices ``\mathbb R^{n×n}`` that are symmetric, positive definite, and doubly stochastic.
 """

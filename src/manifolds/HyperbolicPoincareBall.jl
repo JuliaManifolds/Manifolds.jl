@@ -60,7 +60,6 @@ end
 function check_size(M::Hyperbolic, p::PoincareBallPoint)
     N = get_parameter(M.size)[1]
     if size(p.value, 1) != N
-        !(norm(p.value) < 1)
         return DomainError(
             size(p.value, 1),
             "The point $p does not lie on $M since its length is not $N.",

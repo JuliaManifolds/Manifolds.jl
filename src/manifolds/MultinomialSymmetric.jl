@@ -6,7 +6,7 @@ positive entries such that each column sums to one, i.e.
 
 ````math
 \begin{aligned}
-\mathcal{SP}(n) \coloneqq \bigl\{p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m,\\
+\mathcal{SP}(n) \coloneqq \bigl\{p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,n,\\
 & p^\mathrm{T} = p,\\
 & p\mathbf{1}_n = \mathbf{1}_n
 \bigr\},
@@ -35,7 +35,7 @@ More details can be found in Section IV [DouikHassibi:2019](@cite).
 
 # Constructor
 
-    MultinomialSymmetric(n)
+    MultinomialSymmetric(n::Int; parameter::Symbol=:type)
 
 Generate the manifold of matrices ``ℝ^{n×n}`` that are doubly stochastic and symmetric.
 """
@@ -51,7 +51,7 @@ end
 @doc raw"""
     check_point(M::MultinomialSymmetric, p)
 
-Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(m,n)` `M`,
+Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(n)` `M`,
 i.e. is a symmetric matrix with positive entries whose rows sum to one.
 """
 function check_point(M::MultinomialSymmetric, p; kwargs...)
