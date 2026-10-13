@@ -670,7 +670,7 @@ That is,
 
 ````math
 (T_p\mathrm{Sp}(2n))^{\perp_g}
- = \{Y ∈ ℝ^{2n×2n} : g_p(Y, X) = 0 \test{ for all } X \in T_p\mathrm{Sp}(2n)\}.
+ = \{Y ∈ ℝ^{2n×2n} : g_p(Y, X) = 0 \text{ for all } X \in T_p\mathrm{Sp}(2n)\}.
 ````
 
 The closed form projection operator onto the normal space is given by [GaoSonAbsilStykel:2021](@cite)

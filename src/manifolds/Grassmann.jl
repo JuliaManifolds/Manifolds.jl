@@ -43,10 +43,10 @@ Note that a point ``p ∈ \operatorname{Gr}(n,k)`` might be represented by
 different matrices (i.e. matrices with unitary column vectors that span
 the same subspace).
 
-For a representation of points as orthogonal projectors. Here
+Points can also be represented as orthogonal projectors, where
 
 ```math
-\operatorname{Gr}(n,k) := \bigl\{ p \in \mathbb R^{n×n} : p = p^˜\mathrm{T}, p^2 = p, \operatorname{rank}(p) = k\},
+\operatorname{Gr}(n,k) := \bigl\{ p \in \mathbb R^{n×n} : p = p^{\mathrm{T}}, p^2 = p, \operatorname{rank}(p) = k\},
 ```
 
 with tangent space
@@ -251,7 +251,7 @@ for
 """
 convert(::Type{ProjectorPoint}, p::AbstractMatrix) = ProjectorPoint(p * p')
 @doc raw"""
-    convert(::Type{ProjectorPoint}, ::Stiefelpoint)
+    convert(::Type{ProjectorPoint}, ::StiefelPoint)
 
 Convert a point `p` on [`Stiefel`](@ref) that also represents a point (i.e. subspace) on [`Grassmann`](@ref)
 to a projector representation of said subspace, i.e. compute the [`canonical_project!`](@ref)

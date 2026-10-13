@@ -678,7 +678,7 @@ function get_vector_orthonormal!(
 end
 
 @doc raw"""
-    injectivity_radius(G::GeneraliUnitaryMatrices)
+    injectivity_radius(M::GeneralUnitaryMatrices)
 
 Return the injectivity radius for general unitary matrix manifolds, which is[^1]
 
@@ -689,13 +689,13 @@ Return the injectivity radius for general unitary matrix manifolds, which is[^1]
 injectivity_radius(::GeneralUnitaryMatrices) = π
 
 @doc raw"""
-    injectivity_radius(G::SpecialOrthogonal)
-    injectivity_radius(G::Orthogonal)
     injectivity_radius(M::Rotations)
+    injectivity_radius(M::OrthogonalMatrices)
     injectivity_radius(M::Rotations, ::ExponentialRetraction)
+    injectivity_radius(M::OrthogonalMatrices, ::ExponentialRetraction)
 
-Return the radius of injectivity on the [`Rotations`](@ref) manifold `M`, which is ``π\sqrt{2}``.
-[^1]
+Return the radius of injectivity on the [`Rotations`](@ref) and [`OrthogonalMatrices`](@ref) `M`
+of ``n×n`` matrices, which is ``π\sqrt{2}`` for ``n ≥ 2``[^1] and ``0`` for ``n = 1``.
 
 [^1]:
     > For a derivation of the injectivity radius, see [sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/](https://sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/).
@@ -724,7 +724,7 @@ inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
 """
     is_flat(M::GeneralUnitaryMatrices)
 
-Return true if [`GeneralUnitaryMatrices`](@ref) `M` is SO(2) or U(1) and false otherwise.
+Return true if [`GeneralUnitaryMatrices`](@ref) `M` is O(2), SO(2), U(1) or SU(1) and false otherwise.
 """
 is_flat(M::GeneralUnitaryMatrices) = false
 is_flat(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}) = true
@@ -1211,9 +1211,9 @@ function riemann_tensor!(::GeneralUnitaryMatrices, Xresult, p, X, Y, Z)
 end
 
 @doc raw"""
-    volume_density(M::GeneralUnitaryMatrices{<:Any,ℝ}, p, X)
+    volume_density(M::GeneralUnitaryMatrices{ℝ}, p, X)
 
-Compute volume density function of a sphere, i.e. determinant of the differential of
+Compute volume density function of `M`, i.e. determinant of the differential of
 exponential map `exp(M, p, X)`. It is derived from Eq. (4.1) and Corollary 4.4
 in [ChevallierLiLuDunson:2022](@cite). See also Theorem 4.1 in [FalorsideHaanDavidsonForre:2019](@cite),
 (note that it uses a different convention).

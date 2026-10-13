@@ -123,12 +123,11 @@ Checks whether `X` is a valid tangent vector at `p` on the [`SymplecticStiefel`]
 
 The check consists of verifying that ``H = p^{+}X ∈ 𝔤_{2k}``, where ``𝔤``
 is the Lie Algebra of the symplectic group ``\mathrm{Sp}(2k)``, that is
-the set of [`HamiltonianMatrices`])(@ref), where ``(⋅)^+`` denotes the [`symplectic_inverse`](@ref).
+the set of [`HamiltonianMatrices`](@ref), where ``(⋅)^+`` denotes the [`symplectic_inverse`](@ref).
 """
 check_vector(::SymplecticStiefel, ::Any...)
 
 function check_vector(M::SymplecticStiefel{𝔽}, p, X::T; kwargs...) where {T, 𝔽}
-    n, k = get_parameter(M.size)
     # From Bendokat-Zimmermann: T_pSpSt(2n, 2k) = \{p*H | H^{+} = -H  \}
     H = inv(M, p) * X  # ∈ ℝ^{2k×2k}, should be Hamiltonian.
 

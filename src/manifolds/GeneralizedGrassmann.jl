@@ -38,7 +38,7 @@ The manifold is named after
 
 # Constructor
 
-    GeneralizedGrassmann(n, k, B=I_n, field=ℝ)
+    GeneralizedGrassmann(n, k, B=I_n, field=ℝ; parameter::Symbol=:type)
 
 Generate the (real-valued) Generalized Grassmann manifold of ``n×k`` dimensional
 orthonormal matrices with scalar product `B`.
@@ -73,13 +73,13 @@ end
     change_representer(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
 
 Change `X` to the corresponding representer of a cotangent vector at `p` with respect to the scaled metric
-of the [`GeneralizedGrassmann`](@ref) `M`, i.e, since
+of the [`GeneralizedGrassmann`](@ref) `M`. Since
 
 ```math
-g_p(X,Y) = \operatorname{tr}(Y^{\mathrm{H}}BZ) = \operatorname{tr}(X^{\mathrm{H}}Z) = ⟨X,Z⟩
+g_p(Y,Z) = \operatorname{tr}(Y^{\mathrm{H}}BZ) = \operatorname{tr}(X^{\mathrm{H}}Z) = ⟨X,Z⟩
 ```
 
-has to hold for all ``Z``, where the repreenter `X` is given, the resulting representer with
+has to hold for all ``Z``, where the representer `X` is given, the resulting representer with
 respect to the metric on the [`GeneralizedGrassmann`](@ref) is given by ``Y = B^{-1}X``.
 """
 change_representer(::GeneralizedGrassmann, ::EuclideanMetric, ::Any, ::Any)

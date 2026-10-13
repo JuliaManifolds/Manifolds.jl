@@ -14,12 +14,12 @@ where ``𝔽 ∈ \{ℝ, ℂ\}``,
 ``I_k \in \mathbb R^{k×k}`` denotes the ``k×k`` identity matrix.
 
 
-In the case ``B=I_k`` one gets the usual [`Stiefel`](@ref) manifold.
+In the case ``B=I_n`` one gets the usual [`Stiefel`](@ref) manifold.
 
 The tangent space at a point ``p\in\mathcal M=\operatorname{St}(n,k,B)`` is given by
 
 ````math
-T_p\mathcal M = \{ X \in 𝔽^{n×k} : p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp=0_n\},
+T_p\mathcal M = \{ X \in 𝔽^{n×k} : p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp=0_k\},
 ````
 where ``0_k`` is the ``k×k`` zero matrix.
 

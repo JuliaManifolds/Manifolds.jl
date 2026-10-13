@@ -131,7 +131,7 @@ end
 
 
 @doc raw"""
-    get_coordinates(M::Grasmmann{ℝ}, p, X, B::DefaultOrthonormalBasis)
+    get_coordinates(M::Grassmann{ℝ}, p, X, B::DefaultOrthonormalBasis)
 
 Given a point `p` on the [`Grassmann`](@ref) manifold `M` in Stiefel representation,
 i.e. ``p ∈ ℝ^{n×k}`` compute the coordinates ``c ∈ ℝ^{k(n-k)}`` representing the
@@ -163,7 +163,6 @@ VC_i = X_i, \qquad i=1,…,k.
 get_coordinates(::Grassmann{ℝ}, p, c, ::DefaultOrthonormalBasis)
 
 function get_coordinates_orthonormal!(M::Grassmann{ℝ}, c, p, X, ::RealNumbers)
-    n, k = get_parameter(M.size)
     V = nullspace(p') # from SVD, so we have (n-k) ON columns in R^n
     c .= vec(V \ X)
     return c
@@ -189,7 +188,7 @@ function ManifoldsBase.get_embedding_type(::Stiefel, ::Type{<:StiefelPoint})
 end
 
 @doc raw"""
-    get_vector(M::Grasmmann{ℝ}, p, c, B::DefaultOrthonormalBasis)
+    get_vector(M::Grassmann{ℝ}, p, c, B::DefaultOrthonormalBasis)
 
 Given a point `p` on the [`Grassmann`](@ref) manifold `M` in Stiefel representation,
 i.e. ``p ∈ ℝ^{n×k}`` reconstruct a tangent vector with respect to the [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`)
@@ -496,7 +495,7 @@ function riemannian_Hessian!(M::Grassmann, Y, p, G, H, X)
 end
 
 @doc raw"""
-    riemann_tensor(::Grassmann{<:Any,ℝ}, p, X, Y, Z)
+    riemann_tensor(::Grassmann{ℝ}, p, X, Y, Z)
 
 Compute the value of Riemann tensor on the real [`Grassmann`](@ref) manifold.
 The formula reads [Rentmeesters:2011](@cite)

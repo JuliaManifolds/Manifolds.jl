@@ -339,7 +339,7 @@ Return the dimension of the hyperbolic space manifold ``\mathcal H^n``, i.e. ``\
 manifold_dimension(M::Hyperbolic) = get_parameter(M.size)[1]
 
 @doc raw"""
-    manifold_dimension(M::Hyperbolic)
+    manifold_volume(M::Hyperbolic)
 
 Return the volume of the hyperbolic space manifold ``\mathcal H^n``, i.e. infinity.
 """

@@ -66,13 +66,13 @@ end
 
 Check whether the [`ProjectorTangentVector`](@ref) `X` is from the tangent space ``T_p\operatorname{Gr}(n,k) ``
 at the [`ProjectorPoint`](@ref) `p` on the [`Grassmann`](@ref) manifold ``\operatorname{Gr}(n,k)``.
-This means that `X` has to be symmetric and that
+This means that `X` has to be Hermitian, ``X^{\mathrm{H}} = X``, and that
 
 ```math
 Xp + pX = X
 ```
 
-must hold, where the `kwargs` can be used to check both for symmetrix of ``X```
+must hold, where the `kwargs` can be used to check both ``X^{\mathrm{H}} = X``
 and this equality up to a certain tolerance.
 """
 function check_vector(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector; kwargs...)

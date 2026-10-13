@@ -72,7 +72,7 @@ end
     inner(::SymplecticGrassmann, p, X, Y)
 
 Compute the Riemannian inner product ``g^{\mathrm{SpGr}}_p(X,Y)``
-on the [`SymplecticGrassmann`](@ref) manifold `\mathrm{SpGr}``.
+on the [`SymplecticGrassmann`](@ref) manifold ``\mathrm{SpGr}``.
 
 For the case where ``p`` is represented by a point on the [`SymplecticStiefel`](@ref) manifold
 acting as a representant of its equivalence class ``[p] \in \mathrm{SpGr}``
@@ -163,7 +163,6 @@ where ``J_{2n}`` denotes the [`SymplecticElement`](@ref), and
 riemannian_gradient(M::SymplecticGrassmann, p, Y; kwargs...)
 
 function riemannian_gradient!(M::SymplecticGrassmann, X, p, Y; kwargs...)
-    n, k = get_parameter(M.size)
     J = SymplecticElement(p, X)
     # Since J' = -J We can write (J'YJ) = -J * (YJ)
     JTYJ = (-J * (Y * J))
