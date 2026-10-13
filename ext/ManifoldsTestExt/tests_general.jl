@@ -397,7 +397,6 @@ function Manifolds.test_manifold(
         for (p, X) in zip(pts, tv)
             atol = Manifolds.find_eps(p) * projection_atol_multiplier
             X_emb = embed(M, p, X)
-            p_emb = embed(M, p)
             Test.@test isapprox(M, p, X, project(M, p, X_emb); atol = atol)
             if is_mutating
                 X2 = allocate(X)
@@ -762,12 +761,16 @@ function Manifolds.test_manifold(
 end
 
 """
-    Manifolds.test_parallel_transport(M,P; to=true, direction=true)
+    Manifolds.test_parallel_transport(M, P[, Ξ]; to=true, direction=true, mutating=true)
 
-Generic tests for parallel transport on `M`given at least two pointsin `P`.
+Generic tests for parallel transport on `M` given at least two points in `P`.
+The tangent vectors `Ξ`, with `Ξ[i]` at `P[i]`, default to
+`Ξ[i] = inverse_retract(M, P[i], P[i+1], default_inverse_retraction_method(M))`.
 
 The single functions to transport `to` (a point) or (in a) `direction`
-are sub-tests that can be activated by the keywords arguments
+are sub-tests that can be activated by the keyword arguments of the same name,
+and `mutating` adds the checks of the mutating variants `parallel_transport_to!` and
+`parallel_transport_direction!`.
 
 !!! note
     This function is soon deprecated and will be replaced by a more systematic way in `Manifolds.Test`

@@ -70,7 +70,7 @@ To install the package just type
 using Pkg; Pkg.add("Manifolds")
 ```
 
-Then you can directly start, for example to stop half way from the north pole on the [`Sphere`](@ref) to a point on the the equator, you can generate the [`shortest_geodesic`](@extref `ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold, Any, Any}`).
+Then you can directly start, for example to stop half way from the north pole on the [`Sphere`](@ref) to a point on the equator, you can generate the [`shortest_geodesic`](@extref `ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold, Any, Any}`).
 It internally employs [`log`](@ref log(::Sphere,::Any,::Any)) and [`exp`](@ref exp(::Sphere,::Any,::Any)).
 
 ```@example

@@ -49,7 +49,7 @@ Possible properties are
 * `:Rng` is a random number generator to use for generating random points/vectors if needed
 * `:Seed` is a seed to use for generating random points/vectors if needed
 * `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entries in `:Points`
-* `:SecondVector` is a single second vector in the tangent space of the first entry of `:Points`, for example to test [`inner`](@ref)
+* `:SecondVector` is a single second vector in the tangent space of the first entry of `:Points`, for example to test [`inner`](@extref `ManifoldsBase.inner-Tuple{AbstractManifold, Any, Any, Any}`)
 * `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
 * `:TestMidpointSymmetry` is a boolean (`true` by default) whether to test the symmetry property of the midpoint function
 * `:TestInfo` is a boolean (`true` by default) whether to test that whether `error=:info` in verification functions issues info messages.
@@ -959,6 +959,7 @@ end # Manifolds.Test.test_embed_project
         M, p, X, t=1.0;
         available_functions=[], expected_value=NoExpectation(), test_mutating=true,
         test_log = (log in available_functions),
+        test_aliased = true,
         test_fused = true,
         test_injectivity_radius = (injectivity_radius in available_functions),
         name = "Exponential map on \$M for \$(typeof(p)) points",
@@ -1031,6 +1032,7 @@ end # Manifolds.Test.test_exp
     Manifolds.Test.test_flat(M, p, X;
         available_functions = [],
         expected_value= NoExpectation(),
+        test_mutating = true,
         name = "Flat on \$M for \$(typeof(p)) points",
         kwargs...
     )
@@ -1461,7 +1463,7 @@ end # Manifolds.Test.test_default_metric
     name = "is_flat on \$M",
     )
 
-Test the function [`is_flat`](@ref) on manifold `M`. Since it returns a boolean,
+Test the function [`is_flat`](@extref `ManifoldsBase.is_flat-Tuple{AbstractManifold}`) on manifold `M`. Since it returns a boolean,
 there is also only the check that it agrees with the `expected_value`, if given.
 """
 function Manifolds.Test.test_is_flat(
@@ -1486,7 +1488,7 @@ end
         kwargs...
     )
 
-Test the function [`is_point`](@ref) on  for point `p` on manifold `M`.
+Test the function [`is_point`](@extref `ManifoldsBase.is_point-Tuple{AbstractManifold, Any, Bool}`) for a point `p` on manifold `M`.
 
 * that for `p` it returns `true`.
 * that for each `q` in `qs` it
@@ -1530,7 +1532,7 @@ end
         kwargs...
     )
 
-Test the function [`is_vector`](@ref) on manifold `M` at point `p` for tangent vector `X`.
+Test the function [`is_vector`](@extref `ManifoldsBase.is_vector-Tuple{AbstractManifold, Any, Any, Bool, Bool}`) on manifold `M` at point `p` for tangent vector `X`.
 
 * that for `X` it returns `true`.
 * that for each `Y` in `Ys` it
@@ -2022,16 +2024,17 @@ function Manifolds.Test.test_representation_size(
 end # Manifolds.Test.test_representation_size
 
 """
-    Manifolds.test.test_retract(
+    Manifolds.Test.test_retract(
         M, p, X, m::AbstractRetractionMethod;
         available_functions=[],
         expected_value = NoExpectation(),
         inverse_retraction_method = missing,
-    name = "Retraction \$m on \$M at point \$(typeof(p))",
-        t = 1.0
+        name = "Retraction \$m on \$M at point \$(typeof(p))",
+        t = 1.0,
+        test_aliased = true,
+        test_fused = true,
         test_mutating = true,
-        test_mutating = true,
-        test_inverse_retraction = (inverse_retraction in available_functions) && !ismissing(inverse_retraction_method),
+        test_inverse_retraction = (inverse_retract in available_functions) && !ismissing(inverse_retraction_method),
         kwargs...
     )
 
@@ -2139,6 +2142,7 @@ end # Manifolds.Test.test_sectional_curvature
     Manifolds.Test.test_sharp(M, p, ξ;
         available_functions=[],
         expected_value = NoExpectation(),
+        test_mutating = true,
         name = "Sharp on \$M for \$(typeof(p)) points",
         kwargs...
     )

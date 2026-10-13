@@ -1,6 +1,6 @@
 using Manifolds, ManifoldsBase, Test, StaticArrays
 
-# This file tests a few generic functions for general unitary matricesd
+# This file tests a few generic functions for general unitary matrices
 # independent of their matrix type, so we check that with a dummy type
 
 Test.@testset "GeneralUnitaryMatrices" begin
@@ -47,7 +47,7 @@ Test.@testset "GeneralUnitaryMatrices" begin
             Dict((get_coordinates, b) => c3, (get_vector, c3, b) => X)
         )
     end
-    @testset "Stattic Array & Edge cases" begin
+    @testset "Static Array & Edge cases" begin
         Z = @SMatrix [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
         q = exp(M3, p3S, Z)
         @test q == p3S

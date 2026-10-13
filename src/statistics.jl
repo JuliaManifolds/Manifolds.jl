@@ -12,7 +12,9 @@ end
         tangent_space_covariance_estimator::CovarianceEstimator=SimpleCovariance(;
             corrected=true,
         ),
-        mean_estimation_method::AbstractApproximationMethod=GradientDescentEstimation(),
+        mean_estimation_method::AbstractApproximationMethod=default_approximation_method(
+            M, cov,
+        ),
         inverse_retraction_method::AbstractInverseRetractionMethod=default_inverse_retraction_method(
             M, eltype(x),
         ),
@@ -23,7 +25,7 @@ on a manifold is a rank 2 tensor, the function returns its coefficients in basis
 the given tangent space basis. See Section 5 of [Pennec:2006](@cite) for details.
 
 The mean is calculated using the specified `mean_estimation_method` using
-[mean](@ref Statistics.mean(::AbstractManifold, ::AbstractVector, ::AbstractApproximationMethod),
+[`mean`](@ref mean(::AbstractManifold, args...)),
 and tangent vectors at this mean are calculated using the provided `inverse_retraction_method`.
 Finally, the covariance matrix in the tangent plane is estimated using the Euclidean space
  estimator `tangent_space_covariance_estimator`. The type `CovarianceEstimator` is defined
@@ -117,7 +119,7 @@ the (inverse) retraction.
 
 The Theory stems from [Karcher:1977](@cite) and is also described in [PennecArsigny:2012](@cite)
 as the exponential barycenter.
-The algorithm is further described in[AfsariTronVidal:2013](@cite).
+The algorithm is further described in [AfsariTronVidal:2013](@cite).
 """
 mean(::AbstractManifold, ::Any...)
 
@@ -794,10 +796,17 @@ can be activated by setting `corrected=true`.
 Statistics.std(M::AbstractManifold, args...; kwargs...) = sqrt(var(M, args...; kwargs...))
 
 @doc raw"""
-    mean_and_var(M::AbstractManifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, var)
+    mean_and_var(
+        M::AbstractManifold, x::AbstractVector; corrected=true, kwargs...
+    ) -> (mean, var)
+    mean_and_var(
+        M::AbstractManifold, x::AbstractVector, w::AbstractWeights; corrected=false, kwargs...
+    ) -> (mean, var)
 
 Compute the [`mean`](@ref mean(::AbstractManifold, args...)) and the [`var`](@ref)iance
 simultaneously. See those functions for a description of the arguments.
+The corrected variance is activated by setting `corrected=true`; it is on by default
+without weights and off with weights.
 
     mean_and_var(
         M::AbstractManifold,
@@ -868,6 +877,8 @@ Simultaneously, use a Welford-like recursion to estimate the variance.
 If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered. Optionally, pass `retraction` and `inverse_retraction`
 method types to specify the (inverse) retraction.
+The corrected variance is activated by setting `corrected=true`; it is on by default
+without weights and off with weights.
 
 See [`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`) for details on the geodesic
 interpolation method.
@@ -978,11 +989,11 @@ Compute the [`mean`](@ref mean(::AbstractManifold, args...)) and the standard de
 
     mean_and_std(
         M::AbstractManifold,
-        x::AbstractVector
+        x::AbstractVector,
         [w::AbstractWeights,]
         method::AbstractApproximationMethod;
         kwargs...,
-    ) -> (mean, var)
+    ) -> (mean, std)
 
 Use the `method` for simultaneously computing the mean and standard deviation.
 To use a mean-specific method, call [`mean`](@ref mean(::AbstractManifold, args...)) and

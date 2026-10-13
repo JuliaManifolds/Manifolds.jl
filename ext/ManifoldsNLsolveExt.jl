@@ -6,7 +6,7 @@ using ManifoldsBase
 using NLsolve: NLsolve
 
 @doc raw"""
-    inverse_retract(M, p, q method::NLSolveInverseRetraction; kwargs...)
+    inverse_retract(M, p, q, method::NLSolveInverseRetraction; kwargs...)
 
 Approximate the inverse of the retraction specified by `method.retraction` from `p` with
 respect to `q` on the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M` using NLsolve. This inverse retraction is

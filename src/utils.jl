@@ -29,11 +29,12 @@ end
 
 Compute a modified `sign(z)` that is always nonzero, i.e. where
 ````math
-\operatorname(nzsign)(z) = \begin{cases}
-    1 & \text{if } z = 0\\
-    \frac{z}{|z|} & \text{otherwise}
+\operatorname{nzsign}(z) = \begin{cases}
+    1 & \text{if } |z| < ε^2,\\
+    \frac{z}{|z|} & \text{otherwise.}
 \end{cases}
 ````
+Here ``ε`` is `eps` of the floating point type of ``|z|``, and a given `absz` replaces ``|z|``.
 
 Note that the condition `absz == 0` would be incorrectly handled by ForwardDiff.jl.
 """
@@ -230,9 +231,10 @@ function symmetrize(X)
 end
 
 @doc raw"""
-    vec2skew!(X, v, k)
+    vec2skew!(X, v)
+    vec2skew(v, k)
 
-Create a skew symmetric matrix in-place in `X` of size ``k×k`` from a vector `v`,
+Create a skew symmetric matrix `X` of size ``k×k`` from a vector `v` (in place of `X`),
 for example for `v=[1,2,3]` and `k=3` this
 yields
 ````julia
@@ -348,7 +350,7 @@ end
     estimated_sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis; r::Real=1e-3, N::Int=10000)
 
 Estimate the matrix of sectional curvatures of manifold `M` at point `p` using
-`estimated_sectional_curvature`. Entry `(i, j)`` corresponds to sectional curvature of the
+`estimated_sectional_curvature`. Entry `(i, j)` corresponds to sectional curvature of the
 surface spanned by vectors `i`  and `j` from basis `B`.
 """
 function estimated_sectional_curvature_matrix(
