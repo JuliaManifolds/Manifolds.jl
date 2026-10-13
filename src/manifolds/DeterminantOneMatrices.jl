@@ -2,7 +2,7 @@
     DeterminantOneMatrices{𝔽,T} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
-consisting of the real- or complex-valued (invertible) matrices od determinant one,
+consisting of the real- or complex-valued (invertible) matrices of determinant one,
 that is the set
 
 ```math

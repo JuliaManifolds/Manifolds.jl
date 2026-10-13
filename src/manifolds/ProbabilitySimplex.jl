@@ -1,5 +1,5 @@
 @doc raw"""
-    ProbabilitySimplex{T,boundary} <: AbstractDecoratorManifold{𝔽}
+    ProbabilitySimplex{T,boundary} <: AbstractDecoratorManifold{ℝ}
 
 The (relative interior of) the probability simplex is the set
 ````math
@@ -32,7 +32,10 @@ This implementation follows the notation in [AastroemPetraSchmitzerSchnoerr:2017
 
 # Constructor
 
-    ProbabilitySimplex(n::Int; boundary::Symbol=:open)
+    ProbabilitySimplex(n::Int; boundary::Symbol=:open, parameter::Symbol=:type)
+
+`parameter`: whether a type parameter should be used to store `n`. By default size
+is stored in type. Value can either be `:field` or `:type`.
 """
 struct ProbabilitySimplex{T, boundary} <: AbstractDecoratorManifold{ℝ}
     size::T

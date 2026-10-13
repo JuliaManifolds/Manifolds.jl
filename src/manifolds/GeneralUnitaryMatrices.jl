@@ -1136,7 +1136,7 @@ end
     retract(M::OrthogonalMatrices, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction on the [`Rotations`](@ref) and [`OrthogonalMatrices`](@ref) `M` from `p` in direction `X`
-(as an element of the Lie group) and is a second-order approximation of the exponential map.
+(as an element of the Lie algebra) and is a second-order approximation of the exponential map.
 Let
 
 ````math
@@ -1153,10 +1153,10 @@ retract(::GeneralUnitaryMatrices, ::Any, ::Any, ::PolarRetraction)
 
 @doc raw"""
     retract(M::Rotations, p, X, ::QRRetraction)
-    retract(M::OrthogonalMatrices, p. X, ::QRRetraction)
+    retract(M::OrthogonalMatrices, p, X, ::QRRetraction)
 
 Compute the QR-based retraction on the [`Rotations`](@ref) and [`OrthogonalMatrices`](@ref) `M` from `p` in direction `X`
-(as an element of the Lie group), which is a first-order approximation of the exponential map.
+(as an element of the Lie algebra), which is a first-order approximation of the exponential map.
 
 This is also the default retraction on these manifolds.
 """

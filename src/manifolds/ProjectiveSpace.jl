@@ -31,7 +31,7 @@ space.
 
 # Constructor
 
-    ProjectiveSpace(n[, field=ℝ])
+    ProjectiveSpace(n[, field=ℝ]; parameter::Symbol=:type)
 
 Generate the projective space ``𝔽ℙ^{n} ⊂ 𝔽^{n+1}``, defaulting to the real projective space
 ``ℝℙ^n``, where `field` can also be used to generate the complex- and right-quaternionic
@@ -75,7 +75,7 @@ where ``⟨⋅,⋅⟩_{\mathrm{F}}`` denotes the (Frobenius) inner product in th
 
 # Constructor
 
-    ArrayProjectiveSpace(n₁,n₂,...,nᵢ; field=ℝ)
+    ArrayProjectiveSpace(n₁,n₂,...,nᵢ; field=ℝ, parameter::Symbol=:type)
 
 Generate the projective space ``𝔽ℙ^{n_1, n_2, …, n_i}``, defaulting to the real projective
 space, where `field` can also be used to generate the complex- and right-quaternionic
@@ -308,7 +308,8 @@ injectivity_radius(::AbstractProjectiveSpace, p, ::AbstractRetractionMethod) = �
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::QRInverseRetraction)
 
 Compute the equivalent inverse retraction [`ProjectionInverseRetraction`](@extref `ManifoldsBase.ProjectionInverseRetraction`),
-[`PolarInverseRetraction`](@extref `ManifoldsBase.QRInverseRetraction`) on the
+[`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`) and
+[`QRInverseRetraction`](@extref `ManifoldsBase.QRInverseRetraction`) on the
 [`AbstractProjectiveSpace`](@ref) manifold `M```=𝔽ℙ^n``, i.e.
 ````math
 \operatorname{retr}_p^{-1} q = q \frac{1}{⟨p, q⟩_{\mathrm{F}}} - p,
@@ -497,7 +498,8 @@ end
     retract(M::AbstractProjectiveSpace, p, X, method::PolarRetraction)
     retract(M::AbstractProjectiveSpace, p, X, method::QRRetraction)
 
-Compute the equivalent retraction [`ProjectionRetraction`](@extref `ManifoldsBase.PolarRetraction`),
+Compute the equivalent retraction [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`),
+[`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
 and [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) on the [`AbstractProjectiveSpace`](@ref) manifold `M```=𝔽ℙ^n``,
 i.e.
 ````math

@@ -1,5 +1,5 @@
 @doc raw"""
-    Rotations{T} <: AbstractManifold{ℝ}
+    const Rotations{T} = GeneralUnitaryMatrices{ℝ, T, DeterminantOneMatrixType}
 
 The manifold of rotation matrices of size ``n×n``, i.e.
 real-valued orthogonal matrices with determinant ``+1``.
@@ -18,7 +18,7 @@ function Rotations(n::Int; parameter::Symbol = :type)
 end
 
 # TODO: Remove when removing GroupManifolds, since it is now
-# defined 8and also used then in) LIeGroups.jl
+# defined (and also used then in) LieGroups.jl
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
@@ -408,7 +408,7 @@ end
 @doc raw"""
     Weingarten(M::Rotations, p, X, V)
 
-Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Stiefel`](@ref) `M` with respect to the
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Rotations`](@ref) `M` with respect to the
 tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
 
 The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
@@ -429,8 +429,8 @@ end
 @doc raw"""
     zero_vector(M::Rotations, p)
 
-Return the zero tangent vector from the tangent space art `p` on the [`Rotations`](@ref)
-as an element of the Lie group, i.e. the zero matrix.
+Return the zero tangent vector from the tangent space at `p` on the [`Rotations`](@ref)
+as an element of the Lie algebra, i.e. the zero matrix.
 """
 zero_vector(::Rotations, p) = zero(p)
 
