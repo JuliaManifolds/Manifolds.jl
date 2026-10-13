@@ -9,12 +9,12 @@ fiber_bundle_transport(M::AbstractManifold, ::FiberType) =
     default_vector_transport_method(M)
 
 """
-    VectorBundle{𝔽,TVS,TM,VTV} = FiberBundle{𝔽,TVS,TM,TVT} where {TVS<:VectorSpaceType}
+    VectorBundle{𝔽,TVS,TM,TVT} = FiberBundle{𝔽,TVS,TM,TVT} where {TVS<:VectorSpaceType}
 
 Alias for [`FiberBundle`](@ref) when fiber type is a `TVS` of type
 [`VectorSpaceType`](@extref `ManifoldsBase.VectorSpaceType`).
 
-`VectorSpaceFiberType` is used to encode vector spaces as fiber types.
+`VectorSpaceType` is used to encode vector spaces as fiber types.
 """
 const VectorBundle{𝔽, TVS, TM, TVT} = FiberBundle{
     𝔽,
@@ -237,12 +237,12 @@ function project!(B::VectorBundle, Y, p, X)
 end
 
 """
-    retract(M::VectorBundle, p, q, ::FiberBundleProductRetraction)
+    retract(M::VectorBundle, p, X, ::FiberBundleProductRetraction)
 
 Compute the allocating variant of the [`FiberBundleProductRetraction`](@ref),
 which by default allocates and calls `retract_product!`.
 """
-retract(::VectorBundle, p, q, ::FiberBundleProductRetraction)
+retract(::VectorBundle, p, X, ::FiberBundleProductRetraction)
 
 function ManifoldsBase._retract!(M::VectorBundle, q, p, X, ::FiberBundleProductRetraction)
     return retract_product!(M, q, p, X)

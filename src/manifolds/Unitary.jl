@@ -79,7 +79,7 @@ For ``\mathrm{U}(n)``, coordinates are ordered over the upper triangular part:
 diagonal entries contribute their imaginary parts, and each strict upper-triangular
 entry contributes real and imaginary parts, both scaled by ``\sqrt{2}``.
 """
-get_coordinates(M::UnitaryMatrices{ℂ}, p, X, ::B::DefaultOrthonormalBasis)
+get_coordinates(M::UnitaryMatrices{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 function get_coordinates_orthonormal!(M::UnitaryMatrices{ℂ}, c, p, X, ::RealNumbers)
     n = get_parameter(M.size)[1]
@@ -196,7 +196,7 @@ function Random.rand(
 end
 
 @doc raw"""
-    rand(::Unitary; vector_at=nothing, σ::Real=1.0)
+    rand(::UnitaryMatrices; vector_at=nothing, σ::Real=1.0)
 
 Generate a random point on the [`UnitaryMatrices`](@ref) manifold,
 if `vector_at` is nothing, by computing the QR decomposition of
@@ -262,7 +262,7 @@ end
 @doc raw"""
     Weingarten(M::UnitaryMatrices, p, X, V)
 
-Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Stiefel`](@ref) `M` with respect to the
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`UnitaryMatrices`](@ref) `M` with respect to the
 tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
 
 The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by

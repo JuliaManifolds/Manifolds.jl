@@ -76,7 +76,7 @@ which is[^1]
 ```math
     \operatorname{inj}_{\mathrm{SU}(n)} = π \sqrt{2}.
 ```
-[^1]
+[^1]:
     > For a derivation of the injectivity radius, see [sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/](https://sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/).
 """
 function injectivity_radius(::SpecialUnitaryMatrices)

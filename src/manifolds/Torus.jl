@@ -15,10 +15,10 @@ Torus(n::Int) = Torus{n}(Circle())
 Base.:^(M::Circle, n::Int) = Torus{n}(M)
 
 @doc raw"""
-    check_point(M::Torus{n}, p)
+    check_point(M::Torus{n}, p; kwargs...)
 
 Checks whether `p` is a valid point on the [`Torus`](@ref) `M`, i.e. each of
-its entries is a valid point on the [`Circle`](@ref) and the length of `x` is `n`.
+its entries is a valid point on the [`Circle`](@ref) and the length of `p` is `n`.
 """
 check_point(::Torus, ::Any)
 function check_point(M::Torus{N}, p; kwargs...) where {N}
