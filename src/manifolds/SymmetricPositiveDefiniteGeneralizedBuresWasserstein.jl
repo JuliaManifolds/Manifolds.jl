@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralizedBurresWassertseinMetric{T<:AbstractMatrix} <: AbstractMetric
+    GeneralizedBuresWassersteinMetric{T<:AbstractMatrix} <: RiemannianMetric
 
 The generalized Bures Wasserstein metric for symmetric positive definite matrices, see [HanMishraJawanpuriaGao:2021](@cite).
 

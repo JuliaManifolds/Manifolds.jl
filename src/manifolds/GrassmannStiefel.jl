@@ -424,7 +424,7 @@ representation_size(M::Grassmann) = get_parameter(M.size)
     retract(M::Grassmann, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
-[`Grassmann`](@ref) `M`. With ``USV = p + X`` the retraction reads
+[`Grassmann`](@ref) `M`. With ``USV^\mathrm{H} = p + X`` the retraction reads
 ````math
 \operatorname{retr}_p X = UV^\mathrm{H},
 ````

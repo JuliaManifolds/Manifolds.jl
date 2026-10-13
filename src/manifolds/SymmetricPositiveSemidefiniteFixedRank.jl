@@ -143,7 +143,10 @@ function exp!(::SymmetricPositiveSemidefiniteFixedRank, q2, q, Y)
 end
 
 @doc raw"""
-    isapprox(M::SymmetricPositiveSemidefiniteFixedRank, p, q; kwargs...)
+    isapprox(
+        M::SymmetricPositiveSemidefiniteFixedRank, p, q;
+        atol=sqrt(prod(representation_size(M)))*eps(real(float(number_eltype(p)))), kwargs...
+    )
 
 test, whether two points `p`, `q` are (approximately) nearly the same.
 Since this is a quotient manifold in the embedding, the test is performed by checking

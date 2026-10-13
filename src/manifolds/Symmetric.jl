@@ -18,9 +18,12 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 # Constructor
 
-    SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
+    SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of ``n×n`` symmetric matrices.
+
+`parameter`: whether a type parameter should be used to store `n`. By default size
+is stored in type. Value can either be `:field` or `:type`.
 """
 struct SymmetricMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T

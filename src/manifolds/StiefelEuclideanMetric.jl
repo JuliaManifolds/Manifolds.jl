@@ -6,14 +6,14 @@ emanating from `p` in tangent direction `X`.
 
 ````math
 \exp_p X = \begin{pmatrix}
-   p\\X
+   p & X
  \end{pmatrix}
  \operatorname{Exp}
  \left(
  \begin{pmatrix} p^{\mathrm{H}}X & - X^{\mathrm{H}}X\\
- I_n & p^{\mathrm{H}}X\end{pmatrix}
+ I_k & p^{\mathrm{H}}X\end{pmatrix}
  \right)
-\begin{pmatrix}  \exp( -p^{\mathrm{H}}X) \\ 0_n\end{pmatrix},
+\begin{pmatrix}  \operatorname{Exp}( -p^{\mathrm{H}}X) \\ 0_k\end{pmatrix},
 ````
 
 where ``\operatorname{Exp}`` denotes matrix exponential,

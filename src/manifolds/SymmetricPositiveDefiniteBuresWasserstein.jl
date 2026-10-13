@@ -1,5 +1,5 @@
 @doc raw"""
-    BurresWassertseinMetric <: AbstractMetric
+    BuresWassersteinMetric <: RiemannianMetric
 
 The Bures Wasserstein metric for symmetric positive definite matrices [MalagoMontruccioPistone:2018](@cite)
 """

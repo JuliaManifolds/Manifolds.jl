@@ -262,15 +262,22 @@ This implementation follows the Lyapunov approach.
 inverse_retract(::Stiefel, ::Any, ::Any, ::PolarInverseRetraction)
 
 @doc raw"""
-    inverse_retract(M::Stiefel, p, X, ::PolarLightInverseRetraction)
+    inverse_retract(M::Stiefel, p, q, ::PolarLightInverseRetraction)
 
 Compute an SVD-based inverse retraction [`PolarLightInverseRetraction`](@ref) on the
-[`Stiefel`](@ref)`(n,k)` manifold `M` following [JensenZimmermann:2026](@cite), equation (3.5)
+[`Stiefel`](@ref)`(n,k)` manifold `M`.
+Following equation (3.5) of [JensenZimmermann:2026](@cite) it reads
 
 ````math
 \operatorname{retr}_p^{-1} q =
 p \log\bigl( p^\mathrm{T}q(q^\mathrm{T}pp^\mathrm{T}q)^{-\frac{1}{2}} \bigr)
-+ \bigl(I_n-pp^\mathrm{T}\bigr)p (q^\mathrm{T}pp^\mathrm{T}q)^{-\frac{1}{2}}
++ \bigl(I_n-pp^\mathrm{T}\bigr)q (q^\mathrm{T}pp^\mathrm{T}q)^{-\frac{1}{2}},
+````
+which is computed with the singular value decomposition ``USV^\mathrm{T} = p^\mathrm{T}q``
+as in equation (3.7) of [JensenZimmermann:2026](@cite),
+
+````math
+\operatorname{retr}_p^{-1} q = p\bigl(\log(UV^\mathrm{T}) - UV^\mathrm{T}\bigr) + qVS^{-1}V^\mathrm{T}.
 ````
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::PolarLightInverseRetraction)
@@ -527,10 +534,10 @@ retract(::Stiefel, ::Any, ::Any, ::PadeRetraction)
     retract(M::Stiefel, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
-[`Stiefel`](@ref) manifold `M`. With ``USV = p + X`` the retraction reads
+[`Stiefel`](@ref) manifold `M`. With ``USV^\mathrm{H} = p + X`` the retraction reads
 
 ````math
-\operatorname{retr}_p X = U\bar{V}^\mathrm{H}.
+\operatorname{retr}_p X = UV^\mathrm{H}.
 ````
 """
 retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
@@ -539,12 +546,13 @@ retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
     retract(M::Stiefel, p, X, ::PolarLightRetraction)
 
 Compute an SVD-based retraction [`PolarLightRetraction`](@ref) on the
-[`Stiefel`](@ref)`(n,k)` manifold `M` following [JensenZimmermann:2026](@cite), equation (3.4)
+[`Stiefel`](@ref)`(n,k)` manifold `M`.
+Following equation (3.4) of [JensenZimmermann:2026](@cite) it reads
 
 ````math
 \operatorname{retr}_p X =
 \Bigl( p\exp\bigl( p^\mathrm{T}X \bigr) + \bigl(I_n-pp^\mathrm{T}\bigr)X \Bigr)
-\bigr( I_k  + X^\mathrm{T}(I_n - pp^\mathrm{T})X\bigr).
+\bigl( I_k  + X^\mathrm{T}(I_n - pp^\mathrm{T})X\bigr)^{-\frac{1}{2}}.
 ````
 """
 retract(::Stiefel, ::Any, ::Any, ::PolarLightRetraction)
@@ -880,16 +888,16 @@ vector_transport_direction(
     vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetractionVectorTransport{PolarRetraction})
 
 Compute the vector transport by computing the push forward of
-[`retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref) Section 3.5 of [Zhu:2016](@cite):
+[`retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref), see Section 3.5, page 87, of [Zhu:2016](@cite):
 
 ```math
-T_{p,d}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
+T_{p,d}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(I+d^\mathrm{T}d)^{-\frac{1}{2}},
 ```
 
 where ``q = \operatorname{retr}^{\mathrm{Pol}}_p(d)``, and ``Λ`` is the unique solution of the Sylvester equation
 
 ```math
-    Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}} = q^\mathrm{T}X - X^\mathrm{T}q
+    Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}}Λ = q^\mathrm{T}X - X^\mathrm{T}q
 ```
 """
 vector_transport_direction(
@@ -954,17 +962,17 @@ end
 
 Compute the vector transport by computing the push forward of the
 [`retract(M::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref), see
-Section 4 of [HuangGallivanAbsil:2015](@cite) or  Section 3.5 of [Zhu:2016](@cite):
+Section 4 of [HuangGallivanAbsil:2015](@cite) or Section 3.5 of [Zhu:2016](@cite):
 
 ```math
-T_{q\gets p}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
+T_{q\gets p}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(I+d^\mathrm{T}d)^{-\frac{1}{2}},
 ```
 
 where ``d = \bigl( \operatorname{retr}^{\mathrm{Pol}}_p\bigr)^{-1}(q)``,
 and ``Λ`` is the unique solution of the Sylvester equation
 
 ```math
-    Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}} = q^\mathrm{T}X - X^\mathrm{T}q
+    Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}}Λ = q^\mathrm{T}X - X^\mathrm{T}q
 ```
 """
 vector_transport_to(
@@ -983,7 +991,7 @@ see  [AbsilMahonySepulchre:2008](@cite), p. 173, or Section 3.5 of [Zhu:2016](@c
 T_{q \gets p}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},
 ```
 where ``d = \bigl(\operatorname{retr}^{\mathrm{QR}}\bigr)^{-1}_p(q)``, ``R`` is the ``R`` factor of the QR
-decomposition of ``p+X``, and
+decomposition of ``p+d``, and
 ```math
 \bigl( \rho_{\mathrm{s}}(A) \bigr)_{ij}
 = \begin{cases}

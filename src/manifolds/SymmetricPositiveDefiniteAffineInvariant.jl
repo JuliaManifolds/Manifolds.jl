@@ -478,7 +478,7 @@ end
 """
     sectional_curvature_max(M::SymmetricPositiveDefinite)
 
-Return minimum sectional curvature of [`SymmetricPositiveDefinite`](@ref) manifold,
+Return maximum sectional curvature of [`SymmetricPositiveDefinite`](@ref) manifold,
 that is 0.
 """
 function sectional_curvature_max(::SymmetricPositiveDefinite)
