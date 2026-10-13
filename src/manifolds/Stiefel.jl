@@ -215,7 +215,7 @@ default_retraction_method(::Stiefel) = PolarRetraction()
 """
     default_vector_transport_method(M::Stiefel)
 
-Return the [`DifferentiatedRetractionVectorTransport`](@extref `ManifoldsBase.DifferentiatedRetractionVectorTransport`) of the [`PolarRetraction`]([`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
+Return the [`DifferentiatedRetractionVectorTransport`](@extref `ManifoldsBase.DifferentiatedRetractionVectorTransport`) of the [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
 as the default vector transport method for the [`Stiefel`](@ref) manifold.
 """
 function default_vector_transport_method(::Stiefel)

@@ -77,7 +77,7 @@ end
 Check whether ``X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}`` is a tangent vector to
 ``p=qq^{\mathrm{T}}`` on the [`Spectrahedron`](@ref) `M`,
 i.e. after [`check_point`](@ref) of `q`, `Y` has to be of same dimension as `q`
-and a ``X`` has to be a symmetric matrix with trace.
+and ``X`` has to be a symmetric matrix with zero trace.
 The trace has to vanish up to `max(atol, 2 * rtol * norm(q) * norm(Y))`.
 The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 Note that symmetry of ``X`` holds by construction and is not explicitly checked.
@@ -96,7 +96,7 @@ function check_vector(
     if !(r <= atol || r <= 2 * rtol * norm(q) * norm(Y))
         return DomainError(
             n,
-            "The vector $(X) is not a tangent to a point on $(M) (represented py $(q) and $(Y), since its trace is nonzero.",
+            "The vector $(X) is not a tangent to a point on $(M) (represented by $(q) and $(Y)), since its trace is nonzero.",
         )
     end
     return nothing
@@ -203,7 +203,7 @@ on ``\mathcal M = \mathcal S(n,k)``.
 """
 representation_size(M::Spectrahedron) = get_parameter(M.size)
 
-function Base.show(io::IO, M::Spectrahedron{TypeParameter{Tuple{n, k}}}) where {n, k}
+function Base.show(io::IO, ::Spectrahedron{TypeParameter{Tuple{n, k}}}) where {n, k}
     return print(io, "Spectrahedron($n, $k)")
 end
 function Base.show(io::IO, M::Spectrahedron{Tuple{Int, Int}})

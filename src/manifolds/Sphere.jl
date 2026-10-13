@@ -40,7 +40,7 @@ and the [`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited f
 
 # Constructor
 
-    Sphere(n[, field=ℝ])
+    Sphere(n[, field=ℝ]; parameter::Symbol=:type)
 
 Generate the (real-valued) sphere ``𝕊^{n} ⊂ ℝ^{n+1}``, where `field` can also be used to
 generate the complex- and quaternionic-valued sphere.
@@ -598,7 +598,7 @@ to `q`, provided, the [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{Abstrac
 \mathcal P_{q←p}(X) = X - \frac{2\Re(⟨X,q⟩)}{\lVert p+q \rVert^2}(p+q).
 ````
 """
-parallel_transport_to(::AbstractSphere, ::Any, ::Any, ::Any, ::Any)
+parallel_transport_to(::AbstractSphere, ::Any, ::Any, ::Any)
 
 function parallel_transport_to!(::AbstractSphere, Y, p, X, q)
     m = p .+ q
@@ -662,7 +662,7 @@ end
     volume_density(M::AbstractSphere{ℝ}, p, X)
 
 Compute volume density function of a sphere, i.e. determinant of the differential of
-exponential map `exp(M, p, X)`. The formula reads ``(\sin(\lVert X\rVert)/\lVert X\rVert)^(n-1)``
+exponential map `exp(M, p, X)`. The formula reads ``(\sin(\lVert X\rVert)/\lVert X\rVert)^{n-1}``
 where `n` is the dimension of `M`. It is derived from Eq. (4.1) in [ChevallierLiLuDunson:2022](@cite).
 """
 function volume_density(M::AbstractSphere{ℝ}, p, X)

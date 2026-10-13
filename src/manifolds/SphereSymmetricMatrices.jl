@@ -1,5 +1,5 @@
 @doc raw"""
-    SphereSymmetricMatrices{𝔽, T} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
+    SphereSymmetricMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  consisting of the ``n×n`` symmetric matrices
 of unit Frobenius norm, i.e.
@@ -10,7 +10,7 @@ where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpo
 and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 # Constructor
-    SphereSymmetricMatrices(n[, field=ℝ])
+    SphereSymmetricMatrices(n[, field=ℝ]; parameter::Symbol=:type)
 
 Generate the manifold of `n`-by-`n` symmetric matrices of unit Frobenius norm.
 """
@@ -50,8 +50,8 @@ end
     check_vector(M::SphereSymmetricMatrices, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`SphereSymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
-of unit Frobenius norm.
+[`SphereSymmetricMatrices`](@ref) `M`. That is, `X` has to be a symmetric matrix of size `(n,n)`
+that is orthogonal to `p` with respect to the Frobenius inner product.
 
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
@@ -94,7 +94,7 @@ Return false. [`SphereSymmetricMatrices`](@ref) is not a flat manifold.
 is_flat(M::SphereSymmetricMatrices) = false
 
 @doc raw"""
-    manifold_dimension(M::SphereSymmetricMatrices{<:Any,𝔽})
+    manifold_dimension(M::SphereSymmetricMatrices{𝔽})
 
 Return the manifold dimension of the [`SphereSymmetricMatrices`](@ref) `n`-by-`n` symmetric matrix `M` of unit
 Frobenius norm over the number system `𝔽`, i.e.

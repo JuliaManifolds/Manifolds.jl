@@ -199,7 +199,7 @@ Return the dimension of the [`SkewHermitianMatrices`](@ref) matrix `M` over the 
 system `𝔽`, i.e.
 
 ````math
-\dim \mathrm{SkewHerm}(n,ℝ) = \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,
+\dim \mathrm{SkewHerm}(n,𝔽) = \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,
 ````
 
 where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of ``𝔽``. The first term corresponds to

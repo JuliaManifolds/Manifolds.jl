@@ -68,7 +68,7 @@ function check_size(M::Segre{𝔽, V}, p, X) where {𝔽, V}
 end
 
 @doc raw"""
-    closest_representative!(M::Segre{ℝ, V}, p, q)
+    closest_representative!(M::Segre{ℝ, V}, q, p)
 
 ``\mathcal{S}`` is a ``2^d``-sheeted Riemannian covering of
 
@@ -141,7 +141,8 @@ function embed!(M::Segre, q, p)
 end
 
 @doc raw"""
-    embed!(M::Segre{𝔽, V}, p, X)
+    embed(M::Segre{𝔽, V}, p, X)
+    embed!(M::Segre{𝔽, V}, Y, p, X)
 
 Embed tangent vector ``X = (ν, u_1, …, u_d)`` at ``p ≐ (λ, x_1, …, x_d)`` in ``𝔽^{n_1 ×⋯× n_d}`` using the Kronecker product
 
@@ -162,7 +163,8 @@ end
 
 
 @doc raw"""
-    vector_transport_to(M::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport)
+    vector_transport_to(M::Segre{ℝ, V}, p, X, q, ::ProjectionTransport)
+    vector_transport_to!(M::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport)
 
 Compute projection vector transport on the [`Segre`](@ref) manifold by projecting
 the embedded tangent vector ``D\Phi_p[X]`` onto the tangent space of `M` at `q`.
@@ -217,9 +219,9 @@ v_k
 \left( z_{r,k} - ⟨ z_{r,k}, x_k⟩ x_k \right).
 ````
 The implementation uses this rank-one structure and therefore avoids explicitly
-forming the ambient tensor and precomputing the inner products.
+forming the ambient tensor, by precomputing the inner products.
 """
-vector_transport_to(::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport) where {V}
+vector_transport_to(::Segre{ℝ, V}, p, X, q, ::ProjectionTransport) where {V}
 
 function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
     d = length(V)
@@ -300,7 +302,7 @@ function check_point(M::Segre{ℝ, V}, p; atol = 1.4901161193847656e-8, kwargs..
 end
 
 """
-    is_vector(M::Segre{ℝ, V}, p, X, kwargs...)
+    is_vector(M::Segre{ℝ, V}, p, X; kwargs...)
 
 Check whether `X` is a tangent vector to `p` on `M`, i.e. `X` has to be of same dimension as `p` and orthogonal to `p`.
 The tolerance can be set using the `kwargs...`.
@@ -436,7 +438,7 @@ function get_embedding(::Segre{𝔽, V}) where {𝔽, V}
 end
 
 @doc raw"""
-    get_vector( M::Segre{𝔽, V}, p, c, DefaultOrthonormalBasis; kwargs...)
+    get_vector(M::Segre{𝔽, V}, p, c, ::DefaultOrthonormalBasis; kwargs...)
 
 Get tangent vector `X` from coordinates in the tangent space
 ``T_{(λ, x_1, …, x_d)} \mathcal{S} = \mathbb{R} × T_{x_1} \mathbb{S}^{n_1 - 1} ×⋯× T_{x_d} \mathbb{S}^{n_d - 1}``

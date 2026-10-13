@@ -96,7 +96,7 @@ where
     \end{aligned}
 ````
 
-If ``m = 0`` and ``-λ < ν``, then ``\operatorname{exp}_p(v) = p + X``.
+If ``m = 0`` and ``-λ < ν``, then ``\operatorname{exp}_p(X) = p + X``.
 
 The formula is derived in proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
 """
@@ -132,7 +132,10 @@ function exp!(::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, q, p, X) wh
 end
 
 @doc raw"""
-    get_coordinates(M::Segre{𝔽, V}, p, v, ::DefaultOrthonormalBasis; kwargs...)
+    get_coordinates(
+        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, X, ::DefaultOrthonormalBasis;
+        kwargs...
+    )
 
 Get coordinates of `X` in the tangent space ``T_{(λ, x_1,…, x_d)} \mathcal{S}_A = \mathbb{R} × T_{x_1} \mathbb{S}^{n_1 - 1} ×⋯× T_{x_d} \mathbb{S}^{n_d - 1}`` using a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) on each factor.
 """
@@ -163,7 +166,10 @@ function get_coordinates_orthonormal!(
 end
 
 @doc raw"""
-    get_vector(M::Segre{𝔽, V}, p, c, ::DefaultOrthonormalBasis; kwargs...)
+    get_vector(
+        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, c, ::DefaultOrthonormalBasis;
+        kwargs...
+    )
 
 Get tangent vector `X` from coordinates in the tangent space ``T_{(λ, x_1,…, x_d)} \mathcal{S}_A = \mathbb{R} × T_{x_1} \mathbb{S}^{n_1 - 1} ×⋯× T_{x_d} \mathbb{S}^{n_d - 1}`` using a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) on each factor.
 """
@@ -259,7 +265,7 @@ function log!(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, X, p, q) w
 end
 
 @doc raw"""
-    riemann_tensor(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, X, Y)
+    riemann_tensor(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, X, Y, Z)
 
 Riemann tensor of the warped Segre manifold at ``p``.
 

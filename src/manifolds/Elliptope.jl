@@ -98,7 +98,7 @@ function check_vector(
     if !(r <= atol || r <= 2 * rtol * norm(Y))
         return DomainError(
             n,
-            "The vector $(X) is not a tangent to a point on $(M) (represented py $(q) and $(Y), since its diagonal is nonzero.",
+            "The vector $(X) is not a tangent to a point on $(M) (represented by $(q) and $(Y)), since its diagonal is nonzero.",
         )
     end
     return nothing
