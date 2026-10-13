@@ -575,7 +575,7 @@ function project!(::FixedRankMatrices, Y::UMVTangentVector, p::SVDMPoint, A::Abs
     uTav = p.U' * av
     aTu = A' * p.U
     Y.M .= uTav
-    Y.U .= A * p.Vt' - p.U * uTav
+    Y.U .= av - p.U * uTav
     Y.Vt .= (aTu - p.Vt' * uTav')'
     return Y
 end
