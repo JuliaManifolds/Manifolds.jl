@@ -394,4 +394,19 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         @test isapprox(-1 / p[1][1]^2, sectional_curvature(M, p, X, Z))
         @test isapprox(0.0, sectional_curvature(M, p, X, V))
     end
+
+    # distance, log and connected_by_geodesic leave the second point unchanged
+    @testset "The second point is not modified" begin
+        p = [[2.0], [1.0, 0.0, 0.0], [1.0, 0.0]]
+        q = [[3.0], [-1.0, 0.0, 0.0], [-1.0, 0.0]]
+        for M in [Segre(3, 2), MetricManifold(Segre(3, 2), WarpedMetric(1.2))]
+            q1, q2, q3 = deepcopy(q), deepcopy(q), deepcopy(q)
+            @test isapprox(distance(M, p, q1), 1.0)
+            @test q1 == q
+            @test isapprox(log(M, p, q2), [[1.0], zeros(3), zeros(2)])
+            @test q2 == q
+            @test connected_by_geodesic(M, p, q3)
+            @test q3 == q
+        end
+    end
 end

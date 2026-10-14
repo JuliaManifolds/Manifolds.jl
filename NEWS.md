@@ -100,6 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `exp!`, and with it the in-place `retract!` and `mid_point!`, on the `Segre` manifold and under its `WarpedMetric` return the correct point when the result is the starting point itself.
 * `get_coordinates!` on the `Segre` manifold and under its `WarpedMetric` writes the coordinates into the given vector.
 * `connected_by_geodesic` on the `Segre` manifold with a `WarpedMetric` takes the warping factor into account.
+* `distance`, `log` and `connected_by_geodesic` on the `Segre` manifold, also with a `WarpedMetric`, leave the points they are given unchanged.
 * `log` on `Sphere` and `ArraySphere` returns a tangent vector for every pair of opposite points and is more accurate.
 * `is_vector` and `project` on the `SpecialUnitaryMatrices` require and return tangent vectors of trace zero.
 * `project` onto the tangent space of the `GeneralizedGrassmann` manifold removes the whole part along the columns of the point, so that it and `rand` return tangent vectors `X` with `p'BX = 0`.

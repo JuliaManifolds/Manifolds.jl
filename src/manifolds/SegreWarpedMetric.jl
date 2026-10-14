@@ -32,7 +32,7 @@ function connected_by_geodesic(
         p,
         q,
     ) where {V, A}
-    q = deepcopy(q)
+    q = copy(M, q)
     closest_representative!(M, q, p)
     return A * spherical_angle_sum(M, p, q) < pi
 end
@@ -63,9 +63,10 @@ and assume ``(μ, y_1,…, y_d)`` is the representation of ``q`` that minimizes 
 ````
 """
 function distance(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, q) where {V, A}
-    closest_representative!(M, q, p)
-    m = spherical_angle_sum(M, p, q)
-    return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(A * m / 2)^2)
+    qc = copy(M, q)
+    closest_representative!(M, qc, p)
+    m = spherical_angle_sum(M, p, qc)
+    return sqrt((p[1][1] - qc[1][1])^2 + 4 * p[1][1] * qc[1][1] * sin(A * m / 2)^2)
     # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(A * m)) but more stable for small m
 end
 
@@ -252,13 +253,14 @@ The formula is derived in theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenh
 log(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, q) where {V, A}
 
 function log!(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, X, p, q) where {V, A}
-    closest_representative!(M, q, p)
-    m = spherical_angle_sum(M, p, q)
+    qc = copy(M, q)
+    closest_representative!(M, qc, p)
+    m = spherical_angle_sum(M, p, qc)
 
-    X[1][1] = q[1][1] * cos(A * m) - p[1][1]
-    for (n, xdot, x, y) in zip(V, X[2:end], p[2:end], q[2:end])
+    X[1][1] = qc[1][1] * cos(A * m) - p[1][1]
+    for (n, xdot, x, y) in zip(V, X[2:end], p[2:end], qc[2:end])
         a = distance(Sphere(n - 1), x, y)
-        xdot .= (y - dot(x, y) * x) * (q[1][1] / p[1][1]) * sinc(A * m / pi) / sinc(a / pi)
+        xdot .= (y - dot(x, y) * x) * (qc[1][1] / p[1][1]) * sinc(A * m / pi) / sinc(a / pi)
     end
 
     return X

@@ -120,8 +120,9 @@ end
 `connected_by_geodesic(M, p, q)` returns `true` if two points, `p` and `q`, are connected by a geodesic, and otherwise returns `false`.
 """
 function connected_by_geodesic(M::Segre{ℝ, V}, p, q) where {V}
-    closest_representative!(M, q, p)
-    return spherical_angle_sum(M, p, q) < pi
+    qc = copy(M, q)
+    closest_representative!(M, qc, p)
+    return spherical_angle_sum(M, p, qc) < pi
 end
 
 @doc raw"""
@@ -338,9 +339,10 @@ and assume ``(μ, y_1, …, y_d)`` is the representation of ``q`` that minimizes
 ````
 """
 function distance(M::Segre{ℝ, V}, p, q) where {V}
-    closest_representative!(M, q, p)
-    m = spherical_angle_sum(M, p, q)
-    return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(m / 2)^2)
+    qc = copy(M, q)
+    closest_representative!(M, qc, p)
+    m = spherical_angle_sum(M, p, qc)
+    return sqrt((p[1][1] - qc[1][1])^2 + 4 * p[1][1] * qc[1][1] * sin(m / 2)^2)
     # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(m)) but more stable for small m
 end
 
@@ -512,13 +514,14 @@ The formula is derived in theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenh
 log(M::Segre{ℝ, V}, p, q) where {V}
 
 function log!(M::Segre{ℝ, V}, X, p, q) where {V}
-    closest_representative!(M, q, p)
-    m = spherical_angle_sum(M, p, q)
+    qc = copy(M, q)
+    closest_representative!(M, qc, p)
+    m = spherical_angle_sum(M, p, qc)
 
-    X[1][1] = q[1][1] * cos(m) - p[1][1]
-    for (n, xdot, x, y) in zip(V, X[2:end], p[2:end], q[2:end])
+    X[1][1] = qc[1][1] * cos(m) - p[1][1]
+    for (n, xdot, x, y) in zip(V, X[2:end], p[2:end], qc[2:end])
         a = distance(Sphere(n - 1), x, y)
-        xdot .= (y - dot(x, y) * x) * (q[1][1] / p[1][1]) * sinc(m / pi) / sinc(a / pi)
+        xdot .= (y - dot(x, y) * x) * (qc[1][1] / p[1][1]) * sinc(m / pi) / sinc(a / pi)
     end
 
     return X
