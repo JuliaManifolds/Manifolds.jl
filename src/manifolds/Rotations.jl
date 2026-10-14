@@ -200,8 +200,10 @@ coordinates on the [`Rotations`](@ref)`(3)` manifold. The formula reads
 ````math
 𝕀 + \frac{\cos(θ) - 1}{θ^2} X + \frac{θ - \sin(θ)}{θ^3} X^2,
 ````
-where ``θ`` is the norm of `X`.
-It is adapted from [Chirikjian:2012](@cite), Eq. (10.86), to `Manifolds.jl` conventions.
+where ``θ = \frac{\lVert X \rVert}{\sqrt{2}}``, and the Jacobian is ``𝕀`` for ``X = 0``.
+This is the "right Jacobian" ``J_r`` of [Chirikjian:2012](@cite), Section 10.6.6, p. 40,
+since ``θ`` is the norm ``\lVert \mathbf{x} \rVert`` of the coefficients
+``\mathbf{x} = (X_{32}, X_{13}, X_{21})`` of ``X`` in Eq. (10.83) there.
 """
 function jacobian_exp_argument(M::Rotations{TypeParameter{Tuple{3}}}, p, X)
     J = allocate_jacobian(M, M, jacobian_exp_argument, p)
