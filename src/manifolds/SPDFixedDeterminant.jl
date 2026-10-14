@@ -147,7 +147,7 @@ project(M::SPDFixedDeterminant, p)
 function project!(M::SPDFixedDeterminant, q, p)
     n = get_parameter(M.size)[1]
     q .= (M.d / det(p))^(1 / n) .* p
-    return
+    return q
 end
 
 @doc raw"""

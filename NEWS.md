@@ -94,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `Weingarten` on `Rotations`, `OrthogonalMatrices` and `UnitaryMatrices` returns a tangent vector in the Lie algebra, like its tangent vector argument.
 * `check_vector` and the tangent projection of `SPDFixedDeterminant` use the condition that the trace of `p \ X` vanishes, so that a geodesic in an accepted direction keeps the determinant, and the tangent check takes a relative tolerance `rtol`.
 * `check_point` on `SPDFixedDeterminant` passes its keyword arguments, such as `atol` and `rtol`, to the check of the determinant.
+* Point `project!` onto the `SPDFixedDeterminant` returns the projected point.
 * `embed` and `embed!` of a tangent vector on the `Segre` manifold return the embedded tangent vector, and `embed!` writes it into the given array.
 * `vector_transport_to!` with `ProjectionTransport` on the `Segre` manifold returns the transported vector also when the result is the tangent vector being transported.
 * `exp!`, and with it the in-place `retract!` and `mid_point!`, on the `Segre` manifold and under its `WarpedMetric` return the correct point when the result is the starting point itself.
