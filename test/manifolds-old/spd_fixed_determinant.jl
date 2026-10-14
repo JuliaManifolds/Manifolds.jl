@@ -5,6 +5,9 @@ include("../header.jl")
     @test repr(M) == "SPDFixedDeterminant(2, 1.0)"
     p = [1.0 0.0; 0.0 1.0]
     @test is_point(M, p)
+    # Determinant is 1.00020001
+    @test !is_point(M, 1.0001 .* p)
+    @test is_point(M, 1.0001 .* p; atol = 1.0e-2)
     # Determinant is 4
     @test !is_point(M, 2.0 .* p)
     @test_throws DomainError is_point(M, 2.0 .* p; error = :error)

@@ -61,7 +61,7 @@ with determinant ``\det(p) = ```M.d`.
 The tolerance for the determinant of `p` can be set using `kwargs...`.
 """
 function check_point(M::SPDFixedDeterminant, p; kwargs...)
-    if det(p) ≉ M.d
+    if !isapprox(det(p), M.d; kwargs...)
         return DomainError(
             det(p),
             "The point $(p) does not lie on $M, since it does not have a determinant $(M.d).",
