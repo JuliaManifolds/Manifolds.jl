@@ -740,7 +740,7 @@ inverse_retract(::GeneralUnitaryMatrices{ℝ}, ::Any, ::Any, ::QRInverseRetracti
 function inverse_retract_qr!(M::GeneralUnitaryMatrices{ℝ}, X, p, q)
     n = get_parameter(M.size)[1]
     A = transpose(p) * q
-    det(A) < 0 && throw(
+    typeof(M) <: OrthogonalMatrices && det(A) < 0 && throw(
         DomainError(
             det(A),
             "The QR inverse retraction is not defined for $p and $q from different connected components, i.e. with a negative determinant of p'q.",
