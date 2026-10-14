@@ -196,6 +196,10 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 Z_inplace = zero_vector(N, q)
                 vector_transport_to!(N, Z_inplace, p, X, q, ProjectionTransport())
                 @test isapprox(Z_inplace, Z; atol = 1.0e-10)
+                # the projection transport does not depend on the warping
+                ZM = vector_transport_to(M, p, X, q, ProjectionTransport())
+                @test isapprox(ZM, Z; atol = 1.0e-10)
+                @test is_vector(M, q, ZM)
 
                 Z_alias = deepcopy(X)
                 vector_transport_to!(N, Z_alias, p, Z_alias, q, ProjectionTransport())

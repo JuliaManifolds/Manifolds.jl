@@ -331,3 +331,9 @@ function spherical_angle_sum(
     ) where {V, A}
     return spherical_angle_sum(M.manifold, p, q)
 end
+
+function vector_transport_to_project!(
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, Y, p, X, q
+    ) where {V, A}
+    return vector_transport_to_project!(M.manifold, Y, p, X, q)
+end
