@@ -44,6 +44,9 @@ struct MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic
 end
 
 function MultinomialSymmetric(n::Int; parameter::Symbol = :type)
+    n < 1 && throw(
+        DomainError(n, "The matrix size n of symmetric multinomial matrices must be positive, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return MultinomialSymmetric{typeof(size)}(size)
 end

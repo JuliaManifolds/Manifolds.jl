@@ -1,6 +1,7 @@
 using Manifolds, Test, LinearAlgebra
 
 @testset "Cholesky Space" begin
+    @test_throws DomainError CholeskySpace(-1)
     M = CholeskySpace(3)
 
     A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]

@@ -1,6 +1,8 @@
 include("../header.jl")
 
 @testset "tangent vectors of the elliptope of any length" begin
+    @test_throws DomainError Elliptope(2, 3)
+    @test_throws DomainError Elliptope(2, 0)
     M = Elliptope(3, 2)
     q = [1.0 0.0; 0.0 1.0; 1 / sqrt(2) 1 / sqrt(2)]
     @test is_vector(M, q, project(M, q, [100.0 -50.0; 30.0 20.0; -10.0 5.0]))

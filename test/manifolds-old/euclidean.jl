@@ -4,6 +4,7 @@ using Manifolds: induced_basis
 using FiniteDifferences
 
 @testset "Euclidean" begin
+    @test_throws DomainError Euclidean(2, -1)
     for param in [:field, :type]
         E = Euclidean(3, parameter = param)
         Ec = Euclidean(3; field = ℂ, parameter = param)

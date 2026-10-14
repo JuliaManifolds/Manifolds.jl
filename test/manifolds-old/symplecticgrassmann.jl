@@ -1,6 +1,9 @@
 include("../header.jl")
 
 @testset "Symplectic Grassmann" begin
+    @test_throws DomainError SymplecticGrassmann(2, 4)
+    @test_throws ArgumentError SymplecticGrassmann(5, 2)
+    @test_throws ArgumentError SymplecticGrassmann(6, 3)
     M = SymplecticGrassmann(6, 4)
     Mf = SymplecticGrassmann(6, 4; parameter = :field)
     p = [

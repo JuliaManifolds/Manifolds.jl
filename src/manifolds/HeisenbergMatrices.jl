@@ -26,6 +26,9 @@ struct HeisenbergMatrices{T} <: AbstractDecoratorManifold{ℝ}
 end
 
 function HeisenbergMatrices(n::Int; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The dimension n of Heisenberg matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return HeisenbergMatrices{typeof(size)}(size)
 end

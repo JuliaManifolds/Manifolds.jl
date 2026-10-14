@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "SkewSymmetricMatrices" begin
+    @test_throws DomainError SkewSymmetricMatrices(-1)
     @test SkewSymmetricMatrices(3) === SkewHermitianMatrices(3)
 end
 

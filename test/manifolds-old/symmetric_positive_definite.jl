@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Symmetric Positive Definite Matrices" begin
+    @test_throws DomainError SymmetricPositiveDefinite(-1)
     M1 = SymmetricPositiveDefinite(3)
     @test repr(M1) == "SymmetricPositiveDefinite(3)"
     M2 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.AffineInvariantMetric())

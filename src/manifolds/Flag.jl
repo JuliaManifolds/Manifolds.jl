@@ -77,18 +77,26 @@ end
 
 function Flag(N::Int, ns::Vararg{Int, I}; parameter::Symbol = :type) where {I}
     if ns[1] <= 0
-        error(
-            "First dimension in the sequence ns must be strictly positive, but is $(ns[1]).",
+        throw(
+            DomainError(
+                ns,
+                "First dimension in the sequence ns must be strictly positive, but is $(ns[1]).",
+            ),
         )
     end
     for i in 1:(length(ns) - 1)
         if ns[i] >= ns[i + 1]
-            error("Sequence of dimensions must be strictly increasing, received $ns")
+            throw(
+                DomainError(ns, "Sequence of dimensions must be strictly increasing, received $ns"),
+            )
         end
     end
     if ns[end] >= N
-        error(
-            "Last dimension in sequence (given: $(ns[end])) must be strictly lower than N (given: $N).",
+        throw(
+            DomainError(
+                (N, ns),
+                "Last dimension in sequence (given: $(ns[end])) must be strictly lower than N (given: $N).",
+            ),
         )
     end
     size = wrap_type_parameter(parameter, (N,))

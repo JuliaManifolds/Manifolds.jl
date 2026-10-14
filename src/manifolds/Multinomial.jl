@@ -36,6 +36,12 @@ struct MultinomialMatrices{T, TPM <: ProbabilitySimplex} <:
 end
 
 function MultinomialMatrices(n::Int, m::Int; parameter::Symbol = :type)
+    (n < 1 || m < 0) && throw(
+        DomainError(
+            (n, m),
+            "The number of rows n of multinomial matrices must be positive and the number of columns m nonnegative, but they were $(n) and $(m).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, m))
     MPS = ProbabilitySimplex(n - 1; parameter = parameter)
     return MultinomialMatrices{typeof(size), typeof(MPS)}(size, MPS)

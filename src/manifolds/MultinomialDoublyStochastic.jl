@@ -91,6 +91,9 @@ struct MultinomialDoubleStochastic{T} <: AbstractMultinomialDoublyStochastic
 end
 
 function MultinomialDoubleStochastic(n::Int; parameter::Symbol = :type)
+    n < 1 && throw(
+        DomainError(n, "The matrix size n of doubly stochastic matrices must be positive, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return MultinomialDoubleStochastic{typeof(size)}(size)
 end

@@ -73,6 +73,22 @@ struct SymplecticGrassmann{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SymplecticGrassmann(two_n::Int, two_k::Int; parameter::Symbol = :type)
+    two_n % 2 == 0 || throw(
+        ArgumentError(
+            "The first matrix size of the symplectic Grassmann manifold must be even, but was $(two_n).",
+        ),
+    )
+    two_k % 2 == 0 || throw(
+        ArgumentError(
+            "The second matrix size of the symplectic Grassmann manifold must be even, but was $(two_k).",
+        ),
+    )
+    0 <= two_k <= two_n || throw(
+        DomainError(
+            (two_n, two_k),
+            "The matrix sizes `2n` and `2k` of the symplectic Grassmann manifold must satisfy 0 ≤ 2k ≤ 2n, but they were $(two_n) and $(two_k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (div(two_n, 2), div(two_k, 2)))
     return SymplecticGrassmann{ℝ, typeof(size)}(size)
 end

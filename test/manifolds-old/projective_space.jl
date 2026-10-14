@@ -1,6 +1,8 @@
 include("../header.jl")
 
 @testset "tangent vectors of the projective space of any length" begin
+    @test_throws DomainError ProjectiveSpace(-1)
+    @test_throws DomainError ArrayProjectiveSpace(0, 2)
     M = ProjectiveSpace(2)
     p = [1.0, 2.0, 3.0] / sqrt(14.0)
     @test is_vector(M, p, project(M, p, [100.0, -50.0, 30.0]))

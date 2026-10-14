@@ -1,6 +1,8 @@
 include("../header.jl")
 
 @testset "fixed Rank" begin
+    @test_throws DomainError FixedRankMatrices(3, 2, 3)
+    @test_throws DomainError FixedRankMatrices(3, 2, -1)
     M = FixedRankMatrices(3, 2, 2)
     M2 = FixedRankMatrices(3, 2, 1)
     Mc = FixedRankMatrices(3, 2, 2, ℂ)

@@ -49,6 +49,8 @@ struct Sphere{𝔽, T} <: AbstractSphere{𝔽}
     size::T
 end
 function Sphere(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 &&
+        throw(DomainError(n, "The dimension n of a sphere must be nonnegative, but was $(n)."))
     size = wrap_type_parameter(parameter, (n,))
     return Sphere{field, typeof(size)}(size)
 end
@@ -97,6 +99,12 @@ function ArraySphere(
         field::AbstractNumbers = ℝ,
         parameter::Symbol = :type,
     ) where {I}
+    any(n .< 1) && throw(
+        DomainError(
+            n,
+            "Every array size of an array sphere must be positive, but they were $(n).",
+        ),
+    )
     size = wrap_type_parameter(parameter, n)
     return ArraySphere{field, typeof(size)}(size)
 end

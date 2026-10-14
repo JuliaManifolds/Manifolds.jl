@@ -28,6 +28,9 @@ Generate a valence `(n, ...)` Segre manifold.
 struct Segre{𝔽, V} <: AbstractManifold{𝔽} end
 
 function Segre(n::Int...; field::AbstractNumbers = ℝ)
+    any(n .< 1) && throw(
+        DomainError(n, "Every entry of the valence of a Segre manifold must be positive, but they were $(n).")
+    )
     return Segre{field, (n...,)}()
 end
 

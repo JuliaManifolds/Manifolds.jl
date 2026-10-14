@@ -37,6 +37,9 @@ function GeneralUnitaryMatrices(
         matrix_type::Type{<:AbstractMatrixType};
         parameter::Symbol = :type,
     )
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of general unitary matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return GeneralUnitaryMatrices{field, typeof(size), matrix_type}(size)
 end

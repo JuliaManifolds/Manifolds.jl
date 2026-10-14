@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "SphereSymmetricMatrices" begin
+    @test_throws DomainError SphereSymmetricMatrices(0)
     M = SphereSymmetricMatrices(3)
     M_complex = SphereSymmetricMatrices(3, ℂ)
     A = [1 2 3; 2 4 -5; 3 -5 6] / norm([1 2 3; 2 4 -5; 3 -5 6])

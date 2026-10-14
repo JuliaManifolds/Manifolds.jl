@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Hamiltonian matrices" begin
+    @test_throws DomainError HamiltonianMatrices(-2)
     M = HamiltonianMatrices(4)
     Mf = HamiltonianMatrices(4; parameter = :field)
     # A has to be of the Form JS, S symmetric

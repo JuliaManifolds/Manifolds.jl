@@ -1,6 +1,7 @@
 using LinearAlgebra, Manifolds, ManifoldsBase, Test
 
 @testset "Heisenberg matrices" begin
+    @test_throws DomainError HeisenbergMatrices(-1)
     M = HeisenbergMatrices(1)
 
     p1 = [1.0 2.0 3.0; 0.0 1.0 -1.0; 0.0 0.0 1.0]

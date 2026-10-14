@@ -31,6 +31,9 @@ struct MultinomialSymmetricPositiveDefinite{T} <: AbstractMultinomialDoublyStoch
 end
 
 function MultinomialSymmetricPositiveDefinite(n::Int; parameter::Symbol = :type)
+    n < 1 && throw(
+        DomainError(n, "The matrix size n of symmetric positive definite multinomial matrices must be positive, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return MultinomialSymmetricPositiveDefinite{typeof(size)}(size)
 end

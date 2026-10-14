@@ -20,6 +20,12 @@ struct CenteredMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    (m < 1 || n < 0) && throw(
+        DomainError(
+            (m, n),
+            "The number of rows m of centered matrices must be positive and the number of columns n nonnegative, but they were $(m) and $(n).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (m, n))
     return CenteredMatrices{field, typeof(size)}(size)
 end

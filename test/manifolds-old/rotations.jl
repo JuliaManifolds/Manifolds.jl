@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Rotations" begin
+    @test_throws DomainError Rotations(-1)
     M = Rotations(2)
     @test repr(M) == "Rotations(2)"
     @test representation_size(M) == (2, 2)

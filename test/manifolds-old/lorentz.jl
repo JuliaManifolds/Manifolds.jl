@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Lorentz Manifold" begin
+    @test_throws DomainError Lorentz(-1)
     M = Lorentz(3)
     @test is_flat(M)
     @test is_flat(Lorentz(3; parameter = :field))

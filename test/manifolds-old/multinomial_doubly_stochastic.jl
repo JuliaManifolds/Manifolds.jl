@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Multinomial doubly stochastic Matrices" begin
+    @test_throws DomainError MultinomialDoubleStochastic(0)
     M = MultinomialDoubleStochastic(3)
     @test manifold_dimension(M) == 4
     @test repr(M) == "MultinomialDoubleStochastic(3)"

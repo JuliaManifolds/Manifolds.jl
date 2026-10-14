@@ -1,6 +1,8 @@
 using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, StaticArrays, Test
 
 @testset "The Stiefel manifolds" begin
+    @test_throws DomainError Stiefel(1, 2)
+    @test_throws DomainError Stiefel(2, 3)
     @testset "Real Stiefel Manifold" begin
         M = Stiefel(3, 2)
         p = [1.0 0.0; 0.0 1.0; 0.0 0.0]

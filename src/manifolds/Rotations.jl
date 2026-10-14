@@ -13,6 +13,9 @@ Generate the manifold of ``n×n`` rotation matrices.
 const Rotations{T} = GeneralUnitaryMatrices{ℝ, T, DeterminantOneMatrixType}
 
 function Rotations(n::Int; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of rotations must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return Rotations{typeof(size)}(size)
 end

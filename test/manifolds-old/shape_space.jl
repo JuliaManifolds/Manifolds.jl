@@ -1,6 +1,8 @@
 include("../header.jl")
 
 @testset "KendallsPreShapeSpace" begin
+    @test_throws DomainError KendallsPreShapeSpace(2, 1)
+    @test_throws DomainError KendallsShapeSpace(0, 3)
     M = KendallsPreShapeSpace(2, 3)
     @test repr(M) == "KendallsPreShapeSpace(2, 3)"
     @test representation_size(M) === (2, 3)
@@ -144,9 +146,8 @@ end
     )
     @testset "degenerate cases" begin
         Md3_2 = KendallsShapeSpace(3, 2)
-        Md2_1 = KendallsShapeSpace(2, 1)
         @test manifold_dimension(Md3_2) == 0
-        @test manifold_dimension(Md2_1) == 0
+        @test_throws DomainError KendallsShapeSpace(2, 1)
     end
     @testset "collinear landmarks and a triangle in space" begin
         p = [1.0 -1.0 0.0; 0.0 0.0 0.0] ./ sqrt(2)

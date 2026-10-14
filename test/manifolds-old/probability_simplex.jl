@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "tangent vectors of the probability simplex of any length" begin
+    @test_throws DomainError ProbabilitySimplex(-1)
     M = ProbabilitySimplex(2)
     p = [0.2, 0.3, 0.5]
     @test is_vector(M, p, project(M, p, [100.0, -50.0, 30.0]))

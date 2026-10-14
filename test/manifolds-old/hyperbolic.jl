@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "tangent vectors of the hyperbolic space far from the apex" begin
+    @test_throws DomainError Hyperbolic(-1)
     M = Hyperbolic(2)
     p = exp(M, [0.0, 0.0, 1.0], [5.0, 0.0, 0.0])
     @test is_vector(M, p, project(M, p, [100.0, -50.0, 30.0]))

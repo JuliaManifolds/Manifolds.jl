@@ -36,6 +36,12 @@ struct Stiefel{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    0 <= k <= n || throw(
+        DomainError(
+            (n, k),
+            "The number of columns k of a Stiefel manifold must satisfy 0 ≤ k ≤ n, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return Stiefel{field, typeof(size)}(size)
 end

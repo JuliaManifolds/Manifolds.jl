@@ -48,7 +48,12 @@ function Tucker(
         n⃗::NTuple{D, Int}, r⃗::NTuple{D, Int}, field::AbstractNumbers = ℝ;
         parameter::Symbol = :type,
     ) where {D}
-    @assert is_valid_mlrank(n⃗, r⃗)
+    is_valid_mlrank(n⃗, r⃗) || throw(
+        DomainError(
+            (n⃗, r⃗),
+            "The multilinear rank r⃗ = $(r⃗) of a Tucker manifold must be positive, at most n⃗ = $(n⃗) and satisfy r⃗[i] ≤ ∏ⱼ₌₁,ⱼ≠ᵢ r⃗[j] for every i.",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n⃗, r⃗))
     return Tucker{field, typeof(size), D}(size)
 end

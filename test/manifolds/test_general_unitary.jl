@@ -4,6 +4,9 @@ using Manifolds, ManifoldsBase, Test, StaticArrays
 # independent of their matrix type, so we check that with a dummy type
 
 Test.@testset "GeneralUnitaryMatrices" begin
+    Test.@test_throws DomainError Rotations(-1)
+    Test.@test_throws DomainError OrthogonalMatrices(-1)
+    Test.@test_throws DomainError SpecialUnitaryMatrices(0)
     M2 = Manifolds.GeneralUnitaryMatrices(2, ℝ, Manifolds.Test.DummyMatrixType)
     M2f = Manifolds.GeneralUnitaryMatrices(2, ℝ, Manifolds.Test.DummyMatrixType; parameter = :field)
     @testset "Basics" begin

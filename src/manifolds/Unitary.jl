@@ -32,6 +32,9 @@ see also [`OrthogonalMatrices`](@ref) for the real valued case.
 const UnitaryMatrices{𝔽, T} = GeneralUnitaryMatrices{𝔽, T, AbsoluteDeterminantOneMatrixType}
 
 function UnitaryMatrices(n::Int, 𝔽::AbstractNumbers = ℂ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of unitary matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return UnitaryMatrices{𝔽, typeof(size)}(size)
 end

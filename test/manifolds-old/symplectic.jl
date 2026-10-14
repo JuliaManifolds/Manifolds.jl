@@ -5,6 +5,7 @@ using Manifolds: RiemannianProjectionBackend
 using ManifoldDiff
 
 @testset "SymplecticMatrices" begin
+    @test_throws DomainError SymplecticMatrices(-2)
     M = SymplecticMatrices(2)
     @test metric(M) == RealSymplecticMetric()
     Metr_Sp_2 = MetricManifold(M, RealSymplecticMetric())

@@ -1,6 +1,7 @@
 using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
 @testset "Segre Manifold" begin
+    @test_throws DomainError Segre(2, 0)
     # Manifolds to test
     Ms = [
         Segre(10),

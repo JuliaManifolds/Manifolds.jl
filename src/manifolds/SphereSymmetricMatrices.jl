@@ -19,6 +19,12 @@ struct SphereSymmetricMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SphereSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 1 && throw(
+        DomainError(
+            n,
+            "The matrix size n of symmetric matrices of unit norm must be positive, but was $(n).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n,))
     return SphereSymmetricMatrices{field, typeof(size)}(size)
 end

@@ -1,6 +1,7 @@
 using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
 
 @testset "Unitary Matrices" begin
+    @test_throws DomainError UnitaryMatrices(-1)
     M = UnitaryMatrices(2)
     p1 = [1im 0.0; 0.0 1im]
     X1 = [0.0 1.0; -1.0 0.0]

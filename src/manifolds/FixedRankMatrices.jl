@@ -44,6 +44,12 @@ function FixedRankMatrices(
         m::Int, n::Int, k::Int, field::AbstractNumbers = ℝ;
         parameter::Symbol = :type,
     )
+    0 <= k <= min(m, n) || throw(
+        DomainError(
+            (m, n, k),
+            "The rank k of fixed rank matrices must satisfy 0 ≤ k ≤ min(m, n), but m, n and k were $(m), $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (m, n, k))
     return FixedRankMatrices{field, typeof(size)}(size)
 end

@@ -28,6 +28,9 @@ struct SkewHermitianMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SkewHermitianMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of skew-Hermitian matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return SkewHermitianMatrices{field, typeof(size)}(size)
 end
@@ -209,10 +212,6 @@ corresponds to the constraint that the real part of the diagonal be zero.
 function manifold_dimension(M::SkewHermitianMatrices{𝔽}) where {𝔽}
     N = get_parameter(M.size)[1]
     return div(N * (N + 1), 2) * real_dimension(𝔽) - N
-end
-
-function number_of_coordinates(M::SkewHermitianMatrices{ℂ}, ::AbstractBasis{ℂ})
-    return manifold_dimension(M)
 end
 
 @doc raw"""

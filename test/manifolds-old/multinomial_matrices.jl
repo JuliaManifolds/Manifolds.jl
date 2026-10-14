@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "MultinomialMatrices manifold" begin
+    @test_throws DomainError MultinomialMatrices(0, 2)
     M = MultinomialMatrices(3, 2)
     @testset "MultinomialMatrices manifold Basics" begin
         @test ProbabilitySimplex(2)^3 === MultinomialMatrices(3, 3)

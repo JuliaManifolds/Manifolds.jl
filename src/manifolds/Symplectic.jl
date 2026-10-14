@@ -40,6 +40,12 @@ struct SymplecticMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SymplecticMatrices(two_n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    two_n < 0 && throw(
+        DomainError(
+            two_n,
+            "The matrix size `2n` of the symplectic manifold must be nonnegative, but was $(two_n).",
+        ),
+    )
     two_n % 2 == 0 || throw(
         ArgumentError(
             "The matrix size `2n` of the symplectic manifold must be even, but was $(two_n).",

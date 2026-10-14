@@ -9,9 +9,9 @@ using Random
     @test manifold_dimension(M) == 7
 
     @testset "Flag constructor errors" begin
-        @test_throws ErrorException Flag(0, 0)
-        @test_throws ErrorException Flag(5, 2, 2)
-        @test_throws ErrorException Flag(5, 2, 5)
+        @test_throws DomainError Flag(0, 0)
+        @test_throws DomainError Flag(5, 2, 2)
+        @test_throws DomainError Flag(5, 2, 5)
     end
 
     p1 = [

@@ -1,6 +1,7 @@
 using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
 
 @testset "Invertible matrices" begin
+    @test_throws DomainError InvertibleMatrices(-1)
     M = InvertibleMatrices(3, ℝ)
     A = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
     B = [0.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]

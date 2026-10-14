@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Multinomial symmetric matrices" begin
+    @test_throws DomainError MultinomialSymmetric(0)
     M = MultinomialSymmetric(3)
     @test manifold_dimension(M) == 3
     @test repr(M) == "MultinomialSymmetric(3)"

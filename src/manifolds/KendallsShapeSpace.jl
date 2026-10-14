@@ -20,6 +20,12 @@ struct KendallsShapeSpace{T} <: AbstractDecoratorManifold{ℝ}
 end
 
 function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol = :type)
+    (n < 1 || k < 2) && throw(
+        DomainError(
+            (n, k),
+            "Kendall's shape spaces need a positive dimension n and at least k = 2 landmarks, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return KendallsShapeSpace{typeof(size)}(size)
 end
@@ -187,17 +193,13 @@ end
 
 Return the dimension of the [`KendallsShapeSpace`](@ref) manifold `M`. The dimension is
 given by ``n(k - 1) - 1 - n(n - 1)/2`` in the typical case where ``k \geq n+1``, and
-``(k + 1)(k - 2) / 2`` otherwise, unless ``k`` is equal to 1, in which case the dimension
-is 0. See [Kendall:1984](@cite) for a discussion of the over-dimensioned case.
+``(k + 1)(k - 2) / 2`` otherwise. See [Kendall:1984](@cite) for a discussion of the
+over-dimensioned case.
 """
 function manifold_dimension(M::KendallsShapeSpace)
     n, k = get_parameter(M.size)
     if k < n + 1 # over-dimensioned case
-        if k == 1
-            return 0
-        else
-            return div((k + 1) * (k - 2), 2)
-        end
+        return div((k + 1) * (k - 2), 2)
     else
         return n * (k - 1) - 1 - div(n * (n - 1), 2)
     end

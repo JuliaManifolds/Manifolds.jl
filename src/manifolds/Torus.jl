@@ -10,9 +10,12 @@ struct Torus{N} <: AbstractPowerManifold{ℝ, Circle{ℝ}, ArrayPowerRepresentat
     manifold::Circle{ℝ}
 end
 
-Torus(n::Int) = Torus{n}(Circle())
+function Torus(n::Int)
+    n < 0 && throw(DomainError(n, "The dimension n of a torus must be nonnegative, but was $(n)."))
+    return Torus{n}(Circle())
+end
 
-Base.:^(M::Circle, n::Int) = Torus{n}(M)
+Base.:^(::Circle{ℝ}, n::Int) = Torus(n)
 
 @doc raw"""
     check_point(M::Torus{n}, p; kwargs...)

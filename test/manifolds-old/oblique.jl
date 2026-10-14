@@ -1,6 +1,8 @@
 include("../header.jl")
 
 @testset "Oblique manifold" begin
+    @test_throws DomainError Oblique(0, 2)
+    @test_throws DomainError Oblique(2, -1)
     M = Oblique(3, 2)
     @testset "Oblique manifold Basics" begin
         @test Sphere(2)^3 === Oblique(3, 3)

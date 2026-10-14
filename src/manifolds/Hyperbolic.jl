@@ -38,6 +38,9 @@ struct Hyperbolic{T} <: AbstractDecoratorManifold{ℝ}
 end
 
 function Hyperbolic(n::Int; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The dimension n of a hyperbolic space must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return Hyperbolic{typeof(size)}(size)
 end

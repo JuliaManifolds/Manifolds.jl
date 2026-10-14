@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "SymmetricMatrices" begin
+    @test_throws DomainError SymmetricMatrices(-1)
     M = SymmetricMatrices(3, ℝ)
     A = [1 2 3; 4 5 6; 7 8 9]
     A_sym = [1 2 3; 2 5 -1; 3 -1 9]

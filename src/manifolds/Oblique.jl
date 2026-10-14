@@ -22,6 +22,12 @@ struct Oblique{𝔽, T, S} <: AbstractPowerManifold{𝔽, Sphere{𝔽, S}, Array
 end
 
 function Oblique(n::Int, m::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    (n < 1 || m < 0) && throw(
+        DomainError(
+            (n, m),
+            "The number of rows n of an oblique manifold must be positive and the number of columns m nonnegative, but they were $(n) and $(m).",
+        ),
+    )
     sphere = Sphere(n - 1, field; parameter = parameter)
     size = wrap_type_parameter(parameter, (n, m))
     return Oblique{field, typeof(size), typeof(sphere).parameters[2]}(size, sphere)

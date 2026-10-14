@@ -26,6 +26,12 @@ struct DeterminantOneMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function DeterminantOneMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 1 && throw(
+        DomainError(
+            n,
+            "The matrix size n of determinant one matrices must be positive, but was $(n).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n,))
     return DeterminantOneMatrices{field, typeof(size)}(size)
 end

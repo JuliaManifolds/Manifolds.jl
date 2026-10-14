@@ -3,6 +3,8 @@ using ManifoldDiff
 
 
 @testset "The Spheres" begin
+    @test_throws DomainError Sphere(-1)
+    @test_throws DomainError ArraySphere(0, 2)
 
     M = Sphere(2)
     p = [1.0, 0.0, 0.0]

@@ -16,6 +16,9 @@ struct CholeskySpace{T} <: AbstractManifold{ℝ}
 end
 
 function CholeskySpace(n::Int; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of a Cholesky space must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return CholeskySpace{typeof(size)}(size)
 end

@@ -49,6 +49,12 @@ function ProbabilitySimplex(n::Int; boundary::Symbol = :open, parameter::Symbol 
             ),
         )
     end
+    n < 0 && throw(
+        DomainError(
+            n,
+            "The dimension n of a probability simplex must be nonnegative, but was $(n).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n,))
     return ProbabilitySimplex{typeof(size), boundary}(size)
 end

@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Symmetric Positive Semidefinite Matrices of Fixed Rank" begin
+    @test_throws DomainError SymmetricPositiveSemidefiniteFixedRank(2, 3)
     @testset "Real Matrices" begin
         M = SymmetricPositiveSemidefiniteFixedRank(4, 2)
         @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℝ)"

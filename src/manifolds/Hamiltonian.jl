@@ -65,6 +65,12 @@ struct HamiltonianMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function HamiltonianMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(
+            n,
+            "The matrix size 2n of Hamiltonian matrices must be nonnegative, but was $(n).",
+        ),
+    )
     n % 2 == 0 || throw(ArgumentError("The dimension of the symplectic manifold
                         embedding space must be even. Was odd, n % 2 == $(n % 2)."))
     size = wrap_type_parameter(parameter, (div(n, 2),))

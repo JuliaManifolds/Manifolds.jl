@@ -3,6 +3,7 @@ using DiffEqCallbacks, OrdinaryDiffEq
 using ForwardDiff
 
 @testset "Grassmann distance at a right and at a small angle" begin
+    @test_throws DomainError Grassmann(2, 3)
     M = Grassmann(4, 2)
     p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
     q = [0.0 0.0; 0.0 1.0; 1.0 0.0; 0.0 0.0]

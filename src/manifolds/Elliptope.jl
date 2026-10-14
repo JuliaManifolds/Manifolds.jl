@@ -47,6 +47,12 @@ struct Elliptope{T} <: AbstractDecoratorManifold{ℝ}
 end
 
 function Elliptope(n::Int, k::Int; parameter::Symbol = :type)
+    1 <= k <= n || throw(
+        DomainError(
+            (n, k),
+            "The rank k of an elliptope must satisfy 1 ≤ k ≤ n, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return Elliptope{typeof(size)}(size)
 end

@@ -1,6 +1,7 @@
 using Manifolds, Random, Test
 
 Test.@testset "Centered Matrices" begin
+    Test.@test_throws DomainError CenteredMatrices(0, 2)
 
     Test.@testset "tangent vectors of any length" begin
         N = CenteredMatrices(3, 2)

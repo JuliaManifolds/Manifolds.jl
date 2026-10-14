@@ -30,6 +30,9 @@ struct SymmetricMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of symmetric matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return SymmetricMatrices{field, typeof(size)}(size)
 end

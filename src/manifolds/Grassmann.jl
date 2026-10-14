@@ -78,6 +78,12 @@ end
 # Generic functions independent of the representation of points
 #
 function Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    0 <= k <= n || throw(
+        DomainError(
+            (n, k),
+            "The number of columns k of a Grassmann manifold must satisfy 0 ≤ k ≤ n, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return Grassmann{field, typeof(size)}(size)
 end

@@ -1,6 +1,8 @@
 include("../header.jl")
 
 @testset "tangent vectors of the spectrahedron of any length" begin
+    @test_throws DomainError Spectrahedron(0, 0)
+    @test_throws DomainError Spectrahedron(2, 3)
     M = Spectrahedron(3, 2)
     q = [1.0 2.0; 3.0 4.0; 5.0 6.0] / norm([1.0 2.0; 3.0 4.0; 5.0 6.0])
     @test is_vector(M, q, project(M, q, [100.0 -50.0; 30.0 20.0; -10.0 5.0]))

@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Generalized Stiefel" begin
+    @test_throws DomainError GeneralizedStiefel(2, 3)
     @testset "Real" begin
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
         M = GeneralizedStiefel(3, 2, B)

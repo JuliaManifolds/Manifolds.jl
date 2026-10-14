@@ -2,6 +2,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
 
 
 @testset "Matrices of Determinant 1" begin
+    @test_throws DomainError DeterminantOneMatrices(0)
     # Real case
     M = DeterminantOneMatrices(2)
     p = [1.0 0.0; 0.0 1.0]

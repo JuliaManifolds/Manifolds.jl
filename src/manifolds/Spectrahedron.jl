@@ -47,6 +47,12 @@ struct Spectrahedron{T} <: AbstractDecoratorManifold{ℝ}
 end
 
 function Spectrahedron(n::Int, k::Int; parameter::Symbol = :type)
+    1 <= k <= n || throw(
+        DomainError(
+            (n, k),
+            "The rank k of a spectrahedron must satisfy 1 ≤ k ≤ n, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return Spectrahedron{typeof(size)}(size)
 end

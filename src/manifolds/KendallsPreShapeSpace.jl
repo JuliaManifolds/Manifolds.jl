@@ -20,6 +20,12 @@ struct KendallsPreShapeSpace{T} <: AbstractSphere{ℝ}
 end
 
 function KendallsPreShapeSpace(n::Int, k::Int; parameter::Symbol = :type)
+    (n < 1 || k < 2) && throw(
+        DomainError(
+            (n, k),
+            "Kendall's shape spaces need a positive dimension n and at least k = 2 landmarks, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return KendallsPreShapeSpace{typeof(size)}(size)
 end

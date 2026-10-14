@@ -31,6 +31,9 @@ struct SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
 end
 
 function SymmetricPositiveDefinite(n::Int; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of symmetric positive definite matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return SymmetricPositiveDefinite{typeof(size)}(size)
 end

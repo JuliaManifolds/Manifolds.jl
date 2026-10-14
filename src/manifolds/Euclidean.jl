@@ -37,6 +37,12 @@ function Euclidean(
         field::AbstractNumbers = ℝ,
         parameter::Symbol = :type,
     ) where {I}
+    any(n .< 0) && throw(
+        DomainError(
+            n,
+            "Every array size of a Euclidean space must be nonnegative, but they were $(n).",
+        ),
+    )
     size = wrap_type_parameter(parameter, n)
     return Euclidean{field, typeof(size)}(size)
 end

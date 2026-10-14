@@ -1,6 +1,8 @@
 include("../header.jl")
 
 @testset "Torus" begin
+    @test_throws DomainError Torus(-1)
+    @test_throws DomainError Base.:^(Circle(), -1)
     M = Torus(2)
     @testset "Torus Basics" begin
         @test Circle()^3 === Torus(3)

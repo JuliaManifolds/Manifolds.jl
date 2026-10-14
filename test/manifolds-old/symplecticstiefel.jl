@@ -23,6 +23,7 @@ function exp_naive!(M::SymplecticStiefel, q, p, X)
 end
 
 @testset "SymplecticStiefel" begin
+    @test_throws DomainError SymplecticStiefel(2, 4)
     M = SymplecticStiefel(6, 4)
 
     p_6_4 = [

@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Isochoric matrices" begin
+    @test_throws DomainError SPDFixedDeterminant(0)
     M = SPDFixedDeterminant(2, 1.0)
     @test repr(M) == "SPDFixedDeterminant(2, 1.0)"
     p = [1.0 0.0; 0.0 1.0]

@@ -50,6 +50,12 @@ function SymmetricPositiveSemidefiniteFixedRank(
         field::AbstractNumbers = ℝ;
         parameter::Symbol = :type,
     )
+    0 <= k <= n || throw(
+        DomainError(
+            (n, k),
+            "The rank k of symmetric positive semidefinite matrices of fixed rank must satisfy 0 ≤ k ≤ n, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return SymmetricPositiveSemidefiniteFixedRank{typeof(size), field}(size)
 end

@@ -20,6 +20,9 @@ struct InvertibleMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function InvertibleMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of invertible matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return InvertibleMatrices{field, typeof(size)}(size)
 end

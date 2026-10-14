@@ -17,6 +17,9 @@ This is the same manifold as the [`Stiefel`](@ref)`(n, n, ℝ)` manifold.
 const OrthogonalMatrices{n} = GeneralUnitaryMatrices{ℝ, n, AbsoluteDeterminantOneMatrixType}
 
 function OrthogonalMatrices(n::Int; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of orthogonal matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return OrthogonalMatrices{typeof(size)}(size)
 end

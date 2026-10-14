@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Multinomial symmetric positive definite matrices" begin
+    @test_throws DomainError MultinomialSymmetricPositiveDefinite(0)
     @testset "Basics" begin
         M = MultinomialSymmetricPositiveDefinite(3)
         Mf = MultinomialSymmetricPositiveDefinite(3; parameter = :field)

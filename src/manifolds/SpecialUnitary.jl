@@ -29,6 +29,9 @@ see also [`Rotations`](@ref) for the real valued case.
 const SpecialUnitaryMatrices{T} = GeneralUnitaryMatrices{ℂ, T, DeterminantOneMatrixType}
 
 function SpecialUnitaryMatrices(n::Int; parameter::Symbol = :type)
+    n < 1 && throw(
+        DomainError(n, "The matrix size n of special unitary matrices must be positive, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return SpecialUnitaryMatrices{typeof(size)}(size)
 end

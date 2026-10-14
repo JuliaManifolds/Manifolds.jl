@@ -48,6 +48,12 @@ struct SymplecticStiefel{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SymplecticStiefel(two_n::Int, two_k::Int; parameter::Symbol = :type)
+    0 <= two_k <= two_n || throw(
+        DomainError(
+            (two_n, two_k),
+            "The matrix sizes `2n` and `2k` of the symplectic Stiefel manifold must satisfy 0 ≤ 2k ≤ 2n, but they were $(two_n) and $(two_k).",
+        ),
+    )
     two_n % 2 == 0 || throw(
         ArgumentError(
             "The first matrix size of the symplectic Stiefel manifold must be even, but was $(two_n).",

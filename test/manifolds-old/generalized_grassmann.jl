@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "generalized Grassmann geodesic speed" begin
+    @test_throws DomainError GeneralizedGrassmann(2, 3)
     B = [2.0 1.0 0.0; 1.0 2.0 0.0; 0.0 0.0 1.0]
     M = GeneralizedGrassmann(3, 2, B)
     p = project(M, [1.0 0.0; 0.0 1.0; 0.0 0.0])

@@ -2,6 +2,8 @@ using ManifoldsBase: LinearAlgebra
 include("../header.jl")
 
 @testset "Tucker" begin
+    @test_throws DomainError Tucker((2, 3), (3, 3))
+    @test_throws DomainError Tucker((4, 5, 6), (1, 2, 3))
     n⃗ = (4, 5, 6)
     r⃗ = (2, 3, 4)
     r⃗_small = (2, 3, 3)

@@ -46,6 +46,12 @@ end
 
 function SPDFixedDeterminant(n::Int, d::F = 1.0; parameter::Symbol = :type) where {F <: Real}
     @assert d > 0 "The determinant has to be positive but was provided as $d."
+    n < 1 && throw(
+        DomainError(
+            n,
+            "The matrix size n of SPD matrices with fixed determinant must be positive, but was $(n).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n,))
     return SPDFixedDeterminant{typeof(size), F}(size, d)
 end
