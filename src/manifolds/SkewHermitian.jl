@@ -111,7 +111,7 @@ function get_coordinates_orthonormal!(
         Y,
         p,
         X,
-        ::ComplexNumbers,
+        ::RealNumbers,
     )
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
@@ -165,7 +165,7 @@ function get_vector_orthonormal!(
         Y,
         p,
         X,
-        ::ComplexNumbers,
+        ::RealNumbers,
     )
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
