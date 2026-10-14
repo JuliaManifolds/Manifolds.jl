@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `project` on the `HamiltonianMatrices`, for points and for tangent vectors.
 * `is_flat` for the `Lorentz` manifold with the `MinkowskiMetric`.
 * `rand` now works on `ProjectiveSpace`.
-* `QRInverseRetraction` on the real `GeneralUnitaryMatrices`, in particular on `OrthogonalMatrices`, previously only available on `Rotations`. It throws a `DomainError` for points from different connected components.
+* `QRInverseRetraction` and `PolarInverseRetraction` on the real `GeneralUnitaryMatrices`, in particular on `OrthogonalMatrices`, previously only available on `Rotations`. On `OrthogonalMatrices` they throw a `DomainError` for points from different connected components.
 
 ### Changed
 

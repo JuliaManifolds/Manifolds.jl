@@ -722,6 +722,53 @@ end
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
 
 @doc raw"""
+    inverse_retract(M::Rotations, p, q, ::PolarInverseRetraction)
+    inverse_retract(M::OrthogonalMatrices, p, q, ::PolarInverseRetraction)
+
+Compute a vector `X` (as an element of the Lie algebra) from the tangent space ``T_p\mathcal M``
+of the point `p` on the real [`GeneralUnitaryMatrices`](@ref) manifold `M`, for example the
+[`Rotations`](@ref) or the [`OrthogonalMatrices`](@ref), with which the point `q` can be reached by the
+[`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) from the point `p` after time 1.
+
+The formula reads
+````math
+\operatorname{retr}^{-1}_p(q)
+= -\frac{1}{2}(p^{\mathrm{T}}qs - (p^{\mathrm{T}}qs)^{\mathrm{T}})
+````
+
+where ``s`` is the solution to the Sylvester equation
+
+``p^{\mathrm{T}}qs + s(p^{\mathrm{T}}q)^{\mathrm{T}} + 2I_n = 0.``
+
+The polar retraction does not leave the connected component of `p`, since
+``\operatorname{retr}_p(X) = p (I + X)(I - X^2)^{-1/2}`` and ``\det(I + X) > 0``.
+Hence the inverse is only defined for `p` and `q` with ``\det(p^{\mathrm{T}}q) > 0``,
+and a `DomainError` is thrown otherwise.
+"""
+inverse_retract(::GeneralUnitaryMatrices{ℝ}, ::Any, ::Any, ::PolarInverseRetraction)
+
+function inverse_retract_polar!(M::GeneralUnitaryMatrices{ℝ}, X, p, q)
+    n = get_parameter(M.size)[1]
+    A = transpose(p) * q
+    typeof(M) <: OrthogonalMatrices && det(A) < 0 && throw(
+        DomainError(
+            det(A),
+            "The polar inverse retraction is not defined for $p and $q from different connected components, i.e. with a negative determinant of p'q.",
+        ),
+    )
+    Amat = A isa StaticMatrix ? A : convert(Matrix, A)
+    H = copyto!(allocate(Amat), -2I)
+    try
+        B = lyap(A, H)
+        mul!(X, A, B)
+    catch e
+        e2 = OutOfInjectivityRadiusError()
+        isa(e, LinearAlgebra.LAPACKException) ? throw(e2) : rethrow()
+    end
+    return project!(SkewSymmetricMatrices(n), X, p, X)
+end
+
+@doc raw"""
     inverse_retract(M::Rotations, p, q, ::QRInverseRetraction)
     inverse_retract(M::OrthogonalMatrices, p, q, ::QRInverseRetraction)
 

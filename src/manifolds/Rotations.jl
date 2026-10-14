@@ -148,41 +148,6 @@ function _injectivity_radius(M::Rotations, ::PolarRetraction)
 end
 
 @doc raw"""
-    inverse_retract(M, p, q, ::PolarInverseRetraction)
-
-Compute a vector from the tangent space ``T_p\mathrm{SO}(n)``
-of the point `p` on the [`Rotations`](@ref) manifold `M`
-with which the point `q` can be reached by the
-[`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) from the point `p` after time 1.
-
-The formula reads
-````math
-\operatorname{retr}^{-1}_p(q)
-= -\frac{1}{2}(p^{\mathrm{T}}qs - (p^{\mathrm{T}}qs)^{\mathrm{T}})
-````
-
-where ``s`` is the solution to the Sylvester equation
-
-``p^{\mathrm{T}}qs + s(p^{\mathrm{T}}q)^{\mathrm{T}} + 2I_n = 0.``
-"""
-inverse_retract(::Rotations, ::Any, ::Any, ::PolarInverseRetraction)
-
-function inverse_retract_polar!(M::Rotations, X, p, q)
-    n = get_parameter(M.size)[1]
-    A = transpose(p) * q
-    Amat = A isa StaticMatrix ? A : convert(Matrix, A)
-    H = copyto!(allocate(Amat), -2I)
-    try
-        B = lyap(A, H)
-        mul!(X, A, B)
-    catch e
-        e2 = OutOfInjectivityRadiusError()
-        isa(e, LinearAlgebra.LAPACKException) ? throw(e2) : rethrow()
-    end
-    return project!(SkewSymmetricMatrices(n), X, p, X)
-end
-
-@doc raw"""
     jacobian_exp_argument(M::Rotations{TypeParameter{Tuple{2}}}, p, X)
 
 Compute Jacobian of the exponential map with respect to the argument `X` in orthonormal
