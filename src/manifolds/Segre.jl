@@ -109,7 +109,8 @@ function closest_representative!(M::Segre{ℝ, V}, q, p) where {V}
         end
     end
 
-    return q[flips] = -q[flips]
+    q[flips] = -q[flips]
+    return q
 end
 
 @doc raw"""
