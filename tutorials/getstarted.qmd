@@ -49,7 +49,7 @@ For example the above definition is the same as the real-valued case
 M₁ === Euclidean(3, field = ℝ)
 ```
 
-But we even introduced a short hand notation, since ℝ is also just a symbol/variable to use"
+But we even introduced a short hand notation, since ℝ is also just a symbol/variable to use.
 
 ```{julia}
 M₁ === ℝ^3
@@ -70,10 +70,10 @@ manifold_dimension(M₁)
 
 #### 2. ``[The hyperbolic space](@ref HyperbolicSpace)``{=commonmark}
 
-The $d$-dimensional ``[hyperbolic space](@ref HyperbolicSpace)``{=commonmark} is usually represented in $\mathbb R^{d+1}$ as the set of points $p\in\mathbb R^3$ fulfilling
+The $d$-dimensional ``[hyperbolic space](@ref HyperbolicSpace)``{=commonmark} is usually represented in $\mathbb R^{d+1}$ as the set of points $p\in\mathbb R^{d+1}$ fulfilling
 
 ```math
-p_1^2+p_2^2+⋅s+p_d^2-p_{d+1}^2 = -1.
+p_1^2+p_2^2+\dots+p_d^2-p_{d+1}^2 = -1, \quad p_{d+1} > 0.
 ```
 
 We define the manifold using
@@ -156,7 +156,7 @@ and for these we again get informative error messages
 is_vector(M₃, [1, 0, 0], [0.1, 1, 1]; error = :error)
 ```
 
-To learn about how to define a manifold yourself check out the ``[How to define your own manifold](@extref ManifoldsBase :doc:`tutorials/implement-a-manifold`)``{=commonmark} tutorial of ``[`ManifoldsBase.jl`](@extref ManifoldsBase :doc:`index`)``{=commonmark}."
+To learn about how to define a manifold yourself check out the ``[How to define your own manifold](@extref ManifoldsBase :doc:`tutorials/implement-a-manifold`)``{=commonmark} tutorial of ``[`ManifoldsBase.jl`](@extref ManifoldsBase :doc:`index`)``{=commonmark}.
 
 ### Building more advanced manifolds
 
@@ -204,7 +204,7 @@ which emphasizes that we have vectors of length 2 that contain points, so we sto
 p₂ = [[0.0, 0.0, 1.0], [0.0, 1.0, 0.0]]
 ```
 
-To unify both representations, elements of the power manifold can also be accessed in the classical indexing fashion, if we start with the corresponding manifold first. This way one can implement algorithms also independent of which representation is used."
+To unify both representations, elements of the power manifold can also be accessed in the classical indexing fashion, if we start with the corresponding manifold first. This way one can implement algorithms also independent of which representation is used.
 
 ```{julia}
 p[M₄, 1]
@@ -234,13 +234,13 @@ Here `ArrayPartition` taken from [`RecursiveArrayTools.jl`](https://github.com/S
 is_point(M₆, p₃; error = :error)
 ```
 
-But accessing single components still works the same."
+But accessing single components still works the same.
 
 ```{julia}
 p₃[M₆, 1]
 ```
 
-Finally, also the ``[`TangentBundle`](@ref)``{=commonmark}, the manifold collecting all tangent spaces on a manifold is available as"
+Finally, also the ``[`TangentBundle`](@ref)``{=commonmark}, the manifold collecting all tangent spaces on a manifold is available as
 
 ```{julia}
 M₇ = TangentBundle(M₃)
@@ -250,8 +250,8 @@ M₇ = TangentBundle(M₃)
 
 In this section we take a look how to implement generic functions on manifolds.
 
-For our example here, we want to implement the so-called [Bézier curve](https://en.wikipedia.org
-/wiki/Bézier_curve) using the so-called [de-Casteljau algorithm](https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm).
+For our example here, we want to implement the so-called [Bézier curve](https://en.wikipedia.org/wiki/Bézier_curve)
+using the so-called [de Casteljau algorithm](https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm).
 The linked algorithm can easily be generalised to manifolds by replacing lines with geodesics. This was for example used in [BergmannGousenbourger:2018](@cite) and the following example is an extended version of an example from [AxenBaranBergmannRzecki:2023](@cite).
 
 The algorithm works recursively. For the case that we have a Bézier curve with just two points, the algorithm just evaluates the geodesic connecting both at some time point $t∈[0,1]$. The function to evaluate a shortest geodesic (it might not be unique, but then a deterministic choice is taken) between two points `p` and `q` on a manifold `M` ``[`shortest_geodesic(M, p, q, t)`](@extref `ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold, Any, Any}`)``{=commonmark}.
@@ -275,7 +275,7 @@ Which can now be used on any manifold where the shortest geodesic is implemented
 
 Now on several manifolds the [exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) and its (locally defined) inverse, the logarithmic map might not be available in an implementation. So one way to generalise this, is the use of a retraction (see  [AbsilMahonySepulchre:2008](@cite), Def. 4.1.1 for details) and its (local) inverse.
 
-The function itself is quite similar to the exponential map, just that ``[`retract(M, p, X, m)`](@extref `ManifoldsBase.retract`)``{=commonmark} has one further parameter, the type of retraction to take, so `m` is a subtype of ``[`AbstractRetractionMethod`](@extref `ManifoldsBase.AbstractRetractionMethod`)``{=commoonmark} `m`, the same for the ``[`inverse_retract(M, p, q, n)`](@extref `ManifoldsBase.inverse_retract`)``{=commonmark} with an ``[`AbstractInverseRetractionMethod`](@extref `ManifoldsBase.AbstractInverseRetractionMethod`)``{=commonmark} `n`.
+The function itself is quite similar to the exponential map, just that ``[`retract(M, p, X, m)`](@extref `ManifoldsBase.retract`)``{=commonmark} has one further parameter, the type of retraction to take, so `m` is a subtype of ``[`AbstractRetractionMethod`](@extref `ManifoldsBase.AbstractRetractionMethod`)``{=commonmark} `m`, the same for the ``[`inverse_retract(M, p, q, n)`](@extref `ManifoldsBase.inverse_retract`)``{=commonmark} with an ``[`AbstractInverseRetractionMethod`](@extref `ManifoldsBase.AbstractInverseRetractionMethod`)``{=commonmark} `n`.
 
 Thinking of a generic implementation, we would like to have a way to specify one, that is available. This can be done by using ``[`default_retraction_method`](@extref `ManifoldsBase.default_retraction_method-Tuple{AbstractManifold}`)``{=commonmark} and ``[`default_inverse_retraction_method`](@extref `ManifoldsBase.default_inverse_retraction_method-Tuple{AbstractManifold}`)``{=commonmark}, respectively. We implement
 
@@ -362,15 +362,15 @@ fig
 
 Memory allocation is a [critical performance issue](https://docs.julialang.org/en/v1/manual/performance-tips/#Measure-performance-with-[@time](@ref)-and-pay-attention-to-memory-allocation) when programming in Julia. To take this into account, `Manifolds.jl` provides special functions to reduce the amount of allocations.
 
-We again look at the [exponential map](https://en.wikip edia.org/wiki/Exponential_map_(Riemannian_geometry)). On a manifold `M` the exponential map needs a point `p` (to start from) and a tangent vector `X`, which can be seen as direction to “walk into” as well as the length to walk into this direction. In `Manifolds.jl` the function can then be called with `q = exp(M, p, X)` (see ``[`exp(M, p, X)`](@extref `Base.exp-Tuple{AbstractManifold, Any, Any}`)``{=commonmark}). This function returns the resulting point `q`, which requires to allocate new memory.
+We again look at the [exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)). On a manifold `M` the exponential map needs a point `p` (to start from) and a tangent vector `X`, which can be seen as direction to “walk into” as well as the length to walk into this direction. In `Manifolds.jl` the function can then be called with `q = exp(M, p, X)` (see ``[`exp(M, p, X)`](@extref `Base.exp-Tuple{AbstractManifold, Any, Any}`)``{=commonmark}). This function returns the resulting point `q`, which requires to allocate new memory.
 
 To avoid this allocation, the function ``[`exp!(M, q, p, X)`](@extref `ManifoldsBase.exp!-Tuple{AbstractManifold, Any, Any, Any}`)``{=commonmark} can be called. Here `q` is allocated beforehand and is passed as the memory, where the result is returned in.
-It might be used even for interims computations, as long as it does not introduce side effects. Thas means that even with `exp!(M, p, p, X)` the result is correct.
+It might be used even for interim computations, as long as it does not introduce side effects. That means that even with `exp!(M, p, p, X)` the result is correct.
 
 Let's look at an example.
 
 We take another look at the [`Sphere`](@ref), but now a high-dimensional one.
-We can also illustrate how to generate radnom points and tangent vectors.
+We can also illustrate how to generate random points and tangent vectors.
 
 ```{julia}
 #| output: false
@@ -392,7 +392,7 @@ for example
 q₂ = zero(p₄);
 ```
 
-There are no new memory allocations necessary if we use the in-place function."
+There are no new memory allocations necessary if we use the in-place function.
 
 ```{julia}
 @allocated exp!(M, q₂, p₄, X)
@@ -405,7 +405,7 @@ This also means that if you implement a new manifold, you just have to implement
 ## Decorating a manifold
 
 As you saw until now, an
-``[`AbstractManifold`]@extref `ManifoldsBase.AbstractManifold`)``{=commonmark}
+``[`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)``{=commonmark}
 describes a Riemannian manifold.
 For completeness, this also includes the chosen
 [Riemannian metric tensor](https://en.wikipedia.org/wiki/Metric_tensor)

@@ -8,7 +8,7 @@
 | **Documentation** | **Source** | **Citation** |
 |:-----------------:|:----------------------:|:------------:|
 | [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/stable/) | [![code style: runic](https://img.shields.io/badge/code_style-%E1%9A%B1%E1%9A%A2%E1%9A%BE%E1%9B%81%E1%9A%B2-black)](https://github.com/fredrikekre/Runic.jl) | [![arXiv](https://img.shields.io/badge/arXiv%20CS.MS-2106.08777-blue.svg)](https://arxiv.org/abs/2106.08777) |
-| [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/latest/) | [![CI](https://github.com/JuliaManifolds/Manifolds.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaManifolds/Manifolds.jl/actions?query=workflow%3ACI+branch%3Amaster) | [![DOI](https://zenodo.org/badge/190447542.svg)](https://zenodo.org/badge/latestdoi/190447542) |
+| [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/dev/) | [![CI](https://github.com/JuliaManifolds/Manifolds.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaManifolds/Manifolds.jl/actions?query=workflow%3ACI+branch%3Amaster) | [![DOI](https://zenodo.org/badge/190447542.svg)](https://zenodo.org/badge/latestdoi/190447542) |
 | | [![codecov](https://codecov.io/gh/JuliaManifolds/Manifolds.jl/graph/badge.svg?token=yQYUnjAZZN)](https://codecov.io/gh/JuliaManifolds/Manifolds.jl) |
 
 Package __Manifolds.jl__ aims to provide both a unified interface to define and
@@ -23,8 +23,8 @@ To install the package just type
 using Pkg; Pkg.add("Manifolds")
 ```
 
-Then you can directly start, for example to stop half way from the north pole on the [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/sphere.html) to a point on the equator, you can generate the [`shortest_geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,%20Any,%20Any}).
-It internally employs [`exp`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.exp-Tuple{AbstractManifold,%20Any,%20Any}) and [`log`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.log-Tuple{AbstractManifold,%20Any,%20Any}).
+Then you can directly start, for example to stop half way from the north pole on the [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/sphere/) to a point on the equator, you can generate the [`shortest_geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,%20Any,%20Any}).
+It internally employs [`exp`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#Base.exp-Tuple{AbstractManifold,%20Any,%20Any}) and [`log`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#Base.log-Tuple{AbstractManifold,%20Any,%20Any}).
 
 ```julia
 using Manifolds

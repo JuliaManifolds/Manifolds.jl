@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to ´Manifolds.jl´ will be documented in this file.
+All notable changes to `Manifolds.jl` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -323,7 +323,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Improved performance of `embed` for embedding tangent vectors of the `FixedRankMaticesManifold` (#885).
+* Improved performance of `embed` for embedding tangent vectors of `FixedRankMatrices` (#885).
 
 ## [0.11.21] 2026-04-03
 
@@ -502,7 +502,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* a function `metric(M)` analogous to `embedding(M)` and `connection(M)` that returns the metric of the manifold `M`.
+* a function `metric(M)` analogous to `get_embedding(M)` and `connection(M)` that returns the metric of the manifold `M`.
 * a `DefaultMetric()` type to specify that the manifold uses some specific metric, that is not further named.
 
 ### Changed

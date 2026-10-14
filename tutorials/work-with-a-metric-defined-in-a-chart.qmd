@@ -31,8 +31,6 @@ struct BlackHoleOutside <: AbstractManifold{ℝ}
     rₛ::Float64
 end
 
-struct SchwarzschildAtlas <: AbstractAtlas{ℝ} end
-
 Manifolds.manifold_dimension(::BlackHoleOutside) = 4
 Manifolds.representation_size(::BlackHoleOutside) = (4,)
 

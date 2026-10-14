@@ -55,7 +55,7 @@ hands_projected = [project(Mshape, hands[i, :, :]) for i in axes(hands, 1)]
 ```
 
 In the next part let's do tangent space PCA. This starts with computing a mean point and computing
-logithmic maps at mean to each point in the dataset.
+logarithmic maps at mean to each point in the dataset.
 ```{julia}
 #| output: false
 mean_hand = mean(Mshape, hands_projected)
