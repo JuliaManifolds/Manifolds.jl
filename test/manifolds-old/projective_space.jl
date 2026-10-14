@@ -350,4 +350,15 @@ end
         @test repr(ArrayProjectiveSpace(2, 3; parameter = :field)) ==
             "ArrayProjectiveSpace(2, 3; field=ℝ, parameter=:field)"
     end
+
+    @testset "rand" begin
+        for 𝔽 in (ℝ, ℂ, ℍ), N in (ProjectiveSpace(2, 𝔽), ArrayProjectiveSpace(2, 2; field = 𝔽))
+            p = rand(MersenneTwister(4711), N)
+            @test is_point(N, p)
+            @test is_vector(N, p, rand(MersenneTwister(4712), N; vector_at = p))
+            q = similar(p)
+            rand!(MersenneTwister(4711), N, q)
+            @test is_point(N, q)
+        end
+    end
 end

@@ -52,6 +52,37 @@ using LinearAlgebra, Manifolds, Quaternions, Test, Random
         @test injectivity_radius(OrthogonalMatrices(1; parameter = :field)) == 0.0
     end
 
+    @testset "QR inverse retraction on both connected components" begin
+        rng = MersenneTwister(42)
+        refl(n) = Diagonal([-1; ones(n - 1)])
+        for n in [2, 3, 5]
+            On = OrthogonalMatrices(n)
+            SOn = Rotations(n)
+            for s in [1, -1]
+                p = s == 1 ? rand(rng, SOn) : rand(rng, SOn) * refl(n)
+                X = 2 .* rand(rng, On; vector_at = p)
+                q = retract(On, p, X, QRRetraction())
+                @test det(q) ≈ det(p)
+                Y = inverse_retract(On, p, q, QRInverseRetraction())
+                @test is_vector(On, p, Y)
+                @test isapprox(On, p, X, Y; atol = 1.0e-12)
+                @test isapprox(On, q, retract(On, p, Y, QRRetraction()))
+                Y2 = zero_vector(On, p)
+                inverse_retract!(On, Y2, p, q, QRInverseRetraction())
+                @test Y2 ≈ Y
+                # points from different connected components
+                @test_throws DomainError inverse_retract(On, p, q * refl(n), QRInverseRetraction())
+                @test_throws DomainError inverse_retract(On, p * refl(n), q, QRInverseRetraction())
+            end
+            # on Rotations the result agrees with the one on OrthogonalMatrices
+            p = rand(rng, SOn)
+            q = retract(SOn, p, rand(rng, SOn; vector_at = p), QRRetraction())
+            @test inverse_retract(SOn, p, q, QRInverseRetraction()) ≈
+                inverse_retract(On, p, q, QRInverseRetraction())
+        end
+        @test_throws DomainError inverse_retract(M, p1, p2, QRInverseRetraction())
+    end
+
     @testset "Random tangent vectors scale with σ" begin
         X = rand(MersenneTwister(42), M; vector_at = p1)
         Y = rand(MersenneTwister(42), M; vector_at = p1, σ = 2.0)

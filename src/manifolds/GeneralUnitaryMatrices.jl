@@ -721,6 +721,42 @@ end
 
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
 
+@doc raw"""
+    inverse_retract(M::Rotations, p, q, ::QRInverseRetraction)
+    inverse_retract(M::OrthogonalMatrices, p, q, ::QRInverseRetraction)
+
+Compute a vector `X` (as an element of the Lie algebra) from the tangent space ``T_p\mathcal M``
+of the point `p` on the real [`GeneralUnitaryMatrices`](@ref) manifold `M`, for example the
+[`Rotations`](@ref) or the [`OrthogonalMatrices`](@ref), with which the point `q` can be reached by the
+[`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) from the point `p` after time 1.
+
+The QR retraction does not leave the connected component of `p`, since
+``\operatorname{retr}_p(X) = p \operatorname{qf}(I + X)`` and ``\det(\operatorname{qf}(I + X)) = 1``.
+Hence the inverse is only defined for `p` and `q` with ``\det(p^{\mathrm{T}}q) > 0``,
+and a `DomainError` is thrown otherwise.
+"""
+inverse_retract(::GeneralUnitaryMatrices{ℝ}, ::Any, ::Any, ::QRInverseRetraction)
+
+function inverse_retract_qr!(M::GeneralUnitaryMatrices{ℝ}, X, p, q)
+    n = get_parameter(M.size)[1]
+    A = transpose(p) * q
+    det(A) < 0 && throw(
+        DomainError(
+            det(A),
+            "The QR inverse retraction is not defined for $p and $q from different connected components, i.e. with a negative determinant of p'q.",
+        ),
+    )
+    R = zero(X)
+    for i in 1:n
+        b = zeros(i)
+        b[end] = 1
+        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
+        R[1:i, i] = A[1:i, 1:i] \ b
+    end
+    mul!(X, A, R)
+    return project!(SkewSymmetricMatrices(n), X, p, X)
+end
+
 """
     is_flat(M::GeneralUnitaryMatrices)
 

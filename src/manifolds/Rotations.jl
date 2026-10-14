@@ -167,15 +167,6 @@ where ``s`` is the solution to the Sylvester equation
 """
 inverse_retract(::Rotations, ::Any, ::Any, ::PolarInverseRetraction)
 
-@doc raw"""
-    inverse_retract(M::Rotations, p, q, ::QRInverseRetraction)
-
-Compute a vector from the tangent space ``T_p\mathrm{SO}(n)`` of the point `p` on the
-[`Rotations`](@ref) manifold `M` with which the point `q` can be reached by the
-[`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) from the point `q` after time 1.
-"""
-inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
-
 function inverse_retract_polar!(M::Rotations, X, p, q)
     n = get_parameter(M.size)[1]
     A = transpose(p) * q
@@ -188,19 +179,6 @@ function inverse_retract_polar!(M::Rotations, X, p, q)
         e2 = OutOfInjectivityRadiusError()
         isa(e, LinearAlgebra.LAPACKException) ? throw(e2) : rethrow()
     end
-    return project!(SkewSymmetricMatrices(n), X, p, X)
-end
-function inverse_retract_qr!(M::Rotations, X, p, q)
-    n = get_parameter(M.size)[1]
-    A = transpose(p) * q
-    R = zero(X)
-    for i in 1:n
-        b = zeros(i)
-        b[end] = 1
-        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
-        R[1:i, i] = A[1:i, 1:i] \ b
-    end
-    mul!(X, A, R)
     return project!(SkewSymmetricMatrices(n), X, p, X)
 end
 

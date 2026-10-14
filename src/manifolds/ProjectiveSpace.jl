@@ -630,3 +630,18 @@ function parallel_transport_direction!(M::AbstractProjectiveSpace, Y, p, X, d)
     Y .= X .- p .* α .- d .* β
     return Y
 end
+
+function Random.rand!(
+        rng::AbstractRNG, M::AbstractProjectiveSpace, pX;
+        vector_at = nothing, σ::Real = one(real(float(eltype(pX))))
+    )
+    if vector_at === nothing
+        randn!(rng, pX)
+        project!(M, pX, pX)
+    else
+        randn!(rng, pX)
+        pX .*= σ
+        project!(M, pX, vector_at, pX) #project to TpM (keeps Gaussianness)
+    end
+    return pX
+end
