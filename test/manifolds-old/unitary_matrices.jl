@@ -110,6 +110,12 @@ end
         rand!(MersenneTwister(4711), M, q)
         @test is_point(M, q)
     end
+
+    @testset "repr" begin
+        @test repr(SpecialUnitaryMatrices(3)) == "SpecialUnitaryMatrices(3)"
+        @test repr(SpecialUnitaryMatrices(3; parameter = :field)) ==
+            "SpecialUnitaryMatrices(3; parameter=:field)"
+    end
 end
 
 @testset "Quaternionic Unitary Matrices" begin

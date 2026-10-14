@@ -219,6 +219,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `metric` returns `EuclideanMetric()` on the projective spaces, `Elliptope`, `Spectrahedron`, `SymmetricPositiveSemidefiniteFixedRank`, `KendallsShapeSpace` and `ParametricSurface`, so that `riemannian_gradient` converts a Euclidean gradient on them.
 * `rand` on `MultinomialSymmetric` passes its keyword arguments other than `σ` to the projection onto the manifold, as documented.
 * The manifold of complex `SkewHermitianMatrices` now correctly supports the real orthonormal basis (`DefaultOrthonormalBasis(ℝ)`) of its tangent space instead of mistakenly implementing the complex coefficient basis (`DefaultOrthonormalBasis(ℂ)`).
+* `show` method for `SpecialUnitaryMatrices` for nicer printing.
 
 ## [0.11.32] 2026-09-30
 

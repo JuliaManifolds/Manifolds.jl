@@ -160,3 +160,11 @@ function Random.rand!(
     end
     return pX
 end
+
+function Base.show(io::IO, ::SpecialUnitaryMatrices{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "SpecialUnitaryMatrices($(n))")
+end
+function Base.show(io::IO, M::SpecialUnitaryMatrices{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return print(io, "SpecialUnitaryMatrices($n; parameter=:field)")
+end
