@@ -152,6 +152,9 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
             @testset "rand" begin
                 @test is_point(M, rand(M))
                 @test is_vector(M, p, rand(M, vector_at = p))
+                @test is_point(M, rand(MersenneTwister(42), M))
+                @test rand(MersenneTwister(42), M) == rand(MersenneTwister(42), M)
+                @test is_vector(M, p, rand(MersenneTwister(42), M; vector_at = p))
             end
 
             @testset "get_embedding" begin

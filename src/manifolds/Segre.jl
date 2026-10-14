@@ -563,18 +563,20 @@ If `vector_at` is not `nothing`, return a random tangent vector from a normal di
 """
 Base.rand(M::Segre{ℝ, V}; vector_at = nothing, kwargs...) where {V}
 
-function rand!(M::Segre{ℝ, V}, pX; vector_at = nothing, kwargs...) where {V}
+function Random.rand!(
+        rng::AbstractRNG, M::Segre{ℝ, V}, pX; vector_at = nothing, kwargs...
+    ) where {V}
     if isnothing(vector_at)
-        rand!(PositiveArrays(1), pX[1]; kwargs...)
+        rand!(rng, PositiveArrays(1), pX[1]; kwargs...)
         for (n, x) in zip(V, pX[2:end])
-            rand!(Sphere(n - 1), x; kwargs...)
+            rand!(rng, Sphere(n - 1), x; kwargs...)
         end
         return pX
     else
         p = vector_at
-        rand!(PositiveArrays(1), pX[1]; vector_at = p[1], kwargs...)
+        rand!(rng, PositiveArrays(1), pX[1]; vector_at = p[1], kwargs...)
         for (n, xdot, x) in zip(V, pX[2:end], p[2:end])
-            rand!(Sphere(n - 1), xdot; vector_at = x, kwargs...)
+            rand!(rng, Sphere(n - 1), xdot; vector_at = x, kwargs...)
         end
         return pX
     end

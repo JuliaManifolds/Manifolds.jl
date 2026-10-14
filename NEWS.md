@@ -58,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `volume_density` on a `PowerManifold` in a nested representation returns the product of the volume densities of its components.
 * `get_vector` on complex `SymmetricMatrices` returns a Hermitian matrix, so that it inverts `get_coordinates`.
 * `project` onto the tangent space of the complex `SymmetricMatrices` returns the Hermitian part, so that its result is a tangent vector.
+* `rand` and `rand!` on the `Segre` manifold draw from a given random number generator.
 * `check_point` and `check_vector` on a `FiberBundle` check the base part and the fiber part and report the errors of both.
 * `isapprox` for tangent vectors on a `FiberBundle` compares the base part as a tangent vector at the base point.
 * `is_point` on `FixedRankMatrices` accepts a plain matrix of rank `k` for every `k` and requires the rank to be exactly `k`, also for an `SVDMPoint`.
