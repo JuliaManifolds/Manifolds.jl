@@ -241,7 +241,7 @@ and assume ``(μ, y_1,…, y_d)`` is the representative of ``q`` that minimizes 
 ````math
     \operatorname{log}_p(q) =
     \left(
-        \mu \cos{m} - \lambda,
+        \mu \cos(A m) - \lambda,
         (y_1 - ⟨x_1, y_1⟩ x_1) \frac{\mu \sphericalangle(x_1, y_1) \sin(A m)}{\lambda A m \sin{\sphericalangle(x_1, y_1)}},
         \dots,
         (y_d - ⟨x_d, y_d⟩ x_d) \frac{\mu \sphericalangle(x_d, y_d) \sin(A m)}{\lambda A m \sin{\sphericalangle(x_d, y_d)}}
