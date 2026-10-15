@@ -94,11 +94,15 @@ end
         include_test("manifolds-old/vector_bundle.jl")
         include_test("manifolds-old/graph.jl")
     end
+    #
+    # On CI, JET runs in its own job for simplicity; it comes last, since JET.jl 0.9 on
+    # Julia 1.10 redefines methods of the package it analyzes.
+    # When running the tests locally the following still activates the env and runs JET.
     if TEST_SET == "all" && get(ENV, "CI", "false") != "true"
-        # last, since JET.jl 0.9 on Julia 1.10 redefines methods of the package it analyzes;
-        # CI runs it in its own job from test/jet, a local run of the test set "all" includes it
-        Pkg.activate(joinpath(@__DIR__, "jet"))
-        Pkg.instantiate()
-        include_test("jet/runtests.jl")
+        @testset "JET.jl" begin
+            Pkg.activate(joinpath(@__DIR__, "jet"))
+            Pkg.instantiate()
+            include_test("jet/runtests.jl")
+        end
     end
 end
