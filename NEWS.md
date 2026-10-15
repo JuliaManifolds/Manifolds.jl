@@ -76,6 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `manifold_dimension` on the `HamiltonianMatrices` returns the dimension of the manifold, over the real and over the complex numbers.
 * `rand` on the `HamiltonianMatrices` draws its two off-diagonal blocks independently, as documented.
 * charts of the `DefaultTorusAtlas` are now correctly switched according to the distance of the point from the chart centre (`get_chart_index`, `check_chart_switch`).
+* The chart solvers for geodesics and Jacobi fields continue from the point reached when an atlas asks for a chart switch but keeps its chart.
 * embedding of the `Flag` manifold is now marked as `EmbeddedManifoldType` instead of `IsometricallyEmbeddedManifoldType`.
 *`norm` in the orthogonal representation of a flag manifold is fixed (it had wrong scaling).
 * `SymplecticGrassmann` throws an `ArgumentError` for odd matrix sizes, as `SymplecticStiefel` does, instead of rounding them down.

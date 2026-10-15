@@ -215,6 +215,9 @@ function solve_chart_exp_ode(
                 M, u0.x[2], A, cur_i, a_final, sol.u[end].x[2]::typeof(Xc), new_i
             )
             cur_i = new_i
+        else
+            # Chart switch was suggested but the new chart is the same as the old one.
+            copyto!(u0, sol.u[end])
         end
     end
     return sols
@@ -372,6 +375,9 @@ function solve_chart_jacobi_field(
                 M, u0.x[4], A, cur_i, a_final, sol.u[end].x[4]::typeof(dYc), new_i
             )
             cur_i = new_i
+        else
+            # Chart switch was suggested but the new chart is the same as the old one.
+            copyto!(u0, sol.u[end])
         end
     end
     return sols
@@ -487,6 +493,9 @@ function _jacobi_exp_matrix(
             cur_i = new_i
         elseif retcode !== SciMLBase.ReturnCode.Terminated
             return sol.u[end].x[3], cur_i, a_final
+        else
+            # Chart switch was suggested but the new chart is the same as the old one.
+            copyto!(u0, sol.u[end])
         end
     end
     return u0.x[3], cur_i, u0.x[1]
