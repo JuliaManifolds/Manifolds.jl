@@ -40,6 +40,9 @@ include("../header.jl")
         test_rand_tvector = true,
         rand_tvector_atol_multiplier = 5,
     )
+    X = project(M, p1, [1.0 0.2 -0.3; 0.5 0.8 -0.1])
+    V = 2 * p1 + [1.0 1.0 1.0; -0.5 -0.5 -0.5] # normal vector at p1
+    @test Weingarten(M, p1, X, V) ≈ -2 * X
     @testset "random points and vectors use the element type of the array" begin
         p = rand!(MersenneTwister(42), M, zeros(BigFloat, 2, 3))
         @test p == project(M, randn(MersenneTwister(42), BigFloat, 2, 3))

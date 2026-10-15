@@ -74,6 +74,9 @@ include("../header.jl")
             exp_log_atol_multiplier = 2,
             test_inplace = true,
         )
+        X = project(M_complex, H, I)
+        V = 3 * H + [1.0im 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0] # normal vector at H
+        @test Weingarten(M_complex, H, X, V) ≈ -3 * X
     end
     @testset "field parameter" begin
         M = SphereSymmetricMatrices(3; parameter = :field)

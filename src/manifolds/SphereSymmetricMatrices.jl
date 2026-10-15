@@ -123,9 +123,11 @@ end
 Projects `p` from the embedding onto the [`SphereSymmetricMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_{\mathcal{S}_{\text{sym}}}(p) = \frac{1}{2} \bigl( p + p^{\mathrm{H}} \bigr),
+\operatorname{proj}_{\mathcal{S}_{\text{sym}}}(p) = \frac{s}{\lVert s \rVert},
+\qquad\text{where } s = \frac{1}{2} \bigl( p + p^{\mathrm{H}} \bigr),
 ````
-where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed,
+and ``\lVert ⋅ \rVert`` denotes the Frobenius norm.
 """
 project(::SphereSymmetricMatrices, ::Any)
 

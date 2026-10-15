@@ -271,6 +271,9 @@ end
 function get_embedding(M::Sphere{𝔽, <:Tuple}) where {𝔽}
     return Euclidean(representation_size(M)...; field = 𝔽, parameter = :field)
 end
+function get_embedding(M::ArraySphere{𝔽, <:Tuple}) where {𝔽}
+    return Euclidean(representation_size(M)...; field = 𝔽, parameter = :field)
+end
 
 function ManifoldsBase.get_embedding_type(::AbstractSphere)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
@@ -680,22 +683,28 @@ function volume_density(M::AbstractSphere{ℝ}, p, X)
 end
 
 @doc raw"""
-    Y = Weingarten(M::Sphere, p, X, V)
-    Weingarten!(M::Sphere, Y, p, X, V)
+    Y = Weingarten(M::AbstractSphere, p, X, V)
+    Weingarten!(M::AbstractSphere, Y, p, X, V)
 
-Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Sphere`](@ref) `M` with respect to the
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`AbstractSphere`](@ref) `M` with respect to the
 tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
 
-The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
+The formula reads
 
 ```math
-\mathcal W_p(X,V) = -Xp^{\mathrm{T}}V
+\mathcal W_p(X,V) = -\Re(⟨p,V⟩)X,
 ```
-"""
-Weingarten(::Sphere, p, X, V)
 
-function Weingarten!(::Sphere, Y, p, X, V)
-    Y .= -dot(p, V) .* X
+where ``⟨⋅,⋅⟩`` denotes the inner product in the embedding, whose real part is the inner product
+of the embedding as a real vector space.
+This is ``\mathcal W_p(X, P_p^{\perp}U) = P_p(D_XP)U`` of Theorem 1 in [AbsilMahonyTrumpf:2013](@cite)
+for the orthogonal projection ``P_p`` onto ``T_p\mathcal M``, which Section 4.2 there evaluates
+to ``-Xp^{\mathrm{T}}V`` on the real unit sphere.
+"""
+Weingarten(::AbstractSphere, p, X, V)
+
+function Weingarten!(::AbstractSphere, Y, p, X, V)
+    Y .= -real(dot(p, V)) .* X
     return Y
 end
 

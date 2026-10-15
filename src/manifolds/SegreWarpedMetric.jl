@@ -134,73 +134,48 @@ end
 
 @doc raw"""
     get_coordinates(
-        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, X, ::DefaultOrthonormalBasis;
-        kwargs...
+        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, X, ::DefaultOrthonormalBasis
     )
 
 Get coordinates of `X` in the tangent space ``T_{(λ, x_1,…, x_d)} \mathcal{S}_A = \mathbb{R} × T_{x_1} \mathbb{S}^{n_1 - 1} ×⋯× T_{x_d} \mathbb{S}^{n_d - 1}`` using a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) on each factor.
 """
 get_coordinates(
-    M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}},
-    p,
-    X,
-    ::DefaultOrthonormalBasis;
-    kwargs...,
+    M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, X, ::DefaultOrthonormalBasis
 ) where {𝔽, V, A}
 
 function get_coordinates_orthonormal!(
-        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}},
-        c,
-        p,
-        X,
-        ::RealNumbers;
-        kwargs...,
+        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, c, p, X, ::RealNumbers
     ) where {𝔽, V, A}
     return c .= vcat(
         X[1],
         A *
             p[1][1] *
             [
-            get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis(); kwargs...) for (n, x, xdot) in zip(V, p[2:end], X[2:end])
+            get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis()) for (n, x, xdot) in zip(V, p[2:end], X[2:end])
         ]...,
     )
 end
 
 @doc raw"""
     get_vector(
-        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, c, ::DefaultOrthonormalBasis;
-        kwargs...
+        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, c, ::DefaultOrthonormalBasis
     )
 
 Get tangent vector `X` from coordinates in the tangent space ``T_{(λ, x_1,…, x_d)} \mathcal{S}_A = \mathbb{R} × T_{x_1} \mathbb{S}^{n_1 - 1} ×⋯× T_{x_d} \mathbb{S}^{n_d - 1}`` using a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) on each factor.
 """
 get_vector(
-    M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}},
-    p,
-    c,
-    ::DefaultOrthonormalBasis;
-    kwargs...,
+    M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, c, ::DefaultOrthonormalBasis
 ) where {V, A, 𝔽}
 
 function get_vector_orthonormal!(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        X,
-        p,
-        c,
-        ::RealNumbers;
-        kwargs...,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, X, p, c, ::RealNumbers
     ) where {V, A}
     c_ = deepcopy(c)
     X[1] = [c_[1]]
     c_ = c_[2:end]
     for (i, n) in enumerate(V)
-        X[i + 1] =
-            get_vector(
-            Sphere(n - 1),
-            p[i + 1],
-            c_[1:(n - 1)],
-            DefaultOrthonormalBasis();
-            kwargs...,
+        X[i + 1] = get_vector(
+            Sphere(n - 1), p[i + 1], c_[1:(n - 1)], DefaultOrthonormalBasis()
         ) / (A * p[1][1])
         c_ = c_[n:end]
     end

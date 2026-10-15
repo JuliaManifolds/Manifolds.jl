@@ -153,6 +153,11 @@ using ManifoldDiff
         Y = [1.0 0.0; 0.0 1.1]
         X = project(M, q, Y)
         @test is_vector(M, q, X)
+        V = 2 * q  # normal vector at q
+        @test Weingarten(M, q, X, V) ≈ -2 * X
+        Z = similar(X)
+        Weingarten!(M, Z, q, X, V)
+        @test Z ≈ -2 * X
 
         Manifolds.Test.test_manifold(
             M,
@@ -172,9 +177,12 @@ using ManifoldDiff
 
     Manifolds.Test.test_manifold(
         ArraySphere(2, 2; parameter = :field),
-        Dict(:Functions => [repr]),
+        Dict(:Functions => [get_embedding, repr]),
         # Expectations
-        Dict(repr => "ArraySphere(2, 2; parameter=:field)"),
+        Dict(
+            get_embedding => Euclidean(2, 2; parameter = :field),
+            repr => "ArraySphere(2, 2; parameter=:field)",
+        ),
     )
 
     @testset "Specific Tests and boundary cases" begin

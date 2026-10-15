@@ -410,26 +410,19 @@ function exp!(::Segre{ℝ, V}, q, p, X) where {V}
 end
 
 @doc raw"""
-    get_coordinates(M::Segre{𝔽, V}, p, X, ::DefaultOrthonormalBasis; kwargs...)
+    get_coordinates(M::Segre{𝔽, V}, p, X, ::DefaultOrthonormalBasis)
 
 Get coordinates of `X` in the tangent space
 ``T_{(λ, x_1, …, x_d)} \mathcal{S} = \mathbb{R} × T_{x_1} \mathbb{S}^{n_1 - 1} ×…× T_{x_d} \mathbb{S}^{n_d - 1}``
 using a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) on each factor.
 """
-get_coordinates(M::Segre, p, X, ::DefaultOrthonormalBasis; kwargs...)
+get_coordinates(M::Segre, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates_orthonormal!(
-        M::Segre{ℝ, V},
-        c,
-        p,
-        X,
-        ::RealNumbers;
-        kwargs...,
-    ) where {V}
+function get_coordinates_orthonormal!(M::Segre{ℝ, V}, c, p, X, ::RealNumbers) where {V}
     return c .= vcat(
         X[1],
         p[1][1] * [
-            get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis(); kwargs...) for (n, x, xdot) in zip(V, p[2:end], X[2:end])
+            get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis()) for (n, x, xdot) in zip(V, p[2:end], X[2:end])
         ]...,
     )
 end
@@ -444,26 +437,21 @@ function get_embedding(::Segre{𝔽, V}) where {𝔽, V}
 end
 
 @doc raw"""
-    get_vector(M::Segre{𝔽, V}, p, c, ::DefaultOrthonormalBasis; kwargs...)
+    get_vector(M::Segre{𝔽, V}, p, c, ::DefaultOrthonormalBasis)
 
 Get tangent vector `X` from coordinates in the tangent space
 ``T_{(λ, x_1, …, x_d)} \mathcal{S} = \mathbb{R} × T_{x_1} \mathbb{S}^{n_1 - 1} ×⋯× T_{x_d} \mathbb{S}^{n_d - 1}``
 using a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) on each factor.
 """
-get_vector(M::Segre, p, c, ::DefaultOrthonormalBasis; kwargs...)
+get_vector(M::Segre, p, c, ::DefaultOrthonormalBasis)
 
-function get_vector_orthonormal!(M::Segre{ℝ, V}, X, p, c, ::RealNumbers; kwargs...) where {V}
+function get_vector_orthonormal!(M::Segre{ℝ, V}, X, p, c, ::RealNumbers) where {V}
     c_ = deepcopy(c)
     X[1] = [c_[1]]
     c_ = c_[2:end]
     for (i, n) in enumerate(V)
-        X[i + 1] =
-            get_vector(
-            Sphere(n - 1),
-            p[i + 1],
-            c_[1:(n - 1)],
-            DefaultOrthonormalBasis();
-            kwargs...,
+        X[i + 1] = get_vector(
+            Sphere(n - 1), p[i + 1], c_[1:(n - 1)], DefaultOrthonormalBasis()
         ) / p[1][1]
         c_ = c_[n:end]
     end

@@ -222,6 +222,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `rand` on `MultinomialSymmetric` passes its keyword arguments other than `σ` to the projection onto the manifold, as documented.
 * The manifold of complex `SkewHermitianMatrices` now correctly supports the real orthonormal basis (`DefaultOrthonormalBasis(ℝ)`) of its tangent space instead of mistakenly implementing the complex coefficient basis (`DefaultOrthonormalBasis(ℂ)`).
 * `show` method for `SpecialUnitaryMatrices` for nicer printing.
+* `get_embedding` on an `ArraySphere` created with `parameter = :field` returns a `Euclidean` space that stores its size in a field as well.
+* `Weingarten` is available on every `AbstractSphere`, so also on `ArraySphere`, `KendallsPreShapeSpace` and `SphereSymmetricMatrices`, and uses the real part of the inner product for complex and quaternionic points.
 
 ## [0.11.32] 2026-09-30
 
