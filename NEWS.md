@@ -179,6 +179,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `isapprox` on `Grassmann`, `GeneralizedGrassmann` and `KendallsShapeSpace` finds every point approximately equal to itself, also with `atol = 0`.
 * `isapprox` on the `EssentialManifold` reports two representatives of the same point as equal.
 * `FiberBundleProductRetraction` on a `VectorBundle` transports the fiber part with the vertical vector transport method, the one `FiberBundleInverseProductRetraction` uses.
+* The basis vectors of a `FiberBundle` along the base manifold have a fiber part of the size of the fiber elements instead of the base manifold elements.
 * `mean(M, x)` and `mean(M, x, w)` pass their keyword arguments to the estimation method, also on decorator manifolds.
 * `mean` with `GeodesicInterpolation` and a shuffling generator `shuffle_rng` skips exactly the points of weight zero.
 * `median(M, x)` and `median(M, x, w)` pass their keyword arguments to the estimation method.
