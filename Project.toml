@@ -4,7 +4,7 @@ authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gma
 version = "0.11.32"
 
 [workspace]
-projects = ["test", "docs", "tutorials"]
+projects = ["test", "test/jet", "docs", "tutorials"]
 
 [deps]
 ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"

@@ -18,6 +18,7 @@ updates:
       - "/docs"
       - "/tutorials"
       - "/test"
+      - "/test/jet"
     schedule:
       interval: "weekly"
     groups:

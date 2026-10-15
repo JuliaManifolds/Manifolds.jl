@@ -283,6 +283,8 @@ function dist_min_angle_pair(p, q)
             df_break2n = df2_break2 + df1_break2
             df_break2p = -df2_break2 + df1_break2
 
+            # no minimum found yet
+            t_min = t_break1
             f_min = Inf
             if sign(df_break1p) != sign(df_break2n)
                 #parabolic prediction of min

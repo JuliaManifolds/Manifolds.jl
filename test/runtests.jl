@@ -1,4 +1,4 @@
-using Manifolds, Test
+using Manifolds, Pkg, Test
 
 TEST_SET = get(ENV, "MANIFOLDS_TEST_SET", "all")
 
@@ -93,5 +93,12 @@ end
         include_test("manifolds-old/fiber_bundle.jl")
         include_test("manifolds-old/vector_bundle.jl")
         include_test("manifolds-old/graph.jl")
+    end
+    if TEST_SET == "all" && get(ENV, "CI", "false") != "true"
+        # last, since JET.jl 0.9 on Julia 1.10 redefines methods of the package it analyzes;
+        # CI runs it in its own job from test/jet, a local run of the test set "all" includes it
+        Pkg.activate(joinpath(@__DIR__, "jet"))
+        Pkg.instantiate()
+        include_test("jet/runtests.jl")
     end
 end
