@@ -184,6 +184,7 @@ using FiniteDifferences
                     test_project_tangent = true,
                     test_musical_isomorphisms = true,
                     test_default_vector_transport = true,
+                    test_project_point = true,
                     is_mutating = false,
                 )
             end
