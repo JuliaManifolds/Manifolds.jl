@@ -179,7 +179,8 @@ using FiniteDifferences
                 @test retract(M, pts[1], pts[2]) == exp(M, pts[1], pts[2])
                 Manifolds.test_manifold(
                     M,
-                    pts,
+                    pts;
+                    parallel_transport = true,
                     test_vector_spaces = false,
                     test_project_tangent = true,
                     test_musical_isomorphisms = true,

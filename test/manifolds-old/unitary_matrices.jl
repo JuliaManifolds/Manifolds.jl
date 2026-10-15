@@ -57,6 +57,8 @@ end
     r1 = Manifolds.exp_fused(M, p, X, 1.0)
     @test isapprox(M, r, r1; atol = 1.0e-10)
 
+    @test embed(M, p) == p
+
     @testset "Random" begin
         M = UnitaryMatrices(2)
         Random.seed!(23)

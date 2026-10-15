@@ -50,6 +50,7 @@ end
     @test XE == X
 
     @test mean(M, [p, q]) == shortest_geodesic(M, p, q)(0.5)
+    @test embed(M, p) == p
 
     types = [Vector{Float64}]
 
