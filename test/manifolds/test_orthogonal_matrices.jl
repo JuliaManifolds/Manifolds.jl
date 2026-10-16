@@ -4,16 +4,21 @@ using LinearAlgebra, Manifolds, Quaternions, Test, Random
     M = OrthogonalMatrices(3)
     α = 0.1
     p1 = [cos(α) sin(α) 0.0; -sin(α) cos(α) 0.0; 0.0 0.0 1.0]
-    p2 = [-cos(α) sin(α) 0.0; -sin(α) cos(α) 0.0; 0.0 0.0 1.0]
+    p2 = [-cos(α) -sin(α) 0.0; -sin(α) cos(α) 0.0; 0.0 0.0 1.0]
     p3 = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
     pE = ones(3, 3)
+    # every listed point lies on M; p2 is in the component of determinant -1
+    # note: is_point in test_manifold only checks the first point
+    @test all(is_point(M, p) for p in [p1, p2, p3])
+    @test det(p1) ≈ 1
+    @test det(p2) ≈ -1
     Manifolds.Test.test_manifold(
         M,
         Dict(
             :Functions => [
                 default_vector_transport_method,
                 get_embedding,
-                injectivity_radius, is_flat,
+                injectivity_radius, is_flat, is_point,
                 manifold_dimension,
                 rand, repr,
             ],

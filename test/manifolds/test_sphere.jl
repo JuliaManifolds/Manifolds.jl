@@ -117,8 +117,8 @@ using ManifoldDiff
         Manifolds.Test.test_manifold(
             M,
             Dict(
-                :Functions => [repr, get_embedding, project],
-                :Points => [p],
+                :Functions => [repr, get_embedding, is_point, is_vector, project],
+                :Points => [q],
                 :EmbeddedPoints => [p],
                 :Vectors => [X],
                 :EmbeddedVectors => [X],
@@ -134,8 +134,8 @@ using ManifoldDiff
     Manifolds.Test.test_manifold(
         Sphere(2; parameter = :field),
         Dict(
-            :Functions => [get_embedding, repr],
-            :Points => [p],
+            :Functions => [get_embedding, is_point, repr],
+            :Points => [[1.0, 0.0, 0.0]],
         ),
         # Expectations
         Dict(

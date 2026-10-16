@@ -245,10 +245,10 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
                         if Mcomp === Mcan
                             @test !is_flat(Mcomp)
                             Zl1 = log(Mcomp, pl, ql)
-                            isapprox(MMl, pl, log(MMl, pl, ql), Zl1)
+                            @test isapprox(MMl, pl, log(MMl, pl, ql), Zl1)
                             Zl2 = similar(Zl1)
                             log!(Mcomp, Zl2, pl, ql)
-                            isapprox(MMl, pl, log(MMl, pl, ql), Zl1)
+                            @test isapprox(MMl, pl, log(MMl, pl, ql), Zl1)
                             @test distance(Mcomp, pl, ql) ≈ norm(Mcomp, pl, Zl2)
                         end
                         @test isapprox(MMl, exp(MMl, pl, 0 * Xl), pl; error = :error)
@@ -430,7 +430,7 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
                 :InverseRetractionMethods => [PolarInverseRetraction(), QRInverseRetraction()],
                 :Points => [pc, qc, rc],
                 :Vectors => [Xc, Yc, Zc],
-                :RetractionMethod => [PolarRetraction(), QRRetraction()],
+                :RetractionMethods => [PolarRetraction(), QRRetraction()],
                 :VectorTransportMethods => [
                     DifferentiatedRetractionVectorTransport(PolarRetraction()),
                 ],

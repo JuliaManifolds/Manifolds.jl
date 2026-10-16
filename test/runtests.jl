@@ -90,6 +90,7 @@ end
         #meta manifolds
         include_test("manifolds-old/product_manifold.jl")
         include_test("manifolds-old/power_manifold.jl")
+        include_test("manifolds-old/fiber.jl")
         include_test("manifolds-old/fiber_bundle.jl")
         include_test("manifolds-old/vector_bundle.jl")
         include_test("manifolds-old/graph.jl")

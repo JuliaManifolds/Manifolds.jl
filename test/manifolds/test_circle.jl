@@ -73,10 +73,13 @@ using ManifoldDiff, Manifolds, Random, StaticArrays, Test, ManifoldsBase
     pc1 = 1.0im
     pc2 = 1.0
     Xc1 = 0.5
-    Xc2 = 0.25
+    Xc2 = 0.25im
 
     qc1 = 1.0 + 1.0im
     Yc1 = 1.0im
+    # each listed vector is tangent at the point of the same position
+    @test is_vector(Mc, pc1, Xc1)
+    @test is_vector(Mc, pc2, Xc2)
 
     expectations = Dict(
         manifold_dimension => 1,
@@ -216,6 +219,8 @@ using ManifoldDiff, Manifolds, Random, StaticArrays, Test, ManifoldsBase
             Mc = Circle(ℂ)
             X = log(Mc, 1.0 + 0.0im, -1.0 + 0.0im)
             @test isapprox(X, π * 1.0im)
+            @test isapprox(log(Mc, -1.0 + 0.0im, 1.0 + 0.0im), π * 1.0im)
+            @test isapprox(log(Mc, fill(-1.0 + 0.0im), fill(1.0 + 0.0im))[], π * 1.0im)
             X2 = log(Mc, fill(0 + 1.0im), fill(0.0 - 1.0im))
             @test isapprox(X2[], π)
             X3 = fill(0.0)
