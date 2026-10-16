@@ -192,6 +192,7 @@ using FiniteDifferences
                     test_rand_tvector = true,
                     is_mutating = false,
                 )
+                @test rand(MersenneTwister(4711), M; vector_at = pts[1]) isa T
             end
         end
     end

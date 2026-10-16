@@ -749,11 +749,28 @@ project!(::Euclidean, Y, p, X) = copyto!(Y, X)
 
 function Random.rand!(
         rng::AbstractRNG, ::Euclidean, pX;
-        σ = one(eltype(pX)),
+        σ::Real = one(real(eltype(pX))),
         vector_at = nothing,
     )
     pX .= randn(rng, eltype(pX), size(pX)) .* σ
     return pX
+end
+
+# number-valued Euclidean: return numbers instead of 0-dimensional arrays
+const _ScalarEuclidean{𝔽} = Union{Euclidean{𝔽, TypeParameter{Tuple{}}}, Euclidean{𝔽, Tuple{}}}
+
+_rand_scalar_type(::_ScalarEuclidean{ℝ}, ::Nothing) = Float64
+_rand_scalar_type(::_ScalarEuclidean{ℂ}, ::Nothing) = ComplexF64
+_rand_scalar_type(::_ScalarEuclidean, vector_at::Number) = float(typeof(vector_at))
+
+function Random.rand(M::_ScalarEuclidean; kwargs...)
+    return rand(Random.default_rng(), M; kwargs...)
+end
+function Random.rand(
+        rng::AbstractRNG, M::_ScalarEuclidean;
+        vector_at = nothing, σ::Real = one(real(_rand_scalar_type(M, vector_at))),
+    )
+    return randn(rng, _rand_scalar_type(M, vector_at)) * σ
 end
 
 """

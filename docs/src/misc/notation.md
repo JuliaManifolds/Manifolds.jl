@@ -71,14 +71,22 @@ In robotics, a different notation is commonly used.
 The table below shows a quick guide how to translate between them for people coming from robotics background.
 We use [SolaDerayAtchuthan:2021](@cite) as the primary robotics source.
 
+!!! note
+    Since the 0.11 release of `Manifolds.jl`, the group operations, group actions and Lie groups
+    in the right column are provided by
+    [`LieGroups.jl`](https://juliamanifolds.github.io/LieGroups.jl/stable/); see its
+    [transition tutorial](https://juliamanifolds.github.io/LieGroups.jl/stable/tutorials/transition/)
+    for the names used there.
+
+
 | Robotics concept | Manifolds.jl notation |
 |:--|:--------------- |
 | ``p \circ q`` | `compose(G, p, q)` |
 | ``p^{-1}``|  `inv(G, p)` |
 | ``\mathcal{E}`` | `Identity(G)` or `identity_element(G)` |
 | group action ``p\cdot p_m`` | `apply(A, p, p_m)` |
-| Lie group exponential ``\exp\colon \mathfrak{g} \to \mathcal{G}``, ``\exp(X)=p`` | `exp_lie(G, p)` |
-| Lie group logarithm ``\log\colon \mathcal{G} \to \mathfrak{g}``, ``\log(p)=X`` | `log_lie(G, X)` |
+| Lie group exponential ``\exp\colon \mathfrak{g} \to \mathcal{G}``, ``\exp(X)=p`` | `exp_lie(G, X)` |
+| Lie group logarithm ``\log\colon \mathcal{G} \to \mathfrak{g}``, ``\log(p)=X`` | `log_lie(G, p)` |
 | ``n``-D vector | `TranslationGroup(n)`;  its action is `TranslationAction(Euclidean(n), TranslationGroup(n))` |
 | circle ``S^1`` | `CircleGroup()`; its action is `ComplexPlanarRotation` |
 | rotation ``\mathrm{SO}(n)`` | `SpecialOrthogonal(n)`; its action is `RotationAction(Euclidean(n), SpecialOrthogonal(n))` |
@@ -90,7 +98,7 @@ We use [SolaDerayAtchuthan:2021](@cite) as the primary robotics source.
 | coordinates of an element of Lie algebra ``X^{\vee}`` | `vee(G, Identity(G), X)` |
 | capital exponential map ``\operatorname{Exp}`` | `exp_lie(G, hat(G, Identity(G), tau))` |
 | capital logarithmic map ``\operatorname{Log}`` | `vee(G, Identity(G), log_lie(G, p))` |
-| right-``\oplus``, ``p \oplus \tau`` | `compose(G, exp_lie(G, hat(G, Identity(G), tau)))` |
+| right-``\oplus``, ``p \oplus \tau = p \circ \operatorname{Exp}(\tau)``, see [SolaDerayAtchuthan:2021; Eq. (25)](@cite) | `compose(G, p, exp_lie(G, hat(G, Identity(G), tau)))` |
 | right-``\ominus``, ``p \ominus q`` | `vee(G, Identity(G), log_lie(G, compose(G, inv(G, q), p)))`|
 | left-``\oplus``, ``\tau \oplus p`` | `compose(G, exp_lie(G, hat(G, Identity(G), tau)), p)` |
 | left-``\ominus``, ``p \ominus q`` | `vee(G, Identity(G), log_lie(G, compose(G, p, inv(G, q))))` |

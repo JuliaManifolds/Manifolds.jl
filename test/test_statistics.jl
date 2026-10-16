@@ -127,14 +127,15 @@ function test_median(
         w1 = pweights(ones(n) / n)
         w2 = pweights(ones(n))
         w3 = pweights(2 * ones(n))
-        y = median(M, x; kwargs...)
+        y = isnothing(method) ? median(M, x; kwargs...) : median(M, x, method; kwargs...)
         for w in (w1, w2, w3)
             if isnothing(method)
                 @test is_point(M, median(M, x, w; kwargs...); atol = 10^-9)
+                @test isapprox(M, median(M, x, w; kwargs...), y; atol = 10^-4)
             else
                 @test is_point(M, median(M, x, w, method; kwargs...); atol = 10^-9)
+                @test isapprox(M, median(M, x, w, method; kwargs...), y; atol = 10^-4)
             end
-            @test isapprox(M, median(M, x, w; kwargs...), y; atol = 10^-4)
         end
         if isnothing(method)
             @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)

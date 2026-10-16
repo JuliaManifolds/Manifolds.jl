@@ -100,6 +100,8 @@ using DocumenterCitations, DocumenterCodeBlocks, DocumenterInterLinks, Documente
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
 using NLsolve
+# required for loading the distributions on manifolds
+using Distributions, RecursiveArrayTools
 # required for loading the manifold tests functions
 using Test, FiniteDifferences
 ENV["GKSwstype"] = "100"
@@ -153,6 +155,7 @@ links = InterLinks(
 modules = [
     Manifolds,
     Base.get_extension(Manifolds, :ManifoldsBoundaryValueDiffEqExt),
+    Base.get_extension(Manifolds, :ManifoldsDistributionsExt),
     Base.get_extension(Manifolds, :ManifoldsNLsolveExt),
     Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqDiffEqCallbacksExt),
     Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqExt),

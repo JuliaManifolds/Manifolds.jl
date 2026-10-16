@@ -40,6 +40,7 @@ end
         @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0]))
         @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0], ExponentialRetraction()))
         @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
+        @test !is_point(M, [0.0, 0.0, -1.0])
         @test !is_vector(M, [0.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0])
         @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error = :error)
         @test !is_point(M, [2.0, 0.0, 0.0])
