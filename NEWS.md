@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `riemann_tensor` and `sectional_curvature` on `SymmetricMatrices`, `SkewHermitianMatrices` and `CenteredMatrices`.
 * `riemann_tensor`, `sectional_curvature`, `sectional_curvature_max` and `sectional_curvature_min` on `SymmetricPositiveDefinite` with the `LogEuclideanMetric` return zero.
 * `rand` generates random points on the `SymplecticGrassmann` manifold.
+* `is_flat` for the `SymplecticGrassmann` manifold.
 
 ### Changed
 
@@ -235,6 +236,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `Weingarten` is available on every `AbstractSphere`, so also on `ArraySphere`, `KendallsPreShapeSpace` and `SphereSymmetricMatrices`, and uses the real part of the inner product for complex and quaternionic points.
 * `incident_log!` on a `GraphManifold` overwrites the tangent vector it is given, so that it returns the same result as `incident_log` instead of adding the logarithm to the existing tangent vector.
 * `is_flat` on `SymmetricPositiveDefinite` with the `LogEuclideanMetric` returns `true`.
+* Parallel transport on the `SymmetricPositiveDefinite` matrices returns the vector unchanged when both points are equal.
 
 ## [0.11.32] 2026-09-30
 
