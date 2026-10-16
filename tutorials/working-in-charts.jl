@@ -224,7 +224,7 @@ begin
         ax1, fig1 = torus_figure()
         arrows!(ax1, geo_ps_pt, geo_Ys, linewidth = 0.05, color = :blue)
         lines!(geo_ps; linewidth = 4.0, color = :green)
-        (!interactive) && Makie.save(image_prefix * "working-in-charts-transport.png", fig1)
+        (!interactive) && Makie.save(image_prefix * "/working-in-charts-transport.png", fig1)
         fig1
     else
         PlutoUI.LocalResource(image_prefix * "/working-in-charts-transport.png")

@@ -128,7 +128,7 @@ is_point(M₃, [0, 0, 1.001]; atol = 1.0e-3)
 
 Here we can show a last nice check: ``[`is_vector`](@extref `ManifoldsBase.is_vector-Tuple{AbstractManifold, Any, Any, Bool, Bool}`)``{=commonmark} to check whether a tangent vector `X` is a representation of a tangent vector $X∈T_p\mathcal M$ to a point `p` on the manifold.
 
-This function has two positional arguments, the first to again indicate whether to throw an error, the second to disable the check that `p` is a valid point on the manifold. Usually this validity is essential for the tangent check, but if it was for example performed before, it can be turned off to spare time.
+This function has two positional arguments, the first to disable the check that `p` is a valid point on the manifold, the second to again indicate whether to throw an error. Usually this validity is essential for the tangent check, but if it was for example performed before, it can be turned off to spare time.
 
 For example in our first example the point is not of unit norm
 
@@ -136,11 +136,11 @@ For example in our first example the point is not of unit norm
 is_vector(M₃, [2, 0, 0], [0, 1, 1])
 ```
 
-But the orthogonality of `p` and `X` is still valid, we can disable the point check,
-but even setting the error to true we get here
+But the orthogonality of `p` and `X` is still valid, so if we disable the point check
+and even set the error to true, we get here
 
 ```{julia}
-is_vector(M₃, [2, 0, 0], [0, 1, 1], true, false)
+is_vector(M₃, [2, 0, 0], [0, 1, 1], false, true)
 ```
 
 But of course it is better to use a valid point in the first place

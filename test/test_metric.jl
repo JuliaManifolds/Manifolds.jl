@@ -554,16 +554,16 @@ end
         @test Manifolds.exp_fused(M, p, X, 0.5) == p + X
         @test exp(MM2, p, X) == exp(M, p, X)
         @test Manifolds.exp_fused(MM2, p, X, 0.5) == Manifolds.exp_fused(M, p, X, 0.5)
-        @test exp!(MM, q, p, X) == exp!(M, q, p, X)
+        @test exp!(MM, q, p, X) == exp!(M, copy(q), p, X)
         @test Manifolds.exp_fused!(MM, q, p, X, 0.5) ==
-            Manifolds.exp_fused!(M, q, p, X, 0.5)
-        @test retract!(MM, q, p, X) == retract!(M, q, p, X)
+            Manifolds.exp_fused!(M, copy(q), p, X, 0.5)
+        @test retract!(MM, q, p, X) == retract!(M, copy(q), p, X)
         @test Manifolds.retract_fused!(MM, q, p, X, 1) ==
-            Manifolds.retract_fused!(M, q, p, X, 1)
+            Manifolds.retract_fused!(M, copy(q), p, X, 1)
         @test Manifolds.retract_fused(MM, p, X, 1) ==
             Manifolds.retract_fused(M, p, X, 1)
-        @test project!(MM, Y, p, X) == project!(M, Y, p, X)
-        @test project!(MM, q, p) == project!(M, q, p)
+        @test project!(MM, Y, p, X) == project!(M, copy(Y), p, X)
+        @test project!(MM, q, p) == project!(M, copy(q), p)
         # without a definition for the metric from the embedding, no projection possible
         @test_throws MethodError log!(MM, Y, p, q)
         @test_throws MethodError vector_transport_to!(MM, Y, p, X, q)
@@ -596,23 +596,24 @@ end
         @test inner(MM2, p, X, Y) === inner(M, p, X, Y)
         @test norm(MM2, p, X) === norm(M, p, X)
         @test distance(MM2, p, q) === distance(M, p, q)
-        @test exp!(MM2, q, p, X) == exp!(M, q, p, X)
+        @test exp!(MM2, q, p, X) == exp!(M, copy(q), p, X)
         @test exp(MM2, p, X) == exp(M, p, X)
-        @test log!(MM2, X, p, q) == log!(M, X, p, q)
+        @test log!(MM2, X, p, q) == log!(M, copy(X), p, q)
         @test log(MM2, p, q) == log(M, p, q)
-        @test retract!(MM2, q, p, X) == retract!(M, q, p, X)
+        @test retract!(MM2, q, p, X) == retract!(M, copy(q), p, X)
         @test Manifolds.retract_fused!(MM2, q, p, X, 1) ==
-            Manifolds.retract_fused!(M, q, p, X, 1)
+            Manifolds.retract_fused!(M, copy(q), p, X, 1)
 
-        @test project!(MM2, q, p) == project!(M, q, p)
-        @test project!(MM2, Y, p, X) == project!(M, Y, p, X)
+        @test project!(MM2, q, p) == project!(M, copy(q), p)
+        @test project!(MM2, Y, p, X) == project!(M, copy(Y), p, X)
         X = [0.5, 0.7, 0.11]
         q = exp(M, p, X)
         @test parallel_transport_to(MM2, p, X, q) == parallel_transport_to(M, p, X, q)
         @test parallel_transport_to!(MM2, Y, p, X, q) ==
-            parallel_transport_to!(M, copy(Y), q, X, p)
-        @test project!(MM2, Y, p, X) == project!(M, Y, p, X)
-        @test vector_transport_to!(MM2, Y, p, X, q) == vector_transport_to!(M, Y, p, X, q)
+            parallel_transport_to!(M, copy(Y), p, X, q)
+        @test project(MM2, p, X) == project(M, p, X)
+        @test vector_transport_to!(MM2, Y, p, X, q) ==
+            vector_transport_to!(M, copy(Y), p, X, q)
         c = 2 * ones(3)
         m = ParallelTransport()
         @test zero_vector!(MM2, X, p) == zero_vector!(M, copy(X), p)
