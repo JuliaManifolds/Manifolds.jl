@@ -248,7 +248,7 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
                             @test isapprox(MMl, pl, log(MMl, pl, ql), Zl1)
                             Zl2 = similar(Zl1)
                             log!(Mcomp, Zl2, pl, ql)
-                            @test isapprox(MMl, pl, log(MMl, pl, ql), Zl1)
+                            @test isapprox(MMl, pl, Zl2, Zl1)
                             @test distance(Mcomp, pl, ql) ≈ norm(Mcomp, pl, Zl2)
                         end
                         @test isapprox(MMl, exp(MMl, pl, 0 * Xl), pl; error = :error)
