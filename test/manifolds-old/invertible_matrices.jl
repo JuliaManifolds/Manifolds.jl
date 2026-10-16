@@ -40,6 +40,9 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
         D = similar(A)
         get_vector!(M, D, A, vec(A), DefaultOrthonormalBasis())
         @test isapprox(D, A)
+
+        @test get_coordinates(M, A, A, DefaultOrthogonalBasis()) == vec(A)
+        @test get_vector(M, A, vec(A), DefaultOrthogonalBasis()) == A
     end
     @testset "Complex invertible matrices" begin
         @test repr(Mc) == "InvertibleMatrices(3, ℂ)"

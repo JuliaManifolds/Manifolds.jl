@@ -63,7 +63,7 @@ include("../header.jl")
         @test manifold_dimension(Mf) == manifold_dimension(M)
         @test manifold_dimension(HamiltonianMatrices(4, ℂ)) == 2 * manifold_dimension(M)
         Random.seed!(42)
-        is_point(M, rand(M))
+        @test is_point(M, rand(M))
     end
     @testset "Random Hamiltonian matrices" begin
         q = rand(MersenneTwister(42), M)

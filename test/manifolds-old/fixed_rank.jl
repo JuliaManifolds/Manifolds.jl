@@ -52,6 +52,9 @@ include("../header.jl")
         @test representation_size(Mc) == (3, 2)
         @test manifold_dimension(M) == 6
         @test manifold_dimension(Mc) == 12
+        pc = SVDMPoint(ComplexF64[1.0 0.0; 0.0 1.0im; 0.0 0.0], 2)
+        @test is_point(Mc, pc)
+        @test get_embedding(Mc) == Euclidean(3, 2; field = ℂ)
         @test metric(M) == EuclideanMetric()
         @test !is_flat(M)
         @test !is_flat(Mc)

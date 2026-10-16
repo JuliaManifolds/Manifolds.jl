@@ -224,11 +224,10 @@ end
         n, k = 3, 2
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
         @testset for fT in (Float32, Float64), T in (fT, Complex{fT})
-            𝔽 = T isa Complex ? ℂ : ℝ
+            𝔽 = T <: Complex ? ℂ : ℝ
             M = GeneralizedGrassmann(n, k, B, 𝔽)
             rT = real(T)
-            atol = eps(rT)^(1 // 4)
-            rtol = eps(rT)
+            atol = rtol = sqrt(eps(rT))
             @testset for t in (zero(rT), eps(rT)^(1 // 4) / 8, eps(rT)^(1 // 4))
                 p = project(M, randn(T, representation_size(M)))
                 X = project(M, p, randn(T, representation_size(M)))

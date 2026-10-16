@@ -213,6 +213,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `rand` on the `Hyperbolic` space draws tangent vectors whose coordinates in an orthonormal basis are independent normal with standard deviation `σ` at every base point.
 * `check_vector` and `is_vector` on `MultinomialSymmetric` apply a given `atol` and `rtol` also to the row sums.
 * `get_coordinates` and `get_vector` on the `Hyperbolic` space accept a diagonalizing basis whose direction is a `HyperboloidTangentVector`.
+* `check_point` on `Hyperbolic` now also tests if the last entry is positive.
 * `rand` on `MultinomialSymmetricPositiveDefinite` returns a random point, and with `vector_at` a random tangent vector drawn as on `MultinomialSymmetric`.
 * `get_embedding` on the `Oblique` and `MultinomialMatrices` manifolds returns the space of matrices of their size, so that the extrinsic mean and `embed` on a `ValidationManifold` work for them.
 * `power_dimensions` on the `Oblique` manifold returns a one-element tuple, like the other power manifolds.
@@ -227,6 +228,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `show` method for `SpecialUnitaryMatrices` for nicer printing.
 * `get_embedding` on an `ArraySphere` created with `parameter = :field` returns a `Euclidean` space that stores its size in a field as well.
 * `Weingarten` is available on every `AbstractSphere`, so also on `ArraySphere`, `KendallsPreShapeSpace` and `SphereSymmetricMatrices`, and uses the real part of the inner product for complex and quaternionic points.
+* `incident_log!` on a `GraphManifold` overwrites the tangent vector it is given, so that it returns the same result as `incident_log` instead of adding the logarithm to the existing tangent vector.
 
 ## [0.11.32] 2026-09-30
 

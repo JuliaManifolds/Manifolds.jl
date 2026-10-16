@@ -128,6 +128,7 @@ function incident_log(M::VertexGraphManifold, p)
 end
 
 function incident_log!(M::VertexGraphManifold, X, p)
+    zero_vector!(M, X, p)
     rep_size = representation_size(M.manifold)
     for e in edges(M.graph)
         X[src(e)] +=
@@ -147,6 +148,7 @@ function incident_log!(
         X,
         p,
     ) where {𝔽}
+    zero_vector!(M, X, p)
     rep_size = representation_size(M.manifold)
     for e in edges(M.graph)
         X[src(e)] += (

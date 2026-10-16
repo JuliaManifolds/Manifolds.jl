@@ -76,7 +76,7 @@ end
             @test +X == T(+X.value)
             @test Manifolds.allocate_result_type(M, log, (p, p)) == T
             @test Manifolds.allocate_result_type(M, inverse_retract, (p, p)) == T
-            convert(T, p, X) == X
+            @test convert(T, p, X) == X
             # copyto
             pC = allocate(p)
             copyto!(M, pC, p)
@@ -102,7 +102,7 @@ end
         @test convert(HyperboloidTangentVector, X).value == XH.value
         @test convert(AbstractVector, XH) == X
         @test convert(HyperboloidPoint, p).value == pH.value
-        is_point(M, pH)
+        @test is_point(M, pH)
         pB = convert(PoincareBallPoint, p)
         @test pB.value == convert(PoincareBallPoint, pH).value
         @test is_point(M, pB)
@@ -330,6 +330,7 @@ end
         @test c ≈ [0.5, 1.0]
         c2 = similar(c)
         get_coordinates!(M, c2, p, X, DefaultOrthonormalBasis())
+        @test c2 ≈ c
         B2 = DiagonalizingOrthonormalBasis(X)
         V2 = get_vectors(M, p, get_basis(M, p, B2))
         @test V2[1] ≈ X ./ norm(M, p, X)
@@ -401,7 +402,7 @@ end
     end
     @testset "other metric" begin
         M = Hyperbolic(2)
-        p = [0.0, 0.0, -1.0]
+        p = [0.0, 0.0, 1.0]
         X = [-1.0, 0.0, 0.0]
         Y = [0.0, -1.0, 0.0]
         Z = [-0.5, -0.5, 0.0]
@@ -414,7 +415,9 @@ end
         @test sectional_curvature_max(M) == -1.0
         @test sectional_curvature_min(M) == -1.0
         M1 = Hyperbolic(1)
-        @test sectional_curvature(M1, p, X, Y) == 0.0
+        p1 = [0.0, 1.0]
+        X1 = [1.0, 0.0]
+        @test sectional_curvature(M1, p1, X1, X1) == 0.0
         @test sectional_curvature_max(M1) == 0.0
         @test sectional_curvature_min(M1) == 0.0
     end

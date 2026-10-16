@@ -28,9 +28,12 @@ include("../header.jl")
         @test !is_vector(N, x[1:2], log(N, x, y)[1:2])
         @test_throws DomainError is_vector(N, x, log(N, x, y)[1:2]; error = :error)
         @test incident_log(N, x) == [x[2] - x[1], x[1] - x[2] + x[3] - x[2], x[2] - x[3]]
+        X = log(N, x, y)
+        @test Manifolds.incident_log!(N, X, x) === X
+        @test X == incident_log(N, x)
 
         pts = [x, y, z]
-        Manifolds.test_manifold(N, pts; test_representation_size = false)
+        Manifolds.test_manifold(N, pts; test_representation_size = false, test_inplace = true)
         @test sprint(show, "text/plain", N) == """
             GraphManifold
             Graph:
@@ -45,7 +48,7 @@ include("../header.jl")
         @test is_vector(NE, x[1:2], log(N, x, y)[1:2])
         @test !is_vector(NE, x, log(N, x, y))
         @test_throws DomainError is_vector(NE, x, log(N, x, y); error = :error)
-        @test !is_vector(N, x[1:2], log(N, x, y))
+        @test !is_vector(NE, x[1:2], log(N, x, y))
         @test_throws DomainError is_vector(NE, x[1:2], log(N, x, y); error = :error)
 
         Manifolds.test_manifold(
@@ -79,5 +82,8 @@ include("../header.jl")
             1.5 * (x[1] - x[2]) + 0.5 * (x[3] - x[2]),
             0.5 * (x[2] - x[3]),
         ]
+        X3 = log(N3, x, y)
+        @test Manifolds.incident_log!(N3, X3, x) === X3
+        @test X3 == incident_log(N3, x)
     end
 end

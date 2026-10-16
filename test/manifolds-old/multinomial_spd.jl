@@ -21,8 +21,9 @@ include("../header.jl")
         # Symmetric but does not sum to 1
         pf1 = zeros(3, 3)
         @test_throws ManifoldDomainError is_point(M, pf1; error = :error)
-        #  in theory this is not spd since it has an EV 0 but numerically it is
+        # Symmetric and multinomial, but with the eigenvalues -0.2, 0.0 and 1.0
         pf2 = [0.3 0.4 0.3; 0.4 0.2 0.4; 0.3 0.4 0.3]
+        @test_throws ManifoldDomainError is_point(M, pf2; error = :error)
         # Multinomial but not symmetric
         pf3 = [0.2 0.3 0.5; 0.4 0.2 0.4; 0.4 0.5 0.1]
         @test_throws ManifoldDomainError is_point(M, pf3; error = :error)

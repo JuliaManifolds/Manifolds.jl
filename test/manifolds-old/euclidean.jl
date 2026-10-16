@@ -125,7 +125,7 @@ using FiniteDifferences
                             SchildsLadderTransport(),
                             PoleLadderTransport(),
                         ],
-                        test_mutating_rand = isa(T, Vector),
+                        test_mutating_rand = T <: Vector,
                         point_distributions = [
                             Manifolds.projected_distribution(
                                 M,
@@ -158,6 +158,8 @@ using FiniteDifferences
                     test_project_tangent = true,
                     test_musical_isomorphisms = true,
                     test_default_vector_transport = true,
+                    test_rand_point = true,
+                    test_rand_tvector = true,
                     parallel_transport = true,
                 )
             end
@@ -186,6 +188,8 @@ using FiniteDifferences
                     test_musical_isomorphisms = true,
                     test_default_vector_transport = true,
                     test_project_point = true,
+                    test_rand_point = true,
+                    test_rand_tvector = true,
                     is_mutating = false,
                 )
             end
@@ -369,7 +373,7 @@ using FiniteDifferences
         ) == SA[-1.0 -3.0; -2.0 -4.0]
 
         M1c = Euclidean(3, field = ℂ)
-        get_vector(
+        @test get_vector(
             M1c,
             SizedVector{3}([1.0im, 2.0, 4.0im]),
             SizedVector{3}([-1.0, -3.0, -4.0im]),

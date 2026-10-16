@@ -32,6 +32,12 @@ function check_point(M::Hyperbolic, p; kwargs...)
             "The point $(p) does not lie on $(M) since its Minkowski inner product is not -1.",
         )
     end
+    if p[end] < 0
+        return DomainError(
+            p[end],
+            "The point $(p) does not lie on $(M) since its last entry is negative.",
+        )
+    end
     return nothing
 end
 

@@ -74,7 +74,7 @@ include("../header.jl")
             )
         end
     end
-    @testset "Weingarten & Hessian" begin
+    @testset "Riemannian gradient and Hessian" begin
         M = PositiveNumbers()
         p = 1.0
         G = 2.0

@@ -16,4 +16,9 @@ include("../header.jl")
         @test minkowski_metric(X, Y) == -4
         @test inner(M, p, X, Y) == minkowski_metric(X, Y)
     end
+
+    @testset "field parameter" begin
+        Mf = Lorentz(3; parameter = :field)
+        @test local_metric(Mf, zeros(3)) == Diagonal([1.0, 1.0, -1.0])
+    end
 end

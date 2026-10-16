@@ -316,15 +316,15 @@ end
         @test pSe == pS.value
         Xse = similar(Xs.value)
         embed!(M, Xse, pS, Xs)
-        Xse == Xs.value
+        @test Xse == Xs.value
 
         p2 = ProjectorPoint(similar(p.value))
         pC = pS.value * pS.value'
         canonical_project!(M, p2, pS)
         @test p2.value == pC
         p3 = ProjectorPoint(similar(p.value))
-        canonical_project!(M, p2, pS.value)
-        @test p2.value == pC
+        canonical_project!(M, p3, pS.value)
+        @test p3.value == pC
         p3 = canonical_project(M, pS)
         @test p3.value == pC
 
@@ -434,7 +434,7 @@ end
     @testset "small distance tests" begin
         n, k = 5, 3
         @testset for fT in (Float32, Float64), T in (fT, Complex{fT})
-            𝔽 = T isa Complex ? ℂ : ℝ
+            𝔽 = T <: Complex ? ℂ : ℝ
             M = Grassmann(n, k, 𝔽)
             U = UnitaryMatrices(k, 𝔽)
             rT = real(T)
@@ -443,6 +443,7 @@ end
                     z in (I, rand(U))
 
                 p = project(M, randn(T, representation_size(M)))
+                @test is_point(M, p)
                 X = project(M, p, randn(T, representation_size(M)))
                 X ./= norm(M, p, X)
                 project!(M, X, p, X)

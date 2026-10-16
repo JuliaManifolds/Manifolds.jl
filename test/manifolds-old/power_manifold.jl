@@ -412,7 +412,7 @@ end
     @testset "Hessian conversion" begin
         M = Sphere(2)
         N = PowerManifold(M, 2)
-        p = [1.0 0.0; 0.0 0.0; 1.0 0.0]
+        p = [1.0 0.0; 0.0 0.0; 0.0 1.0]
         q = 1 / sqrt(2) * [0.0 1.0; 1.0 1.0; 1.0 0.0]
         r = 1 / sqrt(3) * [1.0 1.0; 1.0 1.0; 1.0 1.0]
         X = log(M, p, q)
