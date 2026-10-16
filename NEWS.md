@@ -186,6 +186,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `isapprox` on the `EssentialManifold` reports two representatives of the same point as equal.
 * `FiberBundleProductRetraction` on a `VectorBundle` transports the fiber part with the vertical vector transport method, the one `FiberBundleInverseProductRetraction` uses.
 * The basis vectors of a `FiberBundle` along the base manifold have a fiber part of the size of the fiber elements instead of the base manifold elements.
+* `vector_transport_direction!` on a `VectorBundle` moves the fiber part with the transport of the fiber, as `vector_transport_direction` does.
 * `mean(M, x)` and `mean(M, x, w)` pass their keyword arguments to the estimation method, also on decorator manifolds.
 * `mean` with `GeodesicInterpolation` and a shuffling generator `shuffle_rng` skips exactly the points of weight zero.
 * `median(M, x)` and `median(M, x, w)` pass their keyword arguments to the estimation method.
@@ -237,6 +238,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `incident_log!` on a `GraphManifold` overwrites the tangent vector it is given, so that it returns the same result as `incident_log` instead of adding the logarithm to the existing tangent vector.
 * `is_flat` on `SymmetricPositiveDefinite` with the `LogEuclideanMetric` returns `true`.
 * Parallel transport on the `SymmetricPositiveDefinite` matrices returns the vector unchanged when both points are equal.
+* `is_vector` on the `Tucker` manifold checks that the factor matrices of a tangent vector are orthogonal to those of the point, and it accepts the keywords `atol` and `rtol`.
+* `get_coordinates!` on the `Tucker` manifold writes the coordinates of the default orthonormal basis into the given vector.
 
 ## [0.11.32] 2026-09-30
 

@@ -101,8 +101,10 @@ Compute the mean using the specified `method`.
         method::GradientDescentEstimation;
         p0=x[1],
         stop_iter=100,
-        retraction::AbstractRetractionMethod = default_retraction_method(M),
-        inverse_retraction::AbstractInverseRetractionMethod = default_retraction_method(M, eltype(x)),
+        retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
+        inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(
+            M, eltype(x),
+        ),
         kwargs...,
     )
 
@@ -192,8 +194,7 @@ function Statistics.mean!(
         stop_iter = 100,
         retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
         inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(
-            M,
-            eltype(x),
+            M, eltype(x),
         ),
         kwargs...,
     )

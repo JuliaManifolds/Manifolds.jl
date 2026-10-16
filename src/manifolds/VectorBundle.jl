@@ -363,9 +363,9 @@ function _vector_transport_direction!(
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     dx, dVx = submanifold_components(M.manifold, d)
-    return vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal),
-        vector_transport_direction!(M.manifold, VYF, px, VXF, dx, m.method_vertical),
-        return Y
+    vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal)
+    bundle_transport_tangent_direction!(M, VYF, px, pVx, VXF, dx, m.method_vertical)
+    return Y
 end
 
 @doc raw"""

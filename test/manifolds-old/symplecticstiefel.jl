@@ -199,6 +199,7 @@ end
         X1_norm = 37.85466645
         @test isapprox(norm(M, p_6_4, X1), X1_norm; atol = 1.0e-8)
         @test isapprox(norm(M, p_6_4, X1), √inner(M, p_6_4, X1, X1); atol = 1.0e-8)
+        @test inner(M, Float32.(p_6_4), Float32.(X1), Float32.(X1)) isa Float32
 
         X2_norm = 1.0
         @test isapprox(norm(M, p_6_4, X2), X2_norm; atol = 1.0e-6)

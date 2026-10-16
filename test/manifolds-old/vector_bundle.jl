@@ -4,6 +4,17 @@ using RecursiveArrayTools
 
 struct TestVectorSpaceType <: VectorSpaceType end
 
+
+# a fiber element holds two tangent vectors, each moved by the transport of the base manifold
+function Manifolds.bundle_transport_tangent_direction!(
+        B::FiberBundle{<:Any, TestVectorSpaceType}, Y, p, pf, X, d, m,
+    )
+    for i in 1:2
+        vector_transport_direction!(B.manifold, Y.x[i], p, X.x[i], d, m)
+    end
+    return Y
+end
+
 @testset "Vector bundle" begin
     M = Sphere(2)
     TB = TangentBundle(M)
@@ -170,6 +181,20 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test_throws MethodError project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws MethodError zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
         @test_throws MethodError vector_space_dimension(vbf)
+    end
+
+    @testset "in-place vector transport in a direction uses the fiber transport" begin
+        B = FiberBundle(TestVectorSpaceType(), Sphere(2))
+        p = ArrayPartition(
+            [1.0, 0.0, 0.0], ArrayPartition([0.0, -1.0, -1.0], [0.0, -1.0, -1.0]),
+        )
+        X = ArrayPartition([0.0, 1.0, 0.5], ArrayPartition([0.0, 0.0, 1.0], [0.0, 2.0, 0.0]))
+        d = ArrayPartition([0.0, π / 2, 0.0], ArrayPartition(zeros(3), zeros(3)))
+        Z = ArrayPartition([-1.0, 0.0, 0.5], ArrayPartition([0.0, 0.0, 1.0], [-2.0, 0.0, 0.0]))
+        @test isapprox(vector_transport_direction(B, p, X, d), Z)
+        Y = zero(X)
+        @test vector_transport_direction!(B, Y, p, X, d) === Y
+        @test isapprox(Y, Z)
     end
 
     @testset "product retraction and inverse retraction on tangent bundle for power and product manifolds" begin

@@ -285,18 +285,23 @@ function check_point(M::Tucker, x::TuckerPoint; kwargs...)
 end
 
 @doc raw"""
-    check_vector(M::Tucker{<:Any,D}, p::TuckerPoint{T,D}, X::TuckerTangentVector) where {T,D}
+    check_vector(M::Tucker{<:Any,D}, p::TuckerPoint{T,D}, X::TuckerTangentVector; atol, rtol, kwargs...) where {T,D}
 
-Check whether a [`TuckerTangentVector`](@ref) `X` is is in the tangent space to
+Check whether a [`TuckerTangentVector`](@ref) `X` is in the tangent space to
 the `D`th order [`Tucker`](@ref) manifold `M` at the `D`th order [`TuckerPoint`](@ref) `p`.
 This
 is the case when the dimensions of the factors in `X` agree with those of `p` and the factor
-matrices of `X` are in the orthogonal complement of the HOSVD factors of `p`.
+matrices of `X` are in the orthogonal complement of the HOSVD factors of `p`, the latter up
+to `max(atol, rtol * norm(X.U̇[d]))` for the `d`th factor.
+The default of `rtol` is the one of `isapprox`.
 """
 function check_vector(
         M::Tucker{𝔽, <:Any, D},
         p::TuckerPoint{T, D},
-        X::TuckerTangentVector,
+        X::TuckerTangentVector;
+        atol::Real = sqrt(prod(size(p)) * eps(float(real(T)))),
+        rtol::Real = sqrt(eps(float(real(T)))),
+        kwargs...,
     ) where {T, D, 𝔽}
     s = "The tangent vector $(X) is not a tangent vector to $(p) on $(M), "
     if size(p.hosvd.core) ≠ size(X.Ċ) || any(size.(X.U̇) .≠ size.(p.hosvd.U))
@@ -304,6 +309,15 @@ function check_vector(
             size(X.Ċ),
             s * "since the array dimensions of $(p) and $(X)" * " do not agree.",
         )
+    end
+    for d in 1:D
+        r = norm(p.hosvd.U[d]' * X.U̇[d])
+        if !(r <= atol || r <= rtol * norm(X.U̇[d]))
+            return DomainError(
+                r,
+                s * "since the factor $(d) of $(X) is not orthogonal to that of $(p).",
+            )
+        end
     end
     return nothing
 end
@@ -599,22 +613,38 @@ end
 
 #=
 get_coordinates(::Tucker, A, X::TuckerTangentVector, b)
+get_coordinates!(::Tucker, c, A, X::TuckerTangentVector, b)
 
 The coordinates of a tangent vector X at point A on the Tucker manifold with respect to the
-basis b.
+basis b, computed in place of c for the mutating variant.
 =#
-function get_coordinates(::Tucker, 𝔄, X::TuckerTangentVector, ℬ::CachedHOSVDBasis)
-    coords = vec(X.Ċ)
-    for d in 1:length(X.U̇)
-        coord_mtx = (ℬ.data.U⊥[d] \ X.U̇[d]) * Diagonal(𝔄.hosvd.σ[d])
-        coords = vcat(coords, vec(coord_mtx'))
-    end
-    return coords
+function get_coordinates(M::Tucker, 𝔄, X::TuckerTangentVector, ℬ::CachedHOSVDBasis)
+    T = promote_type(number_eltype(𝔄), number_eltype(X))
+    return get_coordinates!(M, Vector{T}(undef, manifold_dimension(M)), 𝔄, X, ℬ)
 end
 function get_coordinates(
         M::Tucker, 𝔄, X, ℬ::DefaultOrthonormalBasis{𝔽, TangentSpaceType},
     ) where {𝔽}
     return get_coordinates(M, 𝔄, X, get_basis(M, 𝔄, ℬ))
+end
+function get_coordinates!(::Tucker, c, 𝔄, X::TuckerTangentVector, ℬ::CachedHOSVDBasis)
+    ℭ = 𝔄.hosvd.core
+    r⃗ = size(ℭ)
+    n⃗ = size(𝔄)
+    copyto!(view(c, 1:length(ℭ)), vec(X.Ċ))
+    # the coordinates of X.U̇[d] are the rows of its coordinate matrix, one after another
+    nextcolumn = length(ℭ) + 1
+    for d in 1:length(X.U̇)
+        numcols = r⃗[d] * (n⃗[d] - r⃗[d])
+        coord_mtx = (ℬ.data.U⊥[d] \ X.U̇[d]) * Diagonal(𝔄.hosvd.σ[d])
+        reshape(view(c, nextcolumn:(nextcolumn + numcols - 1)), r⃗[d], n⃗[d] - r⃗[d]) .=
+            transpose(coord_mtx)
+        nextcolumn += numcols
+    end
+    return c
+end
+function get_coordinates_orthonormal!(M::Tucker, c, 𝔄::TuckerPoint, X::TuckerTangentVector, N)
+    return get_coordinates!(M, c, 𝔄, X, get_basis(M, 𝔄, DefaultOrthonormalBasis(N)))
 end
 
 #=

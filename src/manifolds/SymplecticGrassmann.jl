@@ -62,7 +62,7 @@ The manifold was first introduced in [BendokatZimmermann:2021](@cite)
 
 # Constructor
 
-    SymplecticGrassmann(2n::Int, 2k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+    SymplecticGrassmann(2n::Int, 2k::Int; parameter::Symbol=:type)
 
 Generate the (real-valued) symplectic Grassmann manifold.
 of  ``2k`` dimensional symplectic subspace of ``ℝ^{2n}``.

@@ -129,6 +129,10 @@ include("../header.jl")
                 p,
                 TuckerTangentVector(ones(T, r⃗), map(u⊥ -> u⊥[:, 1:(end - 1)], U⊥)),
             )
+            # factors of a tangent vector are orthogonal to those of the point
+            v_parallel = TuckerTangentVector(copy(v.Ċ), map(copy, p.hosvd.U))
+            @test !is_vector(M, p, v_parallel)
+            @test !is_vector(M, p, v_parallel; atol = 1.0e-10)
 
             ℬ = get_basis(M, p, DefaultOrthonormalBasis())
             J = convert(Matrix, ℬ)
@@ -136,6 +140,12 @@ include("../header.jl")
             vectors = get_vectors(M, p, DefaultOrthonormalBasis())
             vectors_mtx = hcat(map(ξ -> vec(embed(M, p, ξ)), vectors)...)
             @test J ≈ vectors_mtx
+            c = get_coordinates(M, p, v, DefaultOrthonormalBasis())
+            c2 = get_coordinates!(M, similar(c), p, v, DefaultOrthonormalBasis())
+            @test c2 == c
+            @test get_coordinates!(M, similar(c), p, v, ℬ) == c
+            @test get_coordinates!(M, similar(c), p, v) == c
+            @test isapprox(M, p, get_vector(M, p, c2, DefaultOrthonormalBasis()), v)
 
             shiftprint(x) = replace(sprint(show, "text/plain", x), "\n" => "\n ")
 
@@ -190,6 +200,7 @@ include("../header.jl")
                 test_rand_point = true,
                 test_rand_tvector = true,
                 test_mutating_rand = true,
+                is_tangent_atol_multiplier = 5,
                 projection_atol_multiplier = 15,
                 retraction_methods = [PolarRetraction()],
                 inverse_retraction_methods = [ProjectionInverseRetraction()],

@@ -35,7 +35,8 @@ You can also use [`StiefelPoint`](@ref) and [`StiefelTangentVector`](@ref) with 
 they are equivalent to using arrays.
 
 # Constructor
-    SymplecticStiefel(2n::Int, 2k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+
+    SymplecticStiefel(2n::Int, 2k::Int; parameter::Symbol=:type)
 
 Generate the (real-valued) symplectic Stiefel manifold of ``2n×2k``
 matrices which span a ``2k`` dimensional symplectic subspace of ``ℝ^{2n×2k}``.
@@ -220,14 +221,17 @@ With the above defined matrices it holds that ``\bar{\Omega} = λγ^{\mathrm{T}}
 With these matrix constructions done, we can compute the
 exponential mapping as
 ```math
-  \exp_p(X) = Γ \operatorname{Exp}(ΛΓ^{\mathrm{T}})
+  \exp_p(X) = Γ \operatorname{Exp}(Λ^{\mathrm{T}}Γ)
     \begin{bmatrix} 0_{4k} \\ I_{4k} \end{bmatrix}
-    \operatorname{Exp}(λγ^{\mathrm{T}})
+    \operatorname{Exp}(λ^{\mathrm{T}}γ)
     \begin{bmatrix} 0_{2k} \\ I_{2k} \end{bmatrix}.
 ```
 
 which only requires computing the matrix exponentials of
-``ΛΓ^{\mathrm{T}} ∈ ℝ^{8k×8k}`` and ``λγ^{\mathrm{T}} ∈ ℝ^{4k×4k}``.
+``Λ^{\mathrm{T}}Γ ∈ ℝ^{8k×8k}`` and ``λ^{\mathrm{T}}γ ∈ ℝ^{4k×4k}``.
+This formula is equation (4.3.19) of Proposition 4.3.12 in [Bendokat:2021](@cite), page 97,
+whose ``U``, ``Δ``, ``X``, ``Y``, ``\hat X`` and ``\hat Y`` are
+``p``, ``X``, ``γ``, ``λ``, ``Γ`` and ``Λ`` here.
 """
 exp(::SymplecticStiefel, p, X)
 
@@ -328,7 +332,7 @@ function inner(::SymplecticStiefel, p, X, Y)
     # 1) we permute X' and Y c to c^{\mathrm{T}}Y^{\mathrm{T}}X = a\(Y'X) (avoids a large interims matrix)
     # 2) we permute Y c up front, the center term is symmetric, so we get cY'b c b' X
     # and (b'X) again avoids a large interims matrix, so does Y'b.
-    return tr(a \ (Y' * X)) - (1 / 2) * tr(a \ ((Y' * b) * (a \ (b' * X))))
+    return tr(a \ (Y' * X)) - tr(a \ ((Y' * b) * (a \ (b' * X)))) / 2
 end
 
 @doc raw"""
