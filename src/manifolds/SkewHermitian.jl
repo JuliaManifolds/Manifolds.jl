@@ -264,6 +264,27 @@ function representation_size(M::SkewHermitianMatrices)
     return (N, N)
 end
 
+@doc raw"""
+    riemann_tensor(M::SkewHermitianMatrices, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`SkewHermitianMatrices`](@ref) `M`.
+Its value is always the zero tangent vector.
+"""
+riemann_tensor(M::SkewHermitianMatrices, p, X, Y, Z)
+
+function riemann_tensor!(::SkewHermitianMatrices, Xresult, p, X, Y, Z)
+    return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(M::SkewHermitianMatrices, p, X, Y)
+
+Sectional curvature of [`SkewHermitianMatrices`](@ref) `M` is 0.
+"""
+function sectional_curvature(::SkewHermitianMatrices, p, X, Y)
+    return 0.0
+end
+
 function Base.show(io::IO, ::SkewHermitianMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return print(io, "SkewHermitianMatrices($(n), $(𝔽))")
 end

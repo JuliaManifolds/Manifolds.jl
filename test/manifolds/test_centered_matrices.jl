@@ -61,6 +61,11 @@ Test.@testset "Centered Matrices" begin
             representation_size => (3, 2),
         )
     )
+    Test.@testset "curvature" begin
+        Test.@test riemann_tensor(M, p3, p1, p2, p2) == zeros(3, 2)
+        Test.@test sectional_curvature(M, p3, p1, p2) === 0.0
+        Test.@test sectional_curvature(CenteredMatrices(3, 2, ℂ), q2, q2, p2) === 0.0
+    end
     Mf = CenteredMatrices(3, 2; parameter = :field)
     Manifolds.Test.test_manifold(
         Mf,

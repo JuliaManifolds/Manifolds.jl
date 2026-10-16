@@ -45,8 +45,16 @@ include("../header.jl")
         for _M in [M, Mf]
             @test is_point(_M, p)
             @test is_vector(_M, p, X)
+            @test !is_flat(_M)
         end
+        @test is_flat(SymplecticGrassmann(4, 4))
         @test get_embedding(M) == SymplecticStiefel(6, 4)
+    end
+    @testset "Random points" begin
+        for _M in [M, Mf]
+            @test is_point(_M, rand(MersenneTwister(3), _M))
+            @test_throws ArgumentError rand(MersenneTwister(4), _M; vector_at = p)
+        end
     end
     @testset "Embedding / Total Space" begin
         @test get_embedding(M) == SymplecticStiefel(6, 4)

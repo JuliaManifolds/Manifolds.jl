@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `QRInverseRetraction` and `PolarInverseRetraction` on the real `GeneralUnitaryMatrices`, in particular on `OrthogonalMatrices`, previously only available on `Rotations`. On `OrthogonalMatrices` they throw a `DomainError` for points from different connected components.
 * the test suite runs [JET.jl](https://github.com/aviatesk/JET.jl) on the whole package with all extensions loaded, in its own environment `test/jet` and its own CI job, on released Julia versions.
 * `rand` and `rand!` for `SphereSymmetricMatrices`.
+* `riemann_tensor` and `sectional_curvature` on `SymmetricMatrices`, `SkewHermitianMatrices` and `CenteredMatrices`.
+* `riemann_tensor`, `sectional_curvature`, `sectional_curvature_max` and `sectional_curvature_min` on `SymmetricPositiveDefinite` with the `LogEuclideanMetric` return zero.
+* `rand` generates random points on the `SymplecticGrassmann` manifold.
 
 ### Changed
 
@@ -231,6 +234,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_embedding` on an `ArraySphere` created with `parameter = :field` returns a `Euclidean` space that stores its size in a field as well.
 * `Weingarten` is available on every `AbstractSphere`, so also on `ArraySphere`, `KendallsPreShapeSpace` and `SphereSymmetricMatrices`, and uses the real part of the inner product for complex and quaternionic points.
 * `incident_log!` on a `GraphManifold` overwrites the tangent vector it is given, so that it returns the same result as `incident_log` instead of adding the logarithm to the existing tangent vector.
+* `is_flat` on `SymmetricPositiveDefinite` with the `LogEuclideanMetric` returns `true`.
 
 ## [0.11.32] 2026-09-30
 

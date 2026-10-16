@@ -14,11 +14,11 @@ include("../header.jl")
             [2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0],
         ),
     )
-    
+
     @test repr(M6.metric) ==
         "GeneralizedBuresWassersteinMetric([2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0])"
 
-    @test !is_flat(M4)
+    @test is_flat(M4)
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1, one(zeros(3, 3))) == Inf
     @test injectivity_radius(M1, ExponentialRetraction()) == Inf
@@ -172,6 +172,8 @@ include("../header.jl")
         @test is_vector(M, p2, Y3)
         @test isapprox(M, p2, Y1, Y2) # pole is exact on SPDs, i.e. identical to parallel transport
         @test norm(M, p1, X1) ≈ norm(M, p2, Y1) # parallel transport is length preserving
+        p4 = A(0.3) * [1.0e6 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0e-6] * transpose(A(0.3))
+        @test parallel_transport_to(M, p4, X1, p4) == X1 # transport to the same point
         # test isometry
         X2 = log(M, p1, p2)
         Y4 = vector_transport_to(M, p1, X2, p2)
@@ -288,6 +290,15 @@ include("../header.jl")
         ]
 
         @test isapprox(M1, p, riemann_tensor(M1, p, X1, X2, X3), X_rt)
+    end
+    @testset "curvature of the log-Euclidean metric" begin
+        p = [2.0 1.0 0.0; 1.0 2.0 0.0; 0.0 0.0 1.0]
+        X = [1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
+        Y = [0.0 1.0 0.0; 1.0 0.0 0.0; 0.0 0.0 0.0]
+        @test riemann_tensor(M4, p, X, Y, X) == zero(X)
+        @test sectional_curvature(M4, p, X, Y) === 0.0
+        @test sectional_curvature_max(M4) === 0.0
+        @test sectional_curvature_min(M4) === 0.0
     end
     @testset "SPDPoint functions" begin
         p = SPDPoint(2 * Matrix{Float64}(I, 3, 3))

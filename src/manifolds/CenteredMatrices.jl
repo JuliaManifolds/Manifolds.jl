@@ -210,6 +210,27 @@ end
 
 representation_size(M::CenteredMatrices) = get_parameter(M.size)
 
+@doc raw"""
+    riemann_tensor(M::CenteredMatrices, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`CenteredMatrices`](@ref) `M`.
+Its value is always the zero tangent vector.
+"""
+riemann_tensor(M::CenteredMatrices, p, X, Y, Z)
+
+function riemann_tensor!(::CenteredMatrices, Xresult, p, X, Y, Z)
+    return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(M::CenteredMatrices, p, X, Y)
+
+Sectional curvature of [`CenteredMatrices`](@ref) `M` is 0.
+"""
+function sectional_curvature(::CenteredMatrices, p, X, Y)
+    return 0.0
+end
+
 function Base.show(io::IO, ::CenteredMatrices{𝔽, TypeParameter{Tuple{m, n}}}) where {m, n, 𝔽}
     return print(io, "CenteredMatrices($(m), $(n), $(𝔽))")
 end

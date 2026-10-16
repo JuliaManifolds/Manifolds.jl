@@ -119,6 +119,26 @@ function inverse_retract_cayley!(M::SymplecticGrassmann, X, p, q)
 end
 
 @doc raw"""
+    rand(::SymplecticGrassmann; σ::Real=1.0)
+
+Generate a random point on the [`SymplecticGrassmann`](@ref) manifold, represented on the
+[`SymplecticStiefel`](@ref) manifold, as a random point on the [`SymplecticStiefel`](@ref)
+manifold generated with the same `σ`.
+Random tangent vectors, that is `rand` with `vector_at`, are not yet available.
+"""
+rand(::SymplecticGrassmann; σ::Real = 1.0, kwargs...)
+
+function Random.rand!(
+        rng::AbstractRNG, M::SymplecticGrassmann, pX; vector_at = nothing, σ::Real = 1.0
+    )
+    vector_at === nothing || throw(
+        ArgumentError("Random tangent vectors on the symplectic Grassmann manifold are not yet available."),
+    )
+    n, k = get_parameter(M.size)
+    return rand!(rng, SymplecticStiefel(2 * n, 2 * k), pX; σ = σ)
+end
+
+@doc raw"""
     retract(::SymplecticGrassmann, p, X, ::CayleyRetraction)
     retract!(::SymplecticGrassmann, q, p, X, ::CayleyRetraction)
 

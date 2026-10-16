@@ -96,6 +96,16 @@ end
 # Define Stiefel as the array fallback
 ManifoldsBase.@default_manifold_fallbacks SymplecticGrassmann StiefelPoint StiefelTangentVector value value
 
+"""
+    is_flat(::SymplecticGrassmann)
+
+Return true if the [`SymplecticGrassmann`](@ref) degenerates to a point, false otherwise.
+"""
+function is_flat(M::SymplecticGrassmann)
+    n, k = get_parameter(M.size)
+    return n == k
+end
+
 @doc raw"""
     manifold_dimension(::SymplecticGrassmann)
 

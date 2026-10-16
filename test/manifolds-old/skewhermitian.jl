@@ -23,6 +23,11 @@ end
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test is_flat(M)
+        @test riemann_tensor(M, A_skewsym, A_skewsym, B_skewsym, B_skewsym) == zeros(3, 3)
+        @test sectional_curvature(M, A_skewsym, A_skewsym, B_skewsym) === 0.0
+        @test sectional_curvature(
+            M_complex, A_skewsym_complex, A_skewsym_complex, B_skewsym_complex,
+        ) === 0.0
         @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{3, 3}}}
         @test check_point(M, B_skewsym) === nothing
         @test_throws DomainError is_point(M, A; error = :error)

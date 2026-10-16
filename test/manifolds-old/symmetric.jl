@@ -18,6 +18,9 @@ include("../header.jl")
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test is_flat(M)
+        @test riemann_tensor(M, A_sym, A_sym, B_sym, B_sym) == zeros(3, 3)
+        @test sectional_curvature(M, A_sym, A_sym, B_sym) === 0.0
+        @test sectional_curvature(M_complex, C, C, B_sym) === 0.0
         @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{3, 3}}}
         @test check_point(M, B_sym) === nothing
         @test_throws DomainError is_point(M, A; error = :error)
