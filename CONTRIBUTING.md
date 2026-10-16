@@ -7,16 +7,17 @@ The following is a set of guidelines to [`Manifolds.jl`](https://juliamanifolds.
 
 #### Table of contents
 
-* [Contributing to `Manifolds.jl`](#contributing-to-manifoldsjl)
-  * [Table of contents](#Table-of-contents)
-  * [How to ask a question](#How-to-ask-a-question)
-  * [How to file an issue](#How-to-file-an-issue)
-  * [How to contribute](#How-to-contribute)
-    * [Add a missing method](#Add-a-missing-method)
-    * [Provide a new manifold](#Provide-a-new-manifold)
-  * [Code style](#Code-style)
-  * [Spell checking](#Spell-checking)
-  * [On the use of AI](#On-the-use-of-AI)
+- [Contributing to `Manifolds.jl`](#contributing-to-manifoldsjl)
+      - [Table of contents](#table-of-contents)
+  - [How to ask a question](#how-to-ask-a-question)
+  - [How to file an issue](#how-to-file-an-issue)
+  - [How to contribute](#how-to-contribute)
+    - [Overview of resources](#overview-of-resources)
+    - [Add a missing method](#add-a-missing-method)
+    - [Provide a new manifold](#provide-a-new-manifold)
+  - [Code style](#code-style)
+  - [Spell checking](#spell-checking)
+  - [On the use of AI](#on-the-use-of-ai)
 
 ## How to ask a question
 
@@ -72,7 +73,7 @@ possible function signatures including the mutating one.
 You can best achieve this by adding a documentation string to the method with a general signature with the first argument being your manifold:
 
 ```julia
-struct MyManifold <: AbstractManifold end
+struct MyManifold <: AbstractManifold{ℝ} end
 
 @doc """
     exp(M::MyManifold, p, X)

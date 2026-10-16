@@ -214,6 +214,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `check_vector` and `is_vector` on `MultinomialSymmetric` apply a given `atol` and `rtol` also to the row sums.
 * `get_coordinates` and `get_vector` on the `Hyperbolic` space accept a diagonalizing basis whose direction is a `HyperboloidTangentVector`.
 * `check_point` on `Hyperbolic` now also tests if the last entry is positive.
+* Increased accuracy of `distance` on `Hyperbolic` for distant points.
 * `rand` on `MultinomialSymmetricPositiveDefinite` returns a random point, and with `vector_at` a random tangent vector drawn as on `MultinomialSymmetric`.
 * `get_embedding` on the `Oblique` and `MultinomialMatrices` manifolds returns the space of matrices of their size, so that the extrinsic mean and `embed` on a `ValidationManifold` work for them.
 * `power_dimensions` on the `Oblique` manifold returns a one-element tuple, like the other power manifolds.

@@ -88,7 +88,7 @@ For example to refer to the most recent version
 
 <details>
 
-  <summary><code>Manifoldsjl-zenodo-mostrecent</code> (BibLaTeX)</summary>
+  <summary><code>manifoldsjl-zenodo-mostrecent</code> (BibLaTeX)</summary>
 
 ```biblatex
 @software{manifoldsjl-zenodo-mostrecent,
