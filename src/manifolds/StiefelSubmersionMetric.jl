@@ -263,6 +263,11 @@ function riemannian_Hessian!(
     return Y
 end
 
+function Base.show(io::IO, g::StiefelSubmersionMetric)
+    return print(io, "StiefelSubmersionMetric($(repr(g.α)))")
+end
+
+
 # StiefelFactorization code
 # Note: intended only for internal use
 

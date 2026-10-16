@@ -83,4 +83,19 @@ include("../header.jl")
         @test repr(M) == "SphereSymmetricMatrices(3, ℝ; parameter=:field)"
         @test typeof(get_embedding(M)) === ArraySphere{ℝ, Tuple{Int, Int}}
     end
+    @testset "rand" begin
+        for N in [
+                SphereSymmetricMatrices(3),
+                SphereSymmetricMatrices(2, ℂ),
+                SphereSymmetricMatrices(3; parameter = :field),
+            ]
+            rng = MersenneTwister(4711)
+            p = rand(rng, N)
+            @test is_point(N, p)
+            @test is_vector(N, p, rand(rng, N; vector_at = p))
+            q = similar(p)
+            rand!(rng, N, q)
+            @test is_point(N, q)
+        end
+    end
 end

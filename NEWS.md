@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `rand` now works on `ProjectiveSpace`.
 * `QRInverseRetraction` and `PolarInverseRetraction` on the real `GeneralUnitaryMatrices`, in particular on `OrthogonalMatrices`, previously only available on `Rotations`. On `OrthogonalMatrices` they throw a `DomainError` for points from different connected components.
 * the test suite runs [JET.jl](https://github.com/aviatesk/JET.jl) on the whole package with all extensions loaded, in its own environment `test/jet` and its own CI job, on released Julia versions.
+* `rand` and `rand!` for `SphereSymmetricMatrices`.
 
 ### Changed
 

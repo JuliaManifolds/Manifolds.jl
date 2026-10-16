@@ -182,3 +182,7 @@ function log!(
     X .= real.(Symmetric(m * sqrt(lum_p_lum * q) + sqrt(q * lum_p_lum) * m) - 2 * p)
     return X
 end
+
+function Base.show(io::IO, g::GeneralizedBuresWassersteinMetric)
+    return print(io, "GeneralizedBuresWassersteinMetric($(g.M))")
+end

@@ -151,6 +151,19 @@ function project!(M::SphereSymmetricMatrices, Y, p, X)
     return project!(get_embedding(M), Y, p, (X .+ X') ./ 2)
 end
 
+function Random.rand!(
+        rng::AbstractRNG, M::SphereSymmetricMatrices, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX)))
+    )
+    if vector_at === nothing
+        project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
+    else
+        n = σ * randn(rng, eltype(pX), size(pX)) # Gaussian in the embedding
+        project!(M, pX, vector_at, n) # project to TpM (keeps Gaussianness)
+    end
+    return pX
+end
+
 function representation_size(M::SphereSymmetricMatrices)
     n = get_parameter(M.size)[1]
     return (n, n)

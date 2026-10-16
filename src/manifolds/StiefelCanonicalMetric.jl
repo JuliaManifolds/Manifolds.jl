@@ -129,6 +129,16 @@ Return true if [`Stiefel`](@ref) `M` is one-dimensional, since only then, the ma
 """
 is_flat(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}) = manifold_dimension(M) == 1
 
+@doc raw"""
+    log(M::MetricManifold{ℝ,<:Stiefel{ℝ},CanonicalMetric}, p, q; maxiter=10000, tolerance=1.0e-9)
+
+Compute an approximation of the logarithmic map ``\log_p q`` on the [`Stiefel`](@ref)`(n, k)`
+manifold with respect to the [`CanonicalMetric`](@ref).
+It returns `inverse_retract(M, p, q, ApproximateLogarithmicMap(maxiter, tolerance))`.
+The keyword arguments are the maximal number of iterations and the tolerance of the stopping
+criterion of the [`ApproximateLogarithmicMap`](@ref), whose iteration is described at
+[`inverse_retract(::MetricManifold{ℝ,<:Stiefel{ℝ},CanonicalMetric}, ::Any, ::Any, ::ApproximateLogarithmicMap)`](@ref).
+"""
 function log(
         M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, p, q;
         maxiter::Int = 10000, tolerance = 1.0e-9,

@@ -14,6 +14,9 @@ include("../header.jl")
             [2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0],
         ),
     )
+    
+    @test repr(M6.metric) ==
+        "GeneralizedBuresWassersteinMetric([2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0])"
 
     @test !is_flat(M4)
     @test injectivity_radius(M1) == Inf

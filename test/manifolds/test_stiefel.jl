@@ -230,6 +230,8 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
                 end
                 g = StiefelSubmersionMetric(1)
                 @test g isa StiefelSubmersionMetric{Int}
+                @test repr(g) == "StiefelSubmersionMetric(1)"
+                @test repr(StiefelSubmersionMetric(0.5f0)) == "StiefelSubmersionMetric(0.5f0)"
                 @testset for Ml in [Stiefel(3, 3), Stiefel(4, 3), Stiefel(4, 2)]
                     Mcan = MetricManifold(Ml, CanonicalMetric())
                     Meu = MetricManifold(Ml, EuclideanMetric())
