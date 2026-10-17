@@ -396,6 +396,9 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         @test isapprox(0.0, sectional_curvature(M, p, X, Y))
         @test isapprox(-1 / p[1][1]^2, sectional_curvature(M, p, X, Z))
         @test isapprox(0.0, sectional_curvature(M, p, X, V))
+        # the estimate needs unit vectors, and X and Z have norm p[1][1]
+        K = Manifolds.estimated_sectional_curvature(M, p, X ./ p[1][1], Z ./ p[1][1])
+        @test isapprox(K, -1 / p[1][1]^2; atol = 0.15)
 
         M = MetricManifold(Segre(3, 3), WarpedMetric(1.23))
         @test isapprox((1.23^(-2) - 1) / p[1][1]^2, sectional_curvature(M, p, X, Y))

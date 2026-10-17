@@ -40,7 +40,7 @@ Note that the condition `absz == 0` would be incorrectly handled by ForwardDiff.
 """
 @inline function nzsign(z, absz = abs(z))
     psignz = z / absz
-    return ifelse(absz < eps(typeof(absz))^2, one(psignz), psignz)
+    return ifelse(absz < eps(float(typeof(absz)))^2, one(psignz), psignz)
 end
 
 allocate(p, s::Size{S}) where {S} = similar(p, S...)
@@ -293,7 +293,7 @@ Entry `(i, j)` corresponds to sectional curvature of the surface spanned by vect
 function sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis)
     V = get_vectors(M, p, get_basis(M, p, B))
     N = length(V)
-    result = zeros(N, N)
+    result = zeros(real(float(number_eltype(p))), N, N)
     for (i, e_i) in enumerate(V)
         for (j, e_j) in enumerate(V)
             if i < j
@@ -333,8 +333,8 @@ function estimated_sectional_curvature(
     Yo = Y .- real(inner(M, p, Xn, Y)) .* Xn
     Yn = Yo ./ norm(M, p, Yo)
     circumference = 0.0
-    p_i = similar(p)
-    p_ip1 = similar(p)
+    p_i = allocate(p)
+    p_ip1 = allocate(p)
     for i in 1:N
         θ_i = 2π * (i - 1) / N
         θ_ip1 = 2π * (i) / N
@@ -362,7 +362,7 @@ function estimated_sectional_curvature_matrix(
     )
     V = get_vectors(M, p, get_basis(M, p, B))
     N = length(V)
-    result = zeros(N, N)
+    result = zeros(real(float(number_eltype(p))), N, N)
     for (i, e_i) in enumerate(V)
         for (j, e_j) in enumerate(V)
             if i < j

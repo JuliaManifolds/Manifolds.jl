@@ -213,6 +213,10 @@ using ManifoldDiff
                 @test is_vector(M, p, v)
                 @test get_coordinates(M, p, v, B) ≈ vcoord
             end
+            @test get_coordinates(M, [0, 0, 1], [1, 0, 0], B) ==
+                get_coordinates(M, [0.0, 0.0, 1.0], [1.0, 0.0, 0.0], B)
+            @test get_vector(M, [0, 0, 1], [1, 0], B) ==
+                get_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0], B)
         end
 
         @testset "log edge case" begin
@@ -338,6 +342,12 @@ using ManifoldDiff
                 [0.0 1.0; 1.0 0.0],
                 atol = 0.15,
             )
+            B = DefaultOrthonormalBasis()
+            for T in (Float32, BigFloat)
+                p_T = T[1, 0, 0]
+                @test eltype(Manifolds.sectional_curvature_matrix(M, p_T, B)) === T
+                @test eltype(Manifolds.estimated_sectional_curvature_matrix(M, p_T, B)) === T
+            end
         end
 
         @testset "Local Metric" begin

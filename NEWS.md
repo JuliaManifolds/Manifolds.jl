@@ -242,6 +242,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_coordinates!` on the `Tucker` manifold writes the coordinates of the default orthonormal basis into the given vector.
 * `inner` under the `BuresWassersteinMetric` on `SymmetricPositiveDefinite` returns a number of the element type of its arguments.
 * `Circle(ℂ)^n` returns the power manifold of the complex circle.
+* `get_coordinates` and `get_vector` on the sphere and the projective space, and `parallel_transport_to` on the projective space, accept points with integer entries.
+* `sectional_curvature_matrix` and `estimated_sectional_curvature_matrix` return their result in the floating-point number type of the point.
+* `estimated_sectional_curvature` works on manifolds whose points are arrays of arrays, such as `Segre`.
 
 ## [0.11.32] 2026-09-30
 
