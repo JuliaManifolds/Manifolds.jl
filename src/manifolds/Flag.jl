@@ -21,10 +21,6 @@ end
 ManifoldsBase.@manifold_vector_forwards OrthogonalTangentVector value
 ManifoldsBase.@manifold_element_forwards OrthogonalPoint value
 
-function ManifoldsBase.allocate_result(::Flag, ::typeof(rand), p::OrthogonalPoint)
-    return OrthogonalTangentVector(similar(p.value))
-end
-
 Base.eltype(p::OrthogonalPoint) = eltype(p.value)
 Base.eltype(X::OrthogonalTangentVector) = eltype(X.value)
 
@@ -105,6 +101,10 @@ function Flag(N::Int, ns::Vararg{Int, I}; parameter::Symbol = :type) where {I}
     end
     size = wrap_type_parameter(parameter, (N,))
     return Flag{typeof(size), I + 1}(ZeroTuple(tuple(ns..., N)), size)
+end
+
+function ManifoldsBase.allocate_result(::Flag, ::typeof(rand), p::OrthogonalPoint)
+    return OrthogonalTangentVector(similar(p.value))
 end
 
 """
