@@ -3,6 +3,8 @@ include("../header.jl")
 using HybridArrays, Random
 using StaticArrays: Dynamic
 using RecursiveArrayTools
+using FillArrays: Fill
+using NamedDims: NamedDimsArray
 
 Random.seed!(42)
 
@@ -195,6 +197,16 @@ end
         X = [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         @test_throws ComponentManifoldError is_point(M, X; error = :error)
         @test_throws ComponentManifoldError is_vector(M, p, X; error = :error)
+    end
+
+    @testset "getindex and view of arrays from package extensions" begin
+        p1 = randn(3, 5)
+        v1 = p1[1, :]
+        Me5 = PowerManifold(Euclidean(), 5)
+        @test NamedDimsArray{(:a, :b)}(p1)[Ms1, 1] == p1[:, 1]
+        @test NamedDimsArray{(:a,)}(v1)[Me5, 2] == v1[2]
+        @test view(NamedDimsArray{(:a, :b)}(p1), Ms1, 1) == p1[:, 1]
+        @test view(Fill(1.0, 3, 5), Ms1, 1) == ones(3)
     end
 
     @testset "power vector transport" begin

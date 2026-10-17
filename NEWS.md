@@ -248,6 +248,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `exp` and `exp_fused` on the sphere can be differentiated with forward-mode automatic differentiation at the zero tangent vector, so that `ManifoldDiff.gradient` and `ManifoldDiff.hessian` with a forward-mode `TangentDiffBackend` work on the sphere.
 * `get_coordinates!` and `get_vector!` on the real `Grassmann` manifold and the differentiated retraction vector transports on `Stiefel` accept points and tangent vectors given as `StiefelPoint` and `StiefelTangentVector`.
 * Indexing and `view` of points on a `PowerManifold` work when the point is a `VectorOfArray` from RecursiveArrayTools.jl.
+* Indexing and `view` of points on a `PowerManifold` work for arrays from NamedDims.jl and FillArrays.jl.
 
 ## [0.11.32] 2026-09-30
 
