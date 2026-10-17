@@ -21,6 +21,10 @@ end
 ManifoldsBase.@manifold_vector_forwards OrthogonalTangentVector value
 ManifoldsBase.@manifold_element_forwards OrthogonalPoint value
 
+function ManifoldsBase.allocate_result(::Flag, ::typeof(rand), p::OrthogonalPoint)
+    return OrthogonalTangentVector(similar(p.value))
+end
+
 Base.eltype(p::OrthogonalPoint) = eltype(p.value)
 Base.eltype(X::OrthogonalTangentVector) = eltype(X.value)
 

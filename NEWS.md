@@ -252,6 +252,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_point` on a `ProductManifold` accepts parameters given as an `ArrayPartition`.
 * `get_coordinates`, `get_coordinates!`, `get_vector` and `get_vector!` in the cotangent `DefaultOrthonormalBasis` work on a `MetricManifold`.
 * `get_coordinates`, `get_coordinates!`, `get_vector` and `get_vector!` in the cotangent `DefaultOrthonormalBasis` work on every `FiberBundle`, including tangent bundles with `ArrayPartition` points.
+* `rand` with `vector_at` on a `Flag` manifold with an orthogonal representation returns an `OrthogonalTangentVector` instead of `OrthogonalPoint`.
 
 ## [0.11.32] 2026-09-30
 

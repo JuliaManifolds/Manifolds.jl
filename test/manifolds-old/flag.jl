@@ -278,6 +278,7 @@ using Random
         @test is_point(M, q_tmp)
         rand!(Random.default_rng(), M, Y_tmp; vector_at = p1_ortho)
         @test is_vector(M, p1_ortho, Y_tmp)
+        @test rand(M; vector_at = p1_ortho) isa OrthogonalTangentVector
 
         q_tmp = similar(p1_ortho.value)
         embed!(M, q_tmp, p1_ortho)
