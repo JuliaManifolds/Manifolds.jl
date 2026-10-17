@@ -34,7 +34,7 @@ end
         mbs = Test.detect_ambiguities(ManifoldsBase)
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
-        MBS_LIMIT = 32
+        MBS_LIMIT = 30
         if v"1.10" <= VERSION < v"1.11"
             MBS_LIMIT += 4
         end
@@ -49,7 +49,7 @@ end
         ms = Test.detect_ambiguities(Manifolds)
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
-        MS_LIMIT = 19
+        MS_LIMIT = 17
         if v"1.10" <= VERSION < v"1.11"
             MS_LIMIT += 7
         end

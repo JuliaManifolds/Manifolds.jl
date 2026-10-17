@@ -1,3 +1,7 @@
+function ManifoldsBase.allocate_coordinates(::ProductManifold, p::ArrayPartition, T, n::Int)
+    return allocate(submanifold_component(p, 1), T, n)
+end
+
 function adjoint_Jacobi_field(
         M::ProductManifold,
         p::ArrayPartition,

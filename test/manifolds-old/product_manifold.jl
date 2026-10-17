@@ -130,6 +130,7 @@ using RecursiveArrayTools: ArrayPartition
             Float64,
             number_of_coordinates(Mse, DefaultOrthogonalBasis()),
         ) isa Vector{Float64}
+        @test ManifoldsBase.allocate_coordinates(Mse, 1, Float64, 2) == [0.0, 0.0]
 
         Y = allocate(pts[1])
         inverse_retract!(Mse, Y, pts[1], pts[2], default_inverse_retraction_method(Mse))

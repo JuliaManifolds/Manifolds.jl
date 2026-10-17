@@ -1,7 +1,3 @@
-function allocate_coordinates(::ProductManifold, p, T, n::Int)
-    return allocate(submanifold_component(p, 1), T, n)
-end
-
 function adjoint_Jacobi_field!(M::ProductManifold, Y, p, q, t, X, β::Tβ) where {Tβ}
     map(
         adjoint_Jacobi_field!,
