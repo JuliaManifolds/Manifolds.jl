@@ -1,5 +1,5 @@
 @doc raw"""
-    Euclidean{T,𝔽} <: AbstractManifold{𝔽}
+    Euclidean{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 Euclidean vector space.
 
@@ -9,7 +9,7 @@ Euclidean vector space.
 
 Generate the ``n``-dimensional vector space ``ℝ^n``.
 
-    Euclidean(n₁,n₂,...,nᵢ; field=ℝ, parameter::Symbol = :field)
+    Euclidean(n₁,n₂,...,nᵢ; field=ℝ, parameter::Symbol = :type)
     𝔽^(n₁,n₂,...,nᵢ) = Euclidean(n₁,n₂,...,nᵢ; field=𝔽)
 
 Generate the vector space of ``k = n_1 ⋅ n_2 ⋅ … ⋅ n_i`` values, i.e. the
@@ -37,22 +37,28 @@ function Euclidean(
         field::AbstractNumbers = ℝ,
         parameter::Symbol = :type,
     ) where {I}
+    any(n .< 0) && throw(
+        DomainError(
+            n,
+            "Every array size of a Euclidean space must be nonnegative, but they were $(n).",
+        ),
+    )
     size = wrap_type_parameter(parameter, n)
     return Euclidean{field, typeof(size)}(size)
 end
 
-function adjoint_Jacobi_field(::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
-    return X
+function adjoint_Jacobi_field(M::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 function adjoint_Jacobi_field(
-        ::Euclidean{𝔽, TypeParameter{Tuple{}}},
+        M::Euclidean{𝔽, TypeParameter{Tuple{}}},
         p,
         q,
         t,
         X,
         β::Tβ,
     ) where {𝔽, Tβ}
-    return X
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
@@ -141,7 +147,7 @@ Base.@propagate_inbounds function distance(M::Euclidean, p, q)
     @boundscheck if axes(p) != axes(q)
         throw(DimensionMismatch("At last one of $p and $q does not belong to $M"))
     end
-    s = zero(eltype(p))
+    s = zero(real(eltype(p)))
     @inbounds begin # COV_EXCL_LINE
         @simd for I in eachindex(p, q) # COV_EXCL_LINE
             p_i = p[I]
@@ -231,6 +237,24 @@ function get_coordinates_orthonormal(::Euclidean{ℝ}, p, X, ::RealNumbers)
 end
 function get_coordinates_orthonormal(::Euclidean{ℂ}, p, X, ::ComplexNumbers)
     return vec(X)
+end
+function get_coordinates_orthonormal(
+        ::Union{Euclidean{ℝ, TypeParameter{Tuple{}}}, Euclidean{ℝ, Tuple{}}},
+        p, X::Number, ::RealNumbers,
+    )
+    return X
+end
+function get_coordinates_orthonormal(
+        ::Union{Euclidean{ℂ, TypeParameter{Tuple{}}}, Euclidean{ℂ, Tuple{}}},
+        p, X::Number, ::RealNumbers,
+    )
+    return @SVector [real(X), imag(X)]
+end
+function get_coordinates_orthonormal(
+        ::Union{Euclidean{ℂ, TypeParameter{Tuple{}}}, Euclidean{ℂ, Tuple{}}},
+        p, X::Number, ::ComplexNumbers,
+    )
+    return X
 end
 
 function get_coordinates_orthonormal!(::Euclidean{ℝ}, c, p, X, ::RealNumbers)
@@ -432,6 +456,8 @@ inner(::Euclidean, ::Any...)
     return dot(X, Y)
 end
 
+@tfvector_inner_via_get_vector (MetricManifold{𝔽, <:AbstractManifold, EuclideanMetric} where {𝔽})
+
 function inverse_local_metric(
         M::MetricManifold{𝔽, <:AbstractManifold, EuclideanMetric},
         p,
@@ -454,11 +480,11 @@ Return true. [`Euclidean`](@ref) is a flat manifold.
 """
 is_flat(M::Euclidean) = true
 
-function jacobi_field(::Euclidean{𝔽, TypeParameter{Tuple{}}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
-    return X
+function jacobi_field(M::Euclidean{𝔽, TypeParameter{Tuple{}}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
-function jacobi_field(::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
-    return X
+function jacobi_field(M::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 function local_metric(
@@ -650,6 +676,8 @@ function LinearAlgebra.norm(
     return norm(X, r)
 end
 
+@tfvector_norm_via_get_vector MetricManifold{ℝ, <:AbstractManifold, EuclideanMetric}
+
 function project!(
         ::EmbeddedManifold{𝔽, Euclidean{𝔽, nL}, Euclidean{𝔽2, mL}},
         q,
@@ -661,16 +689,16 @@ function project!(
     lm = length(m)
     (length(n) < length(m)) && throw(
         DomainError(
-            "Invalid embedding, since Euclidean dimension ($(n)) is longer than embedding dimension $(m).",
+            "Invalid projection, since the embedding dimension ($(n)) is shorter than the Euclidean dimension $(m).",
         ),
     )
-    any(n .< m[1:ln]) && throw(
+    any(n[1:lm] .< m) && throw(
         DomainError(
-            "Invalid embedding, since Euclidean dimension ($(n)) has entry larger than embedding dimensions ($(m)).",
+            "Invalid projection, since the embedding dimension ($(n)) has an entry smaller than the Euclidean dimensions ($(m)).",
         ),
     )
     #  fill q with the „top left edge“ of p.
-    q .= p[map(i -> Base.OneTo(i), m)..., ntuple(_ -> 1, lm - ln)...]
+    q .= p[map(i -> Base.OneTo(i), m)..., ntuple(_ -> 1, ln - lm)...]
     return q
 end
 
@@ -721,11 +749,28 @@ project!(::Euclidean, Y, p, X) = copyto!(Y, X)
 
 function Random.rand!(
         rng::AbstractRNG, ::Euclidean, pX;
-        σ = one(eltype(pX)),
+        σ::Real = one(real(eltype(pX))),
         vector_at = nothing,
     )
     pX .= randn(rng, eltype(pX), size(pX)) .* σ
     return pX
+end
+
+# number-valued Euclidean: return numbers instead of 0-dimensional arrays
+const _ScalarEuclidean{𝔽} = Union{Euclidean{𝔽, TypeParameter{Tuple{}}}, Euclidean{𝔽, Tuple{}}}
+
+_rand_scalar_type(::_ScalarEuclidean{ℝ}, ::Nothing) = Float64
+_rand_scalar_type(::_ScalarEuclidean{ℂ}, ::Nothing) = ComplexF64
+_rand_scalar_type(::_ScalarEuclidean, vector_at::Number) = float(typeof(vector_at))
+
+function Random.rand(M::_ScalarEuclidean; kwargs...)
+    return rand(Random.default_rng(), M; kwargs...)
+end
+function Random.rand(
+        rng::AbstractRNG, M::_ScalarEuclidean;
+        vector_at = nothing, σ::Real = one(real(_rand_scalar_type(M, vector_at))),
+    )
+    return randn(rng, _rand_scalar_type(M, vector_at)) * σ
 end
 
 """
@@ -736,14 +781,14 @@ Return the array dimensions required to represent an element on the
 """
 representation_size(M::Euclidean) = get_parameter(M.size)
 
-function retract(M::Euclidean{𝔽, TypeParameter{Tuple{}}}, p::Number, q::Number) where {𝔽}
-    return retract(M, p, q, ExponentialRetraction())
+function retract(M::Euclidean{𝔽, TypeParameter{Tuple{}}}, p::Number, X::Number) where {𝔽}
+    return retract(M, p, X, ExponentialRetraction())
 end
 function retract(
         M::Euclidean{𝔽, TypeParameter{Tuple{}}},
-        p::Number, q::Number, ::ExponentialRetraction,
+        p::Number, X::Number, ::ExponentialRetraction,
     ) where {𝔽}
-    return exp(M, p, q)
+    return exp(M, p, X)
 end
 
 @doc raw"""

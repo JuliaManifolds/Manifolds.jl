@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Symmetric Positive Semidefinite Matrices of Fixed Rank" begin
+    @test_throws DomainError SymmetricPositiveSemidefiniteFixedRank(2, 3)
     @testset "Real Matrices" begin
         M = SymmetricPositiveSemidefiniteFixedRank(4, 2)
         @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℝ)"
@@ -10,7 +11,11 @@ include("../header.jl")
         @test is_point(M, q)
         Y = [1.0 0.0; 0.0 0.0; 0.0 0.0; 0.0 0.0]
         @test_throws DomainError is_point(M, Y; error = :error)
+        @test is_point(M, [1.0 0.0; 0.0 1.0e-5; 0.0 0.0; 0.0 0.0])
         @test is_vector(M, q, Y)
+        @test metric(M) == EuclideanMetric()
+        Yamb = [1.0 2.0; 3.0 4.0; 5.0 6.0; 7.0 8.0]
+        @test riemannian_gradient(M, q, Yamb) == project(M, q, Yamb)
         q2 = [2.0 1.0; 0.0 0.0; 0.0 1.0; 0.0 0.0]
         q3 = [0.0 0.0; 1.0 0.0; 0.0 1.0; 0.0 0.0]
         X = log(M, q, q2)
@@ -39,6 +44,14 @@ include("../header.jl")
         M = SymmetricPositiveSemidefiniteFixedRank(4, 2, ℂ)
         @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℂ)"
         @test manifold_dimension(M) == 12
+        qc = ComplexF64[1.0 0.0; 0.0 1.0im; 0.0 0.0; 0.0 0.0]
+        qc2 = ComplexF64[2.0 1.0; 0.0 1.0; 0.0 1.0im; 0.0 0.0]
+        @test is_point(M, qc)
+        Xc = log(M, qc, qc2)
+        @test is_vector(M, qc, Xc)
+        qe = exp(M, qc, Xc)
+        @test qe * qe' ≈ qc2 * qc2'
+        @test isapprox(M, qe, qc2; atol = 5 * eps(Float64))
     end
     @testset "field parameter" begin
         M = SymmetricPositiveSemidefiniteFixedRank(4, 2; parameter = :field)

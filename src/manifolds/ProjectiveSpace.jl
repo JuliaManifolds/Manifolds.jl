@@ -31,7 +31,7 @@ space.
 
 # Constructor
 
-    ProjectiveSpace(n[, field=ℝ])
+    ProjectiveSpace(n[, field=ℝ]; parameter::Symbol=:type)
 
 Generate the projective space ``𝔽ℙ^{n} ⊂ 𝔽^{n+1}``, defaulting to the real projective space
 ``ℝℙ^n``, where `field` can also be used to generate the complex- and right-quaternionic
@@ -41,6 +41,9 @@ struct ProjectiveSpace{𝔽, T} <: AbstractProjectiveSpace{𝔽}
     size::T
 end
 function ProjectiveSpace(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The dimension n of a projective space must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return ProjectiveSpace{field, typeof(size)}(size)
 end
@@ -75,7 +78,7 @@ where ``⟨⋅,⋅⟩_{\mathrm{F}}`` denotes the (Frobenius) inner product in th
 
 # Constructor
 
-    ArrayProjectiveSpace(n₁,n₂,...,nᵢ; field=ℝ)
+    ArrayProjectiveSpace(n₁,n₂,...,nᵢ; field=ℝ, parameter::Symbol=:type)
 
 Generate the projective space ``𝔽ℙ^{n_1, n_2, …, n_i}``, defaulting to the real projective
 space, where `field` can also be used to generate the complex- and right-quaternionic
@@ -89,6 +92,12 @@ function ArrayProjectiveSpace(
         field::AbstractNumbers = ℝ,
         parameter::Symbol = :type,
     ) where {I}
+    any(n .< 1) && throw(
+        DomainError(
+            n,
+            "Every array size of an array projective space must be positive, but they were $(n).",
+        ),
+    )
     size = wrap_type_parameter(parameter, n)
     return ArrayProjectiveSpace{field, typeof(size)}(size)
 end
@@ -120,16 +129,19 @@ end
 Check whether `X` is a tangent vector in the tangent space of `p` on the
 [`AbstractProjectiveSpace`](@ref) `M`.
 This requires that `X` has the same size as elements of the tangent space of the embedding
-and that the Frobenius inner product ``⟨p, X⟩_{\mathrm{F}} = 0``.
+and that the Frobenius inner product ``⟨p, X⟩_{\mathrm{F}} = 0`` up to `max(atol, rtol * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
         M::AbstractProjectiveSpace,
         p,
         X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
-    if !isapprox(dot(p, X), 0; atol = atol, kwargs...)
+    r = abs(dot(p, X))
+    if !(r <= atol || r <= rtol * norm(X))
         return DomainError(
             dot(p, X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not" *
@@ -145,12 +157,17 @@ end
 function decorated_manifold(M::ProjectiveSpace{𝔽, <:Tuple}) where {𝔽}
     return Euclidean(representation_size(M)...; field = 𝔽, parameter = :field)
 end
+function decorated_manifold(M::ArrayProjectiveSpace{𝔽, <:Tuple}) where {𝔽}
+    return Euclidean(representation_size(M)...; field = 𝔽, parameter = :field)
+end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
 
 function ManifoldsBase.get_embedding_type(::AbstractProjectiveSpace)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
+
+metric(::AbstractProjectiveSpace) = EuclideanMetric()
 
 embed(::AbstractProjectiveSpace, p) = p
 embed(::AbstractProjectiveSpace, p, X) = X
@@ -300,7 +317,8 @@ injectivity_radius(::AbstractProjectiveSpace, p, ::AbstractRetractionMethod) = �
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::QRInverseRetraction)
 
 Compute the equivalent inverse retraction [`ProjectionInverseRetraction`](@extref `ManifoldsBase.ProjectionInverseRetraction`),
-[`PolarInverseRetraction`](@extref `ManifoldsBase.QRInverseRetraction`) on the
+[`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`) and
+[`QRInverseRetraction`](@extref `ManifoldsBase.QRInverseRetraction`) on the
 [`AbstractProjectiveSpace`](@ref) manifold `M```=𝔽ℙ^n``, i.e.
 ````math
 \operatorname{retr}_p^{-1} q = q \frac{1}{⟨p, q⟩_{\mathrm{F}}} - p,
@@ -489,7 +507,8 @@ end
     retract(M::AbstractProjectiveSpace, p, X, method::PolarRetraction)
     retract(M::AbstractProjectiveSpace, p, X, method::QRRetraction)
 
-Compute the equivalent retraction [`ProjectionRetraction`](@extref `ManifoldsBase.PolarRetraction`),
+Compute the equivalent retraction [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`),
+[`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
 and [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) on the [`AbstractProjectiveSpace`](@ref) manifold `M```=𝔽ℙ^n``,
 i.e.
 ````math
@@ -619,4 +638,19 @@ function parallel_transport_direction!(M::AbstractProjectiveSpace, Y, p, X, d)
     β = ifelse(iszero(θ), zero(cosθ), (1 - cosθ) / θ^2) * dX
     Y .= X .- p .* α .- d .* β
     return Y
+end
+
+function Random.rand!(
+        rng::AbstractRNG, M::AbstractProjectiveSpace, pX;
+        vector_at = nothing, σ::Real = one(real(float(eltype(pX))))
+    )
+    if vector_at === nothing
+        randn!(rng, pX)
+        project!(M, pX, pX)
+    else
+        randn!(rng, pX)
+        pX .*= σ
+        project!(M, pX, vector_at, pX) #project to TpM (keeps Gaussianness)
+    end
+    return pX
 end

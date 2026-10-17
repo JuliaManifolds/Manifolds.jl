@@ -1,12 +1,15 @@
 include("../header.jl")
 
 @testset "Torus" begin
+    @test_throws DomainError Torus(-1)
+    @test_throws DomainError Base.:^(Circle(), -1)
     M = Torus(2)
     @testset "Torus Basics" begin
         @test Circle()^3 === Torus(3)
         @test Circle()^(3,) === PowerManifold(Circle(), 3)
         @test ^(Circle(), 2) === Torus(2)
         @test typeof(^(Circle(), 2)) == Torus{2}
+        @test Circle(ℂ)^3 === PowerManifold(Circle(ℂ), 3)
         @test repr(M) == "Torus(2)"
         @test representation_size(M) == (2,)
         @test manifold_dimension(M) == 2
@@ -31,7 +34,7 @@ include("../header.jl")
             test_vector_spaces = true,
             test_project_tangent = false,
             test_musical_isomorphisms = true,
-            test_default_vector_transport = false,
+            test_default_vector_transport = true,
             basis_types_to_from = basis_types,
             is_tangent_atol_multiplier = 1,
             test_inplace = true,

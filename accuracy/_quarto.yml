@@ -1,8 +1,11 @@
 project:
-  title: "Manifolds.jl Tutorials"
+  title: "Manifolds.jl Accuracy Investigations"
   render:
     - "*.qmd"
 
+crossref:
+  fig-prefix: Figure
+  tbl-prefix: Table
 fig-format: png
 
 execute:
@@ -13,6 +16,7 @@ execute:
 
 format:
   commonmark:
-    variant: -raw_html+tex_math_dollars
+    variant: -raw_html+tex_math_dollars+pipe_tables+footnotes
     wrap: preserve
-jupyter: julia-1.9
+
+engines: ['julia']

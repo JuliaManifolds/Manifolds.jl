@@ -1,5 +1,5 @@
 @doc raw"""
-    Rotations{T} <: AbstractManifold{ℝ}
+    const Rotations{T} = GeneralUnitaryMatrices{ℝ, T, DeterminantOneMatrixType}
 
 The manifold of rotation matrices of size ``n×n``, i.e.
 real-valued orthogonal matrices with determinant ``+1``.
@@ -13,12 +13,15 @@ Generate the manifold of ``n×n`` rotation matrices.
 const Rotations{T} = GeneralUnitaryMatrices{ℝ, T, DeterminantOneMatrixType}
 
 function Rotations(n::Int; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of rotations must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return Rotations{typeof(size)}(size)
 end
 
 # TODO: Remove when removing GroupManifolds, since it is now
-# defined 8and also used then in) LIeGroups.jl
+# defined (and also used then in) LieGroups.jl
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
@@ -148,63 +151,6 @@ function _injectivity_radius(M::Rotations, ::PolarRetraction)
 end
 
 @doc raw"""
-    inverse_retract(M, p, q, ::PolarInverseRetraction)
-
-Compute a vector from the tangent space ``T_p\mathrm{SO}(n)``
-of the point `p` on the [`Rotations`](@ref) manifold `M`
-with which the point `q` can be reached by the
-[`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) from the point `p` after time 1.
-
-The formula reads
-````math
-\operatorname{retr}^{-1}_p(q)
-= -\frac{1}{2}(p^{\mathrm{T}}qs - (p^{\mathrm{T}}qs)^{\mathrm{T}})
-````
-
-where ``s`` is the solution to the Sylvester equation
-
-``p^{\mathrm{T}}qs + s(p^{\mathrm{T}}q)^{\mathrm{T}} + 2I_n = 0.``
-"""
-inverse_retract(::Rotations, ::Any, ::Any, ::PolarInverseRetraction)
-
-@doc raw"""
-    inverse_retract(M::Rotations, p, q, ::QRInverseRetraction)
-
-Compute a vector from the tangent space ``T_p\mathrm{SO}(n)`` of the point `p` on the
-[`Rotations`](@ref) manifold `M` with which the point `q` can be reached by the
-[`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) from the point `q` after time 1.
-"""
-inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
-
-function inverse_retract_polar!(M::Rotations, X, p, q)
-    n = get_parameter(M.size)[1]
-    A = transpose(p) * q
-    Amat = A isa StaticMatrix ? A : convert(Matrix, A)
-    H = copyto!(allocate(Amat), -2I)
-    try
-        B = lyap(A, H)
-        mul!(X, A, B)
-    catch e
-        e2 = OutOfInjectivityRadiusError()
-        isa(e, LinearAlgebra.LAPACKException) ? throw(e2) : rethrow()
-    end
-    return project!(SkewSymmetricMatrices(n), X, p, X)
-end
-function inverse_retract_qr!(M::Rotations, X, p, q)
-    n = get_parameter(M.size)[1]
-    A = transpose(p) * q
-    R = zero(X)
-    for i in 1:n
-        b = zeros(i)
-        b[end] = 1
-        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
-        R[1:i, i] = A[1:i, 1:i] \ b
-    end
-    mul!(X, A, R)
-    return project!(SkewSymmetricMatrices(n), X, p, X)
-end
-
-@doc raw"""
     jacobian_exp_argument(M::Rotations{TypeParameter{Tuple{2}}}, p, X)
 
 Compute Jacobian of the exponential map with respect to the argument `X` in orthonormal
@@ -222,8 +168,10 @@ coordinates on the [`Rotations`](@ref)`(3)` manifold. The formula reads
 ````math
 𝕀 + \frac{\cos(θ) - 1}{θ^2} X + \frac{θ - \sin(θ)}{θ^3} X^2,
 ````
-where ``θ`` is the norm of `X`.
-It is adapted from [Chirikjian:2012](@cite), Eq. (10.86), to `Manifolds.jl` conventions.
+where ``θ = \frac{\lVert X \rVert}{\sqrt{2}}``, and the Jacobian is ``𝕀`` for ``X = 0``.
+This is the "right Jacobian" ``J_r`` of [Chirikjian:2012](@cite), Section 10.6.6, p. 40,
+since ``θ`` is the norm ``\lVert \mathbf{x} \rVert`` of the coefficients
+``\mathbf{x} = (X_{32}, X_{13}, X_{21})`` of ``X`` in Eq. (10.83) there.
 """
 function jacobian_exp_argument(M::Rotations{TypeParameter{Tuple{3}}}, p, X)
     J = allocate_jacobian(M, M, jacobian_exp_argument, p)
@@ -256,10 +204,12 @@ function jacobian_exp_argument!(
 end
 
 @doc raw"""
-    normal_rotation_distribution(M::Rotations, p, σ::Real)
+    normal_rotation_distribution(M::Rotations, p, σ::Real=1.0)
 
 Return a random point on the manifold [`Rotations`](@ref) `M`
-by generating a (Gaussian) random orthogonal matrix with determinant ``+1``. Let
+by generating a (Gaussian) random orthogonal matrix with determinant ``+1``.
+The function draws samples from the uniform distribution on the manifold,
+regardless of the value of `σ`. Let
 
 ```math
 QR = A
@@ -346,82 +296,6 @@ function Random.rand!(
     return pX
 end
 
-"""
-    _exp_half(::Rotations, d)
-
-Calculate `exp(d / 2)`.
-"""
-_exp_half(::Rotations, d) = exp(d / 2)
-"""
-    _exp_half(::Rotations{TypeParameter{Tuple{3}}}, d)
-
-Calculate `exp(d / 2)` for the manifold of `Rotations(3)` based on the Rodrigues' rotation
-formula.
-"""
-function _exp_half(::Rotations{TypeParameter{Tuple{3}}}, d)
-    θ = norm(d) / (2 * sqrt(2))
-    if θ ≈ 0
-        a = 1 - θ^2 / 6
-        b = θ / 2
-    else
-        a = sin(θ) / θ
-        b = (1 - cos(θ)) / θ^2
-    end
-    a /= 2
-    b /= 4
-
-    return I + a .* d .+ b .* (d^2)
-end
-
-@doc raw"""
-    parallel_transport_direction(M::Rotations, p, X, d)
-
-Compute parallel transport of vector `X` tangent at `p` on the [`Rotations`](@ref)
-manifold in the direction `d`. The formula, provided in [Rentmeesters:2011](@cite), reads:
-
-```math
-\mathcal P_{q\gets p}X = q^\mathrm{T}p \operatorname{Exp}(d/2) X \operatorname{Exp}(d/2)
-```
-where ``q=\exp_p d``.
-
-The formula simplifies to identity for 2-D rotations.
-"""
-parallel_transport_direction(::Rotations, p, X, d)
-function parallel_transport_direction(M::Rotations, p, X, d)
-    expdhalf = _exp_half(M, d)
-    q = exp(M, p, d)
-    return transpose(q) * p * expdhalf * X * expdhalf
-end
-parallel_transport_direction(::Rotations{TypeParameter{Tuple{2}}}, p, X, d) = X
-
-function parallel_transport_direction!(M::Rotations, Y, p, X, d)
-    expdhalf = _exp_half(M, d)
-    q = exp(M, p, d)
-    return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
-end
-function parallel_transport_direction!(::Rotations{TypeParameter{Tuple{2}}}, Y, p, X, d)
-    return copyto!(Y, X)
-end
-
-function parallel_transport_to!(M::Rotations, Y, p, X, q)
-    d = log(M, p, q)
-    expdhalf = _exp_half(M, d)
-    return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
-end
-function parallel_transport_to!(::Rotations{TypeParameter{Tuple{2}}}, Y, p, X, q)
-    return copyto!(Y, X)
-end
-function parallel_transport_to!(M::Rotations{TypeParameter{Tuple{3}}}, Y, p, X, q)
-    d = log(M, p, q)
-    expdhalf = _exp_half(M, d)
-    return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
-end
-function parallel_transport_to(M::Rotations, p, X, q)
-    d = log(M, p, q)
-    expdhalf = _exp_half(M, d)
-    return transpose(q) * p * expdhalf * X * expdhalf
-end
-parallel_transport_to(::Rotations{TypeParameter{Tuple{2}}}, p, X, q) = X
 
 function Base.show(io::IO, ::Rotations{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "Rotations($(n))")
@@ -482,28 +356,29 @@ end
 @doc raw"""
     Weingarten(M::Rotations, p, X, V)
 
-Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Stiefel`](@ref) `M` with respect to the
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Rotations`](@ref) `M` with respect to the
 tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
 
 The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 
 ```math
-\mathcal W_p(X,V) = -\frac{1}{2}p\bigl(V^{\mathrm{T}}X - X^\mathrm{T}V\bigr)
+\mathcal W_p(X,V) = -\frac{1}{2}\bigl(XS + SX\bigr),
+\qquad S = p^{\mathrm{T}}V
 ```
 """
 Weingarten(::Rotations, p, X, V)
 
 function Weingarten!(::Rotations, Y, p, X, V)
-    Y .= V' * X
-    Y .= -p * 1 / 2 * (Y - Y')
+    S = p' * V
+    Y .= -(X * S .+ S * X) ./ 2
     return Y
 end
 
 @doc raw"""
     zero_vector(M::Rotations, p)
 
-Return the zero tangent vector from the tangent space art `p` on the [`Rotations`](@ref)
-as an element of the Lie group, i.e. the zero matrix.
+Return the zero tangent vector from the tangent space at `p` on the [`Rotations`](@ref)
+as an element of the Lie algebra, i.e. the zero matrix.
 """
 zero_vector(::Rotations, p) = zero(p)
 

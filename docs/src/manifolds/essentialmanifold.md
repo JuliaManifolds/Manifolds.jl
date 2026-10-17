@@ -1,4 +1,5 @@
 # Essential Manifold
+
 The essential manifold is modeled as an [`AbstractPowerManifold`](@extref `ManifoldsBase.AbstractPowerManifold`)  of the ``3×3`` [`Rotations`](@ref) and uses [`NestedPowerRepresentation`](@extref `ManifoldsBase.NestedPowerRepresentation`).
 
 ```@autodocs
@@ -8,6 +9,7 @@ Order = [:type]
 ```
 
 ## Functions
+
 ```@autodocs
 Modules = [Manifolds]
 Private = false
@@ -16,6 +18,7 @@ Order = [:function]
 ```
 
 ## Internal Functions
+
 ```@autodocs
 Modules = [Manifolds]
 Public = false
@@ -24,3 +27,8 @@ Order = [:function]
 ```
 
 ## Literature
+
+```@bibliography
+Pages = ["essentialmanifold.md"]
+Canonical=false
+```

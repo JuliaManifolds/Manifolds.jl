@@ -1,6 +1,8 @@
 include("../header.jl")
 
 @testset "Oblique manifold" begin
+    @test_throws DomainError Oblique(0, 2)
+    @test_throws DomainError Oblique(2, -1)
     M = Oblique(3, 2)
     @testset "Oblique manifold Basics" begin
         @test Sphere(2)^3 === Oblique(3, 3)
@@ -8,10 +10,12 @@ include("../header.jl")
         @test ^(Sphere(2), 2) === Oblique(3, 2)
         @test typeof(^(Sphere(2), 2)) ==
             Oblique{ℝ, TypeParameter{Tuple{3, 2}}, TypeParameter{Tuple{2}}}
-        @test repr(M) == "Oblique(3, 2; field=ℝ)"
+        @test repr(M) == "Oblique(3, 2, ℝ)"
         @test representation_size(M) == (3, 2)
         @test manifold_dimension(M) == 4
+        @test power_dimensions(M) == power_dimensions(PowerManifold(Sphere(2), 2)) == (2,)
         @test !is_flat(M)
+        @test get_embedding(M) == Euclidean(3, 2; parameter = :field)
         p = [2, 0, 0]
         p2 = [p p]
         @test !is_point(M, p)
@@ -53,6 +57,7 @@ include("../header.jl")
             Oblique{ℝ, Tuple{Int, Int}, Tuple{Int}}
 
         M = Oblique(3, 2; parameter = :field)
-        @test repr(M) == "Oblique(3, 2; field=ℝ, parameter=:field)"
+        @test repr(M) == "Oblique(3, 2, ℝ; parameter=:field)"
+        @test get_embedding(M) == Euclidean(3, 2; parameter = :field)
     end
 end

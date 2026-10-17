@@ -1,13 +1,13 @@
 @doc raw"""
-    MultinomialMatrices{n,m} <: AbstractPowerManifold{ℝ}
+    MultinomialMatrices{T,TPM} <: AbstractPowerManifold{ℝ}
 
 The multinomial manifold consists of `m` column vectors, where each column is of length
-`n` and unit norm, i.e.
+`n` and is a discrete probability distribution, i.e.
 
 ````math
 \mathcal{MN}(n,m) \coloneqq \bigl\{
     p ∈ ℝ^{n×m}\ \big|\ p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m
-    \text{ and } p^{\mathrm{T}}\mathbb{1}_m = \mathbb{1}_n\bigr\},
+    \text{ and } p^{\mathrm{T}}\mathbb{1}_n = \mathbb{1}_m\bigr\},
 ````
 
 where ``\mathbb{1}_k`` is the vector of length ``k`` containing ones.
@@ -36,6 +36,12 @@ struct MultinomialMatrices{T, TPM <: ProbabilitySimplex} <:
 end
 
 function MultinomialMatrices(n::Int, m::Int; parameter::Symbol = :type)
+    (n < 1 || m < 0) && throw(
+        DomainError(
+            (n, m),
+            "The number of rows n of multinomial matrices must be positive and the number of columns m nonnegative, but they were $(n) and $(m).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, m))
     MPS = ProbabilitySimplex(n - 1; parameter = parameter)
     return MultinomialMatrices{typeof(size), typeof(MPS)}(size, MPS)
@@ -52,7 +58,7 @@ end
 @doc raw"""
     check_point(M::MultinomialMatrices, p)
 
-Check whether `p` is a valid point on the [`MultinomialMatrices`](@ref)`(m,n)` `M`.
+Check whether `p` is a valid point on the [`MultinomialMatrices`](@ref)`(n,m)` `M`.
 This means `p` is a matrix of `m` discrete probability distributions as columns from ``ℝ^n``,
 i.e. each column is a point from [`ProbabilitySimplex`](@ref)`(n-1)`.
 """
@@ -79,6 +85,16 @@ function get_iterator(M::MultinomialMatrices)
     return Base.OneTo(m)
 end
 
+@doc raw"""
+    get_embedding(M::MultinomialMatrices)
+
+Return the embedding of the [`MultinomialMatrices`](@ref) manifold `M`, the [`Euclidean`](@ref) ``ℝ^{n×m}``.
+"""
+function get_embedding(M::MultinomialMatrices)
+    n, m = get_parameter(M.size)
+    return Euclidean(n, m; parameter = :field)
+end
+
 function manifold_dimension(M::MultinomialMatrices)
     n, m = get_parameter(M.size)
     return (n - 1) * m
@@ -86,6 +102,26 @@ end
 function power_dimensions(M::MultinomialMatrices)
     n, m = get_parameter(M.size)
     return (m,)
+end
+
+@doc raw"""
+    project(M::MultinomialMatrices, p, Y)
+
+Project `Y` from the embedding onto the tangent space at `p` on the
+[`MultinomialMatrices`](@ref) `M`, orthogonally with respect to the Fisher–Rao metric.
+Column by column the formula reads
+
+```math
+  \operatorname{proj}_{T_p\mathcal M}(Y)_j = Y_j - ⟨\mathbb{1}_n, Y_j⟩p_j, \qquad j = 1,…,m,
+```
+
+where ``p_j`` and ``Y_j`` are the ``j``th columns of ``p`` and ``Y``, respectively.
+"""
+project(::MultinomialMatrices, ::Any, ::Any)
+
+function project!(::MultinomialMatrices, X, p, Y)
+    X .= Y .- p .* sum(Y; dims = 1)
+    return X
 end
 
 @doc raw"""

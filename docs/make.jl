@@ -51,7 +51,7 @@ for (name, file) in tutorials_menu.second
         global all_tutorials_exist = false
         if !run_quarto
             @warn "Tutorial $name does not exist at $fn."
-            if (!isfile(fn)) && (endswith(file, "getstarted.md"))
+            if (!isfile(fn)) && (basename(file) in ("getstarted.md", "hand-gestures.md"))
                 @warn "Generating empty file, since this tutorial is linked to from the documentation."
                 touch(fn)
             end
@@ -100,6 +100,8 @@ using DocumenterCitations, DocumenterCodeBlocks, DocumenterInterLinks, Documente
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
 using NLsolve
+# required for loading the distributions on manifolds
+using Distributions, RecursiveArrayTools
 # required for loading the manifold tests functions
 using Test, FiniteDifferences
 ENV["GKSwstype"] = "100"
@@ -146,12 +148,14 @@ end
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style = :alpha)
 links = InterLinks(
     "Julia" => "https://docs.julialang.org/en/v1/",
+    "ManifoldMakie" => "https://juliamanifolds.github.io/ManifoldMakie.jl/stable/",
     "ManifoldsBase" => ("https://juliamanifolds.github.io/ManifoldsBase.jl/stable/"),
 )
 
 modules = [
     Manifolds,
     Base.get_extension(Manifolds, :ManifoldsBoundaryValueDiffEqExt),
+    Base.get_extension(Manifolds, :ManifoldsDistributionsExt),
     Base.get_extension(Manifolds, :ManifoldsNLsolveExt),
     Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqDiffEqCallbacksExt),
     Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqExt),

@@ -28,6 +28,9 @@ struct SkewHermitianMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SkewHermitianMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of skew-Hermitian matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return SkewHermitianMatrices{field, typeof(size)}(size)
 end
@@ -40,7 +43,7 @@ This is equivalent to [`SkewHermitianMatrices(n, ℝ)`](@ref).
 
 # Constructor
 
-    SkewSymmetricMatrices(n::Int)
+    SkewSymmetricMatrices(n::Int; parameter::Symbol=:type)
 """
 const SkewSymmetricMatrices{T} = SkewHermitianMatrices{ℝ, T}
 
@@ -111,7 +114,7 @@ function get_coordinates_orthonormal!(
         Y,
         p,
         X,
-        ::ComplexNumbers,
+        ::RealNumbers,
     )
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
@@ -165,7 +168,7 @@ function get_vector_orthonormal!(
         Y,
         p,
         X,
-        ::ComplexNumbers,
+        ::RealNumbers,
     )
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
@@ -199,7 +202,7 @@ Return the dimension of the [`SkewHermitianMatrices`](@ref) matrix `M` over the 
 system `𝔽`, i.e.
 
 ````math
-\dim \mathrm{SkewHerm}(n,ℝ) = \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,
+\dim \mathrm{SkewHerm}(n,𝔽) = \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,
 ````
 
 where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of ``𝔽``. The first term corresponds to
@@ -209,10 +212,6 @@ corresponds to the constraint that the real part of the diagonal be zero.
 function manifold_dimension(M::SkewHermitianMatrices{𝔽}) where {𝔽}
     N = get_parameter(M.size)[1]
     return div(N * (N + 1), 2) * real_dimension(𝔽) - N
-end
-
-function number_of_coordinates(M::SkewHermitianMatrices{ℂ}, ::AbstractBasis{ℂ})
-    return manifold_dimension(M)
 end
 
 @doc raw"""
@@ -263,6 +262,27 @@ end
 function representation_size(M::SkewHermitianMatrices)
     N = get_parameter(M.size)[1]
     return (N, N)
+end
+
+@doc raw"""
+    riemann_tensor(M::SkewHermitianMatrices, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`SkewHermitianMatrices`](@ref) `M`.
+Its value is always the zero tangent vector.
+"""
+riemann_tensor(M::SkewHermitianMatrices, p, X, Y, Z)
+
+function riemann_tensor!(::SkewHermitianMatrices, Xresult, p, X, Y, Z)
+    return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(M::SkewHermitianMatrices, p, X, Y)
+
+Sectional curvature of [`SkewHermitianMatrices`](@ref) `M` is 0.
+"""
+function sectional_curvature(::SkewHermitianMatrices, p, X, Y)
+    return 0.0
 end
 
 function Base.show(io::IO, ::SkewHermitianMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}

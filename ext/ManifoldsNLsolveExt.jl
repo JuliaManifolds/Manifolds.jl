@@ -6,7 +6,7 @@ using ManifoldsBase
 using NLsolve: NLsolve
 
 @doc raw"""
-    inverse_retract(M, p, q method::NLSolveInverseRetraction; kwargs...)
+    inverse_retract(M, p, q, method::NLSolveInverseRetraction; kwargs...)
 
 Approximate the inverse of the retraction specified by `method.retraction` from `p` with
 respect to `q` on the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M` using NLsolve. This inverse retraction is
@@ -21,20 +21,22 @@ inverse_retract(::AbstractManifold, p, q, ::NLSolveInverseRetraction; kwargs...)
 function ManifoldsBase.inverse_retract_nlsolve!(
         M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction; kwargs...
     )
-    X0 = m.X0 === nothing ? zero_vector(M, p) : m.X0
     res = _inverse_retract_nlsolve(M, p, q, m; kwargs...)
-    return copyto!(X, res.zero)
+    if m.project_tangent
+        project!(M, X, p, res.zero)
+    else
+        return copyto!(X, res.zero)
+    end
 end
 
 function _inverse_retract_nlsolve(
         M::AbstractManifold, p, q, m::NLSolveInverseRetraction; kwargs...
     )
     X0 = m.X0 === nothing ? zero_vector(M, p) : m.X0
+    qp = m.project_point ? project(M, q) : q
     function f!(F, X)
-        m.project_tangent && project!(M, X, p, X)
         retract!(M, F, p, project(M, p, X), m.retraction; kwargs...)
-        m.project_point && project!(M, q, q)
-        F .-= q
+        F .-= qp
         return F
     end
     res = NLsolve.nlsolve(f!, X0; m.nlsolve_kwargs...)

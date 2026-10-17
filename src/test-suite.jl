@@ -5,7 +5,7 @@ The module `Manifolds.Test` contains functions to test functions from `Manifolds
 Most functionality is provided only when `Test.jl` is loaded as well, i.e. populated
 with methods by the extension.
 
-The test functions provided are mean to verify that the defined functions
+The test functions provided are meant to verify that the defined functions
 on a specific manifold behave as expected, for example that
 an allocating and in-place version of a function give the same result,
 or that for example the exponential map computes a point on the manifold,
@@ -46,7 +46,7 @@ end
 Expect(e::Expect) = e
 
 """
-    NoExcpectation <: AbstractExpectation
+    NoExpectation <: AbstractExpectation
 
 A struct to indicate that no expectation is provided for a test.
 """
@@ -58,7 +58,7 @@ isexpected(e::Expect) = true
 isexpected(value) = true
 isexpected(e::NoExpectation) = false
 """
-    expected(e::Union{Expect, NoExpectation})
+    isexpected(e::Union{Expect, NoExpectation})
 
 Check if an expectation is provided.
 """
@@ -68,7 +68,7 @@ expect(e::Expect{T}) where {T} = e.value
 expect(value) = value
 expect(e::NoExpectation) = error("No expectation provided.")
 """
-    expect(e::Union{Expect{T}, NoExpectation}) where T
+    expect(e::Union{Expect, NoExpectation})
 
 Get the expected value if provided, error otherwise.
 """

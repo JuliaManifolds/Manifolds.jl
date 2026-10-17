@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "MultinomialMatrices manifold" begin
+    @test_throws DomainError MultinomialMatrices(0, 2)
     M = MultinomialMatrices(3, 2)
     @testset "MultinomialMatrices manifold Basics" begin
         @test ProbabilitySimplex(2)^3 === MultinomialMatrices(3, 3)
@@ -14,6 +15,7 @@ include("../header.jl")
         @test representation_size(M) == (3, 2)
         @test manifold_dimension(M) == 4
         @test !is_flat(M)
+        @test get_embedding(M) == Euclidean(3, 2; parameter = :field)
         @test Manifolds.get_iterator(ProbabilitySimplex(3)^4) === Base.OneTo(4)
         p = [2, 0, 0]
         p2 = [p p]
@@ -54,13 +56,28 @@ include("../header.jl")
 
         M = MultinomialMatrices(3, 2; parameter = :field)
         @test repr(M) == "MultinomialMatrices(3, 2; parameter=:field)"
+        @test get_embedding(M) == Euclidean(3, 2; parameter = :field)
     end
     @testset "Riemannian Gradient" begin
         M = MultinomialMatrices(3, 2)
         p = [0.5 0.4 0.1; 0.5 0.4 0.1]'
         Y = [1.0 -1.0; 0.0 0.0; -1.0 1.0]
-        G = project(M, p, p .* Y)
         X = riemannian_gradient(M, p, Y)
-        @test isapprox(M, p, G, X)
+        @test isapprox(M, p, X, [0.3 -0.3; -0.16 0.16; -0.14 0.14])
+        # the Riemannian gradient satisfies ⟨X, V⟩_p = ⟨Y, V⟩ for tangent vectors V
+        V = [1.0 0.0; -1.0 1.0; 0.0 -1.0]
+        @test inner(M, p, X, V) ≈ dot(Y, V)
+    end
+    @testset "Tangent space projection" begin
+        M = MultinomialMatrices(3, 2)
+        p = [0.5 0.4 0.1; 0.5 0.4 0.1]'
+        Y = [1.0 -1.0; 0.5 0.0; -1.0 2.0]
+        X = project(M, p, Y)
+        @test is_vector(M, p, X)
+        @test isapprox(M, p, X, [0.75 -1.5; 0.3 -0.4; -1.05 1.9])
+        # the projection is orthogonal with respect to the Fisher–Rao metric
+        V = [1.0 0.0; -1.0 1.0; 0.0 -1.0]
+        @test isapprox(inner(M, p, Y - X, V), 0.0; atol = 1.0e-15)
+        @test project(M, p, X) ≈ X
     end
 end

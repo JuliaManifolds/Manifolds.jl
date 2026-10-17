@@ -72,7 +72,7 @@ end
     inner(::SymplecticGrassmann, p, X, Y)
 
 Compute the Riemannian inner product ``g^{\mathrm{SpGr}}_p(X,Y)``
-on the [`SymplecticGrassmann`](@ref) manifold `\mathrm{SpGr}``.
+on the [`SymplecticGrassmann`](@ref) manifold ``\mathrm{SpGr}``.
 
 For the case where ``p`` is represented by a point on the [`SymplecticStiefel`](@ref) manifold
 acting as a representant of its equivalence class ``[p] \in \mathrm{SpGr}``
@@ -116,6 +116,26 @@ inverse_retract(::SymplecticGrassmann, p, q, ::CayleyInverseRetraction)
 function inverse_retract_cayley!(M::SymplecticGrassmann, X, p, q)
     n, k = get_parameter(M.size)
     return inverse_retract_cayley!(SymplecticStiefel(2 * n, 2 * k), X, p, q)
+end
+
+@doc raw"""
+    rand(::SymplecticGrassmann; σ::Real=1.0)
+
+Generate a random point on the [`SymplecticGrassmann`](@ref) manifold, represented on the
+[`SymplecticStiefel`](@ref) manifold, as a random point on the [`SymplecticStiefel`](@ref)
+manifold generated with the same `σ`.
+Random tangent vectors, that is `rand` with `vector_at`, are not yet available.
+"""
+rand(::SymplecticGrassmann; σ::Real = 1.0, kwargs...)
+
+function Random.rand!(
+        rng::AbstractRNG, M::SymplecticGrassmann, pX; vector_at = nothing, σ::Real = 1.0
+    )
+    vector_at === nothing || throw(
+        ArgumentError("Random tangent vectors on the symplectic Grassmann manifold are not yet available."),
+    )
+    n, k = get_parameter(M.size)
+    return rand!(rng, SymplecticStiefel(2 * n, 2 * k), pX; σ = σ)
 end
 
 @doc raw"""
@@ -163,11 +183,10 @@ where ``J_{2n}`` denotes the [`SymplecticElement`](@ref), and
 riemannian_gradient(M::SymplecticGrassmann, p, Y; kwargs...)
 
 function riemannian_gradient!(M::SymplecticGrassmann, X, p, Y; kwargs...)
-    n, k = get_parameter(M.size)
     J = SymplecticElement(p, X)
     # Since J' = -J We can write (J'YJ) = -J * (YJ)
     JTYJ = (-J * (Y * J))
     H = (I - p * symplectic_inverse(p)) * JTYJ
-    X .= (-J * (H * J)) * (p' * p) .- JTYJ * (H' * p)
+    X .= (-J * (H * J)) * (p' * p) .- (-J * (p * J)) * (H' * p)
     return X
 end

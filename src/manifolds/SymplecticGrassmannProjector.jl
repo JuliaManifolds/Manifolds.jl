@@ -51,7 +51,6 @@ function check_vector(
         X::ProjectorTangentVector;
         kwargs...,
     )
-    n, k = get_parameter(M.size)
     if !isapprox((Hamiltonian(X.value)^+).value, X.value; kwargs...)
         return DomainError(
             norm((Hamiltonian(X.value)^+).value - X.value),

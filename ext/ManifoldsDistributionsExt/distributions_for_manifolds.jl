@@ -184,7 +184,7 @@ function NormalRotationDistribution(
     return NormalRotationDistribution{TResult, typeof(M), typeof(d)}(M, d)
 end
 
-function normal_rotation_distribution(M::Rotations, p, σ::Real)
+function normal_rotation_distribution(M::Rotations, p, σ::Real = 1.0)
     n = get_parameter(M.size)[1]
     d = Distributions.MvNormal(zeros(n * n), σ * I)
     return NormalRotationDistribution(M, d, p)

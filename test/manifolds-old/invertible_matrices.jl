@@ -1,6 +1,7 @@
 using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
 
 @testset "Invertible matrices" begin
+    @test_throws DomainError InvertibleMatrices(-1)
     M = InvertibleMatrices(3, ℝ)
     A = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
     B = [0.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
@@ -24,6 +25,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
         @test embed(M, A, A) === A
         @test manifold_dimension(M) == 9
         @test Weingarten(M, A, A, A) == zero(A)
+        @test Weingarten!(M, similar(A), A, A, A) == zero(A)
 
         @test is_point(M, rand(M))
         @test is_point(M, rand(Random.MersenneTwister(), M))
@@ -38,6 +40,9 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
         D = similar(A)
         get_vector!(M, D, A, vec(A), DefaultOrthonormalBasis())
         @test isapprox(D, A)
+
+        @test get_coordinates(M, A, A, DefaultOrthogonalBasis()) == vec(A)
+        @test get_vector(M, A, vec(A), DefaultOrthogonalBasis()) == A
     end
     @testset "Complex invertible matrices" begin
         @test repr(Mc) == "InvertibleMatrices(3, ℂ)"
@@ -48,5 +53,11 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
         @test_throws DomainError is_point(Mc, Bc; error = :error)
         @test_throws DomainError is_point(Mc, B; error = :error)
         @test is_point(Mc, A; error = :error)
+        cr = [real(vec(Ac)); imag(vec(Ac))]
+        @test get_coordinates(Mc, Ac, Ac, DefaultOrthonormalBasis()) == cr
+        @test get_vector(Mc, Ac, cr, DefaultOrthonormalBasis()) == Ac
+        for Bs in [DefaultOrthogonalBasis(), DefaultOrthonormalBasis(ℂ)]
+            @test get_vector(Mc, Ac, get_coordinates(Mc, Ac, Ac, Bs), Bs) == Ac
+        end
     end
 end

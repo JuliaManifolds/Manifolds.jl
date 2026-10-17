@@ -9,12 +9,12 @@ fiber_bundle_transport(M::AbstractManifold, ::FiberType) =
     default_vector_transport_method(M)
 
 """
-    VectorBundle{𝔽,TVS,TM,VTV} = FiberBundle{𝔽,TVS,TM,TVT} where {TVS<:VectorSpaceType}
+    VectorBundle{𝔽,TVS,TM,TVT} = FiberBundle{𝔽,TVS,TM,TVT} where {TVS<:VectorSpaceType}
 
 Alias for [`FiberBundle`](@ref) when fiber type is a `TVS` of type
 [`VectorSpaceType`](@extref `ManifoldsBase.VectorSpaceType`).
 
-`VectorSpaceFiberType` is used to encode vector spaces as fiber types.
+`VectorSpaceType` is used to encode vector spaces as fiber types.
 """
 const VectorBundle{𝔽, TVS, TM, TVT} = FiberBundle{
     𝔽,
@@ -117,7 +117,7 @@ end
     inner(B::VectorBundle, p, X, Y)
 
 Inner product of tangent vectors `X` and `Y` at point `p` from the
-vector bundle `B` over manifold `B.fiber` (denoted ``\mathcal M``).
+vector bundle `B` over manifold `B.manifold` (denoted ``\mathcal M``).
 
 Notation:
   * The point ``p = (x_p, V_p)`` where ``x_p ∈ \mathcal M`` and ``V_p`` belongs to the
@@ -184,7 +184,7 @@ is_flat(M::VectorBundle) = is_flat(M.manifold)
     project(B::VectorBundle, p)
 
 Project the point `p` from the ambient space of the vector bundle `B`
-over manifold `B.fiber` (denoted ``\mathcal M``) to the vector bundle.
+over manifold `B.manifold` (denoted ``\mathcal M``) to the vector bundle.
 
 Notation:
   * The point ``p = (x_p, V_p)`` where ``x_p`` belongs to the ambient space of ``\mathcal M``
@@ -237,12 +237,12 @@ function project!(B::VectorBundle, Y, p, X)
 end
 
 """
-    retract(M::VectorBundle, p, q, ::FiberBundleProductRetraction)
+    retract(M::VectorBundle, p, X, ::FiberBundleProductRetraction)
 
 Compute the allocating variant of the [`FiberBundleProductRetraction`](@ref),
 which by default allocates and calls `retract_product!`.
 """
-retract(::VectorBundle, p, q, ::FiberBundleProductRetraction)
+retract(::VectorBundle, p, X, ::FiberBundleProductRetraction)
 
 function ManifoldsBase._retract!(M::VectorBundle, q, p, X, ::FiberBundleProductRetraction)
     return retract_product!(M, q, p, X)
@@ -291,7 +291,7 @@ function retract_product_fused!(B::VectorBundle, q, p, X, t::Number)
         xp,
         Xp + VXF,
         VXM,
-        B.vector_transport.method_horizontal,
+        B.vector_transport.method_vertical,
     )
     copyto!(B.manifold, xq, xqt)
     return q
@@ -363,9 +363,9 @@ function _vector_transport_direction!(
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     dx, dVx = submanifold_components(M.manifold, d)
-    return vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal),
-        vector_transport_direction!(M.manifold, VYF, px, VXF, dx, m.method_vertical),
-        return Y
+    vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal)
+    bundle_transport_tangent_direction!(M, VYF, px, pVx, VXF, dx, m.method_vertical)
+    return Y
 end
 
 @doc raw"""

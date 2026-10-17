@@ -68,8 +68,8 @@ end
 """
     affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
 
-Calculate the affine connection on manifold `M` at point with parameters `a` in chart `i` of an
-an [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Zc` and `Yc` in induced basis and save the result
+Calculate the affine connection on manifold `M` at point with parameters `a` in chart `i` of
+an [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Xc` and `Yc` in induced basis and save the result
 in `Zc`.
 """
 affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
@@ -124,7 +124,7 @@ end
     christoffel_symbols_first(M::AbstractManifold, A::AbstractAtlas, i, a; backend::AbstractADType = AutoForwardDiff())
 
 Compute the Christoffel symbols of the first kind ``Γ_{i j k}`` in chart `i` of
-[`AbstractAtlas`] `A` at coordinates `a`.
+[`AbstractAtlas`](@ref) `A` at coordinates `a`.
 
 The symbols are obtained by lowering the first index of the second-kind Christoffel
 symbols:
@@ -416,9 +416,9 @@ end
     log_local_metric_density(M::AbstractManifold, A::AbstractAtlas, i, a)
 
 Return the natural logarithm of the metric density ``ρ`` of `M` at the point with
-parametrization `a` in chart `i` of [`AbstractAtlas`](@ref) `A`, which is given by
+parametrization `a` in chart `i` of [`AbstractAtlas`](@ref) `A`. The density is given by
 ````math
-ρ = \log \sqrt{\lvert \det g_{ij} \rvert}
+ρ = \sqrt{\lvert \det g_{ij} \rvert}
 ````
 for the metric tensor expressed in the same chart.
 
@@ -688,7 +688,7 @@ and the inverse local metric `g^{ij}` (returned by `inverse_local_metric`) to fo
 contraction:
 
 ````math
-    K = g^{u v} g^{i p} g^{j q} g^{k r} R^u_{i j k} R^v_{p q r}
+    K = g_{u v} g^{i p} g^{j q} g^{k r} R^u_{i j k} R^v_{p q r}
 ````
 
 # Arguments
@@ -710,6 +710,7 @@ function kretschmann_scalar(
     n = length(a)
     T = eltype(a)
     R = riemann_tensor(M, A, i, a; backend = backend)   # R[u, ii, j, k] == R^u_{ijk}
+    g = local_metric(M, A, i, a)                        # g_{ij}
     ginv = inverse_local_metric(M, A, i, a)             # g^{ij}
 
     K = zero(T)
@@ -719,7 +720,7 @@ function kretschmann_scalar(
             continue
         end
         for v in 1:n, p in 1:n, q in 1:n, r in 1:n
-            K += ginv[u, v] * ginv[ii, p] * ginv[j, q] * ginv[k, r] * Ruijk * R[v, p, q, r]
+            K += g[u, v] * ginv[ii, p] * ginv[j, q] * ginv[k, r] * Ruijk * R[v, p, q, r]
         end
     end
     return K
@@ -738,7 +739,7 @@ local_metric(::AbstractManifold, ::Any, ::InducedBasis)
 
 Compute the allocating version of Levi-Civita affine connection on the manifold `M` at a point with parameters `a`
 in chart `i` of an  [`AbstractAtlas`](@ref) `A`. The connection is calculated for vectors
-with coefficients `Xc` and `Yc` in the induced basis, and the result is stored in `Zc`.
+with coefficients `Xc` and `Yc` in the induced basis.
 """
 function levi_civita_affine_connection(M::AbstractManifold, A, i, a, Xc, Yc; backend::AbstractADType = AutoForwardDiff())
     Zc = similar(Xc, Base.promote_type(eltype(Xc), eltype(Yc), eltype(a)))
@@ -924,7 +925,7 @@ The scalar curvature is the trace of the Ricci tensor with respect to the invers
 local metric:
 ````math
     R = g^{ij} R_{ij}
-````math
+````
 
 # Arguments
 
@@ -946,6 +947,29 @@ function ricci_curvature(
     Ric = ricci_tensor(M, A, i, a; backend = backend)
     S = sum(Ginv .* Ric)
     return S
+end
+
+"""
+    gaussian_curvature(M::AbstractManifold, A::AbstractAtlas, i, a; backend=AutoForwardDiff())
+
+Compute the Gaussian curvature of the manifold `M` at the point given by coordinates `a`
+in chart `i` of atlas `A`. This is equal to half of the scalar Ricci curvature,
+see [`ricci_curvature`](@ref).
+
+# Arguments
+
+- `M::AbstractManifold` : manifold
+- `A::AbstractAtlas`   : atlas providing charts / induced basis
+- `i`                  : chart index in `A`
+- `a`                  : coordinates of the point in chart `i` (length `n`)
+- `backend::AbstractADType` : automatic-differentiation backend (default `AutoForwardDiff()`)
+
+# Returns
+
+- scalar (same element type as `a`) equal to the Gaussian curvature at the point
+"""
+function gaussian_curvature(M::AbstractManifold, A::AbstractAtlas, i, a; kwargs...)
+    return ricci_curvature(M, A, i, a; kwargs...) / 2
 end
 
 """
@@ -1004,7 +1028,7 @@ function ricci_tensor!(
     return Ric
 end
 
-"""
+@doc raw"""
     riemann_tensor(M::AbstractManifold, A::AbstractAtlas, i, a;
         backend::AbstractADType = AutoForwardDiff()
 
@@ -1013,10 +1037,12 @@ chart `i` of atlas `A`.
 
 Returns a 4-dimensional array `R` of size (n,n,n,n) with components `R[u,i,j,k] = R^u_{ijk}`,
 where the first index is the contravariant (upper) index and the remaining three are covariant
-(lower) indices. The components satisfy, for coordinate vector fields e_i:
+(lower) indices. With ``Γ^u_{ij}`` denoting the Christoffel symbols of the second kind,
+the components are
 
 ````math
-    R^u_{ijk} e_u = (∇_{e_i} ∇_{e_j} - ∇_{e_j} ∇_{e_i} - ∇_{[e_i,e_j]}) e_k
+    R^u_{ijk} = ∂_i Γ^u_{jk} - ∂_j Γ^u_{ik}
+        + \sum_m \left(Γ^m_{jk} Γ^u_{im} - Γ^m_{ik} Γ^u_{jm}\right).
 ````
 
 # Arguments
@@ -1100,7 +1126,7 @@ Compute the action of the Riemann curvature tensor `R` on tangent vectors with c
 `Xc`, `Yc` and `Zc` at the point specified by parameters `a` in chart `i` of atlas `A` on
 manifold `M`.
 
-This function returns the vector `W (in induced-chart coordinates) given by
+This function returns the vector `W` (in induced-chart coordinates) given by
 ``(R(X, Y) Z)``, i.e. the result of applying the curvature operator to `Zc`.
 
 # Arguments

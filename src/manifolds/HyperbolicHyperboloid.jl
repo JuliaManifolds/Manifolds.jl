@@ -32,6 +32,12 @@ function check_point(M::Hyperbolic, p; kwargs...)
             "The point $(p) does not lie on $(M) since its Minkowski inner product is not -1.",
         )
     end
+    if p[end] < 0
+        return DomainError(
+            p[end],
+            "The point $(p) does not lie on $(M) since its last entry is negative.",
+        )
+    end
     return nothing
 end
 
@@ -40,9 +46,11 @@ function check_vector(
         p,
         X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
-    if !isapprox(minkowski_metric(p, X), 0; atol = atol, kwargs...)
+    r = abs(minkowski_metric(p, X))
+    if !(r <= atol || r <= rtol * norm(p) * norm(X))
         return DomainError(
             abs(minkowski_metric(p, X)),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal (with respect to the Minkowski inner product) in the embedding.",
@@ -242,10 +250,20 @@ d_{\mathcal H^n}(p,q) = \operatorname{acosh}( - ⟨p, q⟩_{\mathrm{M}}),
 
 where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding, the [`Lorentz`](@ref)ian manifold,
 see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the paper [BergmannPerschSteidl:2016:1](@cite).
+For numerical stability, with ``m = \sqrt{\max\{0, ⟨q-p,q-p⟩_{\mathrm{M}}\}}``, this is evaluated as
+
+````math
+d_{\mathcal H^n}(p,q) = 2\operatorname{asinh}\Bigl(\frac{m}{2}\Bigr)
+````
+
+if ``-⟨p, q⟩_{\mathrm{M}} ≤ \frac{3}{2}``, i.e. ``m ≤ 1``. Otherwise the `acosh` formula
+above is used, which is more accurate there.
 """
 function distance(::Hyperbolic, p, q)
+    c = -minkowski_metric(p, q)
+    c > 3 // 2 && return acosh(c)
     w = q - p
-    m = sqrt(max(0.0, minkowski_metric(w, w)))
+    m = sqrt(max(zero(number_eltype(w)), minkowski_metric(w, w)))
     return 2 * asinh(m / 2)
 end
 
@@ -338,7 +356,8 @@ function get_coordinates_diagonalizing!(
         X,
         B::DiagonalizingOrthonormalBasis,
     )
-    c = get_coordinates!(M, c, p, X, get_basis_diagonalizing(M, p, B))
+    Bp = DiagonalizingOrthonormalBasis(convert(AbstractVector, B.frame_direction))
+    c = get_coordinates!(M, c, p, X, get_basis_diagonalizing(M, p, Bp))
     return c
 end
 
@@ -355,8 +374,9 @@ function get_vector_orthonormal!(M::Hyperbolic, X, p, c, r::RealNumbers)
     X = get_vector!(M, X, p, c, get_basis(M, p, DefaultOrthonormalBasis(r)))
     return X
 end
-function get_vector!(M::Hyperbolic, X, p, c, B::DiagonalizingOrthonormalBasis)
-    X = get_vector!(M, X, p, c, get_basis(M, p, B))
+function get_vector_diagonalizing!(M::Hyperbolic, X, p, c, B::DiagonalizingOrthonormalBasis)
+    Bp = DiagonalizingOrthonormalBasis(convert(AbstractVector, B.frame_direction))
+    X = get_vector!(M, X, p, c, get_basis(M, p, Bp))
     return X
 end
 
@@ -383,11 +403,11 @@ _hyperbolize(::Hyperbolic, p, Y) = vcat(Y, dot(p[1:(end - 1)], Y) / p[end])
     inner(M::Hyperbolic, p, X, Y)
     inner(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTangentVector, Y::HyperboloidTangentVector)
 
-Cmpute the inner product in the Hyperboloid model, i.e. the [`minkowski_metric`](@ref) in
+Compute the inner product in the Hyperboloid model, i.e. the [`minkowski_metric`](@ref) in
 the embedding. The formula reads
 
 ````math
-g_p(X,Y) = ⟨X,Y⟩_{\mathrm{M}} = -X_{n}Y_{n} + \displaystyle\sum_{k=1}^{n-1} X_kY_k.
+g_p(X,Y) = ⟨X,Y⟩_{\mathrm{M}} = -X_{n+1}Y_{n+1} + \displaystyle\sum_{k=1}^{n} X_kY_k.
 ````
 This employs the metric of the embedding, see [`Lorentz`](@ref) space,
 see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the paper [BergmannPerschSteidl:2016:1](@cite).
@@ -421,7 +441,8 @@ end
 
 project!(::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
 function project!(::Hyperbolic, Y::HyperboloidTangentVector, p::HyperboloidPoint, X)
-    return (Y.value .= X .+ minkowski_metric(p.value, X) .* p.value)
+    Y.value .= X .+ minkowski_metric(p.value, X) .* p.value
+    return Y
 end
 
 @doc raw"""
@@ -434,19 +455,19 @@ Behavior
   (an element of H^n in the hyperboloid embedding in ℝ^{n+1}). The routine samples a direction
   ``a ∼ N(0,I_n)`` in the first n coordinates and an offset `f = 1 + σ * |N(0,1)|` for the last
   coordinate, then sets the first ``n`` components to the vector
-  ``a  \sqrt(f^2 - 1) / a)`` and the last component to `f`. The resulting vector satisfies
+  ``a\frac{\sqrt{f^2-1}}{\lVert a\rVert}`` and the last component to `f`. The resulting vector satisfies
   the Minkowski normalization ⟨p,p⟩_M = -1.
 
-- If `vector_at` is provided (a point on the manifold) then `pX` is filled with a random
-  tangent vector at `vector_at`. A Euclidean Gaussian `Y = σ * randn(...)` is sampled and then
-  projected to the tangent space at `vector_at`.
+- If `vector_at` is provided (a point ``p`` on the manifold) then `pX` is filled with a random
+  tangent vector at ``p``: ``σZ`` with ``Z ∼ N(0,I_{n+1})`` is projected to the tangent space at
+  ``(0,…,0,1)`` and parallel transported to ``p``, see Proposition 5.5 (f) in [Lee:2019](@cite).
 
 Arguments
 - `rng::AbstractRNG` : random number generator used for sampling.
 - `M::Hyperbolic` : the hyperbolic manifold instance (hyperboloid model).
 - `pX` : the array or wrapped type to be written in-place (point or tangent vector).
 - `vector_at` : optional point on `M` indicating the base point for tangent vector sampling.
-- `σ::Real` : scale parameter (default = 1) controlling dispersion of the samples.
+- `σ::Real` : scale parameter (default `1 / sqrt(manifold_dimension(M))`) controlling dispersion of the samples.
 
 Returns
 - `pX` (mutated) : the sampled point or tangent vector.
@@ -466,7 +487,10 @@ function Random.rand!(
         pX[end] = f
     else
         Y = σ * randn(rng, eltype(vector_at), size(vector_at))
-        project!(M, pX, vector_at, Y)
+        o = zero(Y)
+        o[end] = 1
+        project!(M, Y, o, Y)
+        parallel_transport_to!(M, pX, o, Y, vector_at)
     end
     return pX
 end
@@ -476,6 +500,32 @@ function parallel_transport_to!(::Hyperbolic, Y, p, X, q)
         Y,
         X .+ minkowski_metric(q, X) ./ (1 - minkowski_metric(p, q)) .* (p + q),
     )
+end
+
+@doc raw"""
+    riemannian_gradient(M::Hyperbolic, p, G)
+    riemannian_gradient!(M::Hyperbolic, X, p, G)
+
+Compute the Riemannian gradient ``\operatorname{grad} f(p)`` from the Euclidean gradient
+``∇f(\tilde p)`` in `G`, where ``\tilde p`` is the representation of `p` in the embedding.
+
+Let ``\mathbf{g} = \mathbf{g}^{-1} = \operatorname{diag}(1,...,1,-1)``. Since the metric of the
+[`Hyperbolic`](@ref) space is the [`MinkowskiMetric`](@ref) of the embedding, the representer is
+changed before the projection onto the tangent space, see Proposition 7.7 in [Boumal:2023](@cite):
+
+```math
+\operatorname{grad} f(p)
+= \operatorname{proj}_{T_p\mathcal H^n}\bigl(\mathbf{g}^{-1}∇f(p)\bigr).
+```
+"""
+riemannian_gradient(M::Hyperbolic, p, G)
+
+function riemannian_gradient!(
+        M::Hyperbolic, X, p, G; embedding_metric::AbstractMetric = EuclideanMetric()
+    )
+    change_representer!(M, X, embedding_metric, p, G)
+    project!(M, X, p, X)
+    return X
 end
 
 @doc raw"""
@@ -503,19 +553,19 @@ function riemannian_Hessian!(M::Hyperbolic, Y, p, G, H, X)
     g = copy(G)
     g[end] *= -1 # = g^{-1}G
     h = copy(H)
-    H[end] *= -1 # = g^{-1}H
-    project!(M, Y, p, h .+ dot(p, g) .* X)
+    h[end] *= -1 # = g^{-1}H
+    project!(M, Y, p, h .+ minkowski_metric(p, g) .* X)
     return Y
 end
 @doc raw"""
     volume_density(M::Hyperbolic, p, X)
 
 Compute volume density function of the hyperbolic manifold. The formula reads
-``(\sinh(\lVert X\rVert)/\lVert X\rVert)^(n-1)`` where `n` is the dimension of `M`.
+``(\sinh(\lVert X\rVert_p)/\lVert X\rVert_p)^{n-1}`` where `n` is the dimension of `M`.
 It is derived from Eq. (4.1) in[ChevallierLiLuDunson:2022](@cite).
 """
 function volume_density(M::Hyperbolic, p, X)
-    Xnorm = norm(X)
+    Xnorm = norm(M, p, X)
     if Xnorm == 0
         return one(eltype(X))
     else

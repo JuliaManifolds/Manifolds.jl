@@ -4,6 +4,26 @@ using DiffEqCallbacks, OrdinaryDiffEq, RecursiveArrayTools
 
 using LinearAlgebra
 
+# chart of the plane that asks for a switch beyond a[1] = 0.5 and keeps its index
+struct TestPinnedChartAtlas <: Manifolds.AbstractAtlas{ℝ} end
+
+function Manifolds.affine_connection!(::Euclidean, Zc, ::TestPinnedChartAtlas, i, a, Xc, Yc)
+    return fill!(Zc, 0)
+end
+function Manifolds.check_chart_switch(::Euclidean, ::TestPinnedChartAtlas, i, a)
+    return a[1] > 0.5
+end
+function Manifolds.get_chart_index(::Euclidean, ::TestPinnedChartAtlas, i, a)
+    return i
+end
+function Manifolds.get_parameters!(::Euclidean, a, ::TestPinnedChartAtlas, i, p)
+    return copyto!(a, p)
+end
+function Manifolds.get_point!(::Euclidean, p, ::TestPinnedChartAtlas, i, a)
+    return copyto!(p, a)
+end
+
+
 @testset "Atlases" begin
     M = Sphere(2)
     A = Manifolds.StereographicAtlas()
@@ -11,6 +31,13 @@ using LinearAlgebra
     i = :north
     p = get_point(M, A, i, a)
     B = induced_basis(M, A, i)
+
+    @test local_metric(M, A, i, a) isa Diagonal
+    @test inverse_local_metric(M, A, i, a) ≈ inv(local_metric(M, A, i, a))
+    @test ricci_curvature(M, A, i, a) ≈ 2
+    @test gaussian_curvature(M, A, i, a) ≈ 1
+    @test ricci_curvature(Sphere(3), A, :south, [0.1, 0.4, -0.3]) ≈ 6
+
     for (Xc, Yc) in [([0.8, 0.9], [-0.8, 0.25]), ([0.3, 0.2], [-0.2, 0.25])]
         # tests with & without chart switching
         X = get_vector(M, p, Xc, B)
@@ -131,4 +158,21 @@ using LinearAlgebra
     @test a_jeam ≈ a
 
     @test_throws ArgumentError Manifolds._jacobi_exp_matrix(M, a, Xc, A, i; wrt = :teapot, final_time = -1.0)
+
+    @testset "Chart solvers continue in a chart that is kept" begin
+        M = Euclidean(2)
+        A = TestPinnedChartAtlas()
+        a, Xc, Yc, dYc = [0.0, 0.0], [1.0, 2.0], [0.5, -1.0], [1.0, 0.5]
+        # Tsit5 compiles fast; the step bound stops the integration before the final time
+        kwargs = (; solver = Tsit5(), dtmax = 0.25)
+        exp_solution = Manifolds.solve_chart_exp_ode(M, a, Xc, A, 1; kwargs...)
+        @test length(exp_solution.sols) > 1
+        @test exp_solution(1.0)[1] ≈ a + Xc
+        jacobi_solution = Manifolds.solve_chart_jacobi_field(M, a, Xc, A, 1, Yc, dYc; kwargs...)
+        @test length(jacobi_solution.sols) > 1
+        @test jacobi_solution(1.0)[3] ≈ Yc + dYc
+        E, _, a_final = Manifolds._jacobi_exp_matrix(M, a, Xc, A, 1; wrt = :argument, kwargs...)
+        @test E ≈ I
+        @test a_final ≈ a + Xc
+    end
 end

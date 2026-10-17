@@ -60,6 +60,8 @@ Declare `ParametricSurface` as directly and isometrically embedded in its Euclid
 ManifoldsBase.get_embedding_type(::ParametricSurface) =
     ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 
+metric(::ParametricSurface) = EuclideanMetric()
+
 """
     manifold_dimension(M::ParametricSurface)
 

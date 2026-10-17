@@ -1,14 +1,14 @@
 @doc raw"""
     PositiveNumbers <: AbstractManifold{ℝ}
 
-The hyperbolic manifold of positive numbers $H^1$ is a the hyperbolic manifold represented
+The hyperbolic manifold of positive numbers $H^1$ is the hyperbolic manifold represented
 by just positive numbers.
 
 # Constructor
 
     PositiveNumbers()
 
-Generate the `ℝ`-valued hyperbolic model represented by positive positive numbers.
+Generate the `ℝ`-valued hyperbolic model represented by positive numbers.
 To use this with arrays (1-element arrays),
 please use [`SymmetricPositiveDefinite`](@ref)`(1)`.
 """
@@ -27,12 +27,12 @@ PositiveVectors(n::Integer; parameter::Symbol = :type) =
     PowerManifold(PositiveNumbers(), n; parameter = parameter)
 
 """
-    PositiveMatrices(m::Integer, n::Integer; parameter::Symbol=:type)
+    PositiveMatrices(n::Integer, m::Integer; parameter::Symbol=:type)
 
 Generate the manifold of matrices with positive entries.
 This manifold is modeled as a [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) of [`PositiveNumbers`](@ref).
 
-`parameter`: whether a type parameter should be used to store `n`. By default size
+`parameter`: whether a type parameter should be used to store `n` and `m`. By default size
 is stored in a type parameter. Value can either be `:field` or `:type`.
 """
 PositiveMatrices(n::Integer, m::Integer; parameter::Symbol = :type) =
@@ -59,7 +59,7 @@ Change the representer ``X ∈ T_p\mathcal M`` of a linear function from the
 For all tangent vectors ``Y`` the result ``Z`` has to fulfill
 
 ```math
-    ⟨X,Y⟩ = XY = \frac{ZY}{p^2} = g_p(YZ)
+    ⟨X,Y⟩ = XY = \frac{ZY}{p^2} = g_p(Z,Y)
 ```
 
 and hence ``Z = p^2X``
@@ -67,6 +67,18 @@ and hence ``Z = p^2X``
 """
 change_representer(::PositiveNumbers, ::EuclideanMetric, ::Any, ::Any)
 change_representer(::PositiveNumbers, ::EuclideanMetric, p::Real, X::Real) = p * X * p
+
+@doc raw"""
+    riemannian_gradient(M::PositiveNumbers, p, X)
+
+Convert the Euclidean gradient `X` of a function at `p` on the [`PositiveNumbers`](@ref) `M`
+into its Riemannian gradient ``p^2X``, the [`change_representer`](@ref) of `X` to the metric of `M`.
+"""
+riemannian_gradient(::PositiveNumbers, ::Any, ::Any)
+
+function riemannian_gradient(M::PositiveNumbers, p::Real, X::Real; kwargs...)
+    return change_representer(M, EuclideanMetric(), p, X)
+end
 
 function change_representer!(::PositiveNumbers, Y, ::EuclideanMetric, p, X)
     Y .= p .* X .* p
@@ -82,10 +94,10 @@ Change the metric representation of the tangent vector ``X ∈ T_p\mathcal M`` f
 For all ``Z,Y`` we are looking for the function ``c`` on the tangent space at ``p`` such that
 
 ```math
-    ⟨Z,Y⟩ = XY = \frac{c(Z)c(Y)}{p^2} = g_p(c(Y),c(Z))
+    ⟨Z,Y⟩ = ZY = \frac{c(Z)c(Y)}{p^2} = g_p(c(Y),c(Z))
 ```
 
-and hence ``C(X) = pX``.
+and hence ``c(X) = pX``.
 """
 change_metric(::PositiveNumbers, ::EuclideanMetric, ::Any, ::Any)
 change_metric(::PositiveNumbers, ::EuclideanMetric, p::Real, X::Real) = p * X
@@ -116,8 +128,6 @@ end
 Check whether `X` is a tangent vector in the tangent space of `p` on the
 [`PositiveNumbers`](@ref) `M`.
 For the real-valued case represented by positive numbers, all `X` are valid, since the tangent space is the whole real line.
-For the complex-valued case `X` [...]
-
 """
 function check_vector(M::PositiveNumbers, p, X; kwargs...)
     return nothing
@@ -266,8 +276,8 @@ project(::PositiveNumbers, ::Real, X::Real) = X
 
 project!(::PositiveNumbers, Y, p, X) = (Y .= X)
 
-retract(M::PositiveNumbers, p, q) = retract(M, p, q, ExponentialRetraction())
-retract(M::PositiveNumbers, p, q, ::ExponentialRetraction) = exp(M, p, q)
+retract(M::PositiveNumbers, p, X) = retract(M, p, X, ExponentialRetraction())
+retract(M::PositiveNumbers, p, X, ::ExponentialRetraction) = exp(M, p, X)
 
 representation_size(::PositiveNumbers) = ()
 
@@ -341,7 +351,7 @@ function Random.rand!(
 end
 
 @doc raw"""
-    riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)
+    riemannian_Hessian(M::PositiveNumbers, p, G, H, X)
 
 The Riemannian Hessian can be computed as stated in Eq. (7.3) [Nguyen:2023](@cite).
 Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
@@ -353,6 +363,11 @@ Then the formula reads
 ```
 """
 riemannian_Hessian(::PositiveNumbers, p, G, H, X) = p * H * p + X * G * p
+
+function riemannian_Hessian!(::PositiveNumbers, Y, p, G, H, X)
+    Y .= p .* H .* p .+ X .* G .* p
+    return Y
+end
 
 function vector_transport_direction(
         M::PositiveNumbers,

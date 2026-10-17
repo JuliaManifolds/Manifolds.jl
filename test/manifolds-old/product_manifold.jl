@@ -130,6 +130,7 @@ using RecursiveArrayTools: ArrayPartition
             Float64,
             number_of_coordinates(Mse, DefaultOrthogonalBasis()),
         ) isa Vector{Float64}
+        @test ManifoldsBase.allocate_coordinates(Mse, 1, Float64, 2) == [0.0, 0.0]
 
         Y = allocate(pts[1])
         inverse_retract!(Mse, Y, pts[1], pts[2], default_inverse_retraction_method(Mse))
@@ -320,14 +321,8 @@ using RecursiveArrayTools: ArrayPartition
                 ParallelTransport(),
             ),
         )
-        @test Manifolds.default_vector_transport_method(Mstb, T_p_ap) ===
-            ProductVectorTransport(
-            ParallelTransport(),
-            Manifolds.FiberBundleProductVectorTransport(
-                ParallelTransport(),
-                ParallelTransport(),
-            ),
-        )
+        @test Manifolds.default_vector_transport_method(Mse) ===
+            ProductVectorTransport(ParallelTransport(), ParallelTransport())
     end
 
     @testset "ManifoldDiff" begin
@@ -406,7 +401,6 @@ using RecursiveArrayTools: ArrayPartition
         M = Sphere(2)
         N = M × M
         p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0, 1.0])
-        q = 1 / sqrt(2) * ArrayPartition([1.0, 1.0, 0.0], [0.0, 1.0, 1.0])
         q = 1 / sqrt(2) * ArrayPartition([0.0, 1.0, 1.0], [1.0, 1.0, 0.0])
         r = 1 / sqrt(3) * ArrayPartition([1.0, 1.0, 1.0], [1.0, 1.0, 1.0])
         X = log(M, p, q)
@@ -455,6 +449,8 @@ using RecursiveArrayTools: ArrayPartition
         a = get_parameters(Mse, A, i, p)
         @test length(a) == manifold_dimension(Mse)
         @test isapprox(Mse, get_point(Mse, A, i, a), p)
+        ap = ArrayPartition([0.1, 0.2], [0.3, 0.4])
+        @test isapprox(Mse, get_point(Mse, A, i, ap), get_point(Mse, A, i, [0.1, 0.2, 0.3, 0.4]))
 
         A2 = ProductAtlas(StereographicAtlas(), get_default_atlas(M2))
         i2 = get_chart_index(Mse, A2, p)

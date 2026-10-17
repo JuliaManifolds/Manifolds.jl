@@ -61,7 +61,7 @@ Get the object of type `FVectorSupport` for the distribution `d`.
 Distributions.support(::FVectorDistribution)
 
 """
-    uniform_distribution(M::Grassmann{<:Any,ℝ}, p)
+    uniform_distribution(M::Grassmann{ℝ}, p)
 
 Uniform distribution on given (real-valued) [`Grassmann`](@ref) `M`.
 Specifically, this is the normalized Haar measure on `M`.
@@ -82,7 +82,7 @@ function uniform_distribution(M::Grassmann{ℝ}, p)
 end
 
 """
-    uniform_distribution(M::ProjectiveSpace{<:Any,ℝ}, p)
+    uniform_distribution(M::ProjectiveSpace{ℝ}, p)
 
 Uniform distribution on given [`ProjectiveSpace`](@ref) `M`. Generated points will be of
 similar type as `p`.
@@ -114,13 +114,12 @@ function uniform_distribution(M::Stiefel{ℝ}, p)
 end
 
 """
-    uniform_distribution(M::Sphere{n,ℝ}, p) where {n}
+    uniform_distribution(M::Sphere{ℝ}, p)
 
 Uniform distribution on given [`Sphere`](@ref) `M`. Generated points will be of
 similar type as `p`.
 """
 function uniform_distribution(M::Sphere{ℝ}, p)
-    n = get_parameter(M.size)[1]
     d = Distributions.MvNormal(zero(p), 1.0 * I)
     return ProjectedPointDistribution(M, d, project!, p)
 end

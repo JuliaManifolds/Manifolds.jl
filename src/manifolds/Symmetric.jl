@@ -18,15 +18,21 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 # Constructor
 
-    SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
+    SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of ``n×n`` symmetric matrices.
+
+`parameter`: whether a type parameter should be used to store `n`. By default size
+is stored in type. Value can either be `:field` or `:type`.
 """
 struct SymmetricMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
 function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of symmetric matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return SymmetricMatrices{field, typeof(size)}(size)
 end
@@ -154,7 +160,7 @@ function get_vector_orthonormal!(M::SymmetricMatrices{ℂ}, Y, p, X, ::RealNumbe
     for i in 1:N, j in i:N
         scale = ifelse(i == j, 1, 1 / sqrt(2))
         @inbounds Y[i, j] = (X[k] + (i == j ? 0 : X[k + 1] * 1im)) * scale
-        @inbounds Y[j, i] = Y[i, j]
+        @inbounds Y[j, i] = conj(Y[i, j])
         k += (i == j ? 1 : 2)
     end
     return Y
@@ -218,7 +224,7 @@ where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpo
 """
 project(::SymmetricMatrices, ::Any, ::Any)
 
-project!(::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
+project!(M::SymmetricMatrices, Y, p, X) = project!(M, Y, X)
 
 function Random.rand!(
         rng::AbstractRNG,
@@ -230,6 +236,27 @@ function Random.rand!(
     rand!(rng, pX)
     pX .= (σ / (2 * norm(pX))) .* (pX + pX')
     return pX
+end
+
+@doc raw"""
+    riemann_tensor(M::SymmetricMatrices, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`SymmetricMatrices`](@ref) `M`.
+Its value is always the zero tangent vector.
+"""
+riemann_tensor(M::SymmetricMatrices, p, X, Y, Z)
+
+function riemann_tensor!(::SymmetricMatrices, Xresult, p, X, Y, Z)
+    return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(M::SymmetricMatrices, p, X, Y)
+
+Sectional curvature of [`SymmetricMatrices`](@ref) `M` is 0.
+"""
+function sectional_curvature(::SymmetricMatrices, p, X, Y)
+    return 0.0
 end
 
 function Base.show(io::IO, ::SymmetricMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}

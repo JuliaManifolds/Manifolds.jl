@@ -9,7 +9,7 @@ title: Exploring curvature without coordinates
 using Pkg;
 cd(@__DIR__)
 Pkg.activate("."); # for reproducibility use the local tutorial environment.
-Pkg.develop(PackageSpec(; path = (@__DIR__) * "/../"))
+Pkg.develop(path = "../") # a trick to work on the local dev version
 using Markdown
 ```
 
@@ -50,6 +50,7 @@ cm = sectional_curvature_matrix(M, p, DefaultOrthonormalBasis())
 for X in V
     println(exp(M, p, X))
 end
+cm
 ```
 
 The flat planes correspond to directions where the matrix changes independently.

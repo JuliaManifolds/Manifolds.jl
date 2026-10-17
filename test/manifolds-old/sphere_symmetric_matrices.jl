@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "SphereSymmetricMatrices" begin
+    @test_throws DomainError SphereSymmetricMatrices(0)
     M = SphereSymmetricMatrices(3)
     M_complex = SphereSymmetricMatrices(3, ℂ)
     A = [1 2 3; 2 4 -5; 3 -5 6] / norm([1 2 3; 2 4 -5; 3 -5 6])
@@ -73,10 +74,28 @@ include("../header.jl")
             exp_log_atol_multiplier = 2,
             test_inplace = true,
         )
+        X = project(M_complex, H, I)
+        V = 3 * H + [1.0im 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0] # normal vector at H
+        @test Weingarten(M_complex, H, X, V) ≈ -3 * X
     end
     @testset "field parameter" begin
         M = SphereSymmetricMatrices(3; parameter = :field)
         @test repr(M) == "SphereSymmetricMatrices(3, ℝ; parameter=:field)"
         @test typeof(get_embedding(M)) === ArraySphere{ℝ, Tuple{Int, Int}}
+    end
+    @testset "rand" begin
+        for N in [
+                SphereSymmetricMatrices(3),
+                SphereSymmetricMatrices(2, ℂ),
+                SphereSymmetricMatrices(3; parameter = :field),
+            ]
+            rng = MersenneTwister(4711)
+            p = rand(rng, N)
+            @test is_point(N, p)
+            @test is_vector(N, p, rand(rng, N; vector_at = p))
+            q = similar(p)
+            rand!(rng, N, q)
+            @test is_point(N, q)
+        end
     end
 end

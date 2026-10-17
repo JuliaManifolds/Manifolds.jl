@@ -2,11 +2,11 @@
     SymplecticMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The symplectic manifold consists of all ``2n×2n`` matrices which preserve
-the canonical symplectic form over ``𝔽^{2n×2n}×𝔽^{2n×2n}`` given by
+the canonical symplectic form over ``𝔽^{2n}×𝔽^{2n}`` given by
 
 ```math
-  \omega\colon 𝔽^{2n×2n}×𝔽^{2n×2n} → 𝔽,
-  \quad \omega(x, y) = p^{\mathrm{T}} J_{2n} q, \  x, y \in 𝔽^{2n×2n},
+  \omega\colon 𝔽^{2n}×𝔽^{2n} → 𝔽,
+  \quad \omega(x, y) = x^{\mathrm{T}} J_{2n} y, \  x, y \in 𝔽^{2n},
 ```
 
 where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
@@ -40,6 +40,12 @@ struct SymplecticMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SymplecticMatrices(two_n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    two_n < 0 && throw(
+        DomainError(
+            two_n,
+            "The matrix size `2n` of the symplectic manifold must be nonnegative, but was $(two_n).",
+        ),
+    )
     two_n % 2 == 0 || throw(
         ArgumentError(
             "The matrix size `2n` of the symplectic manifold must be even, but was $(two_n).",
@@ -73,7 +79,7 @@ The extension of the [`RealSymplecticMetric`](@ref) at a point ``p \in \mathrm{S
 as an inner product over the embedding space ``ℝ^{2n×2n}``, i.e.
 
 ```math
-    ⟨x, y⟩_p = ⟨p^{-1}x, p^{-1}⟩_{\mathrm{Fr}}
+    ⟨x, y⟩_p = ⟨p^{-1}x, p^{-1}y⟩_{\mathrm{Fr}}
     = \operatorname{tr}(x^{\mathrm{T}}(pp^{\mathrm{T}})^{-1}y), \text{ for all } x, y \in ℝ^{2n×2n}.
 ```
 """
@@ -670,7 +676,7 @@ That is,
 
 ````math
 (T_p\mathrm{Sp}(2n))^{\perp_g}
- = \{Y ∈ ℝ^{2n×2n} : g_p(Y, X) = 0 \test{ for all } X \in T_p\mathrm{Sp}(2n)\}.
+ = \{Y ∈ ℝ^{2n×2n} : g_p(Y, X) = 0 \text{ for all } X \in T_p\mathrm{Sp}(2n)\}.
 ````
 
 The closed form projection operator onto the normal space is given by [GaoSonAbsilStykel:2021](@cite)
@@ -705,7 +711,7 @@ tangent vector ``X \in T_p\mathrm{Sp}(2n)`` if `vector_at` is set to
 a point ``p \in \mathrm{Sp}(2n)``.
 
 A random point on ``\mathrm{Sp}(2n)`` is constructed by generating a
-random Hamiltonian matrix ``Ω \in \mathfrak{sp}(2n,F)`` with norm `σ`,
+random Hamiltonian matrix ``Ω \in \mathfrak{sp}(2n,F)`` from Gaussian entries scaled by `σ`,
 and then transforming it to a symplectic matrix by applying the Cayley transform
 
 ```math
@@ -735,15 +741,15 @@ function Random.rand!(
         pX .= (I - pX) \ (I + pX)
         return pX
     else
-        random_vector!(M, pX, vector_at; σ = σ)
+        random_vector!(rng, M, pX, vector_at; σ = σ)
         return pX
     end
 end
 
-function random_vector!(M::SymplecticMatrices, X, p; σ::Real = 1.0)
+function random_vector!(rng, M::SymplecticMatrices, X, p; σ::Real = 1.0)
     n = get_parameter(M.size)[1]
     # Generate random symmetric matrix:
-    randn!(X)
+    randn!(rng, X)
     X .= 0.5 * (X + X')
     X .*= σ / norm(X)
     lmul!(SymplecticElement(p), X)
@@ -792,23 +798,22 @@ end
 Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^{2n×2n}`` or at
 least around the [`SymplecticMatrices`](@ref) `M` where `p` (the embedding of) a point on `M`,
 we restrict ``\tilde f`` to the manifold and denote that by ``f``.
-Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by
+Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` with respect to the
+[`RealSymplecticMetric`](@ref), the left invariant metric of Section 2.3 in
+[BirteaCaşuComănescu:2020](@cite), is given by Theorem 2 and Eq. (1) there as
 
 ```math
-  X = Yp^{\mathrm{T}}p + J_{2n}pY^{\mathrm{T}}J_{2n}p,
+  X = \frac{1}{2}\bigl(pp^{\mathrm{T}}Y + pJ_{2n}Y^{\mathrm{T}}pJ_{2n}\bigr),
 ```
 
 where ``J_{2n}`` denotes the [`SymplecticElement`](@ref).
 """
-function riemannian_gradient(::SymplecticMatrices, p, Y; kwargs...)
-    J = SymplecticElement(p)
-    return Y * p' * p .+ (J * p) * Y' * (J * p)
+function riemannian_gradient(M::SymplecticMatrices, p, Y; kwargs...)
+    return change_representer(M, EuclideanMetric(), p, Y)
 end
 
 function riemannian_gradient!(M::SymplecticMatrices, X, p, Y; kwargs...)
-    J = SymplecticElement(p, X)
-    X .= Y * p'p .+ (J * p) * Y' * (J * p)
-    return X
+    return change_representer!(M, X, EuclideanMetric(), p, Y)
 end
 
 function Base.show(io::IO, ::SymplecticMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}

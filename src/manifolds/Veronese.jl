@@ -174,8 +174,8 @@ end
     check_size(M::Veronese, p)
     check_size(M::Veronese, p, X)
 
-For `M = Veronese(N, D)`, check that a stored point `p = ([λ], x)` and,
-optionally, a tangent vector `X = ([ν], u)` use two-component tuple
+For `M = Veronese(N, D)`, check the sizes of a stored point `p = ([λ], x)` and,
+optionally, of a tangent vector `X = ([ν], u)`. Both use two-component tuple
 representations with component sizes `(1,)` and `(N,)`, corresponding
 respectively to their radial and spherical parts.
 """
@@ -621,6 +621,25 @@ function inner(M::Veronese, p, X, Y)
     _, d = get_parameter(M.size)
     return X[1][1] * Y[1][1] + d * p[1][1]^2 * dot(X[2], Y[2])
 end
+
+@doc raw"""
+    isapprox(M::Veronese, p, q; kwargs...)
+
+Test whether two points `p`, `q` on the [`Veronese`](@ref) manifold `M` are (approximately) the same,
+that is whether ``d_{\mathcal M}(p,q) \approx 0`` with the classical `isapprox`; if one of them is not
+a point on `M`, their components are compared instead. The `kwargs...` are passed on to this;
+`atol` defaults to `sqrt(max_eps(p[1], p[2], q[1], q[2]))`.
+"""
+isapprox(::Veronese, ::Any, ::Any)
+
+@doc raw"""
+    isapprox(M::Veronese, p, X, Y; kwargs...)
+
+Test whether two tangent vectors `X`, `Y` at `p` on the [`Veronese`](@ref) manifold `M` are (approximately)
+the same, that is whether their components agree with the classical `isapprox`. The `kwargs...` are
+passed on to this; `atol` defaults to `sqrt(max_eps(X[1], X[2], Y[1], Y[2]))`.
+"""
+isapprox(::Veronese, ::Any, ::Any, ::Any)
 
 function _isapprox(
         M::Veronese, p, q; atol = sqrt(max_eps(p[1], p[2], q[1], q[2])), kwargs...,

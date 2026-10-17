@@ -1,3 +1,7 @@
+function ManifoldsBase.allocate_coordinates(::ProductManifold, p::ArrayPartition, T, n::Int)
+    return allocate(submanifold_component(p, 1), T, n)
+end
+
 function adjoint_Jacobi_field(
         M::ProductManifold,
         p::ArrayPartition,
@@ -21,6 +25,10 @@ end
 
 function allocate_result(M::ProductManifold, f::typeof(get_point), a::AbstractVector)
     return ArrayPartition(map(M_i -> allocate_result(M_i, f, a), M.manifolds)...)
+end
+# disambiguation
+function allocate_result(M::ProductManifold, f::typeof(get_point), a::ArrayPartition)
+    return @invoke allocate_result(M, f, a::AbstractVector)
 end
 
 function get_coordinates(

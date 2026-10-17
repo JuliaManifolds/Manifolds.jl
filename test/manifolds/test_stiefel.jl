@@ -1,6 +1,8 @@
-using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays, Test
+using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, StaticArrays, Test
 
 @testset "The Stiefel manifolds" begin
+    @test_throws DomainError Stiefel(1, 2)
+    @test_throws DomainError Stiefel(2, 3)
     @testset "Real Stiefel Manifold" begin
         M = Stiefel(3, 2)
         p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -50,6 +52,7 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 default_retraction_method => PolarRetraction(),
                 default_vector_transport_method => DifferentiatedRetractionVectorTransport(PolarRetraction()),
                 injectivity_radius => π,
+                is_flat => false,
                 manifold_dimension => 3,
                 repr => "Stiefel(3, 2, ℝ)",
             )
@@ -68,12 +71,26 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
             vector_transport_direction!(
                 M, Zca, p, X, X, DifferentiatedRetractionVectorTransport(CayleyRetraction()),
             )
-            @test is_vector(M, qca, Yca; atol = 10^-15)
+            @test is_vector(M, qca, Zca; atol = 10^-15)
             @test isapprox(M, qca, Yca, Zca)
             rpa = PadeRetraction(2)
             @test repr(rpa) == "PadeRetraction(2)"
             qpa = retract(M, p, X, rpa)
             @test is_point(M, qpa; error = :error)
+        end
+        @testset "Differentiated retraction transports of a StiefelPoint" begin
+            pS, qS = StiefelPoint(p), StiefelPoint(q)
+            XS, YS = StiefelTangentVector(X), StiefelTangentVector(Y)
+            for m in [CayleyRetraction(), PolarRetraction(), QRRetraction()]
+                vt = DifferentiatedRetractionVectorTransport(m)
+                Xd = vector_transport_direction(M, p, X, Y, vt)
+                @test vector_transport_direction(M, pS, XS, YS, vt).value == Xd
+            end
+            for m in [PolarRetraction(), QRRetraction()]
+                vt = DifferentiatedRetractionVectorTransport(m)
+                Xt = vector_transport_to(M, p, X, q, vt)
+                @test vector_transport_to(M, pS, XS, qS, vt).value == Xt
+            end
         end
 
 
@@ -117,6 +134,7 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                             @test Xfact.U[1:n, 1:k] ≈ pl
                             @test Xfact.U'Xfact.U ≈ I
                             @test Xfact.U * Xfact.Z ≈ Xl
+                            @test (2 * Xfact).Z == 2 * Xfact.Z
                             @test is_vector(Rotations(k), I(k), Xfact.Z[1:k, 1:k])
 
                             pfact2 = Manifolds.stiefel_factorization(pl, pl)
@@ -226,6 +244,8 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 end
                 g = StiefelSubmersionMetric(1)
                 @test g isa StiefelSubmersionMetric{Int}
+                @test repr(g) == "StiefelSubmersionMetric(1)"
+                @test repr(StiefelSubmersionMetric(0.5f0)) == "StiefelSubmersionMetric(0.5f0)"
                 @testset for Ml in [Stiefel(3, 3), Stiefel(4, 3), Stiefel(4, 2)]
                     Mcan = MetricManifold(Ml, CanonicalMetric())
                     Meu = MetricManifold(Ml, EuclideanMetric())
@@ -241,10 +261,10 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                         if Mcomp === Mcan
                             @test !is_flat(Mcomp)
                             Zl1 = log(Mcomp, pl, ql)
-                            isapprox(MMl, pl, log(MMl, pl, ql), Zl1)
+                            @test isapprox(MMl, pl, log(MMl, pl, ql), Zl1)
                             Zl2 = similar(Zl1)
                             log!(Mcomp, Zl2, pl, ql)
-                            isapprox(MMl, pl, log(MMl, pl, ql), Zl1)
+                            @test isapprox(MMl, pl, Zl2, Zl1)
                             @test distance(Mcomp, pl, ql) ≈ norm(Mcomp, pl, Zl2)
                         end
                         @test isapprox(MMl, exp(MMl, pl, 0 * Xl), pl; error = :error)
@@ -262,6 +282,17 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                         @test isapprox(MMl, pl, log(MMl, pl, pl), zero_vector(MMl, pl); error = :error, atol = 1.0e-6)
                     end
                 end
+                @testset "exp! of the canonical metric into its own point" begin
+                    p33 = [0.6 -0.8 0.0; 0.8 0.6 0.0; 0.0 0.0 1.0]
+                    X33 = p33 * [0.0 0.1 -0.2; -0.1 0.0 0.3; 0.2 -0.3 0.0]
+                    p42 = [0.5 0.5; 0.5 -0.5; 0.5 0.5; 0.5 -0.5]
+                    X42 = [0.05 0.25; 0.25 0.45; -0.55 0.25; 0.25 0.05]
+                    for (Ml, pl, Xl) in [(Stiefel(3, 3), p33, X33), (Stiefel(4, 2), p42, X42)]
+                        Mcan = MetricManifold(Ml, CanonicalMetric())
+                        ql = copy(pl)
+                        @test isapprox(Mcan, exp!(Mcan, ql, ql, Xl), exp(Mcan, pl, Xl))
+                    end
+                end
                 @testset "Hessian Conversion" begin
                     M1 = MetricManifold(M, StiefelSubmersionMetric(-0.5))
                     M2 = MetricManifold(M, EuclideanMetric())
@@ -276,11 +307,29 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                     @test riemannian_Hessian(M2, pH, YH, ZH, XH) == rH # metric is default
                     @test riemannian_Hessian(M3, pH, YH, ZH, XH) == riemannian_Hessian(M4, pH, YH, ZH, XH)
                     VH = [0.0 -1.0; 1.0 0.0; 0.0 0.0]
+                    # the Hessian is self-adjoint with respect to the metric
+                    for Mg in [M4, MetricManifold(M, StiefelSubmersionMetric(1.0))]
+                        HX = riemannian_Hessian(Mg, pH, YH, -XH, XH)
+                        HV = riemannian_Hessian(Mg, pH, YH, -VH, VH)
+                        @test inner(Mg, pH, HX, VH) ≈ inner(Mg, pH, XH, HV)
+                    end
                     WH = zero_vector(M, pH)
                     Weingarten!(M, WH, pH, XH, VH)
                     WHb = zero_vector(M, pH)
                     Weingarten!(M2, WHb, pH, XH, VH)
                     @test WH == WHb
+                end
+                @testset "canonical logarithm at coinciding points for 2k > n" begin
+                    for Ml in [Stiefel(3, 3), Stiefel(4, 3), Stiefel(5, 4)]
+                        n, k = representation_size(Ml)
+                        Mcan = MetricManifold(Ml, CanonicalMetric())
+                        pl = project(Ml, [1.0 / (i + j) for i in 1:n, j in 1:k])
+                        Xl = project(Ml, pl, [(-1.0)^(i + j) / (i + 2j) for i in 1:n, j in 1:k])
+                        Zl = zero_vector(Mcan, pl)
+                        @test isapprox(Mcan, pl, log(Mcan, pl, pl), Zl; atol = 1.0e-12)
+                        ql = exp(Mcan, pl, 1.0e-9 * Xl)
+                        @test isapprox(Mcan, pl, log(Mcan, pl, ql), 1.0e-9 * Xl; atol = 1.0e-12)
+                    end
                 end
             end
         end
@@ -363,7 +412,7 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 QRInverseRetraction(),
             )
             Z243 = inverse_retract(M, p243, q243, QRInverseRetraction())
-            @test isapprox(M43, p243, Y243, Z243)
+            @test isapprox(M, p243, Y243, Z243)
         end
     end
     @testset "Complex Stiefel Manifold" begin
@@ -371,7 +420,7 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
         pc = [0.5 + 0.5im 0.5 + 0.5im; 0.5 + 0.5im -0.5 - 0.5im; 0.0 0.0]
         Xc = [0.0 0.0; 0.0 0.0; 0.1 -0.1]
         qc = exp(Mc, pc, Xc)
-        rc = exp(Mc, pc, Xc)
+        rc = exp(Mc, pc, 2 .* Xc)
         Yc = inverse_retract(Mc, qc, pc, PolarInverseRetraction())
         Zc = inverse_retract(Mc, rc, pc, PolarInverseRetraction())
         # Invalid ones
@@ -397,7 +446,7 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 :InverseRetractionMethods => [PolarInverseRetraction(), QRInverseRetraction()],
                 :Points => [pc, qc, rc],
                 :Vectors => [Xc, Yc, Zc],
-                :RetractionMethod => [PolarRetraction(), QRRetraction()],
+                :RetractionMethods => [PolarRetraction(), QRRetraction()],
                 :VectorTransportMethods => [
                     DifferentiatedRetractionVectorTransport(PolarRetraction()),
                 ],
@@ -409,15 +458,33 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 default_retraction_method => PolarRetraction(),
                 default_vector_transport_method => DifferentiatedRetractionVectorTransport(PolarRetraction()),
                 injectivity_radius => π,
-                manifold_dimension => 3,
+                manifold_dimension => 8,
                 repr => "Stiefel(3, 2, ℂ)",
                 representation_size => (3, 2),
-                manifold_dimension => 8,
                 is_flat => false,
             )
         )
+        @testset "QR inverse retraction of complex Stiefel manifolds" begin
+            a = [1.0 0.0 1.0im; 1.0im 1.0 0.0; 1.0 2.0im 0.0; 0.0 3.0 1.0]
+            b = [0.1 0.2im -0.3; -0.3 0.4 0.1im; 0.5im 0.6 0.2; 0.7 -0.8im 0.0]
+            for k in 1:3
+                Mk = Stiefel(4, k, ℂ)
+                pk = project(Mk, a[:, 1:k])
+                Xk = project(Mk, pk, b[:, 1:k])
+                qk = retract(Mk, pk, Xk, QRRetraction())
+                @test isapprox(Mk, pk, inverse_retract(Mk, pk, qk, QRInverseRetraction()), Xk)
+            end
+        end
         @testset "Allocation Promotion" begin
             @test Manifolds.allocation_promotion_function(Mc, get_vector, ()) === complex
+        end
+        @testset "Tangent vectors of a complex Stiefel manifold" begin
+            Mc4 = Stiefel(4, 2, ℂ)
+            pc4 = project(Mc4, [1.0 0.0; 1.0im 1.0; 1.0 2.0im; 0.0 3.0])
+            Xc4 = project(Mc4, pc4, [0.1 0.2im; -0.3 0.4; 0.5im 0.6; 0.7 -0.8im])
+            @test is_vector(Mc4, pc4, Xc4)
+            @test is_vector(Mc4, pc4, 1.0e8 * Xc4)
+            @test !is_vector(Mc4, pc4, [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0])
         end
     end
     @testset "Quaternion Stiefel" begin
@@ -425,6 +492,28 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
         @testset "Basics" begin
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 18
+            p = rand(MersenneTwister(42), M)
+            @test is_point(M, p; error = :error)
+            @test !is_point(M, 2 .* p)
+        end
+    end
+
+    @testset "Differentiated QR retraction" begin
+        T = DifferentiatedRetractionVectorTransport(QRRetraction())
+        for (M, f) in [(Stiefel(5, 3), cos), (Stiefel(5, 3, ℂ), cis)]
+            p = project(M, [f(1.3i - 0.7j) + 0.1 * i * j for i in 1:5, j in 1:3])
+            d = project(M, p, [f(0.9i + 1.1j) + 0.2 * (i - j) for i in 1:5, j in 1:3]) / 2
+            X = project(M, p, [f(0.4i * j) - 0.3 * i for i in 1:5, j in 1:3])
+            q = retract(M, p, d, QRRetraction())
+            R = q' * (p + d)
+            Ys = [vector_transport_direction(M, p, X, d, T)]
+            M == Stiefel(5, 3) && push!(Ys, vector_transport_to(M, p, X, q, T))
+            for Y in Ys
+                @test q' * Y ≈ -(Y' * q)
+                # differentiating qR = p + d: q'(X - YR) is upper triangular with real diagonal
+                E = q' * (X - Y * R)
+                @test E ≈ triu(E) - im * Diagonal(imag.(diag(E)))
+            end
         end
     end
 
@@ -434,6 +523,16 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
         Xs = get_vectors(M, p, DefaultOrthonormalBasis())
         for X in Xs
             @test is_vector(M, p, X; atol = 1.0e-12)
+            @test is_vector(M, p, X)
         end
     end
+end
+
+@testset "random tangent vectors scale with σ" begin
+    M = Stiefel(4, 2)
+    p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+    X = rand(MersenneTwister(42), M; vector_at = p)
+    Y = rand(MersenneTwister(42), M; vector_at = p, σ = 2.0)
+    @test is_vector(M, p, Y)
+    @test Y == 2 .* X
 end

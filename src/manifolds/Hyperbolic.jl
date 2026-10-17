@@ -38,6 +38,9 @@ struct Hyperbolic{T} <: AbstractDecoratorManifold{ℝ}
 end
 
 function Hyperbolic(n::Int; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The dimension n of a hyperbolic space must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return Hyperbolic{typeof(size)}(size)
 end
@@ -315,6 +318,22 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
     end
 end
 
+for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
+    @eval function Random.rand!(
+            rng::AbstractRNG, M::Hyperbolic, pX::Union{$P, $T};
+            vector_at = nothing, σ::Real = one(eltype(pX.value)) / sqrt(manifold_dimension(M)),
+        )
+        if vector_at === nothing
+            pX.value .= convert($P, rand(rng, M; σ = σ)).value
+        else
+            p = convert(AbstractVector, vector_at)
+            pX.value .= convert($T, p, rand(rng, M; vector_at = p, σ = σ)).value
+        end
+        return pX
+    end
+    @eval allocate_result_type(::Hyperbolic, ::typeof(rand), ::Tuple{$P}) = $T
+end
+
 @doc raw"""
     manifold_dimension(M::Hyperbolic)
 
@@ -323,7 +342,7 @@ Return the dimension of the hyperbolic space manifold ``\mathcal H^n``, i.e. ``\
 manifold_dimension(M::Hyperbolic) = get_parameter(M.size)[1]
 
 @doc raw"""
-    manifold_dimension(M::Hyperbolic)
+    manifold_volume(M::Hyperbolic)
 
 Return the volume of the hyperbolic space manifold ``\mathcal H^n``, i.e. infinity.
 """
@@ -407,7 +426,10 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
         return Y
     end
     @eval zero_vector(::Hyperbolic, p::$P) = $T(zero(p.value))
-    @eval zero_vector!(::Hyperbolic, X::$T, ::$P) = fill!(X.value, 0)
+    @eval function zero_vector!(::Hyperbolic, X::$T, ::$P)
+        fill!(X.value, 0)
+        return X
+    end
 end
 
 @doc raw"""

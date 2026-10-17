@@ -1,9 +1,12 @@
 using Manifolds, ManifoldsBase, Test, StaticArrays
 
-# This file tests a few generic functions for general unitary matricesd
+# This file tests a few generic functions for general unitary matrices
 # independent of their matrix type, so we check that with a dummy type
 
 Test.@testset "GeneralUnitaryMatrices" begin
+    Test.@test_throws DomainError Rotations(-1)
+    Test.@test_throws DomainError OrthogonalMatrices(-1)
+    Test.@test_throws DomainError SpecialUnitaryMatrices(0)
     M2 = Manifolds.GeneralUnitaryMatrices(2, ℝ, Manifolds.Test.DummyMatrixType)
     M2f = Manifolds.GeneralUnitaryMatrices(2, ℝ, Manifolds.Test.DummyMatrixType; parameter = :field)
     @testset "Basics" begin
@@ -47,14 +50,14 @@ Test.@testset "GeneralUnitaryMatrices" begin
             Dict((get_coordinates, b) => c3, (get_vector, c3, b) => X)
         )
     end
-    @testset "Stattic Array & Edge cases" begin
+    @testset "Static Array & Edge cases" begin
         Z = @SMatrix [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
         q = exp(M3, p3S, Z)
         @test q == p3S
         q3S = @SMatrix [-1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 1.0]
         X = log(M3, p3S, q3S)
         X3S = @SMatrix [0.0 -π 0.0; π 0.0 0.0; 0.0 0.0 0.0]
-        @test isapprox(M3, X, X3S)
+        @test isapprox(M3, p3S, X, X3S)
     end
 
 
@@ -73,5 +76,41 @@ Test.@testset "GeneralUnitaryMatrices" begin
             ),
             Dict((get_coordinates, b) => c4, (get_vector, c4, b) => X4)
         )
+    end
+    @testset "Parallel transport on the orthogonal and unitary matrices" begin
+        for (N, p, X, W) in [
+                (
+                    OrthogonalMatrices(3), [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 -1.0],
+                    [0.0 0.3 0.0; -0.3 0.0 0.2; 0.0 -0.2 0.0],
+                    [0.0 0.0 0.5; 0.0 0.0 0.0; -0.5 0.0 0.0],
+                ),
+                (
+                    OrthogonalMatrices(2), [0.0 1.0; 1.0 0.0], [0.0 0.3; -0.3 0.0],
+                    [0.0 -0.4; 0.4 0.0],
+                ),
+                (
+                    UnitaryMatrices(2), [1.0im 0.0; 0.0 1.0im], [0.0 1.0; -1.0 0.0],
+                    [0.5im 0.2; -0.2 0.0],
+                ),
+                (
+                    SpecialUnitaryMatrices(2), [1.0im 0.0; 0.0 -1.0im], [0.0 1.0; -1.0 0.0],
+                    [0.5im 0.2; -0.2 -0.5im],
+                ),
+            ]
+            q = exp(N, p, X)
+            Y = parallel_transport_to(N, p, X, q)
+            @test is_vector(N, q, Y)
+            @test norm(N, q, Y) ≈ norm(N, p, X)
+            # the velocity of a geodesic is parallel along it
+            @test Y ≈ X
+            # the transport along the geodesic from p with velocity X
+            @test parallel_transport_to(N, p, W, q) ≈ exp(-X / 2) * W * exp(X / 2)
+            @test parallel_transport_direction(N, p, X, X) ≈ Y
+            Z = similar(Y)
+            parallel_transport_to!(N, Z, p, X, q)
+            @test Z ≈ Y
+            parallel_transport_direction!(N, Z, p, X, X)
+            @test Z ≈ Y
+        end
     end
 end

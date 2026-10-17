@@ -8,15 +8,18 @@ The manifold of (real) orthogonal ``n×n`` matrices ``\mathrm{O}(n)``. They are 
 ```
 where ``M^{T}`` is the transpose of ``M`` and ``\mathrm{I}_n`` is the ``n×n`` identity matrix. Thus, their columns and rows represent ``n`` pairwise orthonormal vectors. Such matrices ``M`` have the property that ``\lVert \det(M) \rVert = 1``.
 
-This is the same manifold as the [`Stiefel`](@ref)`(n, n, ℂ)` manifold.
+This is the same manifold as the [`Stiefel`](@ref)`(n, n, ℝ)` manifold.
 
 # Constructor
 
-    OrthogonalMatrices(n)
+    OrthogonalMatrices(n; parameter::Symbol=:type)
 """
 const OrthogonalMatrices{n} = GeneralUnitaryMatrices{ℝ, n, AbsoluteDeterminantOneMatrixType}
 
 function OrthogonalMatrices(n::Int; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of orthogonal matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return OrthogonalMatrices{typeof(size)}(size)
 end
@@ -29,18 +32,17 @@ function Random.rand!(
         σ::Real = one(eltype(pX)),
     )
     if vector_at === nothing
-        # Special case: Rotations(1) is just zero-dimensional
+        # Special case: OrthogonalMatrices(1) is just zero-dimensional
         (manifold_dimension(M) == 0) && return fill!(pX, rand(rng, (-1, 1)))
         A = randn(rng, representation_size(M))
         s = diag(sign.(qr(A).R))
         D = Diagonal(s)
         pX .= qr(A).Q * D
     else
-        # Special case: Rotations(1) is just zero-dimensional
+        # Special case: OrthogonalMatrices(1) is just zero-dimensional
         (manifold_dimension(M) == 0) && return fill!(pX, 0)
-        A = σ .* randn(rng, representation_size(M))
-        pX .= triu(A, 1) .- transpose(triu(A, 1))
-        normalize!(pX)
+        Z = σ .* randn(rng, representation_size(M))
+        project!(M, pX, vector_at, Z)
     end
     return pX
 end

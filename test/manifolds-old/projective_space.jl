@@ -1,5 +1,14 @@
 include("../header.jl")
 
+@testset "tangent vectors of the projective space of any length" begin
+    @test_throws DomainError ProjectiveSpace(-1)
+    @test_throws DomainError ArrayProjectiveSpace(0, 2)
+    M = ProjectiveSpace(2)
+    p = [1.0, 2.0, 3.0] / sqrt(14.0)
+    @test is_vector(M, p, project(M, p, [100.0, -50.0, 30.0]))
+    @test !is_vector(M, p, project(M, p, [1.0, -0.5, 0.3]) .+ 1.0e-6 .* p)
+end
+
 @testset "ProjectiveSpace" begin
     @testset "Real" begin
         M = ProjectiveSpace(2)
@@ -8,6 +17,8 @@ include("../header.jl")
             @test representation_size(M) == (3,)
             @test manifold_dimension(M) == 2
             @test !is_flat(M)
+            @test metric(M) == EuclideanMetric()
+            @test riemannian_gradient(M, [1.0, 0.0, 0.0], [1.0, 1.0, 1.0]) == [0.0, 1.0, 1.0]
             @test is_flat(ProjectiveSpace(1))
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0])
@@ -307,7 +318,7 @@ include("../header.jl")
 
     @testset "small distance tests" begin
         @testset for fT in (Float32, Float64), T in (fT, Complex{fT}, Quaternion{fT})
-            𝔽 = T isa Complex ? ℂ : (T isa Quaternion ? ℍ : ℝ)
+            𝔽 = T <: Complex ? ℂ : (T <: Quaternion ? ℍ : ℝ)
             M = ProjectiveSpace(2, 𝔽)
             rT = real(T)
             atol = rtol = sqrt(eps(rT))
@@ -315,6 +326,7 @@ include("../header.jl")
                     λ in (one(T), (T <: Real ? -one(T) : sign(randn(T))))
 
                 p = project(M, randn(T, representation_size(M)))
+                @test is_point(M, p)
                 X = project(M, p, randn(T, representation_size(M)))
                 X ./= norm(M, p, X)
                 project!(M, X, p, X)
@@ -334,8 +346,21 @@ include("../header.jl")
     @testset "field parameter" begin
         M = ProjectiveSpace(2; parameter = :field)
         @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int}}
+        @test typeof(get_embedding(ArrayProjectiveSpace(2, 3; parameter = :field))) ===
+            Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "ProjectiveSpace(2, ℝ; parameter=:field)"
         @test repr(ArrayProjectiveSpace(2, 3; parameter = :field)) ==
             "ArrayProjectiveSpace(2, 3; field=ℝ, parameter=:field)"
+    end
+
+    @testset "rand" begin
+        for 𝔽 in (ℝ, ℂ, ℍ), N in (ProjectiveSpace(2, 𝔽), ArrayProjectiveSpace(2, 2; field = 𝔽))
+            p = rand(MersenneTwister(4711), N)
+            @test is_point(N, p)
+            @test is_vector(N, p, rand(MersenneTwister(4712), N; vector_at = p))
+            q = similar(p)
+            rand!(MersenneTwister(4711), N, q)
+            @test is_point(N, q)
+        end
     end
 end

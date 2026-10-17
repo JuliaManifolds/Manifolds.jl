@@ -13,6 +13,25 @@ The main function is
 Manifolds.Test.test_manifold
 ```
 
+A manifold is described by two dictionaries, one of properties and one of expected results.
+
+```@example testsuite
+using Manifolds, Test
+M = Sphere(2)
+p = [1.0, 0.0, 0.0]
+q = [0.0, 1.0, 0.0]
+X = [0.0, π / 4, 0.0]
+Manifolds.Test.test_manifold(
+    M,
+    Dict(
+        :Functions => [distance, exp, log, manifold_dimension, norm, repr],
+        :Points => [p, q],
+        :Vectors => [X],
+    ),
+    Dict(:atol => 1.0e-14, manifold_dimension => 2, repr => "Sphere(2)"),
+);
+```
+
 ## Functions for individual tests
 
 ```@docs

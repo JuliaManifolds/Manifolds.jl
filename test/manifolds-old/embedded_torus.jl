@@ -21,6 +21,8 @@ using LinearAlgebra
     @test p ≈ [1.7230709564189848, -4.431999755591838, 0.958851077208406]
     i_p0x = Manifolds.get_chart_index(M, A, p)
     @test [i_p0x...] ≈ p0x
+    @test Manifolds.get_parameters(M, A, i_p0x, p) ≈ [0.0, 0.0]
+    @test Manifolds.get_point(M, A, i_p0x, p0x) ≈ [Manifolds._torus_param(M, (2 .* p0x)...)...]
     B = induced_basis(M, A, i_p0x)
     X = get_vector(M, p, X_p0x, B)
     Y = get_vector(M, p, Y_p0x, B)
@@ -51,7 +53,8 @@ using LinearAlgebra
     @test ricci_curvature(M, A, i_p0x, p0x) ≈ sum(inverse_local_metric(M, A, i_p0x, p0x) .* Ric)
     a_p = get_parameters(M, A, i_p0x, p)
     @test ricci_curvature(M, A, i_p0x, a_p) / 2 ≈ gaussian_curvature(M, p)
-    @test Manifolds.kretschmann_scalar(M, A, i_p0x, p0x) ≈ 0.0005794816008357242
+    @test gaussian_curvature(M, A, i_p0x, a_p) ≈ gaussian_curvature(M, p)
+    @test Manifolds.kretschmann_scalar(M, A, i_p0x, p0x) ≈ 0.017531723390651732
 
     einstein_tensor_ref = ricci_tensor(M, A, i_p0x, p0x) - local_metric(M, A, i_p0x, p0x) * ricci_curvature(M, A, i_p0x, p0x) / 2
     @test einstein_tensor(M, A, i_p0x, p0x) ≈ einstein_tensor_ref
@@ -140,7 +143,7 @@ using LinearAlgebra
         A,
         i_p0x;
         final_time = 3.0,
-        check_chart_switch_kwargs = (; ϵ = 0.3),
+        check_chart_switch_kwargs = (; ϵ = 1.5),
     )
     p_exp_switch_3 = p_exp_switch(3.0)
     @test isapprox(
@@ -148,7 +151,7 @@ using LinearAlgebra
         [2.701765894057119, 2.668437820810143, -1.8341712552932237],
         rtol = 1.0e-5,
     )
-    @test length(p_exp_switch.sols) < length(p_exp.sols)
+    @test length(p_exp_switch.sols) > length(p_exp.sols)
 
     i_to = (-1.0, -0.3)
     @test transition_map_diff(M, A, i_p0x, [0.0, 0.0], X_p0x, i_to) ≈ X_p0x

@@ -7,14 +7,14 @@ represents.
 abstract type GraphManifoldType end
 
 @doc raw"""
-    EdgeManifoldManifold <: GraphManifoldType
+    EdgeManifold <: GraphManifoldType
 
 A type for a [`GraphManifold`](@ref) where the data is given on the edges.
 """
 struct EdgeManifold <: GraphManifoldType end
 
 @doc raw"""
-    VectexGraphManifold <: GraphManifoldType
+    VertexManifold <: GraphManifoldType
 
 A type for a [`GraphManifold`](@ref) where the data is given on the vertices.
 """
@@ -34,6 +34,21 @@ struct GraphManifold{𝔽, G <: AbstractGraph, TM, T <: GraphManifoldType} <:
     AbstractPowerManifold{𝔽, TM, NestedPowerRepresentation}
     graph::G
     manifold::TM
+end
+
+function Base.:(==)(
+        M::GraphManifold{𝔽, G, TM, T}, N::GraphManifold{𝔽, G, TM, T}
+    ) where {𝔽, G, TM, T}
+    return M.graph == N.graph && M.manifold == N.manifold
+end
+function Base.isequal(
+        M::GraphManifold{𝔽, G, TM, T}, N::GraphManifold{𝔽, G, TM, T}
+    ) where {𝔽, G, TM, T}
+    return isequal(M.graph, N.graph) && isequal(M.manifold, N.manifold)
+end
+function Base.hash(M::GraphManifold{𝔽, G, TM, T}, h::UInt) where {𝔽, G, TM, T}
+    # not every graph type hashes by content
+    return hash(M.manifold, hash(nv(M.graph), hash(T, h)))
 end
 
 function GraphManifold(
@@ -97,7 +112,7 @@ get_iterator(M::EdgeGraphManifold) = 1:ne(M.graph)
 get_iterator(M::VertexGraphManifold) = 1:nv(M.graph)
 
 @doc raw"""
-    incident_log(M::GraphManifold, x)
+    incident_log(M::GraphManifold{𝔽,G,TM,VertexManifold}, p)
 
 Return the tangent vector on the (vertex) [`GraphManifold`](@ref), where at
 each node the sum of the [`log`](@extref `Base.log-Tuple{AbstractManifold, Any, Any}`)s to incident nodes is computed.
@@ -113,9 +128,9 @@ function incident_log(M::VertexGraphManifold, p)
 end
 
 function incident_log!(M::VertexGraphManifold, X, p)
+    zero_vector!(M, X, p)
     rep_size = representation_size(M.manifold)
     for e in edges(M.graph)
-        vw = _write(M, rep_size, X, src(e))
         X[src(e)] +=
             log(M.manifold, _read(M, rep_size, p, src(e)), _read(M, rep_size, p, dst(e)))
         if !is_directed(M.graph)
@@ -133,6 +148,7 @@ function incident_log!(
         X,
         p,
     ) where {𝔽}
+    zero_vector!(M, X, p)
     rep_size = representation_size(M.manifold)
     for e in edges(M.graph)
         X[src(e)] += (
@@ -156,7 +172,7 @@ function incident_log!(
 end
 
 @doc raw"""
-    manifold_dimension(N::GraphManifold{G,𝔽,M,VertexManifold})
+    manifold_dimension(N::GraphManifold{𝔽,G,TM,VertexManifold})
 
 returns the manifold dimension of the [`GraphManifold`](@ref) `N` on the vertices of
 a graph $G=(V,E)$, i.e.
@@ -169,7 +185,7 @@ function manifold_dimension(M::VertexGraphManifold)
     return manifold_dimension(M.manifold) * nv(M.graph)
 end
 @doc raw"""
-    manifold_dimension(N::GraphManifold{G,𝔽,M,EdgeManifold})
+    manifold_dimension(N::GraphManifold{𝔽,G,TM,EdgeManifold})
 
 returns the manifold dimension of the [`GraphManifold`](@ref) `N` on the edges of
 a graph $G=(V,E)$, i.e.

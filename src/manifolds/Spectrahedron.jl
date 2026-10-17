@@ -47,6 +47,12 @@ struct Spectrahedron{T} <: AbstractDecoratorManifold{ℝ}
 end
 
 function Spectrahedron(n::Int, k::Int; parameter::Symbol = :type)
+    1 <= k <= n || throw(
+        DomainError(
+            (n, k),
+            "The rank k of a spectrahedron must satisfy 1 ≤ k ≤ n, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return Spectrahedron{typeof(size)}(size)
 end
@@ -77,8 +83,9 @@ end
 Check whether ``X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}`` is a tangent vector to
 ``p=qq^{\mathrm{T}}`` on the [`Spectrahedron`](@ref) `M`,
 i.e. after [`check_point`](@ref) of `q`, `Y` has to be of same dimension as `q`
-and a ``X`` has to be a symmetric matrix with trace.
-The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
+and ``X`` has to be a symmetric matrix with zero trace.
+The trace has to vanish up to `max(atol, 2 * rtol * norm(q) * norm(Y))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 Note that symmetry of ``X`` holds by construction and is not explicitly checked.
 """
 function check_vector(
@@ -86,14 +93,16 @@ function check_vector(
         q,
         Y::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
     X = q * Y' + Y * q'
     n = tr(X)
-    if !isapprox(n, 0; atol = atol, kwargs...)
+    r = abs(n)
+    if !(r <= atol || r <= 2 * rtol * norm(q) * norm(Y))
         return DomainError(
             n,
-            "The vector $(X) is not a tangent to a point on $(M) (represented py $(q) and $(Y), since its trace is nonzero.",
+            "The vector $(X) is not a tangent to a point on $(M) (represented by $(q) and $(Y)), since its trace is nonzero.",
         )
     end
     return nothing
@@ -110,6 +119,8 @@ end
 function ManifoldsBase.get_embedding_type(::Spectrahedron)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
+
+metric(::Spectrahedron) = EuclideanMetric()
 
 """
     is_flat(::Spectrahedron)
@@ -156,6 +167,26 @@ function project!(::Spectrahedron, Z, q, Y)
 end
 
 @doc raw"""
+    rand(M::Spectrahedron; vector_at=nothing, σ::Real=1.0)
+    rand!(M::Spectrahedron, pX; vector_at=nothing, σ::Real=1.0)
+
+Project a matrix of independent normally distributed entries with standard deviation `σ`
+onto `M`, or onto the tangent space at `vector_at`.
+"""
+function Random.rand!(
+        rng::AbstractRNG, M::Spectrahedron, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX)))
+    )
+    A = σ .* randn(rng, eltype(pX), representation_size(M))
+    if vector_at === nothing
+        project!(M, pX, A)
+    else
+        project!(M, pX, vector_at, A)
+    end
+    return pX
+end
+
+@doc raw"""
     retract(M::Spectrahedron, q, Y, ::ProjectionRetraction)
 
 compute a projection based retraction by projecting ``q+Y`` back onto the manifold.
@@ -178,7 +209,7 @@ on ``\mathcal M = \mathcal S(n,k)``.
 """
 representation_size(M::Spectrahedron) = get_parameter(M.size)
 
-function Base.show(io::IO, M::Spectrahedron{TypeParameter{Tuple{n, k}}}) where {n, k}
+function Base.show(io::IO, ::Spectrahedron{TypeParameter{Tuple{n, k}}}) where {n, k}
     return print(io, "Spectrahedron($n, $k)")
 end
 function Base.show(io::IO, M::Spectrahedron{Tuple{Int, Int}})

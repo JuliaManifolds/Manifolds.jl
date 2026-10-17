@@ -245,7 +245,7 @@ end
         v = range(0, π, length = surface_resolution_lat + 1)
         x = cos.(u) * sin.(v)'
         y = sin.(u) * sin.(v)'
-        z = repeat(cos.(v)', outer = [wires_lon + 1, 1])
+        z = repeat(cos.(v)', outer = [surface_resolution_lon + 1, 1])
         @series begin
             seriestype := :surface
             seriescolor := surface_color

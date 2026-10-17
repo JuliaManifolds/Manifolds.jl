@@ -24,7 +24,7 @@ struct ApproximateLogarithmicMap{T} <: ApproximateInverseRetraction
     tolerance::T
 end
 
-function distance(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, q, p)
+function distance(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, p, q)
     return norm(M, p, log(M, p, q))
 end
 
@@ -69,6 +69,9 @@ exp(::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, ::Any...)
 function exp!(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, q, p, X)
     n, k = get_parameter(M.manifold.size)
     A = p' * X
+    if q === p # the products below must not write into one of their factors
+        p = copy(q)
+    end
     n == k && return mul!(q, p, exp(A))
     QR = qr(X - p * A)
     BC_ext = exp([A -QR.R'; QR.R 0 * I])
@@ -99,6 +102,8 @@ function inner(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, p, X, Y)
     end
 end
 
+@tfvector_inner_via_get_vector MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}
+
 @doc raw"""
     X = inverse_retract(M::MetricManifold{ℝ, Stiefel{ℝ}, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
     inverse_retract!(M::MetricManifold{ℝ, Stiefel{ℝ}, X, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
@@ -124,6 +129,16 @@ Return true if [`Stiefel`](@ref) `M` is one-dimensional, since only then, the ma
 """
 is_flat(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}) = manifold_dimension(M) == 1
 
+@doc raw"""
+    log(M::MetricManifold{ℝ,<:Stiefel{ℝ},CanonicalMetric}, p, q; maxiter=10000, tolerance=1.0e-9)
+
+Compute an approximation of the logarithmic map ``\log_p q`` on the [`Stiefel`](@ref)`(n, k)`
+manifold with respect to the [`CanonicalMetric`](@ref).
+It returns `inverse_retract(M, p, q, ApproximateLogarithmicMap(maxiter, tolerance))`.
+The keyword arguments are the maximal number of iterations and the tolerance of the stopping
+criterion of the [`ApproximateLogarithmicMap`](@ref), whose iteration is described at
+[`inverse_retract(::MetricManifold{ℝ,<:Stiefel{ℝ},CanonicalMetric}, ::Any, ::Any, ::ApproximateLogarithmicMap)`](@ref).
+"""
 function log(
         M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, p, q;
         maxiter::Int = 10000, tolerance = 1.0e-9,
@@ -189,12 +204,12 @@ Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](@ref)
 ```math
     \operatorname{Hess}f(p)[X]
     =
-    \operatorname{proj}_{T_p\mathcal M}\Bigl(
+    \operatorname{proj}_{T_p\mathcal M}\Bigl(g_p^{-1}\Bigl(
         ∇^2f(p)[X] - \frac{1}{2} X \bigl( (∇f(p))^{\mathrm{H}}p + p^{\mathrm{H}}∇f(p)\bigr)
-        - \frac{1}{2} \bigl( P ∇f(p) p^{\mathrm{H}} + p ∇f(p))^{\mathrm{H}} P)X
-    \Bigr),
+        - \frac{1}{2} \bigl( P ∇f(p) p^{\mathrm{H}} + p (∇f(p))^{\mathrm{H}} P\bigr)X
+    \Bigr)\Bigr),
 ```
-where ``P = I-pp^{\mathrm{H}}``.
+where ``P = I-pp^{\mathrm{H}}`` and ``g_p^{-1}W = PW + 2pp^{\mathrm{H}}W``.
 """
 riemannian_Hessian(M::MetricManifold{𝔽, Stiefel, CanonicalMetric}, p, G, H, X) where {𝔽}
 
@@ -208,6 +223,8 @@ function riemannian_Hessian!(
     ) where {𝔽}
     Gp = symmetrize(G' * p)
     Z = symmetrize((I - p * p') * G * p')
-    project!(M, Y, p, H - X * Gp - Z * X)
+    W = H - X * Gp - Z * X
+    # apply g_p^{-1}W = (I - pp')W + 2pp'W = W + pp'W, then project
+    project!(M, Y, p, W + p * (p' * W))
     return Y
 end

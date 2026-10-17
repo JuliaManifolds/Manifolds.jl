@@ -26,6 +26,9 @@ struct HeisenbergMatrices{T} <: AbstractDecoratorManifold{ℝ}
 end
 
 function HeisenbergMatrices(n::Int; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The dimension n of Heisenberg matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return HeisenbergMatrices{typeof(size)}(size)
 end
@@ -41,33 +44,33 @@ end
 
 function check_point(M::HeisenbergMatrices, p; kwargs...)
     n = get_parameter(M.size)[1]
-    if !isone(p[1, 1])
+    if !isapprox(p[1, 1], 1; kwargs...)
         return DomainError(
             p[1, 1],
             "The matrix $(p) does not lie on $(M), since p[1, 1] is not equal to 1.",
         )
     end
-    if !isone(p[n + 2, n + 2])
+    if !isapprox(p[n + 2, n + 2], 1; kwargs...)
         return DomainError(
             p[n + 2, n + 2],
             "The matrix $(p) does not lie on $(M), since p[n+2, n+2] is not equal to 1.",
         )
     end
-    if !iszero(p[2:(n + 2), 1])
+    if !isapprox(norm(p[2:(n + 2), 1]), 0; kwargs...)
         return DomainError(
-            norm(iszero(p[2:(n + 2), 1])),
+            norm(p[2:(n + 2), 1]),
             "The matrix $(p) does not lie on $(M), since p[2:(n + 2), 1] is not equal to 0.",
         )
     end
-    if !iszero(p[n + 2, 1:(n + 1)])
+    if !isapprox(norm(p[n + 2, 1:(n + 1)]), 0; kwargs...)
         return DomainError(
-            norm(iszero(p[n + 2, 1:(n + 1)])),
+            norm(p[n + 2, 1:(n + 1)]),
             "The matrix $(p) does not lie on $(M), since p[n + 2, 1:(n+1)] is not equal to 0.",
         )
     end
-    if !isapprox(I, p[2:(n + 1), 2:(n + 1)])
+    if !isapprox(I, p[2:(n + 1), 2:(n + 1)]; kwargs...)
         return DomainError(
-            det(p[2:(n + 1), 2:(n + 1)] - I),
+            norm(p[2:(n + 1), 2:(n + 1)] - I),
             "The matrix $(p) does not lie on $(M), since p[2:(n+1), 2:(n+1)] is not an identity matrix.",
         )
     end
@@ -77,19 +80,19 @@ end
 
 function check_vector(M::HeisenbergMatrices, p, X; kwargs...)
     n = get_parameter(M.size)[1]
-    if !iszero(X[1, 1])
+    if !isapprox(X[1, 1], 0; kwargs...)
         return DomainError(
             X[1, 1],
             "The matrix $(X) does not lie in the tangent space of $(M), since X[1, 1] is not equal to 0.",
         )
     end
-    if !iszero(X[n + 2, n + 2])
+    if !isapprox(X[n + 2, n + 2], 0; kwargs...)
         return DomainError(
             X[n + 2, n + 2],
             "The matrix $(X) does not lie in the tangent space of $(M), since X[n+2, n+2] is not equal to 0.",
         )
     end
-    if !iszero(X[2:(n + 2), 1:(n + 1)])
+    if !isapprox(norm(X[2:(n + 2), 1:(n + 1)]), 0; kwargs...)
         return DomainError(
             norm(X[2:(n + 2), 1:(n + 1)]),
             "The matrix $(X) does not lie in the tangent space of $(M), since X[2:(n + 2), 1:(n + 1)] is not a zero matrix.",
@@ -107,9 +110,9 @@ embed(::HeisenbergMatrices, p, X) = X
 Get coordinates of tangent vector `X` at point `p` from the [`HeisenbergMatrices`](@ref) `M`.
 Given a matrix
 ```math
-\begin{bmatrix} 1 & \mathbf{a} & c \\
-\mathbf{0} & I_n & \mathbf{b} \\
-0 & \mathbf{0} & 1 \end{bmatrix}
+\begin{bmatrix} 0 & \mathbf{a} & c \\
+\mathbf{0} & 0_n & \mathbf{b} \\
+0 & \mathbf{0} & 0 \end{bmatrix}
 ```
 the coordinates are concatenated vectors ``\mathbf{a}``, ``\mathbf{b}``, and number ``c``.
 """
@@ -144,11 +147,11 @@ end
     get_vector(M::HeisenbergMatrices, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
 
 Get tangent vector with coordinates `Xⁱ` at point `p` from the [`HeisenbergMatrices`](@ref) `M`.
-Given a vector of coordinates ``\begin{bmatrix}\mathbb{a} & \mathbb{b} & c\end{bmatrix}`` the tangent vector is equal to
+Given a vector of coordinates ``\begin{bmatrix}\mathbf{a} & \mathbf{b} & c\end{bmatrix}`` the tangent vector is equal to
 ```math
-\begin{bmatrix} 1 & \mathbf{a} & c \\
-\mathbf{0} & I_n & \mathbf{b} \\
-0 & \mathbf{0} & 1 \end{bmatrix}
+\begin{bmatrix} 0 & \mathbf{a} & c \\
+\mathbf{0} & 0_n & \mathbf{b} \\
+0 & \mathbf{0} & 0 \end{bmatrix}
 ```
 """
 get_vector(M::HeisenbergMatrices, p, c, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
@@ -156,8 +159,8 @@ get_vector(M::HeisenbergMatrices, p, c, ::DefaultOrthonormalBasis{ℝ, TangentSp
 function get_vector_orthonormal(M::HeisenbergMatrices, p, Xⁱ, ::RealNumbers)
     n = get_parameter(M.size)[1]
     return [
-        0 Xⁱ[1:n] Xⁱ[2 * n + 1]
-        zeros(n, n + 1) Xⁱ[(n + 1):(2 * n)]'
+        0 Xⁱ[1:n]' Xⁱ[2 * n + 1]
+        zeros(n, n + 1) Xⁱ[(n + 1):(2 * n)]
         zeros(1, n + 2)
     ]
 end

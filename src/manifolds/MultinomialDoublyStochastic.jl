@@ -10,11 +10,19 @@ That way they share the inner product (just by restriction), and even the Rieman
 """
 abstract type AbstractMultinomialDoublyStochastic <: AbstractDecoratorManifold{ℝ} end
 
+"""
+    default_retraction_method(M::AbstractMultinomialDoublyStochastic)
+
+Return [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`), the retraction
+that the doubly stochastic multinomial manifolds implement.
+"""
+default_retraction_method(::AbstractMultinomialDoublyStochastic) = ProjectionRetraction()
+
 @doc raw"""
     representation_size(M::AbstractMultinomialDoublyStochastic)
 
 return the representation size of doubly stochastic matrices, which are embedded
-in the ``ℝ^{n×n}`` matrices and hence the answer here is ``
+in the ``ℝ^{n×n}`` matrices and hence the answer here is ``(n,n)``.
 """
 function representation_size(M::AbstractMultinomialDoublyStochastic)
     n = get_parameter(M.size)[1]
@@ -45,14 +53,14 @@ function riemannian_gradient!(M::AbstractMultinomialDoublyStochastic, X, p, Y; k
 end
 
 @doc raw"""
-    MultinomialDoublyStochastic{T} <: AbstractMultinomialDoublyStochastic
+    MultinomialDoubleStochastic{T} <: AbstractMultinomialDoublyStochastic
 
 The set of doubly stochastic multinomial matrices consists of all ``n×n`` matrices with
 stochastic columns and rows, i.e.
 
 ````math
 \begin{aligned}
-\mathcal{DP}(n) \coloneqq \bigl\{p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m,\\
+\mathcal{DP}(n) \coloneqq \bigl\{p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,n,\\
 & p\mathbf{1}_n = p^{\mathrm{T}}\mathbf{1}_n = \mathbf{1}_n
 \bigr\},
 \end{aligned}
@@ -60,12 +68,11 @@ stochastic columns and rows, i.e.
 
 where ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
 
-The tangent space can be written as
+The tangent space is given in Proposition 3.1 of [Douik:2020](@cite) as
 
 ````math
 T_p\mathcal{DP}(n) \coloneqq \bigl\{
-X ∈ ℝ^{n×n}\ \big|\ X = X^{\mathrm{T}} \text{ and }
-X\mathbf{1}_n = X^{\mathrm{T}}\mathbf{1}_n = \mathbf{0}_n
+X ∈ ℝ^{n×n}\ \big|\ X\mathbf{1}_n = X^{\mathrm{T}}\mathbf{1}_n = \mathbf{0}_n
 \bigr\},
 ````
 
@@ -77,13 +84,16 @@ More details can be found in Section III [DouikHassibi:2019](@cite).
 
     MultinomialDoubleStochastic(n::Int; parameter::Symbol=:type)
 
-Generate the manifold of matrices ``ℝ^{n×n}`` that are doubly stochastic and symmetric.
+Generate the manifold of matrices ``ℝ^{n×n}`` that are doubly stochastic.
 """
 struct MultinomialDoubleStochastic{T} <: AbstractMultinomialDoublyStochastic
     size::T
 end
 
 function MultinomialDoubleStochastic(n::Int; parameter::Symbol = :type)
+    n < 1 && throw(
+        DomainError(n, "The matrix size n of doubly stochastic matrices must be positive, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return MultinomialDoubleStochastic{typeof(size)}(size)
 end
@@ -161,7 +171,8 @@ The formula reads
 ````
 
 where ``⊙`` denotes the Hadamard or elementwise product and ``\mathbb{1}_n`` is the vector of length ``n`` containing ones.
-The two vectors ``α,β ∈ ℝ^{n×n}`` are computed as a solution (typically using the left pseudo inverse) of
+The two vectors ``α,β ∈ ℝ^n`` are computed with an LU decomposition, or with the pseudo inverse if that fails,
+as a solution of
 
 ````math
     \begin{pmatrix} I_n & p\\p^{\mathrm{T}} & I_n \end{pmatrix}
@@ -170,13 +181,19 @@ The two vectors ``α,β ∈ ℝ^{n×n}`` are computed as a solution (typically u
     \begin{pmatrix} Y\mathbf{1}\\Y^{\mathrm{T}}\mathbf{1}\end{pmatrix},
 ````
 where ``I_n`` is the ``n×n`` unit matrix and ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
+This system has infinitely many solutions, and all of them yield the same projection,
+see [DouikHassibi:2019](@cite) and Theorem 3.1 in [Douik:2020](@cite).
 
 """
 project(::MultinomialDoubleStochastic, ::Any, ::Any)
 
 function project!(M::MultinomialDoubleStochastic, X, p, Y)
     n = get_parameter(M.size)[1]
-    ζ = [I p; p' I] \ [sum(Y, dims = 2); sum(Y, dims = 1)'] # Formula (25) from 1802.02628
+    A = [I p; p' I]
+    b = [sum(Y, dims = 2); sum(Y, dims = 1)']
+    # the system has infinitely many solutions; if the LU factorization fails, the pseudo inverse picks one
+    F = lu(A; check = false)
+    ζ = issuccess(F) ? F \ b : pinv(A) * b
     return X .= Y .- (repeat(ζ[1:n], 1, n) .+ repeat(ζ[(n + 1):end]', n, 1)) .* p
 end
 
@@ -184,12 +201,15 @@ end
     project(
         M::AbstractMultinomialDoublyStochastic,
         p;
-        maxiter = 100,
-        tolerance = eps(eltype(p))
+        maxiter = 1000,
+        tolerance = eps(real(float(eltype(p)))),
+        warn_nonconvergence = true,
     )
 
 project a matrix `p` with positive entries applying Sinkhorn's algorithm.
 Note that this project method – different from the usual case, accepts keywords.
+If the algorithm does not reach `tolerance` within `maxiter` iterations, a warning is
+issued unless `warn_nonconvergence` is set to `false`.
 """
 function project(M::AbstractMultinomialDoublyStochastic, p; kwargs...)
     q = allocate_result(M, project, p)
@@ -201,8 +221,9 @@ function project!(
         ::AbstractMultinomialDoublyStochastic,
         q,
         p;
-        maxiter::Int = 100,
-        tolerance::Real = eps(eltype(p)),
+        maxiter::Int = 1000,
+        tolerance::Real = eps(real(float(eltype(p)))),
+        warn_nonconvergence::Bool = true,
     )
     any(p .<= 0) && throw(
         DomainError(
@@ -210,16 +231,19 @@ function project!(
         ),
     )
     iter = 0
-    d1 = sum(p, dims = 1)
+    d1 = float.(sum(p, dims = 1))
     d2 = 1 ./ (p * d1')
     row = d2' * p
-    gap = 2 * tolerance
-    while iter < maxiter && (gap >= tolerance)
+    gap = maximum(abs.(row .* d1 .- 1))
+    while iter < maxiter && (gap > tolerance)
         iter += 1
         row .= d2' * p
         gap = maximum(abs.(row .* d1 .- 1))
         d1 .= 1 ./ row
         d2 .= 1 ./ (p * d1')
+    end
+    if warn_nonconvergence && gap > tolerance
+        @warn "Sinkhorn's algorithm stopped after $(maxiter) iterations with a gap of $(gap), which is larger than the tolerance $(tolerance)."
     end
     q .= p .* (d2 * d1)
     return q
@@ -233,12 +257,13 @@ or tangent vectors at the point `vector_at` if that is not `nothing`.
 
 Let ``n×n`` denote the matrix dimension of the [`MultinomialDoubleStochastic`](@ref).
 
-When `vector_at` is nothing, this is done by generating a random matrix`rand(n,n)`
-with positive entries and projecting it onto the manifold. The `kwargs...` are
+When `vector_at` is nothing, this is done by generating a random matrix `rand(n,n)`
+with positive entries and projecting it onto the manifold; `σ` has no effect in this case,
+since the projection normalizes rows and columns. The `kwargs...` are
 passed to this projection.
 
-When `vector_at` is not `nothing`, a random matrix in the ambient space is generated
-and projected onto the tangent space
+When `vector_at` is not `nothing`, a random matrix in the ambient space is generated,
+multiplied by `σ` and projected onto the tangent space.
 """
 rand(::MultinomialDoubleStochastic; σ::Real = 1.0)
 

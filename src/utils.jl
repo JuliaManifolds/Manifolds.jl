@@ -29,22 +29,23 @@ end
 
 Compute a modified `sign(z)` that is always nonzero, i.e. where
 ````math
-\operatorname(nzsign)(z) = \begin{cases}
-    1 & \text{if } z = 0\\
-    \frac{z}{|z|} & \text{otherwise}
+\operatorname{nzsign}(z) = \begin{cases}
+    1 & \text{if } |z| < ε^2,\\
+    \frac{z}{|z|} & \text{otherwise.}
 \end{cases}
 ````
+Here ``ε`` is `eps` of the floating point type of ``|z|``, and a given `absz` replaces ``|z|``.
 
 Note that the condition `absz == 0` would be incorrectly handled by ForwardDiff.jl.
 """
 @inline function nzsign(z, absz = abs(z))
     psignz = z / absz
-    return ifelse(absz < eps(typeof(absz))^2, one(psignz), psignz)
+    return ifelse(absz < eps(float(typeof(absz)))^2, one(psignz), psignz)
 end
 
-allocate(p, s::Size{S}) where {S} = similar(p, S...)
+allocate(p::AbstractArray, s::Size{S}) where {S} = similar(p, S...)
 allocate(p::StaticArray, s::Size{S}) where {S} = similar(p, maybesize(s))
-allocate(p, ::Type{T}, s::Size{S}) where {S, T} = similar(p, T, S...)
+allocate(p::AbstractArray, ::Type{T}, s::Size{S}) where {S, T} = similar(p, T, S...)
 allocate(p::StaticArray, ::Type{T}, s::Size{S}) where {S, T} = similar(p, T, maybesize(s))
 
 quat_promote(T::Type{<:Number}) = typeof(Quaternions.quat(zero(T)))
@@ -230,9 +231,10 @@ function symmetrize(X)
 end
 
 @doc raw"""
-    vec2skew!(X, v, k)
+    vec2skew!(X, v)
+    vec2skew(v, k)
 
-Create a skew symmetric matrix in-place in `X` of size ``k×k`` from a vector `v`,
+Create a skew symmetric matrix `X` of size ``k×k`` from a vector `v` (in place of `X`),
 for example for `v=[1,2,3]` and `k=3` this
 yields
 ````julia
@@ -291,7 +293,7 @@ Entry `(i, j)` corresponds to sectional curvature of the surface spanned by vect
 function sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis)
     V = get_vectors(M, p, get_basis(M, p, B))
     N = length(V)
-    result = zeros(N, N)
+    result = zeros(real(float(number_eltype(p))), N, N)
     for (i, e_i) in enumerate(V)
         for (j, e_j) in enumerate(V)
             if i < j
@@ -317,6 +319,7 @@ which states that
 where ``C(r)`` is the circumference of the circle of radius ``r`` around `p` in submanifold
 of `M` spanned by `X` and `Y`. The circumference calculation method has a tendency to
 return curvature values larger than the exact ones.
+`X` and `Y` are orthonormalized internally, so the estimate depends only on the plane they span.
 """
 function estimated_sectional_curvature(
         M::AbstractManifold,
@@ -326,14 +329,17 @@ function estimated_sectional_curvature(
         r::Real = 1.0e-3,
         N::Int = 10000,
     )
+    Xn = X ./ norm(M, p, X)
+    Yo = Y .- real(inner(M, p, Xn, Y)) .* Xn
+    Yn = Yo ./ norm(M, p, Yo)
     circumference = 0.0
-    p_i = similar(p)
-    p_ip1 = similar(p)
+    p_i = allocate(p)
+    p_ip1 = allocate(p)
     for i in 1:N
         θ_i = 2π * (i - 1) / N
         θ_ip1 = 2π * (i) / N
-        exp!(M, p_i, p, r .* (sin(θ_i) .* X .+ cos(θ_i) .* Y))
-        exp!(M, p_ip1, p, r .* (sin(θ_ip1) .* X .+ cos(θ_ip1) .* Y))
+        exp!(M, p_i, p, r .* (sin(θ_i) .* Xn .+ cos(θ_i) .* Yn))
+        exp!(M, p_ip1, p, r .* (sin(θ_ip1) .* Xn .+ cos(θ_ip1) .* Yn))
 
         circumference += distance(M, p_i, p_ip1)
     end
@@ -344,7 +350,7 @@ end
     estimated_sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis; r::Real=1e-3, N::Int=10000)
 
 Estimate the matrix of sectional curvatures of manifold `M` at point `p` using
-`estimated_sectional_curvature`. Entry `(i, j)`` corresponds to sectional curvature of the
+`estimated_sectional_curvature`. Entry `(i, j)` corresponds to sectional curvature of the
 surface spanned by vectors `i`  and `j` from basis `B`.
 """
 function estimated_sectional_curvature_matrix(
@@ -356,7 +362,7 @@ function estimated_sectional_curvature_matrix(
     )
     V = get_vectors(M, p, get_basis(M, p, B))
     N = length(V)
-    result = zeros(N, N)
+    result = zeros(real(float(number_eltype(p))), N, N)
     for (i, e_i) in enumerate(V)
         for (j, e_j) in enumerate(V)
             if i < j
@@ -378,5 +384,5 @@ function _ensure_nonzero_rng_determinant!(
     while abs(det(pX)) < atol
         rand!(rng, M, pX; kwargs...)
     end
-    return
+    return pX
 end

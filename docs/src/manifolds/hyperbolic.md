@@ -4,7 +4,7 @@ The hyperbolic space can be represented in three different models.
 
 * [Hyperboloid](@ref hyperboloid_model) which is the default model, i.e. is used when using arbitrary array types for points and tangent vectors
 * [Poincaré ball](@ref poincare_ball) with separate types for points and tangent vectors and a [visualization](@ref poincare_ball_plot) for the two-dimensional case
-* [Poincaré half space](@ref poincare_halfspace) with separate types for points and tangent vectors and a [visualization](@ref poincare_half_plane_plot) for the two-dimensional cae.
+* [Poincaré half space](@ref poincare_halfspace) with separate types for points and tangent vectors and a [visualization](@ref poincare_half_plane_plot) for the two-dimensional case.
 
 In the following the common functions are collected.
 
@@ -94,9 +94,9 @@ For the case of [`Hyperbolic`](@ref)`(2)` there is a plotting available based on
     [RecipesBase.jl](http://juliaplots.org/RecipesBase.jl/stable/) is loaded.
 
 If we consider a set of points, we can first plot these and their connecting
-geodesics using the `geodesic_interpolation` For the points. This variable specifies with how many points a geodesic between two successive points is sampled (per default it's `-1`, which deactivates geodesics) and the line style is set to be a path.
+geodesics using the `geodesic_interpolation` for the points. This variable specifies with how many points a geodesic between two successive points is sampled (per default it's `-1`, which deactivates geodesics) and the line style is set to be a path.
 Another keyword argument added is the border of the Poincaré disc, namely
-`circle_points = 720` resolution of the drawn boundary (every hlaf angle) as well as its color, `hyperbolic_border_color = RGBA(0.0, 0.0, 0.0, 1.0)`.
+`circle_points = 720` resolution of the drawn boundary (about every half degree) as well as its color, `hyperbolic_border_color = RGBA(0.0, 0.0, 0.0, 1.0)`.
 
 ```@example poincareball
 using Manifolds, Plots
@@ -142,7 +142,7 @@ For the case of [`Hyperbolic`](@ref)`(2)` there is a plotting available based on
     [RecipesBase.jl](http://juliaplots.org/RecipesBase.jl/stable/) is loaded.
 
 We again have two different recipes, one for points, one for tangent vectors, where the first one again can be equipped with geodesics between the points.
-In the following example we generate 7 points on an ellipse in the [Hyperboloid model](#hyperboloid-model).
+In the following example we generate 7 points on an ellipse in the [hyperboloid model](@ref hyperboloid_model).
 
 ```@example poincarehalfplane
 using Manifolds, Plots

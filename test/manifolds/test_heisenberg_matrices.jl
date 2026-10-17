@@ -1,6 +1,7 @@
 using LinearAlgebra, Manifolds, ManifoldsBase, Test
 
 @testset "Heisenberg matrices" begin
+    @test_throws DomainError HeisenbergMatrices(-1)
     M = HeisenbergMatrices(1)
 
     p1 = [1.0 2.0 3.0; 0.0 1.0 -1.0; 0.0 0.0 1.0]
@@ -31,8 +32,10 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
                 get_embedding, get_coordinates, get_vector,
                 injectivity_radius,
                 is_flat, is_point, is_vector,
+                manifold_dimension,
                 parallel_transport_to,
                 rand, repr, representation_size,
+                vector_transport_to,
                 Weingarten,
             ],
             :Bases => [DefaultOrthonormalBasis()],
@@ -55,10 +58,34 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
         ),
     )
 
+    @testset "check_point and check_vector with tolerances" begin
+        M2 = HeisenbergMatrices(2)
+        p = [1.0 1.5 -0.5 2.0; 0.0 1.0 0.0 0.7; 0.0 0.0 1.0 -1.2; 0.0 0.0 0.0 1.0]
+        q = copy(p)
+        q[3, 1] = 1.0e-12
+        q[4, 4] += 1.0e-12
+        @test is_point(M2, q; atol = 1.0e-5)
+        Y = [0.0 0.3 -0.4 1.1; 0.0 0.0 0.0 0.2; 0.0 0.0 0.0 -0.6; 1.0e-12 0.0 0.0 0.0]
+        @test is_vector(M2, p, Y; atol = 1.0e-5)
+        q1 = [1.0 1.5 -0.5 2.0; 0.0 1.0 0.0 0.7; 1.0e-3 0.0 1.0 -1.2; 0.0 0.0 0.0 1.0]
+        @test check_point(M2, q1).val == 1.0e-3
+        q2 = [1.0 1.5 -0.5 2.0; 0.0 2.0 0.0 0.7; 0.0 0.0 1.0 -1.2; 0.0 0.0 0.0 1.0]
+        @test check_point(M2, q2).val == 1.0
+    end
+
     Mf = HeisenbergMatrices(1; parameter = :field)
     Manifolds.Test.test_manifold(
         Mf,
         Dict(:Functions => [get_embedding, repr]),
         Dict(get_embedding => Euclidean(3, 3; parameter = :field), repr => "HeisenbergMatrices(1; parameter=:field)")
     )
+
+    @testset "get_vector for n = 2" begin
+        M2 = HeisenbergMatrices(2)
+        p = Matrix{Float64}(I, 4, 4)
+        c = [1.0, 2.0, 3.0, 4.0, 5.0]
+        X = get_vector(M2, p, c, DefaultOrthonormalBasis())
+        @test is_vector(M2, p, X)
+        @test get_coordinates(M2, p, X, DefaultOrthonormalBasis()) == c
+    end
 end

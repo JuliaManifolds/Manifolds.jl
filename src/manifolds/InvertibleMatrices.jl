@@ -11,7 +11,7 @@ where the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 # Constructor
 
-    InvertibleMatrices(n::Int, field::AbstractNumbers=ℝ)
+    InvertibleMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of ``n×n`` invertible matrices.
 """
@@ -20,6 +20,9 @@ struct InvertibleMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function InvertibleMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of invertible matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return InvertibleMatrices{field, typeof(size)}(size)
 end
@@ -113,6 +116,14 @@ Return true. [`InvertibleMatrices`](@ref) is a flat manifold.
 """
 is_flat(M::InvertibleMatrices) = true
 
+function get_coordinates_orthonormal!(M::InvertibleMatrices, c, p, X, N)
+    return get_coordinates_orthonormal!(get_embedding(M), c, p, X, N)
+end
+
+function get_vector_orthonormal!(M::InvertibleMatrices, X, p, c, N)
+    return get_vector_orthonormal!(get_embedding(M), X, p, c, N)
+end
+
 @doc raw"""
     manifold_dimension(M::InvertibleMatrices{n,𝔽})
 
@@ -127,7 +138,8 @@ end
     Random.rand(M::InvertibleMatrices; vector_at=nothing, kwargs...)
 
 If `vector_at` is `nothing`, return a random point on the [`InvertibleMatrices`](@ref)
-manifold `M` by using `rand` in the embedding.
+manifold `M` by using `rand` in the embedding. The point is drawn again while the absolute
+value of its determinant is below the square root of the machine epsilon of its entries.
 
 If `vector_at` is not `nothing`, return a random tangent vector from the tangent space of
 the point `vector_at` on the [`InvertibleMatrices`](@ref) by using by using `rand` in the

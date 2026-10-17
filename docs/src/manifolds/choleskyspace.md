@@ -17,3 +17,8 @@ Order = [:function]
 ```
 
 ## Literature
+
+```@bibliography
+Pages = ["choleskyspace.md"]
+Canonical=false
+```

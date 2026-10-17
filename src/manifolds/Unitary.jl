@@ -25,13 +25,16 @@ If you prefer the representation as `X` you can use the [`Stiefel`](@ref)`(n, n,
 
 # Constructor
 
-    UnitaryMatrices(n, 𝔽::AbstractNumbers=ℂ)
+    UnitaryMatrices(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
 
 see also [`OrthogonalMatrices`](@ref) for the real valued case.
 """
 const UnitaryMatrices{𝔽, T} = GeneralUnitaryMatrices{𝔽, T, AbsoluteDeterminantOneMatrixType}
 
 function UnitaryMatrices(n::Int, 𝔽::AbstractNumbers = ℂ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of unitary matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return UnitaryMatrices{𝔽, typeof(size)}(size)
 end
@@ -41,7 +44,7 @@ check_size(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number) = noth
 
 embed(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p::Number) = SMatrix{1, 1}(p)
 
-embed(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number) = SMatrix{1, 1}(X)
+embed(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number) = SMatrix{1, 1}(p * X)
 
 function exp(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number)
     return p * exp(X)
@@ -79,7 +82,7 @@ For ``\mathrm{U}(n)``, coordinates are ordered over the upper triangular part:
 diagonal entries contribute their imaginary parts, and each strict upper-triangular
 entry contributes real and imaginary parts, both scaled by ``\sqrt{2}``.
 """
-get_coordinates(M::UnitaryMatrices{ℂ}, p, X, ::B::DefaultOrthonormalBasis)
+get_coordinates(M::UnitaryMatrices{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 function get_coordinates_orthonormal!(M::UnitaryMatrices{ℂ}, c, p, X, ::RealNumbers)
     n = get_parameter(M.size)[1]
@@ -171,7 +174,10 @@ number_of_coordinates(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, ::Abstrac
 
 project(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p) = sign(p)
 
-project(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X) = (X - conj(X)) / 2
+function project(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X)
+    Y = conj(p) * X
+    return (Y - conj(Y)) / 2
+end
 
 function Random.rand(M::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}; vector_at = nothing)
     if vector_at === nothing
@@ -193,7 +199,7 @@ function Random.rand(
 end
 
 @doc raw"""
-    rand(::Unitary; vector_at=nothing, σ::Real=1.0)
+    rand(::UnitaryMatrices; vector_at=nothing, σ::Real=1.0)
 
 Generate a random point on the [`UnitaryMatrices`](@ref) manifold,
 if `vector_at` is nothing, by computing the QR decomposition of
@@ -249,29 +255,31 @@ and that means the inverse has to be applied to the (Euclidean) Hessian
 to map it into the Lie algebra.
 """
 riemannian_Hessian(M::UnitaryMatrices, p, G, H, X)
-function riemannian_Hessian!(M::UnitaryMatrices, Y, p, G, H, X)
+function riemannian_Hessian!(M::UnitaryMatrices{𝔽}, Y, p, G, H, X) where {𝔽}
+    n = get_parameter(M.size)[1]
     symmetrize!(Y, G' * p)
-    project!(M, Y, p, p' * H - X * Y)
+    project!(SkewHermitianMatrices(n, 𝔽), Y, p' * H - X * Y)
     return Y
 end
 
 @doc raw"""
     Weingarten(M::UnitaryMatrices, p, X, V)
 
-Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Stiefel`](@ref) `M` with respect to the
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`UnitaryMatrices`](@ref) `M` with respect to the
 tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
 
 The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 
 ```math
-\mathcal W_p(X,V) = -\frac{1}{2}p\bigl(V^{\mathrm{H}}X - X^\mathrm{H}V\bigr).
+\mathcal W_p(X,V) = -\frac{1}{2}\bigl(XS + SX\bigr),
+\qquad S = p^{\mathrm{H}}V.
 ```
 """
 Weingarten(::UnitaryMatrices, p, X, V)
 
 function Weingarten!(::UnitaryMatrices, Y, p, X, V)
-    Y .= V' * X
-    Y .= -p * 1 / 2 * (Y - Y')
+    S = p' * V
+    Y .= -(X * S .+ S * X) ./ 2
     return Y
 end
 

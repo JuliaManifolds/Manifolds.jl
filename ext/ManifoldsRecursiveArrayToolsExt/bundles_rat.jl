@@ -27,6 +27,13 @@ function get_vector(M::FiberBundle, p::ArrayPartition, c::AbstractVector, B::Abs
         get_vector(F, xp2, c[(n + 1):end], B),
     )
 end
+# disambiguation
+function get_vector(
+        M::FiberBundle, p::ArrayPartition, c::AbstractVector,
+        B::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
+    ) where {𝔽}
+    return @invoke get_vector(M::AbstractManifold, p, c, B)
+end
 function get_vector(
         M::FiberBundle, p::ArrayPartition, c::AbstractVector,
         B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData},
@@ -47,7 +54,7 @@ function get_vectors(
     xp1, xp2 = submanifold_components(M, p)
     zero_m = zero_vector(M.manifold, xp1)
     F = Fiber(M.manifold, xp1, M.type)
-    zero_f = zero_vector(F, xp1)
+    zero_f = zero_vector(F, xp2)
     vs = typeof(ArrayPartition(zero_m, zero_f))[]
     for bv in get_vectors(M.manifold, xp1, B.data.base_basis)
         push!(vs, ArrayPartition(bv, zero_f))
