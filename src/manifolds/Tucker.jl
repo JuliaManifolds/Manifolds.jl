@@ -891,12 +891,10 @@ function ManifoldsBase.retract_polar!(
     return q
 end
 
-function Base.show(
-        io::IO, ::MIME"text/plain", ::Tucker{𝔽, TypeParameter{Tuple{n, r}}, D},
-    ) where {n, r, D, 𝔽}
+function Base.show(io::IO, ::Tucker{𝔽, TypeParameter{Tuple{n, r}}, D}) where {n, r, D, 𝔽}
     return print(io, "Tucker($(n), $(r), $(𝔽))")
 end
-function Base.show(io::IO, ::MIME"text/plain", M::Tucker{𝔽, <:Tuple, D}) where {D, 𝔽}
+function Base.show(io::IO, M::Tucker{𝔽, <:Tuple, D}) where {D, 𝔽}
     n, r = get_parameter(M.size)
     return print(io, "Tucker($(n), $(r), $(𝔽); parameter=:field)")
 end

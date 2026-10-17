@@ -241,6 +241,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `is_vector` on the `Tucker` manifold checks that the factor matrices of a tangent vector are orthogonal to those of the point, and it accepts the keywords `atol` and `rtol`.
 * `get_coordinates!` on the `Tucker` manifold writes the coordinates of the default orthonormal basis into the given vector.
 * `inner` under the `BuresWassersteinMetric` on `SymmetricPositiveDefinite` returns a number of the element type of its arguments.
+* `Circle(ℂ)^n` returns the power manifold of the complex circle.
 
 ## [0.11.32] 2026-09-30
 

@@ -39,6 +39,8 @@ include("../header.jl")
         -0.02823014 0.00029946 -0.04196034 -0.04145413
     ]
     @testset "Basics" begin
+        @test_throws ArgumentError SymplecticGrassmann(5, 4)
+        @test_throws ArgumentError SymplecticGrassmann(6, 3)
         @test repr(M) == "SymplecticGrassmann(6, 4)"
         @test repr(Mf) == "SymplecticGrassmann(6, 4; parameter=:field)"
         @test manifold_dimension(M) == 4 * (6 - 4)

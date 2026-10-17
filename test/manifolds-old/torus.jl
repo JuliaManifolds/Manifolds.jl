@@ -9,6 +9,7 @@ include("../header.jl")
         @test Circle()^(3,) === PowerManifold(Circle(), 3)
         @test ^(Circle(), 2) === Torus(2)
         @test typeof(^(Circle(), 2)) == Torus{2}
+        @test Circle(ℂ)^3 === PowerManifold(Circle(ℂ), 3)
         @test repr(M) == "Torus(2)"
         @test representation_size(M) == (2,)
         @test manifold_dimension(M) == 2

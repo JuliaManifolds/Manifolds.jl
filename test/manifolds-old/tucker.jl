@@ -150,6 +150,7 @@ include("../header.jl")
             shiftprint(x) = replace(sprint(show, "text/plain", x), "\n" => "\n ")
 
             @test sprint(show, "text/plain", M) == "Tucker((4, 5, 6), (2, 3, 4), ℝ)"
+            @test repr(M) == "Tucker((4, 5, 6), (2, 3, 4), ℝ)"
             @test sprint(show, "text/plain", p) == """
                 $(summary(p))
                 U factor 1:
@@ -212,6 +213,7 @@ include("../header.jl")
         M = Tucker(n⃗, r⃗; parameter = :field)
         @test sprint(show, "text/plain", M) ==
             "Tucker((4, 5, 6), (2, 3, 4), ℝ; parameter=:field)"
+        @test repr(M) == "Tucker((4, 5, 6), (2, 3, 4), ℝ; parameter=:field)"
     end
 
     @testset "projection transport" begin
