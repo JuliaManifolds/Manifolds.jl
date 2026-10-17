@@ -162,7 +162,7 @@ VC_i = X_i, \qquad i=1,…,k.
 """
 get_coordinates(::Grassmann{ℝ}, p, c, ::DefaultOrthonormalBasis)
 
-function get_coordinates_orthonormal!(M::Grassmann{ℝ}, c, p, X, ::RealNumbers)
+function get_coordinates_orthonormal!(M::Grassmann{ℝ}, c, p::AbstractArray, X, ::RealNumbers)
     V = nullspace(p') # from SVD, so we have (n-k) ON columns in R^n
     c .= vec(V \ X)
     return c
@@ -216,7 +216,7 @@ X_i = VC_i = \sum_{j=1}^{n-k} c_{i(n-k) + j}v_j,\qquad i=1,…k
 """
 get_vector(::Grassmann{ℝ}, p, c, ::DefaultOrthonormalBasis)
 
-function get_vector_orthonormal!(M::Grassmann{ℝ}, X, p, c, ::RealNumbers)
+function get_vector_orthonormal!(M::Grassmann{ℝ}, X, p::AbstractArray, c, ::RealNumbers)
     n, k = get_parameter(M.size)
     V = nullspace(p') # from SVD, so we have (n-k) ON columns in R^n
     mul!(X, V, reshape(c, n - k, k))

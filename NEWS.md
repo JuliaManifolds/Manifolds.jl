@@ -245,6 +245,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_coordinates` and `get_vector` on the sphere and the projective space, and `parallel_transport_to` on the projective space, accept points with integer entries.
 * `sectional_curvature_matrix` and `estimated_sectional_curvature_matrix` return their result in the floating-point number type of the point.
 * `estimated_sectional_curvature` works on manifolds whose points are arrays of arrays, such as `Segre`.
+* `exp` and `exp_fused` on the sphere can be differentiated with forward-mode automatic differentiation at the zero tangent vector, so that `ManifoldDiff.gradient` and `ManifoldDiff.hessian` with a forward-mode `TangentDiffBackend` work on the sphere.
+* `get_coordinates!` and `get_vector!` on the real `Grassmann` manifold and the differentiated retraction vector transports on `Stiefel` accept points and tangent vectors given as `StiefelPoint` and `StiefelTangentVector`.
 
 ## [0.11.32] 2026-09-30
 

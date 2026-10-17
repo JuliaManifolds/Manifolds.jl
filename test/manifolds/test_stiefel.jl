@@ -78,6 +78,20 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
             qpa = retract(M, p, X, rpa)
             @test is_point(M, qpa; error = :error)
         end
+        @testset "Differentiated retraction transports of a StiefelPoint" begin
+            pS, qS = StiefelPoint(p), StiefelPoint(q)
+            XS, YS = StiefelTangentVector(X), StiefelTangentVector(Y)
+            for m in [CayleyRetraction(), PolarRetraction(), QRRetraction()]
+                vt = DifferentiatedRetractionVectorTransport(m)
+                Xd = vector_transport_direction(M, p, X, Y, vt)
+                @test vector_transport_direction(M, pS, XS, YS, vt).value == Xd
+            end
+            for m in [PolarRetraction(), QRRetraction()]
+                vt = DifferentiatedRetractionVectorTransport(m)
+                Xt = vector_transport_to(M, p, X, q, vt)
+                @test vector_transport_to(M, pS, XS, qS, vt).value == Xt
+            end
+        end
 
 
         @testset "Distribution tests" begin

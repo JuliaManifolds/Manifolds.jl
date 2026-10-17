@@ -184,6 +184,12 @@ end
             # might be a bit dependent on nullspace, but it returns an ONB in x3,x4
             @test X == [0.0 0.0; 0.0 0.0; 1.0 0.0; 1.0 0.0]
             @test get_coordinates(M, p, X, B) == c
+            cS = similar(c)
+            get_coordinates!(M, cS, StiefelPoint(p), StiefelTangentVector(X), B)
+            @test cS == c
+            XS = StiefelTangentVector(similar(X))
+            get_vector!(M, XS, StiefelPoint(p), c, B)
+            @test XS.value == X
         end
 
     end

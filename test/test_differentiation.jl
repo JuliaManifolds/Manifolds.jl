@@ -1,5 +1,7 @@
 # A bit of duplication of tests in ManifoldDiff.jl but it ensures that it works here too.
 
+using Manifolds, Test
+
 using Manifolds:
     default_differential_backend,
     _derivative,
@@ -148,7 +150,7 @@ end
 
     q = [sqrt(2) / 2, 0, sqrt(2) / 2]
     X = similar(q)
-    for backend in [rb_onb_default, rb_proj]
+    for backend in [rb_onb_default, rb_proj, rb_onb_fwd_diff]
         @test isapprox(s2, q, gradient(s2, f1, q, backend), [0.5, 0.0, -0.5])
         @test gradient!(s2, f1, X, q, backend) === X
         @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
@@ -207,6 +209,13 @@ end
         ManifoldDiff.hessian(s2, f1, q, rb_onb_fwd_diff),
         [2.0 0.0; 0.0 0.0],
     )
+    # the third coordinate, whose Riemannian Hessian is -p[3] times the identity
+    f2(p) = p[3]
+    @test isapprox(ManifoldDiff.hessian(s2, f2, q, rb_onb_fwd_diff), [-q[3] 0.0; 0.0 -q[3]])
+    # the same along the fused exponential map with t = 1/2, which scales the Hessian by 1/4
+    B = DefaultOrthonormalBasis()
+    g2(c) = f2(Manifolds.exp_fused(s2, q, get_vector(s2, q, c, B), 0.5))
+    @test isapprox(ForwardDiff.hessian(g2, zeros(2)), [-q[3] 0.0; 0.0 -q[3]] ./ 4)
 end
 
 @testset "EmbeddedBackend" begin
