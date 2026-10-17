@@ -90,6 +90,10 @@ include("../header.jl")
     end
     p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
     q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
+    @testset "element type of the Bures-Wasserstein inner product" begin
+        Xf = Float32[0.0 1.0 0.0; 1.0 0.0 0.0; 0.0 0.0 1.0]
+        @test inner(M5, Float32.(p), Xf, Xf) isa Float32
+    end
     @testset "Convert Eucl/Emb to (Generalised) BW" begin
         Z = ones(3, 3)
         em = EuclideanMetric()

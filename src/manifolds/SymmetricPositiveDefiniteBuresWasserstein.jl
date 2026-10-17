@@ -104,7 +104,7 @@ function inner(
         X,
         Y,
     )
-    return 1 / 2 * dot(lyap(p, -X), Y)
+    return dot(lyap(p, -X), Y) / 2
 end
 
 @tfvector_inner_via_get_vector MetricManifold{
