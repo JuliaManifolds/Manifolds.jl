@@ -163,6 +163,14 @@ end
         @test p1[Ms1, 2] ≈ 4 * p2
         @test view(p1, Ms1, 1) == p1[Ms1, 1]
         @test view(p1, Ms1, 1) isa SubArray
+        q1 = [1.0 0.0 0.0 0.6 0.0; 0.0 1.0 0.0 0.8 0.6; 0.0 0.0 1.0 0.0 0.8]
+        pv = VectorOfArray([q1[:, i] for i in 1:5])
+        @test pv[Ms1, 4] == [0.6, 0.8, 0.0]
+        @test view(pv, Ms1, 4) == [0.6, 0.8, 0.0]
+        Me5 = PowerManifold(Euclidean(), 5)
+        pvs = VectorOfArray([1.0, 2.0, 3.0, 4.0, 5.0])
+        @test pvs[Me5, 2] == 2.0
+        @test view(pvs, Me5, 2)[] == 2.0
 
         Msn1 = PowerManifold(Ms, Manifolds.NestedPowerRepresentation(), 5)
         p_n1 = [randn(3) for _ in 1:5]
