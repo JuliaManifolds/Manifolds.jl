@@ -27,6 +27,13 @@ function get_vector(M::FiberBundle, p::ArrayPartition, c::AbstractVector, B::Abs
         get_vector(F, xp2, c[(n + 1):end], B),
     )
 end
+# disambiguation
+function get_vector(
+        M::FiberBundle, p::ArrayPartition, c::AbstractVector,
+        B::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
+    ) where {𝔽}
+    return @invoke get_vector(M::AbstractManifold, p, c, B)
+end
 function get_vector(
         M::FiberBundle, p::ArrayPartition, c::AbstractVector,
         B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData},

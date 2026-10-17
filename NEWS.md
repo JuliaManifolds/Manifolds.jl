@@ -249,6 +249,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_coordinates!` and `get_vector!` on the real `Grassmann` manifold and the differentiated retraction vector transports on `Stiefel` accept points and tangent vectors given as `StiefelPoint` and `StiefelTangentVector`.
 * Indexing and `view` of points on a `PowerManifold` work when the point is a `VectorOfArray` from RecursiveArrayTools.jl.
 * Indexing and `view` of points on a `PowerManifold` work for arrays from NamedDims.jl and FillArrays.jl.
+* `get_point` on a `ProductManifold` accepts parameters given as an `ArrayPartition`.
+* `get_coordinates`, `get_coordinates!`, `get_vector` and `get_vector!` in the cotangent `DefaultOrthonormalBasis` work on a `MetricManifold`.
+* `get_coordinates`, `get_coordinates!`, `get_vector` and `get_vector!` in the cotangent `DefaultOrthonormalBasis` work on every `FiberBundle`, including tangent bundles with `ArrayPartition` points.
 
 ## [0.11.32] 2026-09-30
 

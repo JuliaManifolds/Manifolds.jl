@@ -255,4 +255,14 @@ end
         q2 = retract(B2, p, X, m_prod_retr)
         @test isapprox(B2, p, inverse_retract(B2, p, q2, m_prod_invretr), X)
     end
+
+    @testset "cotangent basis on a tangent bundle" begin
+        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
+        c = [1.0, 2.0, 3.0, 4.0]
+        Bc = DefaultOrthonormalBasis(ℝ, CotangentSpaceType())
+        ξ = get_vector(TB, p, c, Bc)
+        @test ξ isa Manifolds.RieszRepresenterCotangentVector
+        @test ξ.X ≈ get_vector(TB, p, c, DefaultOrthonormalBasis())
+        @test get_coordinates(TB, p, ξ, Bc) ≈ c
+    end
 end

@@ -790,4 +790,19 @@ end
         @test inner(M, p, fX, fY) ≈ dot([1.0, 0.5, -1.0], [0.0, 2.0, 1.0])
         @test norm(M, p, fX) ≈ norm([1.0, 0.5, -1.0])
     end
+
+    @testset "cotangent basis on a MetricManifold" begin
+        M = Sphere(2)
+        MM = MetricManifold(M, EuclideanMetric())
+        p = [1.0, 0.0, 0.0]
+        X = [0.0, 2.0, -1.0]
+        Bc = DefaultOrthonormalBasis(ℝ, CotangentSpaceType())
+        c = get_coordinates(M, p, X, DefaultOrthonormalBasis())
+        ξ = flat(MM, p, X)
+        @test get_coordinates(MM, p, ξ, Bc) ≈ c
+        @test get_coordinates!(MM, similar(c), p, ξ, Bc) ≈ c
+        @test get_vector(MM, p, c, Bc).X ≈ X
+        ξ2 = Manifolds.RieszRepresenterCotangentVector(MM, p, zero_vector(M, p))
+        @test get_vector!(MM, ξ2, p, c, Bc).X ≈ X
+    end
 end

@@ -440,12 +440,13 @@ METAMANIFOLDS = [
     AbstractManifold,
     AbstractDecoratorManifold,
     AbstractPowerManifold,
+    MetricManifold,
     PowerManifoldNested,
     PowerManifoldNestedReplacing,
     ProductManifold,
     TangentSpace,
     ValidationManifold,
-    VectorBundle,
+    FiberBundle,
 ]
 
 # Features II: That require MetaManifolds

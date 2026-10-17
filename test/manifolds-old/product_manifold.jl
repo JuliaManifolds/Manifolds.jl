@@ -448,6 +448,8 @@ using RecursiveArrayTools: ArrayPartition
         a = get_parameters(Mse, A, i, p)
         @test length(a) == manifold_dimension(Mse)
         @test isapprox(Mse, get_point(Mse, A, i, a), p)
+        ap = ArrayPartition([0.1, 0.2], [0.3, 0.4])
+        @test isapprox(Mse, get_point(Mse, A, i, ap), get_point(Mse, A, i, [0.1, 0.2, 0.3, 0.4]))
 
         A2 = ProductAtlas(StereographicAtlas(), get_default_atlas(M2))
         i2 = get_chart_index(Mse, A2, p)

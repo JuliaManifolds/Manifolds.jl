@@ -43,9 +43,9 @@ Note that the condition `absz == 0` would be incorrectly handled by ForwardDiff.
     return ifelse(absz < eps(float(typeof(absz)))^2, one(psignz), psignz)
 end
 
-allocate(p, s::Size{S}) where {S} = similar(p, S...)
+allocate(p::AbstractArray, s::Size{S}) where {S} = similar(p, S...)
 allocate(p::StaticArray, s::Size{S}) where {S} = similar(p, maybesize(s))
-allocate(p, ::Type{T}, s::Size{S}) where {S, T} = similar(p, T, S...)
+allocate(p::AbstractArray, ::Type{T}, s::Size{S}) where {S, T} = similar(p, T, S...)
 allocate(p::StaticArray, ::Type{T}, s::Size{S}) where {S, T} = similar(p, T, maybesize(s))
 
 quat_promote(T::Type{<:Number}) = typeof(Quaternions.quat(zero(T)))
