@@ -44,6 +44,14 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
         @test get_coordinates(M, A, A, DefaultOrthogonalBasis()) == vec(A)
         @test get_vector(M, A, vec(A), DefaultOrthogonalBasis()) == A
     end
+    @testset "tangent projection" begin
+        Z = [1.0 2.0 3.0; 4.0 5.0 6.0; 7.0 8.0 10.0]
+        @test project(M, A, Z) == Z
+        @test project(Mc, Ac, im * Z) == im * Z
+        Y = zero(Z)
+        @test project!(M, Y, A, Z) === Y
+        @test Y == Z
+    end
     @testset "Complex invertible matrices" begin
         @test repr(Mc) == "InvertibleMatrices(3, ℂ)"
         Mc2 = InvertibleMatrices(3, ℂ; parameter = :field)

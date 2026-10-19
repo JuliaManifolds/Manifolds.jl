@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `rand` generates random points on the `SymplecticGrassmann` manifold.
 * `is_flat` for the `SymplecticGrassmann` manifold.
 * `project` onto `HeisenbergMatrices` and onto their tangent spaces.
+* `project` onto the tangent spaces of `InvertibleMatrices`.
 
 ### Changed
 
@@ -255,6 +256,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_coordinates`, `get_coordinates!`, `get_vector` and `get_vector!` in the cotangent `DefaultOrthonormalBasis` work on a `MetricManifold`.
 * `get_coordinates`, `get_coordinates!`, `get_vector` and `get_vector!` in the cotangent `DefaultOrthonormalBasis` work on every `FiberBundle`, including tangent bundles with `ArrayPartition` points.
 * `rand` with `vector_at` on a `Flag` manifold with an orthogonal representation returns an `OrthogonalTangentVector` instead of `OrthogonalPoint`.
+* `isapprox` on a `Flag` accepts points in the orthogonal representation.
 
 ## [0.11.32] 2026-09-30
 

@@ -135,6 +135,17 @@ function manifold_dimension(M::InvertibleMatrices{<:Any, 𝔽}) where {𝔽}
 end
 
 @doc raw"""
+    project(M::InvertibleMatrices, p, X)
+
+Project `X` onto the tangent space at `p` of the [`InvertibleMatrices`](@ref) `M`. Since the
+invertible matrices are an open subset of their embedding, the tangent space consists of all
+matrices, and the projection is the identity.
+"""
+project(::InvertibleMatrices, ::Any, ::Any)
+
+project!(::InvertibleMatrices, Y, p, X) = copyto!(Y, X)
+
+@doc raw"""
     Random.rand(M::InvertibleMatrices; vector_at=nothing, kwargs...)
 
 If `vector_at` is `nothing`, return a random point on the [`InvertibleMatrices`](@ref)

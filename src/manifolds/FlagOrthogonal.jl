@@ -97,6 +97,10 @@ function inner(
     return dot(X.value, Y.value) / 2
 end
 
+function Base.isapprox(M::Flag, p::OrthogonalPoint, q::OrthogonalPoint; kwargs...)
+    return isapprox(M, convert(AbstractMatrix, M, p), convert(AbstractMatrix, M, q); kwargs...)
+end
+
 function norm(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector)
     return sqrt(inner(M, p, X, X))
 end

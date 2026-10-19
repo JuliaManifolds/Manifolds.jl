@@ -314,4 +314,11 @@ using Random
         q = retract(M, p, X, PolarRetraction())
         @test isapprox(M, p, inverse_retract(M, p, q, PolarInverseRetraction()), X; atol = 1.0e-10)
     end
+
+    @testset "isapprox for points in the orthogonal representation" begin
+        M = Flag(5, 1, 2)
+        @test isapprox(M, p1o, p1o)
+        @test !isapprox(M, p1o, p2o)
+        @test isapprox(M, p1o, Manifolds.OrthogonalPoint(p1o.value[:, [1, 2, 3, 5, 4]]))
+    end
 end
