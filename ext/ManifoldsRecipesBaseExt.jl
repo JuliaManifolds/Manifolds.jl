@@ -31,7 +31,7 @@ SURFACE_RESOLUTION_DEFAULT = 32
         x, y
     end
     show_axis --> false
-    framestyle -> :none
+    framestyle --> :none
     axis --> false
     xlims --> (-1.01, 1.01)
     ylims --> (-1.01, 1.01)
@@ -157,7 +157,7 @@ end
         end
     end
     show_axis --> false
-    framestyle -> :none
+    framestyle --> :none
     axis --> false
     xlims --> (min(px...), max(px...))
     ylims --> (min(py...), max(py...))
@@ -253,7 +253,7 @@ end
         end
     end
     show_axis --> false
-    framestyle -> :none
+    framestyle --> :none
     axis --> false
     xlims --> (-1.05, 1.05)
     ylims --> (-1.05, 1.05)

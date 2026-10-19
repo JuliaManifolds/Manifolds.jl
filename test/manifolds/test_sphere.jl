@@ -37,6 +37,7 @@ using ManifoldDiff
             :InvalidPoints => [2 * p],
             :InvalidVectors => [p],
             :NormalVectors => [V],
+            :OtherMetrics => [MinkowskiMetric()],
             :Covectors => [ξ],
             :RetractionMethods => [ExponentialRetraction(), ProjectionRetraction()],
             :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
@@ -62,7 +63,8 @@ using ManifoldDiff
             manifold_dimension => 2,
             repr => "Sphere(2)",
             Weingarten => -X * (p'V), # or [ 0, -π/2, 0 ]
-            :IsPointErrors => [DomainError]
+            :IsPointErrors => [DomainError],
+            :IsVectorBasepointError => ManifoldDomainError
         ),
     )
 
