@@ -331,6 +331,30 @@ function get_vector_orthonormal(::Euclidean{ℝ, Tuple{Int}}, ::Any, c, ::RealNu
     return c
 end
 function get_vector_orthonormal(
+        ::Union{Euclidean{ℝ, TypeParameter{Tuple{}}}, Euclidean{ℝ, Tuple{}}},
+        ::Number,
+        c,
+        ::RealNumbers,
+    )
+    return c[1]
+end
+function get_vector_orthonormal(
+        ::Union{Euclidean{ℂ, TypeParameter{Tuple{}}}, Euclidean{ℂ, Tuple{}}},
+        ::Number,
+        c,
+        ::RealNumbers,
+    )
+    return complex(c[1], c[2])
+end
+function get_vector_orthonormal(
+        ::Union{Euclidean{ℂ, TypeParameter{Tuple{}}}, Euclidean{ℂ, Tuple{}}},
+        ::Number,
+        c,
+        ::ComplexNumbers,
+    )
+    return c[1]
+end
+function get_vector_orthonormal(
         ::Euclidean{ℝ, <:TypeParameter},
         ::SArray{S},
         c,

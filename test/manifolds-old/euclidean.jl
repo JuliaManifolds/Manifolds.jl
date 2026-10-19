@@ -483,4 +483,15 @@ using FiniteDifferences
             @test p ≈ fill(4.0)
         end
     end
+
+    @testset "get_vector on the number valued Euclidean space" begin
+        B = DefaultOrthonormalBasis()
+        Bc = DefaultOrthonormalBasis(ℂ)
+        for param in [:type, :field]
+            @test get_vector(Euclidean(; parameter = param), 0.3, [1.2], B) === 1.2
+            Mc = Euclidean(; field = ℂ, parameter = param)
+            @test get_vector(Mc, 0.3im, [1.2, 2.0], B) === 1.2 + 2.0im
+            @test get_vector(Mc, 0.3im, [1.2 + 2.0im], Bc) === 1.2 + 2.0im
+        end
+    end
 end

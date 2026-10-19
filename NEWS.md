@@ -257,6 +257,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_coordinates`, `get_coordinates!`, `get_vector` and `get_vector!` in the cotangent `DefaultOrthonormalBasis` work on every `FiberBundle`, including tangent bundles with `ArrayPartition` points.
 * `rand` with `vector_at` on a `Flag` manifold with an orthogonal representation returns an `OrthogonalTangentVector` instead of `OrthogonalPoint`.
 * `isapprox` on a `Flag` accepts points in the orthogonal representation.
+* `get_vector` in the orthonormal basis of the number-valued `Euclidean` space returns a number when the point is a number.
 
 ## [0.11.32] 2026-09-30
 
