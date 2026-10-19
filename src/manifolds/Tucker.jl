@@ -190,6 +190,11 @@ function allocate(x::TuckerTangentVector, ::Type{T}) where {T}
     return TuckerTangentVector(allocate(x.Ċ, T), allocate(x.U̇, T))
 end
 
+# coordinates are a plain vector
+function ManifoldsBase.allocate_coordinates(::Tucker, ::TuckerTangentVector, T, n::Int)
+    return zeros(T, n)
+end
+
 # Tuple-like broadcasting of TuckerTangentVector
 Base.axes(::TuckerTangentVector) = ()
 Base.size(::TuckerTangentVector) = ()

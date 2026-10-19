@@ -37,7 +37,7 @@ embedding neighborhood of `M`, then the Riemannian gradient is given by
 Lemma 1 [DouikHassibi:2019](@cite) as
 
 ```math
-  \operatorname{grad} f(p) = \proj_{T_p\mathcal M}(Y⊙p)
+  \operatorname{grad} f(p) = \operatorname{proj}_{T_p\mathcal M}(Y⊙p)
 ```
 
 where ``⊙`` denotes the Hadamard or elementwise product, and the projection

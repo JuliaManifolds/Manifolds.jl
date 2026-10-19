@@ -243,6 +243,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Parallel transport on the `SymmetricPositiveDefinite` matrices returns the vector unchanged when both points are equal.
 * `is_vector` on the `Tucker` manifold checks that the factor matrices of a tangent vector are orthogonal to those of the point, and it accepts the keywords `atol` and `rtol`.
 * `get_coordinates!` on the `Tucker` manifold writes the coordinates of the default orthonormal basis into the given vector.
+* `get_coordinates` on the `Tucker` manifold works in the `DefaultOrthogonalBasis` and the `DefaultBasis`.
 * `inner` under the `BuresWassersteinMetric` on `SymmetricPositiveDefinite` returns a number of the element type of its arguments.
 * `Circle(ℂ)^n` returns the power manifold of the complex circle.
 * `get_coordinates` and `get_vector` on the sphere and the projective space, and `parallel_transport_to` on the projective space, accept points with integer entries.

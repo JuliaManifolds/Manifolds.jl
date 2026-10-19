@@ -366,4 +366,12 @@ include("../header.jl")
         Y .*= 2
         @test isapprox(M, p0, X + X, Y)
     end
+    @testset "coordinates in the orthogonal and the default basis" begin
+        M = Tucker((4, 5, 6), (2, 3, 4))
+        p = TuckerPoint(reshape([mod(17k, 23) / 23 for k in 1:120], 4, 5, 6), (2, 3, 4))
+        X = get_vector(M, p, collect(1.0:42), DefaultOrthonormalBasis())
+        c = get_coordinates(M, p, X, DefaultOrthonormalBasis())
+        @test get_coordinates(M, p, X, DefaultOrthogonalBasis()) ≈ c
+        @test get_coordinates(M, p, X, DefaultBasis()) ≈ c
+    end
 end

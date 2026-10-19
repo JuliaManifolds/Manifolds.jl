@@ -70,15 +70,14 @@ using ManifoldDiff
 
     @testset "Embedding test" begin
         p = [1.0, 0.0, 0.0]
-        X = [0.0, 1.0, 1.0]
-        @test embed(M, p) == p
-        q = similar(p)
-        embed!(M, q, p)
-        @test q == p
-        @test embed(M, p, X) == X
-        Y = similar(X)
-        embed!(M, Y, p, X)
-        @test Y == X
+        X1 = [0.0, 1.0, 1.0]
+        q1 = similar(p)
+        embed!(M, q1, p)
+        @test q1 == p
+        @test embed(M, p, X1) == X1
+        Y1 = similar(X1)
+        embed!(M, Y1, p, X1)
+        @test Y1 == X1
     end
 
     Manifolds.test_atlases(M, [p, q], (RetractionAtlas(), Manifolds.StereographicAtlas()))
