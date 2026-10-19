@@ -1033,15 +1033,14 @@ function StatsBase.moment(M::AbstractManifold, x::AbstractVector, k::Int, m = me
 end
 
 """
-    skewness(M::AbstractManifold, x::AbstractVector, k::Int[, w::AbstractWeights], m=mean(M, x[, w]))
+    skewness(M::AbstractManifold, x::AbstractVector[, w::AbstractWeights], m=mean(M, x[, w]))
 
 Compute the standardized skewness of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed
 [`mean`](@ref mean(::AbstractManifold, args...)) `m`.
 """
 function StatsBase.skewness(M::AbstractManifold, x::AbstractVector, w::AbstractWeights)
-    m, s = mean_and_std(M, x, w; corrected = false)
-    return moment(M, x, 3, w, m) / s^3
+    return skewness(M, x, w, mean(M, x, w))
 end
 function StatsBase.skewness(M::AbstractManifold, x::AbstractVector, w::AbstractWeights, m)
     return moment(M, x, 3, w, m) / std(M, x, w, m; corrected = false)^3
@@ -1052,7 +1051,7 @@ function StatsBase.skewness(M::AbstractManifold, x::AbstractVector, args...)
 end
 
 """
-    kurtosis(M::AbstractManifold, x::AbstractVector, k::Int[, w::AbstractWeights], m=mean(M, x[, w]))
+    kurtosis(M::AbstractManifold, x::AbstractVector[, w::AbstractWeights], m=mean(M, x[, w]))
 
 Compute the excess kurtosis of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed
@@ -1060,7 +1059,7 @@ provide weights `w` and/or a precomputed
 """
 function StatsBase.kurtosis(M::AbstractManifold, x::AbstractVector, w::AbstractWeights)
     m, v = mean_and_var(M, x, w; corrected = false)
-    return moment(M, x, 4, w, m) / v^2 - 3
+    return kurtosis(M, x, w, mean(M, x, w))
 end
 function StatsBase.kurtosis(M::AbstractManifold, x::AbstractVector, w::AbstractWeights, m)
     return moment(M, x, 4, w, m) / var(M, x, w, m; corrected = false)^2 - 3

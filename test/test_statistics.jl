@@ -741,6 +741,16 @@ end
                 mean(S, x, GeodesicInterpolation())
         end
 
+        @testset "Sphere skewness and kurtosis" begin
+            S = Sphere(2)
+            x = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.6, 0.8, 0.0]]
+            w = pweights([1.0, 2.0, 1.0, 0.5])
+            @test skewness(S, x) ≈ skewness(S, x, mean(S, x))
+            @test kurtosis(S, x) ≈ kurtosis(S, x, mean(S, x))
+            @test skewness(S, x, w) ≈ skewness(S, x, w, mean(S, x, w))
+            @test kurtosis(S, x, w) ≈ kurtosis(S, x, w, mean(S, x, w))
+        end
+
         @testset "ProjectiveSpace default" begin
             rng = MersenneTwister(47)
             M = ProjectiveSpace(2)

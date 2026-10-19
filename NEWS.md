@@ -179,6 +179,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `retract`, `retract_fused` and `inverse_retract` with the `PolarLightRetraction` and the `PolarLightInverseRetraction` on `Stiefel` accept keyword arguments.
 * `riemannian_gradient` on the `SymplecticStiefel` manifold accepts the `embedding_metric` keyword in its allocating form and returns the same result with it as without it.
 * `mean!(M, y, x)` uses the default estimation method for the type of the points, as `mean(M, x)` does.
+* `skewness(M, x[, w])` and `kurtosis(M, x[, w])` return the same values as with the precomputed mean `mean(M, x[, w])`, also where the mean is computed by geodesic interpolation. This avoids using the Welford's algorithm by default, which is very inaccurate on non-flat manifolds.
 * `Manifolds.Test.test_parallel_transport` and `Manifolds.Test.test_vector_transport` compare the transported vector in the tangent space at the point it is transported to.
 * `parallel_transport_to` and `parallel_transport_direction` work on `OrthogonalMatrices`, `UnitaryMatrices` and `SpecialUnitaryMatrices` as they do on `Rotations`.
 * The exponential map and the parallel transport on `Rotations(3)` and `OrthogonalMatrices(3)` return finite values for tangent vectors shorter than `1e-162`.

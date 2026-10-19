@@ -409,6 +409,11 @@ using ManifoldDiff
             gtsd_mvector =
                 Manifolds.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
             @test isa(rand(gtsd_mvector), MVector)
+
+            @test Distributions.insupport(haar_measure, [0.0, 0.6, 0.8])
+            @test !Distributions.insupport(haar_measure, [1.0, 1.0, 0.0])
+            @test Distributions.insupport(gtsd_mvector, [0.0, 1.0, 2.0])
+            @test !Distributions.insupport(gtsd_mvector, [1.0, 0.0, 0.0])
         end
     end
 end

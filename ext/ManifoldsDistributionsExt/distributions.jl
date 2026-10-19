@@ -60,6 +60,13 @@ Get the object of type `FVectorSupport` for the distribution `d`.
 """
 Distributions.support(::FVectorDistribution)
 
+Distributions.insupport(d::MPointDistribution, p) = is_point(support(d).manifold, p)
+
+function Distributions.insupport(d::FVectorDistribution, X)
+    s = support(d)
+    return is_vector(s.space.manifold, s.space.point, X)
+end
+
 """
     uniform_distribution(M::Grassmann{ℝ}, p)
 
