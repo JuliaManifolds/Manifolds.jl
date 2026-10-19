@@ -81,23 +81,17 @@ include("../header.jl")
         )
         @test !is_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), X)
         @test_throws ManifoldDomainError is_vector(
-            M,
-            SVDMPoint([1.0 0.0; 0.0 0.0], 2),
-            X;
+            M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), X;
             error = :error,
         )
         @test !is_vector(M, p, UMVTangentVector(p.U, X.M, p.Vt, 2))
         @test_throws DomainError is_vector(
-            M,
-            p,
-            UMVTangentVector(p.U, X.M, p.Vt, 2);
+            M, p, UMVTangentVector(p.U, X.M, p.Vt, 2);
             error = :error,
         )
         @test !is_vector(M, p, UMVTangentVector(X.U, X.M, p.Vt, 2))
         @test_throws DomainError is_vector(
-            M,
-            p,
-            UMVTangentVector(X.U, X.M, p.Vt, 2);
+            M, p, UMVTangentVector(X.U, X.M, p.Vt, 2);
             error = :error,
         )
         M4 = FixedRankMatrices(4, 3, 2)
@@ -110,7 +104,8 @@ include("../header.jl")
         @test is_vector(M4, p4, X4)
         @test !is_vector(M4, p4, UMVTangentVector(X4.U, X4.M, p4.Vt))
         @test_throws DomainError is_vector(
-            M4, p4, UMVTangentVector(X4.U, X4.M, p4.Vt); error = :error
+            M4, p4, UMVTangentVector(X4.U, X4.M, p4.Vt);
+            error = :error,
         )
         # the default retraction and inverse retraction invert each other at a generic point
         M5 = FixedRankMatrices(5, 4, 2)
@@ -173,14 +168,9 @@ include("../header.jl")
                 @test is_point(M, xM)
                 @test !is_point(M, xM[1:2, :])
                 @test_throws DomainError is_point(M, xM[1:2, :]; error = :error)
+                @test_throws DomainError is_point(FixedRankMatrices(3, 2, 1), p; error = :error)
                 @test_throws DomainError is_point(
-                    FixedRankMatrices(3, 2, 1),
-                    p;
-                    error = :error,
-                )
-                @test_throws DomainError is_point(
-                    FixedRankMatrices(3, 2, 1),
-                    xM;
+                    FixedRankMatrices(3, 2, 1), xM;
                     error = :error,
                 )
                 xF1 = SVDMPoint(2 * p.U, p.S, p.Vt)
@@ -287,9 +277,7 @@ include("../header.jl")
         pE = [1.0 0.0; 0.0 1.0; 0.0 0.0]
         p = SVDMPoint(pE)
         X = UMVTangentVector(
-            [0.0 0.0; 0.0 0.0; 1.0 1.0],
-            [1.0 0.0; 0.0 1.0],
-            [1.0 0.0; 0.0 1.0],
+            [0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], [1.0 0.0; 0.0 1.0]
         )
         G = [1.0 0.0; 0.0 2.0; 0.0 0.0]
         H = [0.0 3.0; 0.0 4.0; 0.0 1.0]

@@ -76,9 +76,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     @testset "rng test" begin
         M = DeterminantOneMatrices(2)
         pX = zeros(2, 2)
-        Manifolds._ensure_nonzero_rng_determinant!(
-            Random.default_rng(), get_embedding(M), pX,
-        )
+        Manifolds._ensure_nonzero_rng_determinant!(Random.default_rng(), get_embedding(M), pX)
         @test abs(det(pX)) > 1.0e-8
     end
 

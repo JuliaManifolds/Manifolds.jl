@@ -180,8 +180,7 @@ using ManifoldDiff
     end
     @testset "test_manifold(SymplecticMatrices(6))" begin
         Manifolds.test_manifold(
-            Sp_6,
-            cat(points, large_tr_norm_points; dims = 1);
+            Sp_6, cat(points, large_tr_norm_points; dims = 1);
             retraction_methods = [CayleyRetraction(), ExponentialRetraction()],
             default_retraction_method = CayleyRetraction(),
             default_inverse_retraction_method = CayleyInverseRetraction(),
@@ -204,8 +203,7 @@ using ManifoldDiff
         fd_diff = RiemannianProjectionBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 
         @test isapprox(
-            Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff),
-            analytical_grad_f(p_grad);
+            Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff), analytical_grad_f(p_grad);
             atol = 1.0e-9,
         )
         @test isapprox(

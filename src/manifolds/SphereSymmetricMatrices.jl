@@ -38,15 +38,13 @@ i.e. is an `n`-by-`n` symmetric matrix of unit Frobenius norm.
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_point(
-        M::SphereSymmetricMatrices,
-        p::T;
+        M::SphereSymmetricMatrices, p::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
     ) where {T}
     if !isapprox(norm(p - p'), 0; atol = atol, kwargs...)
         return DomainError(
-            norm(p - p'),
-            "The point $(p) does not lie on $M, since it is not symmetric.",
+            norm(p - p'), "The point $(p) does not lie on $M, since it is not symmetric."
         )
     end
     return nothing
@@ -62,9 +60,7 @@ that is orthogonal to `p` with respect to the Frobenius inner product.
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(
-        M::SphereSymmetricMatrices,
-        p,
-        X::T;
+        M::SphereSymmetricMatrices, p, X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
     ) where {T}
@@ -153,7 +149,7 @@ end
 
 function Random.rand!(
         rng::AbstractRNG, M::SphereSymmetricMatrices, pX;
-        vector_at = nothing, σ::Real = one(real(eltype(pX)))
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
     )
     if vector_at === nothing
         project!(M, pX, randn(rng, eltype(pX), representation_size(M)))

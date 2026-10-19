@@ -64,17 +64,13 @@ using FiniteDifferences
         @test_throws DomainError is_point(E, [1]; error = :error)
         @test_throws DomainError is_vector(Ec, [:a, :b, :b], [1.0, 1.0, 0.0]; error = :error)
         @test_throws DomainError is_vector(
-            E,
-            [1.0, 1.0im, 0.0],
-            [1.0, 1.0, 0.0];
+            E, [1.0, 1.0im, 0.0], [1.0, 1.0, 0.0];
             error = :error,
         ) # real manifold does not allow complex values
         @test_throws DomainError is_vector(E, [1], [1.0, 1.0, 0.0]; error = :error)
         @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0]; error = :error)
         @test_throws DomainError is_vector(
-            E,
-            [0.0, 0.0, 0.0],
-            [1.0, 0.0, 1.0im];
+            E, [0.0, 0.0, 0.0], [1.0, 0.0, 1.0im];
             error = :error,
         )
         @test_throws DomainError is_vector(Ec, [0.0, 0.0, 0.0], [:a, :b, :c]; error = :error)
@@ -128,8 +124,7 @@ using FiniteDifferences
                         test_mutating_rand = T <: Vector,
                         point_distributions = [
                             Manifolds.projected_distribution(
-                                M,
-                                Distributions.MvNormal(zero(pts[1]), 1.0 * I),
+                                M, Distributions.MvNormal(zero(pts[1]), 1.0 * I)
                             ),
                         ],
                         tvector_distributions = [
@@ -180,8 +175,7 @@ using FiniteDifferences
                 @test project(M, pts[1]) == pts[1]
                 @test retract(M, pts[1], pts[2]) == exp(M, pts[1], pts[2])
                 Manifolds.test_manifold(
-                    M,
-                    pts;
+                    M, pts;
                     parallel_transport = true,
                     test_vector_spaces = false,
                     test_project_tangent = true,
@@ -349,10 +343,7 @@ using FiniteDifferences
     @testset "StaticArrays specializations" begin
         M1 = Euclidean(3)
         @test get_vector(
-            M1,
-            SA[1.0, 2.0, 3.0],
-            SA[-1.0, -2.0, -3.0],
-            DefaultOrthonormalBasis(),
+            M1, SA[1.0, 2.0, 3.0], SA[-1.0, -2.0, -3.0], DefaultOrthonormalBasis()
         ) === SA[-1.0, -2.0, -3.0]
 
         c_sv = SizedVector{3}([-1.0, -2.0, -3.0])
@@ -360,10 +351,7 @@ using FiniteDifferences
 
         M2 = Euclidean(2, 2)
         @test get_vector(
-            M2,
-            SA[1.0 2.0; 3.0 4.0],
-            SA[-1.0, -2.0, -3.0, -4.0],
-            DefaultOrthonormalBasis(),
+            M2, SA[1.0 2.0; 3.0 4.0], SA[-1.0, -2.0, -3.0, -4.0], DefaultOrthonormalBasis()
         ) === SA[-1.0 -3.0; -2.0 -4.0]
 
         @test get_vector(
@@ -403,22 +391,12 @@ using FiniteDifferences
         # ManifoldDiff
         M0 = Euclidean()
         @test ManifoldDiff.adjoint_Jacobi_field(
-            M0,
-            0.0,
-            1.0,
-            0.5,
-            2.0,
-            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+            M0, 0.0, 1.0, 0.5, 2.0, ManifoldDiff.βdifferential_shortest_geodesic_startpoint
         ) === 1.0
         @test ManifoldDiff.diagonalizing_projectors(M0, 0.0, 2.0) ==
             ((0.0, ManifoldDiff.IdentityProjector()),)
         @test ManifoldDiff.jacobi_field(
-            M0,
-            0.0,
-            1.0,
-            0.5,
-            2.0,
-            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+            M0, 0.0, 1.0, 0.5, 2.0, ManifoldDiff.βdifferential_shortest_geodesic_startpoint
         ) === 1.0
     end
 
@@ -454,22 +432,12 @@ using FiniteDifferences
         @test retract(M0s, 2.0, 4.0, ExponentialRetraction()) == 6.0
 
         @test ManifoldDiff.adjoint_Jacobi_field(
-            M0s,
-            0.0,
-            1.0,
-            0.5,
-            2.0,
-            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+            M0s, 0.0, 1.0, 0.5, 2.0, ManifoldDiff.βdifferential_shortest_geodesic_startpoint
         ) === 1.0
         @test ManifoldDiff.diagonalizing_projectors(M0s, 0.0, 2.0) ==
             ((0.0, ManifoldDiff.IdentityProjector()),)
         @test ManifoldDiff.jacobi_field(
-            M0s,
-            0.0,
-            1.0,
-            0.5,
-            2.0,
-            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+            M0s, 0.0, 1.0, 0.5, 2.0, ManifoldDiff.βdifferential_shortest_geodesic_startpoint
         ) === 1.0
     end
 

@@ -17,8 +17,7 @@ using RecursiveArrayTools: ArrayPartition
     @test Mse[2] == M2
     @test injectivity_radius(Mse) ≈ π
     @test injectivity_radius(
-        Mse,
-        ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
+        Mse, ProductRetraction(ExponentialRetraction(), ExponentialRetraction())
     ) ≈ π
     @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
     @test injectivity_radius(
@@ -27,9 +26,7 @@ using RecursiveArrayTools: ArrayPartition
         ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
     ) ≈ π
     @test injectivity_radius(
-        Mse,
-        ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0]),
-        ExponentialRetraction(),
+        Mse, ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0]), ExponentialRetraction()
     ) ≈ π
     @test is_default_metric(Mse, ProductMetric())
 
@@ -50,8 +47,7 @@ using RecursiveArrayTools: ArrayPartition
     ]
     inverse_retraction_methods = [
         InverseProductRetraction(
-            LogarithmicInverseRetraction(),
-            LogarithmicInverseRetraction(),
+            LogarithmicInverseRetraction(), LogarithmicInverseRetraction()
         ),
         LogarithmicInverseRetraction(),
     ]
@@ -111,13 +107,12 @@ using RecursiveArrayTools: ArrayPartition
             ProjectedOrthonormalBasis(:svd),
             get_basis(Mse, pts[1], DefaultOrthonormalBasis()),
             DiagonalizingOrthonormalBasis(
-                ArrayPartition(SizedVector{3}([0.0, 1.0, 0.0]), SizedVector{2}([1.0, 0.0])),
+                ArrayPartition(SizedVector{3}([0.0, 1.0, 0.0]), SizedVector{2}([1.0, 0.0]))
             ),
         )
         distr_M1 = Manifolds.uniform_distribution(M1, pts_sphere[1])
         distr_M2 = Manifolds.projected_distribution(
-            M2,
-            Distributions.MvNormal(zero(pts_r2[1]), 1.0 * I),
+            M2, Distributions.MvNormal(zero(pts_r2[1]), 1.0 * I)
         )
         @test injectivity_radius(Mse, pts[1]) ≈ π
         @test injectivity_radius(Mse) ≈ π
@@ -125,10 +120,7 @@ using RecursiveArrayTools: ArrayPartition
         @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
 
         @test ManifoldsBase.allocate_coordinates(
-            Mse,
-            pts[1],
-            Float64,
-            number_of_coordinates(Mse, DefaultOrthogonalBasis()),
+            Mse, pts[1], Float64, number_of_coordinates(Mse, DefaultOrthogonalBasis())
         ) isa Vector{Float64}
         @test ManifoldsBase.allocate_coordinates(Mse, 1, Float64, 2) == [0.0, 0.0]
 
@@ -150,19 +142,16 @@ using RecursiveArrayTools: ArrayPartition
 
             ProductPointDistribution =
                 Base.get_extension(
-                Manifolds,
-                :ManifoldsDistributionsExt,
+                Manifolds, :ManifoldsDistributionsExt
             ).ProductPointDistribution
             push!(Mse_point_distributions, ProductPointDistribution(distr_M1, distr_M2))
 
             ProductFVectorDistribution =
                 Base.get_extension(
-                Manifolds,
-                :ManifoldsDistributionsExt,
+                Manifolds, :ManifoldsDistributionsExt
             ).ProductFVectorDistribution
             push!(
-                Mse_tvector_distributions,
-                ProductFVectorDistribution(distr_tv_M1, distr_tv_M2),
+                Mse_tvector_distributions, ProductFVectorDistribution(distr_tv_M1, distr_tv_M2)
             )
 
             MPointSupport =
@@ -265,14 +254,12 @@ using RecursiveArrayTools: ArrayPartition
         X = ArrayPartition(log(M, p, q), log(M, q, p))
         Y = change_metric(N, e, P, X)
         Yc = ArrayPartition(
-            change_metric(M, e, p, log(M, p, q)),
-            change_metric(M, e, q, log(M, q, p)),
+            change_metric(M, e, p, log(M, p, q)), change_metric(M, e, q, log(M, q, p))
         )
         @test norm(N, P, Y - Yc) ≈ 0
         Z = change_representer(N, e, P, X)
         Zc = ArrayPartition(
-            change_representer(M, e, p, log(M, p, q)),
-            change_representer(M, e, q, log(M, q, p)),
+            change_representer(M, e, p, log(M, p, q)), change_representer(M, e, q, log(M, q, p))
         )
         @test norm(N, P, Z - Zc) ≈ 0
     end
@@ -287,38 +274,32 @@ using RecursiveArrayTools: ArrayPartition
             },
         }
         @test Manifolds.default_retraction_method(Mstb) === ProductRetraction(
-            ExponentialRetraction(),
-            Manifolds.FiberBundleProductRetraction(),
+            ExponentialRetraction(), Manifolds.FiberBundleProductRetraction()
         )
         @test Manifolds.default_retraction_method(Mstb, T_p_ap) === ProductRetraction(
-            ExponentialRetraction(),
-            Manifolds.FiberBundleProductRetraction(),
+            ExponentialRetraction(), Manifolds.FiberBundleProductRetraction()
         )
 
         @test Manifolds.default_inverse_retraction_method(Mstb) ===
             Manifolds.InverseProductRetraction(
-            LogarithmicInverseRetraction(),
-            Manifolds.FiberBundleInverseProductRetraction(),
+            LogarithmicInverseRetraction(), Manifolds.FiberBundleInverseProductRetraction()
         )
         @test Manifolds.default_inverse_retraction_method(Mstb, T_p_ap) ===
             Manifolds.InverseProductRetraction(
-            LogarithmicInverseRetraction(),
-            Manifolds.FiberBundleInverseProductRetraction(),
+            LogarithmicInverseRetraction(), Manifolds.FiberBundleInverseProductRetraction()
         )
 
         @test Manifolds.default_vector_transport_method(Mstb) === ProductVectorTransport(
             ParallelTransport(),
             Manifolds.FiberBundleProductVectorTransport(
-                ParallelTransport(),
-                ParallelTransport(),
+                ParallelTransport(), ParallelTransport()
             ),
         )
         @test Manifolds.default_vector_transport_method(Mstb, T_p_ap) ===
             ProductVectorTransport(
             ParallelTransport(),
             Manifolds.FiberBundleProductVectorTransport(
-                ParallelTransport(),
-                ParallelTransport(),
+                ParallelTransport(), ParallelTransport()
             ),
         )
         @test Manifolds.default_vector_transport_method(Mse) ===
@@ -331,41 +312,19 @@ using RecursiveArrayTools: ArrayPartition
         X = ArrayPartition([1.0, 0.0, 0.0], [2.0, 3.0])
         # ManifoldDiff
         @test ManifoldDiff.adjoint_Jacobi_field(
-            Mse,
-            p,
-            q,
-            0.5,
-            X,
-            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+            Mse, p, q, 0.5, X, ManifoldDiff.βdifferential_shortest_geodesic_startpoint
         ) == ArrayPartition([0.5, 0.0, 0.0], [1.0, 1.5])
         X2 = allocate(X)
         ManifoldDiff.adjoint_Jacobi_field!(
-            Mse,
-            X2,
-            p,
-            q,
-            0.5,
-            X,
-            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+            Mse, X2, p, q, 0.5, X, ManifoldDiff.βdifferential_shortest_geodesic_startpoint
         )
         @test X2 == ArrayPartition([0.5, 0.0, 0.0], [1.0, 1.5])
         @test ManifoldDiff.jacobi_field(
-            Mse,
-            p,
-            q,
-            0.5,
-            X,
-            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+            Mse, p, q, 0.5, X, ManifoldDiff.βdifferential_shortest_geodesic_startpoint
         ) == ArrayPartition([0.3535533905932738, -0.35355339059327373, 0.0], [1.0, 1.5])
         X2 = allocate(X)
         ManifoldDiff.jacobi_field!(
-            Mse,
-            X2,
-            p,
-            q,
-            0.5,
-            X,
-            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+            Mse, X2, p, q, 0.5, X, ManifoldDiff.βdifferential_shortest_geodesic_startpoint
         )
         @test X2 ==
             ArrayPartition([0.3535533905932738, -0.35355339059327373, 0.0], [1.0, 1.5])
@@ -408,7 +367,7 @@ using RecursiveArrayTools: ArrayPartition
         Z = -X
         H1 = riemannian_Hessian(N, p, Y, Z, X)
         H2 = ArrayPartition(
-            [riemannian_Hessian(M, p.x[i], Y.x[i], Z.x[i], X.x[i]) for i in 1:2]...,
+            [riemannian_Hessian(M, p.x[i], Y.x[i], Z.x[i], X.x[i]) for i in 1:2]...
         )
         @test H1 == H2
         V = ArrayPartition([0.2, 0.0, 0.0], [0.0, 0.0, 0.3])

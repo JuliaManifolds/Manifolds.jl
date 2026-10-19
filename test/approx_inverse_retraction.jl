@@ -19,11 +19,8 @@ Random.seed!(10)
             @test isempty(m1.nlsolve_kwargs)
 
             m2 = NLSolveInverseRetraction(
-                PolarRetraction(),
-                [1.0, 2.0, 3.0];
-                project_tangent = true,
-                project_point = true,
-                autodiff = :forward,
+                PolarRetraction(), [1.0, 2.0, 3.0];
+                project_tangent = true, project_point = true, autodiff = :forward,
             )
             @test m2.retraction === PolarRetraction()
             @test m2.X0 == [1.0, 2.0, 3.0]
@@ -65,12 +62,7 @@ Random.seed!(10)
             X = inverse_retract(M, p, q, inv_retr_method)
             @test is_vector(M, p, X; atol = 1.0e-9)
             @test X ≈ X_exp atol = 1.0e-8
-            @test_throws OutOfInjectivityRadiusError inverse_retract(
-                M,
-                p,
-                -p,
-                inv_retr_method,
-            )
+            @test_throws OutOfInjectivityRadiusError inverse_retract(M, p, -p, inv_retr_method)
             # the point handed in stays as it is when the method projects it
             q2 = 1.001 .* exp(M, p, [0.0, 0.3, 0.0])
             q2_copy = copy(q2)

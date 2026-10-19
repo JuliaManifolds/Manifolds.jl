@@ -89,10 +89,7 @@ function SPDPoint(p::AbstractMatrix; store_p = true, store_sqrt = true, store_sq
         q = missing
     end
     return SPDPoint{typeof(q), typeof(p_sqrt), typeof(p_sqrt_inv), typeof(e)}(
-        q,
-        e,
-        p_sqrt,
-        p_sqrt_inv,
+        q, e, p_sqrt, p_sqrt_inv
     )
 end
 convert(::Type{SPDPoint}, p::AbstractMatrix) = SPDPoint(p)
@@ -350,7 +347,7 @@ This method assumes that `p` represents an spd matrix.
 """
 spd_sqrt_inv(p::SPDPoint) = Symmetric(p.sqrt_inv)
 function spd_sqrt_inv(
-        p::SPDPoint{P, Q, Missing},
+        p::SPDPoint{P, Q, Missing}
     ) where {P <: Union{AbstractMatrix, Missing}, Q <: Union{AbstractMatrix, Missing}}
     U = p.eigen.vectors
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
@@ -384,17 +381,17 @@ function spd_sqrt_and_sqrt_inv(p::SPDPoint{P}) where {P <: Union{Missing, Abstra
     return (Symmetric(p.sqrt), Symmetric(p.sqrt_inv))
 end
 function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Q, Missing},
+        p::SPDPoint{P, Q, Missing}
     ) where {P <: Union{Missing, AbstractMatrix}, Q <: AbstractMatrix}
     return (Symmetric(p.sqrt), spd_sqrt_inv(p))
 end
 function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Missing, R},
+        p::SPDPoint{P, Missing, R}
     ) where {P <: Union{Missing, AbstractMatrix}, R <: AbstractMatrix}
     return (spd_sqrt(p), Symmetric(p.sqrt_inv))
 end
 function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Missing, Missing},
+        p::SPDPoint{P, Missing, Missing}
     ) where {P <: Union{Missing, AbstractMatrix}}
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
     U = p.eigen.vectors

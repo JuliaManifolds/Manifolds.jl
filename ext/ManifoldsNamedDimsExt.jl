@@ -8,16 +8,12 @@ using Manifolds: PowerManifoldMultidimensional, _write
 
 # resolve ambiguities with the indexing of NamedDims.jl arrays
 Base.@propagate_inbounds function Base.getindex(
-        p::NamedDimsArray,
-        M::PowerManifoldMultidimensional,
-        I::Integer...,
+        p::NamedDimsArray, M::PowerManifoldMultidimensional, I::Integer...
     )
     return collect(get_component(M, p, I...))
 end
 Base.@propagate_inbounds function Base.getindex(
-        p::NamedDimsArray{L, T, N},
-        M::PowerManifoldMultidimensional,
-        I::Vararg{Integer, N},
+        p::NamedDimsArray{L, T, N}, M::PowerManifoldMultidimensional, I::Vararg{Integer, N}
     ) where {L, T, N}
     return get_component(M, p, I...)
 end

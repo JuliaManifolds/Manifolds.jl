@@ -94,10 +94,7 @@ using ManifoldDiff
             M,
             Dict(:Functions => [repr, get_embedding], :Points => [q], :Vectors => [X]),
             # Expectations
-            Dict(
-                repr => "Sphere(2, ℂ)",
-                get_embedding => Euclidean(3; field = ℂ)
-            ),
+            Dict(repr => "Sphere(2, ℂ)", get_embedding => Euclidean(3; field = ℂ)),
         )
 
         # testing that the random point is actually a complex number with non-zero imaginary part
@@ -134,10 +131,7 @@ using ManifoldDiff
 
     Manifolds.Test.test_manifold(
         Sphere(2; parameter = :field),
-        Dict(
-            :Functions => [get_embedding, is_point, repr],
-            :Points => [[1.0, 0.0, 0.0]],
-        ),
+        Dict(:Functions => [get_embedding, is_point, repr], :Points => [[1.0, 0.0, 0.0]]),
         # Expectations
         Dict(
             repr => "Sphere(2; parameter=:field)",
@@ -329,16 +323,12 @@ using ManifoldDiff
         @testset "sectional curvature" begin
             M = Sphere(2; parameter = :field)
             K = Manifolds.sectional_curvature_matrix(
-                M,
-                [1.0, 0.0, 0.0],
-                DefaultOrthonormalBasis(),
+                M, [1.0, 0.0, 0.0], DefaultOrthonormalBasis()
             )
             @test isapprox(K, [0 1; 1 0])
             @test isapprox(
                 Manifolds.estimated_sectional_curvature_matrix(
-                    M,
-                    [1.0, 0.0, 0.0],
-                    DefaultOrthonormalBasis(),
+                    M, [1.0, 0.0, 0.0], DefaultOrthonormalBasis()
                 ),
                 [0.0 1.0; 1.0 0.0],
                 atol = 0.15,

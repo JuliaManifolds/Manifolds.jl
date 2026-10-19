@@ -25,9 +25,7 @@ Compute the Einstein tensor of the manifold `M` at the point `p`, see [https://e
     Consider using the chart-based variant [`einstein_tensor`](@ref)`(M::AbstractManifold, A::AbstractAtlas, i, a)` instead.
 """
 function einstein_tensor(
-        M::AbstractManifold,
-        p,
-        B::AbstractBasis;
+        M::AbstractManifold, p, B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
     )
     @warn "`einstein_tensor(M::AbstractManifold, p, B::AbstractBasis)` is deprecated. Consider using `einstein_tensor(M::AbstractManifold, A::AbstractAtlas, i, a)` instead"  maxlog = 1
@@ -38,12 +36,7 @@ function einstein_tensor(
     G = Ric - g .* S / 2
     return G
 end
-@trait_function einstein_tensor(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
+@trait_function einstein_tensor(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
 
 @doc raw"""
@@ -111,9 +104,7 @@ dimensions of the resulting multi-dimensional array are ordered ``(i,j,k)``.
 """
 local_metric_jacobian(::AbstractManifold, ::Any, B::AbstractBasis)
 function local_metric_jacobian(
-        M::AbstractManifold,
-        p,
-        B::AbstractBasis;
+        M::AbstractManifold, p, B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
     )
     @warn "`local_metric_jacobian(M::AbstractManifold, p, B::AbstractBasis)` is deprecated. Consider using `christoffel_symbols_second(M::AbstractManifold, A::AbstractAtlas, i, a)` instead"  maxlog = 1
@@ -159,9 +150,7 @@ uses the Einstein summation convention.
 """
 ricci_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
 function ricci_curvature(
-        M::AbstractManifold,
-        p,
-        B::AbstractBasis;
+        M::AbstractManifold, p, B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
     )
     @warn "`ricci_curvature(M::AbstractManifold, p, B::AbstractBasis)` is deprecated. Consider using `ricci_curvature(M::AbstractManifold, A::AbstractAtlas, i, a)` instead"  maxlog = 1
@@ -171,9 +160,7 @@ function ricci_curvature(
     return S
 end
 ManifoldsBase.@trait_function ricci_curvature(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
+    M::AbstractDecoratorManifold, p, B::AbstractBasis;
     kwargs...,
 )
 
@@ -202,9 +189,7 @@ the resulting multi-dimensional array are ordered ``(i,j,k)``.
 """
 christoffel_symbols_first(::AbstractManifold, ::Any, B::AbstractBasis)
 function christoffel_symbols_first(
-        M::AbstractManifold,
-        p,
-        B::AbstractBasis;
+        M::AbstractManifold, p, B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
     )
     ∂g = local_metric_jacobian(M, p, B; backend = backend)
@@ -214,9 +199,7 @@ function christoffel_symbols_first(
     return Γ
 end
 @trait_function christoffel_symbols_first(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
+    M::AbstractDecoratorManifold, p, B::AbstractBasis;
     kwargs...,
 )
 
@@ -246,9 +229,7 @@ are ordered ``(l,i,j)``.
     Consider using the chart-based variant [`christoffel_symbols_second`](@ref)`(M::AbstractManifold, A::AbstractAtlas, i, a)` instead.
 """
 function christoffel_symbols_second(
-        M::AbstractManifold,
-        p,
-        B::AbstractBasis;
+        M::AbstractManifold, p, B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
     )
     Ginv = inverse_local_metric(M, p, B)
@@ -259,9 +240,7 @@ function christoffel_symbols_second(
 end
 
 @trait_function christoffel_symbols_second(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
+    M::AbstractDecoratorManifold, p, B::AbstractBasis;
     kwargs...,
 )
 
@@ -289,9 +268,7 @@ The dimensions of the resulting multi-dimensional array are ordered ``(k,i,j,l)`
 """
 christoffel_symbols_second_jacobian(::AbstractManifold, ::Any, B::AbstractBasis)
 function christoffel_symbols_second_jacobian(
-        M::AbstractManifold,
-        p,
-        B::AbstractBasis;
+        M::AbstractManifold, p, B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
     )
     n = size(p, 1)
@@ -305,9 +282,7 @@ function christoffel_symbols_second_jacobian(
     return ∂Γ
 end
 @trait_function christoffel_symbols_second_jacobian(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
+    M::AbstractDecoratorManifold, p, B::AbstractBasis;
     kwargs...,
 )
 
@@ -332,12 +307,7 @@ gaussian_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
 function gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
     return ricci_curvature(M, p, B; kwargs...) / 2
 end
-@trait_function gaussian_curvature(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
+@trait_function gaussian_curvature(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
 """
     ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
@@ -358,12 +328,7 @@ function ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
     @einsum Ric[i, j] = R[l, i, l, j]
     return Ric
 end
-@trait_function ricci_tensor(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
+@trait_function ricci_tensor(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
 @doc raw"""
     riemann_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend=default_differential_backend())
@@ -386,9 +351,7 @@ for details.
 """
 riemann_tensor(::AbstractManifold, ::Any, ::AbstractBasis)
 function riemann_tensor(
-        M::AbstractManifold,
-        p,
-        B::AbstractBasis;
+        M::AbstractManifold, p, B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
     )
     n = size(p, 1)
@@ -399,12 +362,7 @@ function riemann_tensor(
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]
     return R
 end
-@trait_function riemann_tensor(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
+@trait_function riemann_tensor(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
 function solve_exp_ode end
 

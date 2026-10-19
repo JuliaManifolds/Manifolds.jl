@@ -21,30 +21,24 @@ struct TestConnection <: AbstractAffineConnection end
 Manifolds.connection(::TestEuclidean) = TestConnection()
 ManifoldsBase.default_retraction_method(::TestEuclidean) = TestRetraction()
 function ManifoldsBase.default_retraction_method(
-        ::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric},
+        ::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric}
     )
     return TestRetraction()
 end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
 function Manifolds.local_metric(
-        M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric},
-        ::Any,
-        ::InducedBasis,
+        M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric}, ::Any, ::InducedBasis
     )
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-        M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric},
-        ::Any,
-        ::T,
+        M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric}, ::Any, ::T
     ) where {T <: ManifoldsBase.AbstractOrthogonalBasis}
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-        M::MetricManifold{ℝ, <:TestEuclidean, <:TestScaledEuclideanMetric},
-        ::Any,
-        ::T,
+        M::MetricManifold{ℝ, <:TestEuclidean, <:TestScaledEuclideanMetric}, ::Any, ::T
     ) where {T <: ManifoldsBase.AbstractOrthogonalBasis}
     return 2 .* Diagonal(1.0:manifold_dimension(M))
 end
@@ -77,10 +71,7 @@ function Manifolds.get_vector_orthonormal!(
     return X
 end
 function Manifolds.get_coordinates_orthogonal!(
-        M::MetricManifold{ℝ, <:TestEuclidean, <:TestScaledEuclideanMetric},
-        c,
-        ::Any,
-        X,
+        M::MetricManifold{ℝ, <:TestEuclidean, <:TestScaledEuclideanMetric}, c, ::Any, X
     )
     c .= 1 ./ (2 .* [1.0:manifold_dimension(M)...]) .* X
     return c
@@ -111,9 +102,7 @@ struct TestSphericalMetric <: AbstractMetric end
 
 Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
 function Manifolds.local_metric(
-        M::MetricManifold{ℝ, <:TestSphere, <:TestSphericalMetric},
-        p,
-        ::InducedBasis,
+        M::MetricManifold{ℝ, <:TestSphere, <:TestSphericalMetric}, p, ::InducedBasis
     )
     r = base_manifold(M).r
     d = allocate(p)
@@ -146,26 +135,17 @@ Manifolds._injectivity_radius(::BaseManifold, ::ExponentialRetraction) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::AbstractRetractionMethod) = Inf
 Manifolds._injectivity_radius(::BaseManifold, ::Any, ::ExponentialRetraction) = Inf
 function Manifolds.local_metric(
-        ::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
-        p,
-        ::InducedBasis,
+        ::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}}, p, ::InducedBasis
     ) where {N}
     return 2 * one(p * p')
 end
 function Manifolds.exp!(
-        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
-        q,
-        p,
-        X,
+        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}}, q, p, X
     ) where {N}
     return exp!(base_manifold(M), q, p, X)
 end
 function Manifolds.exp_fused!(
-        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
-        q,
-        p,
-        X,
-        t::Number,
+        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}}, q, p, X, t::Number
     ) where {N}
     return Manifolds.exp_fused!(base_manifold(M), q, p, X, t)
 end
@@ -173,27 +153,17 @@ function Manifolds.parallel_transport_to!(::BaseManifold, Y, p, X, q)
     return (Y .= X)
 end
 function Manifolds.get_basis(
-        ::BaseManifold{N},
-        p,
-        B::DefaultOrthonormalBasis{<:Any, ManifoldsBase.TangentSpaceType},
+        ::BaseManifold{N}, p, B::DefaultOrthonormalBasis{<:Any, ManifoldsBase.TangentSpaceType}
     ) where {N}
     return CachedBasis(B, [(Matrix{eltype(p)}(I, N, N)[:, i]) for i in 1:N])
 end
 function Manifolds.get_coordinates_orthonormal!(
-        ::BaseManifold,
-        Y,
-        p,
-        X,
-        ::ManifoldsBase.AbstractNumbers,
+        ::BaseManifold, Y, p, X, ::ManifoldsBase.AbstractNumbers
     )
     return Y .= X
 end
 function Manifolds.get_vector_orthonormal!(
-        ::BaseManifold,
-        Y,
-        p,
-        X,
-        ::ManifoldsBase.AbstractNumbers,
+        ::BaseManifold, Y, p, X, ::ManifoldsBase.AbstractNumbers
     )
     return Y .= X
 end
@@ -630,13 +600,9 @@ end
         @test is_point(MM2, p) === is_point(M, p)
         @test is_vector(MM2, p, X) === is_vector(M, p, X)
 
-        a = Manifolds.projected_distribution(
-            M,
-            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
-        )
+        a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0 * I))
         b = Manifolds.projected_distribution(
-            MM2,
-            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
+            MM2, Distributions.MvNormal(zero(zeros(3)), 1.0 * I)
         )
         @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
         @test isapprox(a.distribution.μ, b.distribution.μ)

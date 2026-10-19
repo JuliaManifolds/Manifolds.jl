@@ -33,9 +33,7 @@ end
     q2 = [4.0 / 5 3.0 / 5; 3.0 / 5.0 -4.0 / 5.0; 1.0 0.0; 0.0 1.0]
     q3 = [12.0 / 13.0 5.0 / 13.0; 1.0 0.0; -12.0 / 13.0 5.0 / 13.0; 0.0 1.0]
     @test is_vector(
-        M,
-        q2,
-        vector_transport_to(M, q, Y, q2, ProjectionTransport());
+        M, q2, vector_transport_to(M, q, Y, q2, ProjectionTransport());
         atol = 10^-15,
     )
     Yamb = [0.3 -0.2; 0.1 0.4; -0.5 0.2; 0.25 -0.15]

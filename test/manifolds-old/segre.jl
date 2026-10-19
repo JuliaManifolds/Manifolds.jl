@@ -111,16 +111,8 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
             @testset "is_point" begin
                 @test is_point(M, p)
                 @test is_point(M, q)
-                @test_throws DomainError is_point(
-                    M,
-                    [[1.0, 0.0], p[2:end]...];
-                    error = :error,
-                )
-                @test_throws DomainError is_point(
-                    M,
-                    [p[1], [1.0], p[3:end]...];
-                    error = :error,
-                )
+                @test_throws DomainError is_point(M, [[1.0, 0.0], p[2:end]...]; error = :error)
+                @test_throws DomainError is_point(M, [p[1], [1.0], p[3:end]...]; error = :error)
                 @test_throws DomainError is_point(M, [[-1.0], p[2:end]...]; error = :error)
                 @test_throws DomainError is_point(M, [p[1], 2 * p[2:end]...]; error = :error)
             end
@@ -128,20 +120,8 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
             @testset "is_vector" begin
                 @test is_vector(M, p, X; error = :error)
                 @test is_vector(M, p, Y; error = :error)
-                @test_throws DomainError is_vector(
-                    M,
-                    [[1.0, 0.0], p[2:end]...],
-                    X,
-                    false,
-                    true,
-                )
-                @test_throws DomainError is_vector(
-                    M,
-                    p,
-                    [[1.0, 0.0], X[2:end]...],
-                    false,
-                    true,
-                )
+                @test_throws DomainError is_vector(M, [[1.0, 0.0], p[2:end]...], X, false, true)
+                @test_throws DomainError is_vector(M, p, [[1.0, 0.0], X[2:end]...], false, true)
                 @test_throws DomainError is_vector(M, p, p, false, true)
             end
 
@@ -216,8 +196,7 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
                 # Coordinates are ON
                 @test isapprox(
-                    dot(c, get_coordinates(M, p, X)),
-                    inner(M, p, X, get_vector(M, p, c)),
+                    dot(c, get_coordinates(M, p, X)), inner(M, p, X, get_vector(M, p, c))
                 )
             end
 

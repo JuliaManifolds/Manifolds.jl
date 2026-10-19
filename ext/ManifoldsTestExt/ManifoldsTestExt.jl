@@ -363,7 +363,8 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (is_flat in functions)
             Manifolds.Test.test_is_flat(
-                M; expected_value = get_expectation(expectations, is_flat), name = "is_flat(M)",
+                M;
+                expected_value = get_expectation(expectations, is_flat), name = "is_flat(M)",
             )
         end
         if (is_point in functions)
@@ -408,7 +409,9 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         if (manifold_dimension in functions)
             expected_dim = get_expectation(expectations, manifold_dimension)
             Manifolds.Test.test_manifold_dimension(
-                M; expected_value = expected_dim, expected_type = get(result_types, manifold_dimension, Int),
+                M;
+                expected_value = expected_dim,
+                expected_type = get(result_types, manifold_dimension, Int),
                 name = "manifold_dimension(M)",
             )
         end
@@ -416,8 +419,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             expected_vol = get_expectation(expectations, manifold_volume)
             Manifolds.Test.test_manifold_volume(
                 M;
-                expected_value = expected_vol,
-                name = "manifold_volume(M)",
+                expected_value = expected_vol, name = "manifold_volume(M)",
             )
         end
         if (mid_point in functions)
@@ -492,11 +494,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (repr in functions)
             expected_repr = get_expectation(expectations, repr)
-            Manifolds.Test.test_repr(
-                M;
-                expected_value = expected_repr,
-                name = "repr(M)",
-            )
+            Manifolds.Test.test_repr(M; expected_value = expected_repr, name = "repr(M)")
         end
         if (representation_size in functions)
             expected_repr_size = get_expectation(expectations, representation_size)
@@ -623,8 +621,7 @@ Test `copy(M, p)` and `copy(M, p, X)` on a manifold `M`.
 """
 function Manifolds.Test.test_copy(
         M::AbstractManifold, p, X;
-        name = "copying on $M for $(typeof(p)) points",
-        kwargs...
+        name = "copying on $M for $(typeof(p)) points", kwargs...,
     )
     Test.@testset "$(name)" begin
         q = copy(M, p)
@@ -655,8 +652,7 @@ Note that since this function does not modify its input, is is called `test_copy
 """
 function Manifolds.Test.test_copyto(
         M::AbstractManifold, p, X;
-        name = "copyto! on $M for $(typeof(p)) points",
-        kwargs...
+        name = "copyto! on $M for $(typeof(p)) points", kwargs...,
     )
     Test.@testset "$(name)" begin
         # Allocate memory for copyto!
@@ -775,9 +771,10 @@ Test the distance function on manifold `M` between points `p` and `q`.
 """
 function Manifolds.Test.test_distance(
         M::AbstractManifold, p, q;
-        available_functions = Function[], expected_value = NoExpectation(),
+        available_functions = Function[],
+        expected_value = NoExpectation(),
         name = "Distance on $M between $(typeof(p)) points",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         d = distance(M, p, q)
@@ -831,7 +828,7 @@ function Manifolds.Test.test_embed(
         test_aliased = true,
         test_mutating = true,
         name = "Embedding on $M for $(typeof(p)) points",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         E = get_embedding(M) isa AbstractManifold ? get_embedding(M) : missing
@@ -921,7 +918,7 @@ function Manifolds.Test.test_embed_project(
         test_aliased = true,
         test_mutating = true,
         name = "Embed-then-project on $M for $(typeof(ap)) points",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         # Test point projection
@@ -990,7 +987,7 @@ function Manifolds.Test.test_exp(
         test_injectivity_radius = (injectivity_radius in available_functions),
         test_mutating = true,
         name = "Exponential map on $M for $(typeof(p)) points",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         q = exp(M, p, X)
@@ -1053,7 +1050,7 @@ function Manifolds.Test.test_flat(
         expected_value = NoExpectation(),
         test_mutating = true,
         name = "Flat on $M for $(typeof(p)) points",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         ξ = flat(M, p, X)
@@ -1094,7 +1091,7 @@ function Manifolds.Test.test_geodesic(
         expected_value = NoExpectation(),
         N = 10,
         name = "Geodesic on $M for $(typeof(p)) points",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         q = geodesic(M, p, X, t)
@@ -1146,7 +1143,7 @@ function Manifolds.Test.test_get_coordinates(
         expected_value = NoExpectation(),
         test_mutating = true,
         name = "get_coordinates on $M at point $(typeof(p))",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         c = get_coordinates(M, p, X, B)
@@ -1248,7 +1245,7 @@ function Manifolds.Test.test_get_vector(
         expected_value = NoExpectation(),
         test_mutating = true,
         name = "get_vector on $M at point $(typeof(p))",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         X = get_vector(M, p, c, B)
@@ -1291,7 +1288,7 @@ function Manifolds.Test.test_get_vectors(
         test_orthogonality = false,
         test_normality = false,
         name = "get_vectors on $M at point $(typeof(p)) and $(typeof(b))",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         Vs = get_vectors(M, p, b)
@@ -1338,7 +1335,7 @@ function Manifolds.Test.test_injectivity_radius(
         expected_global_value = NoExpectation(),
         name = "Injectivity radius on $M at point $(ismissing(p) ? "" : "$(typeof(p))")",
         retraction_method = missing,
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         r = if ismissing(p)
@@ -1378,7 +1375,7 @@ function Manifolds.Test.test_inner(
         expected_value = NoExpectation(),
         test_norm = (norm in available_functions),
         name = "Inner product on $M at point $(typeof(p))",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         v = inner(M, p, X, Y)
@@ -1421,7 +1418,7 @@ function Manifolds.Test.test_inverse_retract(
         retraction_method = missing,
         test_retraction = (retract in available_functions) && !ismissing(retraction_method),
         test_mutating = true,
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         X = inverse_retract(M, p, q, m)
@@ -1476,8 +1473,7 @@ there is also only the check that it agrees with the `expected_value`, if given.
 """
 function Manifolds.Test.test_is_flat(
         M::AbstractManifold;
-        expected_value = NoExpectation(),
-        name = "is_flat on $M",
+        expected_value = NoExpectation(), name = "is_flat on $M",
     )
     Test.@testset "$(name)" begin
         v = is_flat(M)
@@ -1511,7 +1507,7 @@ function Manifolds.Test.test_is_point(
         name = "is_point on $M for $(typeof(p)) points",
         test_warn = true,
         test_info = true,
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         Test.@test is_point(M, p; kwargs...)
@@ -1565,7 +1561,7 @@ function Manifolds.Test.test_is_vector(
         test_warn = true,
         test_info = true,
         q = missing,
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         Test.@test is_vector(M, p, X; kwargs...)
@@ -1616,7 +1612,7 @@ function Manifolds.Test.test_log(
         test_injectivity_radius = (injectivity_radius in available_functions),
         test_mutating = true,
         name = "Logarithmic map on $M for $(typeof(p)) points",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         X = log(M, p, q)
@@ -1684,8 +1680,7 @@ Test the volume of the manifold `M`.
 """
 function Manifolds.Test.test_manifold_volume(
         M;
-        expected_value = NoExpectation(),
-        name = "Manifold volume for $M",
+        expected_value = NoExpectation(), name = "Manifold volume for $M",
     )
     Test.@testset "$(name)" begin
         v = manifold_volume(M)
@@ -1723,7 +1718,7 @@ function Manifolds.Test.test_mid_point(
         test_mutating = true,
         test_symmetry = true,
         name = "Mid-point on $M between $(typeof(p)) points",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         r = mid_point(M, p, q)
@@ -1776,7 +1771,7 @@ function Manifolds.Test.test_norm(
         expected_value = NoExpectation(),
         test_inner = (inner in available_functions),
         name = "Norm on $M at point $(typeof(p))",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         v = norm(M, p, X)
@@ -1828,7 +1823,7 @@ function Manifolds.Test.test_parallel_transport(
         name = "Parallel transport on $M at point $(typeof(p))",
         test_aliased = true,
         test_mutating = true,
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         Y = parallel_transport_to(M, p, X, q)
@@ -1899,7 +1894,7 @@ function Manifolds.Test.test_project(
         test_aliased = true,
         test_mutating = true,
         name = "Projection on $M for $(typeof(q)) points",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         # Test point projection
@@ -1946,7 +1941,8 @@ end # Manifolds.Test.test_project
 Test that the default `show` method works as expected by calling `repr(M)`.
 """
 function Manifolds.Test.test_repr(
-        M; expected_value = NoExpectation(), name = "(String) repr_esentation of \$M",
+        M;
+        expected_value = NoExpectation(), name = "(String) repr_esentation of \$M",
     )
     Test.@testset "$(name)" begin
         s = repr(M)
@@ -1980,7 +1976,7 @@ function Manifolds.Test.test_rand(
         test_mutating = true,
         rng = missing,
         name = "Random sampling on $M $(ismissing(vector_at) ? "" : "at points of type $(typeof(vector_at))")",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         ismissing(seed) || (ismissing(rng) ? Random.seed!(seed) : Random.seed!(rng, seed))
@@ -2019,8 +2015,7 @@ Test the representation size of the manifold `M`.
 """
 function Manifolds.Test.test_representation_size(
         M::AbstractManifold;
-        expected_value = NoExpectation(),
-        name = "Representation size of $M",
+        expected_value = NoExpectation(), name = "Representation size of $M",
     )
     Test.@testset "$(name)" begin
         s = representation_size(M)
@@ -2067,7 +2062,7 @@ function Manifolds.Test.test_retract(
         test_inverse_retraction = (inverse_retract in available_functions) && !ismissing(inverse_retraction_method),
         test_mutating = true,
         test_fused = true,
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         q = retract(M, p, X, m)
@@ -2131,7 +2126,7 @@ function Manifolds.Test.test_sectional_curvature(
         expected_min = NoExpectation(),
         expected_max = NoExpectation(),
         name = "Sectional curvature on $M at point $(typeof(p))",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         k = sectional_curvature(M, p, X, Y)
@@ -2168,7 +2163,7 @@ function Manifolds.Test.test_sharp(
         expected_value = NoExpectation(),
         test_mutating = true,
         name = "Sharp on $M for $(typeof(p)) points",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         X = sharp(M, p, ξ)
@@ -2210,7 +2205,7 @@ function Manifolds.Test.test_shortest_geodesic(
         expected_value = NoExpectation(),
         N = 10,
         name = "Shortest geodesic on $M for $(typeof(p)) points",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         p2 = shortest_geodesic(M, p, q, 0.0)
@@ -2285,7 +2280,7 @@ function Manifolds.Test.test_vector_transport(
         test_aliased = true,
         test_mutating = true,
         name = "Vector transport method $(m) on $M at point $(typeof(p))",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         Y = vector_transport_to(M, p, X, q, m)
@@ -2339,9 +2334,7 @@ Test the [`volume_density`](@ref) of the manifold `M`.
 """
 function Manifolds.Test.test_volume_density(
         M, p, X;
-        expected_value = NoExpectation(),
-        name = "Manifold volume density for $M",
-        kwargs...
+        expected_value = NoExpectation(), name = "Manifold volume density for $M", kwargs...,
     )
     Test.@testset "$(name)" begin
         v = volume_density(M, p, X)
@@ -2375,7 +2368,7 @@ function Manifolds.Test.test_Weingarten(
         test_aliased = true,
         test_mutating = true,
         name = "Weingarten map on $M at point $(typeof(p))",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         Y = Weingarten(M, p, X, V)
@@ -2414,7 +2407,7 @@ function Manifolds.Test.test_zero_vector(
         test_mutating = true,
         test_norm = (norm in available_functions),
         name = "Zero vector on $M at point $(typeof(p))",
-        kwargs...
+        kwargs...,
     )
     Test.@testset "$(name)" begin
         Z = zero_vector(M, p)

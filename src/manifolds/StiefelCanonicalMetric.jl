@@ -214,12 +214,7 @@ where ``P = I-pp^{\mathrm{H}}`` and ``g_p^{-1}W = PW + 2pp^{\mathrm{H}}W``.
 riemannian_Hessian(M::MetricManifold{𝔽, Stiefel, CanonicalMetric}, p, G, H, X) where {𝔽}
 
 function riemannian_Hessian!(
-        M::MetricManifold{𝔽, <:Stiefel{𝔽}, CanonicalMetric},
-        Y,
-        p,
-        G,
-        H,
-        X,
+        M::MetricManifold{𝔽, <:Stiefel{𝔽}, CanonicalMetric}, Y, p, G, H, X
     ) where {𝔽}
     Gp = symmetrize(G' * p)
     Z = symmetrize((I - p * p') * G * p')

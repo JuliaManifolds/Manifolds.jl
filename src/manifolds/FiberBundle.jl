@@ -39,16 +39,14 @@ function FiberBundleProductVectorTransport(
         M::AbstractManifold = ManifoldsBase.DefaultManifold(),
         fiber::FiberType = TangentSpaceType();
         vector_transport_method_horizontal::AbstractVectorTransportMethod = default_vector_transport_method(
-            M,
+            M
         ),
         vector_transport_method_vertical::AbstractVectorTransportMethod = fiber_bundle_transport(
-            M,
-            fiber,
+            M, fiber
         ),
     )
     return FiberBundleProductVectorTransport(
-        vector_transport_method_horizontal,
-        vector_transport_method_vertical,
+        vector_transport_method_horizontal, vector_transport_method_vertical
     )
 end
 
@@ -299,10 +297,7 @@ function get_coordinates!(M::FiberBundle, Y, p, X, B::AbstractBasis)
 end
 
 function get_coordinates(
-        M::FiberBundle,
-        p,
-        X,
-        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData},
+        M::FiberBundle, p, X, B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData}
     ) where {𝔽}
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
@@ -314,11 +309,7 @@ function get_coordinates(
 end
 
 function get_coordinates!(
-        M::FiberBundle,
-        Y,
-        p,
-        X,
-        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData},
+        M::FiberBundle, Y, p, X, B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData}
     ) where {𝔽}
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
@@ -340,11 +331,7 @@ function get_vector!(M::FiberBundle, Y, p, X, B::AbstractBasis)
 end
 
 function get_vector!(
-        M::FiberBundle,
-        Y,
-        p,
-        X,
-        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData},
+        M::FiberBundle, Y, p, X, B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData}
     ) where {𝔽}
     n = manifold_dimension(M.manifold)
     xp1, xp2 = submanifold_components(M, p)

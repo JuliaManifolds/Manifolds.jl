@@ -131,11 +131,7 @@ include("../header.jl")
 
     @testset "Euclidean metric tests" begin
         @test riemann_tensor(
-            M,
-            pts[1],
-            pts[2] - pts[1],
-            pts[3] - pts[1],
-            (pts[3] - pts[1]) / 2,
+            M, pts[1], pts[2] - pts[1], pts[3] - pts[1], (pts[3] - pts[1]) / 2
         ) == [0.0, 0.0, 0.0]
         @test sectional_curvature(M, pts[2], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]) == 0.0
         @test sectional_curvature_max(M) == 0.0

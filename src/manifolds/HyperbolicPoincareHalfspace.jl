@@ -11,16 +11,13 @@ function check_size(M::Hyperbolic, p::PoincareHalfSpacePoint)
     N = get_parameter(M.size)[1]
     if size(p.value, 1) != N
         return DomainError(
-            size(p.value, 1),
-            "The point $p does not lie on $M since its length is not $N.",
+            size(p.value, 1), "The point $p does not lie on $M since its length is not $N."
         )
     end
 end
 
 function check_size(
-        M::Hyperbolic,
-        p::PoincareHalfSpacePoint,
-        X::PoincareHalfSpaceTangentVector;
+        M::Hyperbolic, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTangentVector;
         kwargs...,
     )
     N = get_parameter(M.size)[1]
@@ -133,9 +130,7 @@ function convert(
     return convert(t, convert(AbstractVector, p), convert(AbstractVector, X))
 end
 function convert(
-        ::Type{PoincareHalfSpaceTangentVector},
-        p::P,
-        X::T,
+        ::Type{PoincareHalfSpaceTangentVector}, p::P, X::T
     ) where {P <: AbstractVector, T <: AbstractVector}
     return convert(
         PoincareHalfSpaceTangentVector,
@@ -217,17 +212,12 @@ end
 embed(::Hyperbolic, p::PoincareHalfSpacePoint) = p.value
 embed!(::Hyperbolic, q, p::PoincareHalfSpacePoint) = copyto!(q, p.value)
 embed(::Hyperbolic, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTangentVector) = X.value
-function embed!(
-        ::Hyperbolic,
-        Y,
-        p::PoincareHalfSpacePoint,
-        X::PoincareHalfSpaceTangentVector,
-    )
+function embed!(::Hyperbolic, Y, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTangentVector)
     return copyto!(Y, X.value)
 end
 
 function get_embedding(
-        ::Hyperbolic{TypeParameter{Tuple{n}}}, ::Type{<:PoincareHalfSpacePoint},
+        ::Hyperbolic{TypeParameter{Tuple{n}}}, ::Type{<:PoincareHalfSpacePoint}
     ) where {n}
     return Euclidean(n)
 end

@@ -79,10 +79,7 @@ using Manifolds, Test, Random, StaticArrays, Quaternions, LinearAlgebra
 
         # orthogonal/unitary
         @test Manifolds.isnormal(Matrix(qr(randn(3, 3)).Q); atol = sqrt(eps()))
-        @test Manifolds.isnormal(
-            Matrix(qr(randn(ComplexF64, 3, 3)).Q);
-            atol = sqrt(eps()),
-        )
+        @test Manifolds.isnormal(Matrix(qr(randn(ComplexF64, 3, 3)).Q); atol = sqrt(eps()))
     end
     @testset "realify/unrealify!" begin
         # round trip real

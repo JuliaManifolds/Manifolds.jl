@@ -30,32 +30,24 @@ end
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             @test_throws ManifoldDomainError is_point(
-                M,
-                [2.0 0.0; 0.0 1.0; 0.0 0.0];
+                M, [2.0 0.0; 0.0 1.0; 0.0 0.0];
                 error = :error,
             )
             @test_throws ManifoldDomainError is_vector(
-                M,
-                [2.0 0.0; 0.0 1.0; 0.0 0.0],
-                zeros(3, 2);
+                M, [2.0 0.0; 0.0 1.0; 0.0 0.0], zeros(3, 2);
                 error = :error,
             )
             @test_throws ManifoldDomainError is_vector(
-                M,
-                [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                ones(3, 2);
+                M, [1.0 0.0; 0.0 1.0; 0.0 0.0], ones(3, 2);
                 error = :error,
             )
             @test is_point(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]; error = :error)
             @test_throws ManifoldDomainError is_point(
-                M,
-                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0];
+                M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0];
                 error = :error,
             )
             @test is_vector(
-                M,
-                [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]);
+                M, [1.0 0.0; 0.0 1.0; 0.0 0.0], zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]);
                 error = :error,
             )
             @test_throws ManifoldDomainError is_vector(
@@ -68,9 +60,7 @@ end
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]) == π / 2
             @test injectivity_radius(
-                M,
-                [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                ExponentialRetraction(),
+                M, [1.0 0.0; 0.0 1.0; 0.0 0.0], ExponentialRetraction()
             ) == π / 2
         end
         types = [Matrix{Float64}]
@@ -148,11 +138,8 @@ end
             @test vector_transport_to(M, p1, X, p2, ProjectionTransport()) ==
                 project(M, p2, X)
             @test is_vector(
-                M,
-                p2,
-                vector_transport_to(M, p1, X, p2, ProjectionTransport());
-                error = :error,
-                atol = 10^-15,
+                M, p2, vector_transport_to(M, p1, X, p2, ProjectionTransport());
+                error = :error, atol = 10^-15,
             )
         end
 
@@ -205,20 +192,15 @@ end
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
             @test_throws ManifoldDomainError is_point(
-                M,
-                [2.0 0.0; 0.0 1.0; 0.0 0.0];
+                M, [2.0 0.0; 0.0 1.0; 0.0 0.0];
                 error = :error,
             )
             @test_throws ManifoldDomainError is_vector(
-                M,
-                [2.0 0.0; 0.0 1.0; 0.0 0.0],
-                zeros(3, 2);
+                M, [2.0 0.0; 0.0 1.0; 0.0 0.0], zeros(3, 2);
                 error = :error,
             )
             @test_throws ManifoldDomainError is_vector(
-                M,
-                [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                ones(3, 2);
+                M, [1.0 0.0; 0.0 1.0; 0.0 0.0], ones(3, 2);
                 error = :error,
             )
             @test is_vector(
@@ -540,7 +522,8 @@ end
             q = exp(M, p, X)
 
             exp_solution = Manifolds.solve_chart_exp_ode(
-                M, a, Xc, A, i; final_time = 1.0, abstol = 1.0e-10, reltol = 1.0e-10,
+                M, a, Xc, A, i;
+                final_time = 1.0, abstol = 1.0e-10, reltol = 1.0e-10,
             )
             q_chart, X_chart = exp_solution(1.0)
             @test isapprox(M, q_chart, q; atol = 1.0e-8)

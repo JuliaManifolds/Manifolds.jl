@@ -39,11 +39,7 @@ function check_vector(M::Torus{N}, p, X; kwargs...) where {N}
 end
 
 function get_coordinates_induced_basis!(
-        ::Torus,
-        c,
-        p,
-        X,
-        ::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+        ::Torus, c, p, X, ::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
     )
     copyto!(c, vec(X))
     return c

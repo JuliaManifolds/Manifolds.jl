@@ -43,16 +43,11 @@ end
 
 function ProbabilitySimplex(n::Int; boundary::Symbol = :open, parameter::Symbol = :type)
     if boundary !== :open && boundary !== :closed
-        throw(
-            ArgumentError(
-                "boundary can only be set to :open or :closed; received $boundary",
-            ),
-        )
+        throw(ArgumentError("boundary can only be set to :open or :closed; received $boundary"))
     end
     n < 0 && throw(
         DomainError(
-            n,
-            "The dimension n of a probability simplex must be nonnegative, but was $(n).",
+            n, "The dimension n of a probability simplex must be nonnegative, but was $(n)."
         ),
     )
     size = wrap_type_parameter(parameter, (n,))
@@ -119,8 +114,7 @@ The tolerance for the last test can be set using the `kwargs...`.
 function check_point(M::ProbabilitySimplex{<:Any, boundary}, p; kwargs...) where {boundary}
     if boundary === :closed && minimum(p) < 0
         return DomainError(
-            minimum(p),
-            "The point $(p) does not lie on the $(M) since it has negative entries.",
+            minimum(p), "The point $(p) does not lie on the $(M) since it has negative entries."
         )
     end
     if boundary === :open && minimum(p) <= 0
@@ -131,8 +125,7 @@ function check_point(M::ProbabilitySimplex{<:Any, boundary}, p; kwargs...) where
     end
     if !isapprox(sum(p), 1.0; kwargs...)
         return DomainError(
-            sum(p),
-            "The point $(p) does not lie on the $(M) since its sum is not 1.",
+            sum(p), "The point $(p) does not lie on the $(M) since its sum is not 1."
         )
     end
     return nothing
@@ -148,9 +141,7 @@ up to `max(atol, rtol * sqrt(length(X)) * norm(X))`.
 The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
-        M::ProbabilitySimplex,
-        p,
-        X::T;
+        M::ProbabilitySimplex, p, X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
@@ -216,11 +207,7 @@ end
 function get_coordinates_orthonormal!(M::ProbabilitySimplex, Xc, p, X, R::RealNumbers)
     n = get_parameter(M.size)[1]
     get_coordinates_orthonormal!(
-        Sphere(n),
-        Xc,
-        simplex_to_amplitude(M, p),
-        simplex_to_amplitude_diff(M, p, X),
-        R,
+        Sphere(n), Xc, simplex_to_amplitude(M, p), simplex_to_amplitude_diff(M, p, X), R
     )
     return Xc
 end
@@ -382,10 +369,7 @@ function parallel_transport_to!(M::ProbabilitySimplex, Y, p, X, q)
     n = get_parameter(M.size)[1]
     q_s = simplex_to_amplitude(M, q)
     Ys = parallel_transport_to(
-        Sphere(n),
-        simplex_to_amplitude(M, p),
-        simplex_to_amplitude_diff(M, p, X),
-        q_s,
+        Sphere(n), simplex_to_amplitude(M, p), simplex_to_amplitude_diff(M, p, X), q_s
     )
     return amplitude_to_simplex_diff!(M, Y, q_s, Ys)
 end
@@ -406,11 +390,8 @@ to have a zero component sum.
 rand(::ProbabilitySimplex; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::ProbabilitySimplex,
-        pX;
-        vector_at = nothing,
-        σ = one(eltype(pX)),
+        rng::AbstractRNG, M::ProbabilitySimplex, pX;
+        vector_at = nothing, σ = one(eltype(pX)),
     )
     if isnothing(vector_at)
         Random.randn!(rng, pX)
@@ -560,8 +541,7 @@ function riemann_tensor!(M::ProbabilitySimplex, Xresult, p, X, Y, Z)
 end
 
 function Base.show(
-        io::IO,
-        ::ProbabilitySimplex{TypeParameter{Tuple{n}}, boundary},
+        io::IO, ::ProbabilitySimplex{TypeParameter{Tuple{n}}, boundary}
     ) where {n, boundary}
     return print(io, "ProbabilitySimplex($(n); boundary=:$boundary)")
 end

@@ -7,7 +7,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
 # a fiber element holds two tangent vectors, each moved by the transport of the base manifold
 function Manifolds.bundle_transport_tangent_direction!(
-        B::FiberBundle{<:Any, TestVectorSpaceType}, Y, p, pf, X, d, m,
+        B::FiberBundle{<:Any, TestVectorSpaceType}, Y, p, pf, X, d, m
     )
     for i in 1:2
         vector_transport_direction!(B.manifold, Y.x[i], p, X.x[i], d, m)
@@ -127,8 +127,7 @@ end
 
             # tangent space at point
             pts_TpM = map(
-                p -> convert(T, p),
-                [[0.0, 0.0, 1.0], [0.0, 2.0, 0.0], [0.0, -1.0, 1.0]],
+                p -> convert(T, p), [[0.0, 0.0, 1.0], [0.0, 2.0, 0.0], [0.0, -1.0, 1.0]]
             )
             basis_types = (
                 DefaultOrthonormalBasis(),
@@ -151,10 +150,7 @@ end
             )
 
             @test Manifolds.bundle_transport_to(
-                TB,
-                p,
-                convert(T, [0.0, -1.0, -1.0]),
-                convert(T, [0.0, 1.0, 0.0]),
+                TB, p, convert(T, [0.0, -1.0, -1.0]), convert(T, [0.0, 1.0, 0.0])
             ) ≈ convert(T, [1.0, 0.0, -1.0])
         end
     end
@@ -186,7 +182,7 @@ end
     @testset "in-place vector transport in a direction uses the fiber transport" begin
         B = FiberBundle(TestVectorSpaceType(), Sphere(2))
         p = ArrayPartition(
-            [1.0, 0.0, 0.0], ArrayPartition([0.0, -1.0, -1.0], [0.0, -1.0, -1.0]),
+            [1.0, 0.0, 0.0], ArrayPartition([0.0, -1.0, -1.0], [0.0, -1.0, -1.0])
         )
         X = ArrayPartition([0.0, 1.0, 0.5], ArrayPartition([0.0, 0.0, 1.0], [0.0, 2.0, 0.0]))
         d = ArrayPartition([0.0, π / 2, 0.0], ArrayPartition(zeros(3), zeros(3)))
@@ -215,12 +211,10 @@ end
         M2 = ProductManifold(Circle(ℝ), Euclidean(2))
         N2 = TangentBundle(M2)
         p1_2 = ArrayPartition(
-            ArrayPartition([0.0], [0.0, 0.0]),
-            ArrayPartition([0.0], [0.0, 0.0]),
+            ArrayPartition([0.0], [0.0, 0.0]), ArrayPartition([0.0], [0.0, 0.0])
         )
         p2_2 = ArrayPartition(
-            ArrayPartition([-1.047], [1.0, 0.0]),
-            ArrayPartition([-1.047], [0.0, 1.0]),
+            ArrayPartition([-1.047], [1.0, 0.0]), ArrayPartition([-1.047], [0.0, 1.0])
         )
         @test isapprox(
             N2,

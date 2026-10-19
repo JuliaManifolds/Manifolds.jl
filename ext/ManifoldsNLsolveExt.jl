@@ -19,7 +19,8 @@ See [`NLSolveInverseRetraction`](@extref `ManifoldsBase.NLSolveInverseRetraction
 inverse_retract(::AbstractManifold, p, q, ::NLSolveInverseRetraction; kwargs...)
 
 function ManifoldsBase.inverse_retract_nlsolve!(
-        M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction; kwargs...
+        M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction;
+        kwargs...,
     )
     res = _inverse_retract_nlsolve(M, p, q, m; kwargs...)
     if m.project_tangent
@@ -30,7 +31,8 @@ function ManifoldsBase.inverse_retract_nlsolve!(
 end
 
 function _inverse_retract_nlsolve(
-        M::AbstractManifold, p, q, m::NLSolveInverseRetraction; kwargs...
+        M::AbstractManifold, p, q, m::NLSolveInverseRetraction;
+        kwargs...,
     )
     X0 = m.X0 === nothing ? zero_vector(M, p) : m.X0
     qp = m.project_point ? project(M, q) : q

@@ -32,9 +32,7 @@ struct GeneralUnitaryMatrices{𝔽, T, S <: AbstractMatrixType} <: AbstractDecor
 end
 
 function GeneralUnitaryMatrices(
-        n::Int,
-        field,
-        matrix_type::Type{<:AbstractMatrixType};
+        n::Int, field, matrix_type::Type{<:AbstractMatrixType};
         parameter::Symbol = :type,
     )
     n < 0 && throw(
@@ -82,8 +80,7 @@ i.e. that ``p`` has a determinant of absolute value one.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(
-        M::GeneralUnitaryMatrices{𝔽, <:Any, AbsoluteDeterminantOneMatrixType},
-        p;
+        M::GeneralUnitaryMatrices{𝔽, <:Any, AbsoluteDeterminantOneMatrixType}, p;
         kwargs...,
     ) where {𝔽}
     if !isapprox(abs(det(p)), one(eltype(p)); kwargs...)
@@ -94,8 +91,7 @@ function check_point(
     end
     if !isapprox(p' * p, one(p); kwargs...)
         return DomainError(
-            norm(p' * p - one(p)),
-            "$p must be orthogonal but it's not at kwargs $kwargs",
+            norm(p' * p - one(p)), "$p must be orthogonal but it's not at kwargs $kwargs"
         )
     end
     return nothing
@@ -110,8 +106,7 @@ i.e. that ``p`` has a determinant of absolute value one, i.e. that ``p^{\mathrm{
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(
-        M::GeneralUnitaryMatrices{𝔽, <:Any, DeterminantOneMatrixType},
-        p;
+        M::GeneralUnitaryMatrices{𝔽, <:Any, DeterminantOneMatrixType}, p;
         kwargs...,
     ) where {𝔽}
     if !isapprox(det(p), one(eltype(p)); kwargs...)
@@ -119,8 +114,7 @@ function check_point(
     end
     if !isapprox(p' * p, one(p); kwargs...)
         return DomainError(
-            norm(p' * p - one(p)),
-            "$p must be orthogonal but it's not at kwargs $kwargs",
+            norm(p' * p - one(p)), "$p must be orthogonal but it's not at kwargs $kwargs"
         )
     end
     return nothing
@@ -137,8 +131,7 @@ function check_size(M::GeneralUnitaryMatrices, p)
     end
     if m != (n, n)
         return DomainError(
-            size(p),
-            "The point $p is not a matrix of size $((n, n)), but $(size(p)).",
+            size(p), "The point $p is not a matrix of size $((n, n)), but $(size(p))."
         )
     end
     return nothing
@@ -154,8 +147,7 @@ function check_size(M::GeneralUnitaryMatrices, p, X)
     end
     if m != (n, n)
         return DomainError(
-            size(X),
-            "The tangent vector $X is not a matrix of size $((n, n)), but $(size(X)).",
+            size(X), "The tangent vector $X is not a matrix of size $((n, n)), but $(size(X))."
         )
     end
     return nothing
@@ -263,10 +255,7 @@ function exp(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p::SMatrix
     return p * SA[cosθ -sinθ; sinθ cosθ]
 end
 function ManifoldsBase.exp_fused(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        p::SMatrix,
-        X::SMatrix,
-        t::Real,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p::SMatrix, X::SMatrix, t::Real
     )
     return exp(M, p, t * X)
 end
@@ -306,11 +295,7 @@ function exp!(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, q, p, X)
     return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
 end
 function ManifoldsBase.exp_fused!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        q,
-        p,
-        X,
-        t::Real,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, q, p, X, t::Real
     )
     @assert size(q) == (2, 2)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
@@ -338,11 +323,7 @@ first two terms of the series of ``a`` and ``b`` in the proof of Proposition 2.7
 [GallierQuaintance:2020](@cite).
 """
 function ManifoldsBase.exp_fused!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}},
-        q,
-        p,
-        X,
-        t::Real,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, q, p, X, t::Real
     )
     θ = abs(t) * norm(M, p, X) / sqrt(2)
     if iszero(θ^2)
@@ -356,11 +337,7 @@ function ManifoldsBase.exp_fused!(
     return copyto!(q, p * pinvq)
 end
 function ManifoldsBase.exp_fused!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{4}}},
-        q,
-        p,
-        X,
-        t::Real,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{4}}}, q, p, X, t::Real
     )
     return exp!(M, q, p, t * X)
 end
@@ -452,18 +429,18 @@ function get_coordinates_orthogonal(M::GeneralUnitaryMatrices{ℝ}, p, X, N)
 end
 
 function get_coordinates_orthogonal!(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{1}}}, c, p, X, ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{1}}}, c, p, X, ::RealNumbers
     )
     return c
 end
 function get_coordinates_orthogonal!(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, c, p, X, ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, c, p, X, ::RealNumbers
     )
     c[1] = X[2]
     return c
 end
 function get_coordinates_orthogonal!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{n}}}, c, p, X, ::RealNumbers,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{n}}}, c, p, X, ::RealNumbers
     ) where {n}
     @assert length(c) == manifold_dimension(M)
     @assert size(X) == (n, n)
@@ -480,8 +457,7 @@ function get_coordinates_orthogonal!(
     return c
 end
 function get_coordinates_orthogonal!(
-        M::GeneralUnitaryMatrices{ℝ, Tuple{Int}},
-        c, p, X, ::RealNumbers,
+        M::GeneralUnitaryMatrices{ℝ, Tuple{Int}}, c, p, X, ::RealNumbers
     )
     n = get_parameter(M.size)[1]
     @assert length(c) == manifold_dimension(M)
@@ -502,9 +478,7 @@ function get_coordinates_orthogonal!(
     end
     return c
 end
-function get_coordinates_orthonormal!(
-        M::GeneralUnitaryMatrices{ℝ}, c, p, X, num::RealNumbers,
-    )
+function get_coordinates_orthonormal!(M::GeneralUnitaryMatrices{ℝ}, c, p, X, num::RealNumbers)
     T = Base.promote_eltype(p, X)
     get_coordinates_orthogonal!(M, c, p, X, num)
     c .*= sqrt(T(2))
@@ -531,8 +505,7 @@ function ManifoldsBase.get_embedding_type(::GeneralUnitaryMatrices)
     return ManifoldsBase.EmbeddedManifoldType()
 end
 function ManifoldsBase.get_embedding_type(
-        ::GeneralUnitaryMatrices,
-        ::Type{<:Quaternions.Quaternion},
+        ::GeneralUnitaryMatrices, ::Type{<:Quaternions.Quaternion}
     )
     return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
@@ -553,15 +526,12 @@ function get_vector_orthogonal(M::GeneralUnitaryMatrices{ℝ}, p, c, N::RealNumb
 end
 
 function get_vector_orthogonal(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        p::SMatrix,
-        Xⁱ,
-        ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p::SMatrix, Xⁱ, ::RealNumbers
     )
     return @SMatrix [0 -Xⁱ[]; Xⁱ[] 0]
 end
 function get_vector_orthogonal(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p::SMatrix, c, ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p::SMatrix, c, ::RealNumbers
     )
     return @SMatrix [0 -c[3] c[2]; c[3] 0 -c[1]; -c[2] c[1] 0]
 end
@@ -579,8 +549,7 @@ function get_vector_orthogonal!(
     return get_vector_orthogonal!(M, X, p, c[1], N)
 end
 function get_vector_orthogonal!(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        X, p, c::Real, ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, X, p, c::Real, ::RealNumbers
     )
     @assert length(X) == 4
     @inbounds begin
@@ -621,11 +590,7 @@ function get_vector_orthogonal!(
     return X
 end
 function get_vector_orthogonal!(
-        M::GeneralUnitaryMatrices{ℝ, Tuple{Int}},
-        X,
-        p,
-        Xⁱ,
-        ::RealNumbers,
+        M::GeneralUnitaryMatrices{ℝ, Tuple{Int}}, X, p, Xⁱ, ::RealNumbers
     )
     n = get_parameter(M.size)[1]
     @assert size(X) == (n, n)
@@ -668,11 +633,7 @@ function get_vector_orthonormal(M::GeneralUnitaryMatrices{ℝ}, p, Xⁱ, N::Real
 end
 
 function get_vector_orthonormal!(
-        M::GeneralUnitaryMatrices{ℝ},
-        X,
-        p,
-        Xⁱ::AbstractVector,
-        N::RealNumbers,
+        M::GeneralUnitaryMatrices{ℝ}, X, p, Xⁱ::AbstractVector, N::RealNumbers
     )
     T = Base.promote_eltype(p, X)
     get_vector_orthogonal!(M, X, p, Xⁱ, N)
@@ -1034,7 +995,7 @@ function parallel_transport_direction!(M::GeneralUnitaryMatrices, Y, p, X, d)
     return copyto!(Y, q' * p * expdhalf * X * expdhalf)
 end
 function parallel_transport_direction!(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, Y, p, X, d,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, Y, p, X, d
     )
     return copyto!(Y, X)
 end
@@ -1045,12 +1006,12 @@ function parallel_transport_to!(M::GeneralUnitaryMatrices, Y, p, X, q)
     return copyto!(Y, q' * p * expdhalf * X * expdhalf)
 end
 function parallel_transport_to!(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, Y, p, X, q,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, Y, p, X, q
     )
     return copyto!(Y, X)
 end
 function parallel_transport_to!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, Y, p, X, q,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, Y, p, X, q
     )
     d = log(M, p, q)
     expdhalf = _exp_half(M, d)
@@ -1110,9 +1071,7 @@ to the metric of [`inner`](@ref), Eq. (A27) in [ZyczkowskiSommers:2003](@cite):
 
 twice the volume of the [`Rotations`](@ref).
 """
-function manifold_volume(
-        M::GeneralUnitaryMatrices{ℝ, <:Any, AbsoluteDeterminantOneMatrixType},
-    )
+function manifold_volume(M::GeneralUnitaryMatrices{ℝ, <:Any, AbsoluteDeterminantOneMatrixType})
     n = get_parameter(M.size)[1]
     return 2 * manifold_volume(GeneralUnitaryMatrices(n, ℝ, DeterminantOneMatrixType))
 end
@@ -1144,9 +1103,7 @@ respect to the metric of [`inner`](@ref), Eq. (3.9) in [ZyczkowskiSommers:2003](
 (2π)^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}.
 ```
 """
-function manifold_volume(
-        M::GeneralUnitaryMatrices{ℂ, <:Any, AbsoluteDeterminantOneMatrixType},
-    )
+function manifold_volume(M::GeneralUnitaryMatrices{ℂ, <:Any, AbsoluteDeterminantOneMatrixType})
     n = get_parameter(M.size)[1]
     vol = (2π)^div(n * (n + 1), 2)
     kf = 1
@@ -1187,9 +1144,7 @@ is
 project(::GeneralUnitaryMatrices{𝔽, <:Any, AbsoluteDeterminantOneMatrixType}, p) where {𝔽}
 
 function project!(
-        ::GeneralUnitaryMatrices{𝔽, <:Any, AbsoluteDeterminantOneMatrixType},
-        q,
-        p,
+        ::GeneralUnitaryMatrices{𝔽, <:Any, AbsoluteDeterminantOneMatrixType}, q, p
     ) where {𝔽}
     F = svd(p)
     mul!(q, F.U, F.Vt)
@@ -1253,11 +1208,7 @@ function ManifoldsBase.retract_qr!(M::GeneralUnitaryMatrices, q, p, X)
 end
 
 function ManifoldsBase.retract_qr_fused!(
-        ::GeneralUnitaryMatrices,
-        q::AbstractArray{T},
-        p,
-        X,
-        t::Number,
+        ::GeneralUnitaryMatrices, q::AbstractArray{T}, p, X, t::Number
     ) where {T}
     A = p + p * (t * X)
     qr_decomp = qr(A)

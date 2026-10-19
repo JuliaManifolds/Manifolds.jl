@@ -52,16 +52,12 @@ function Base.hash(M::GraphManifold{𝔽, G, TM, T}, h::UInt) where {𝔽, G, TM
 end
 
 function GraphManifold(
-        g::G,
-        M::TM,
-        ::VertexManifold,
+        g::G, M::TM, ::VertexManifold
     ) where {G <: AbstractGraph, 𝔽, TM <: AbstractManifold{<:𝔽}}
     return GraphManifold{𝔽, G, TM, VertexManifold}(g, M)
 end
 function GraphManifold(
-        g::G,
-        M::TM,
-        ::EdgeManifold,
+        g::G, M::TM, ::EdgeManifold
     ) where {G <: AbstractGraph, 𝔽, TM <: AbstractManifold{<:𝔽}}
     return GraphManifold{𝔽, G, TM, EdgeManifold}(g, M)
 end
@@ -135,9 +131,7 @@ function incident_log!(M::VertexGraphManifold, X, p)
             log(M.manifold, _read(M, rep_size, p, src(e)), _read(M, rep_size, p, dst(e)))
         if !is_directed(M.graph)
             X[dst(e)] += log(
-                M.manifold,
-                _read(M, rep_size, p, dst(e)),
-                _read(M, rep_size, p, src(e)),
+                M.manifold, _read(M, rep_size, p, dst(e)), _read(M, rep_size, p, src(e))
             )
         end
     end
@@ -153,17 +147,13 @@ function incident_log!(
     for e in edges(M.graph)
         X[src(e)] += (
             get_weight(M.graph, src(e), dst(e)) * log(
-                M.manifold,
-                _read(M, rep_size, p, src(e)),
-                _read(M, rep_size, p, dst(e)),
+                M.manifold, _read(M, rep_size, p, src(e)), _read(M, rep_size, p, dst(e))
             )
         )
         if !is_directed(M.graph)
             X[dst(e)] += (
                 get_weight(M.graph, dst(e), src(e)) * log(
-                    M.manifold,
-                    _read(M, rep_size, p, dst(e)),
-                    _read(M, rep_size, p, src(e)),
+                    M.manifold, _read(M, rep_size, p, dst(e)), _read(M, rep_size, p, src(e))
                 )
             )
         end

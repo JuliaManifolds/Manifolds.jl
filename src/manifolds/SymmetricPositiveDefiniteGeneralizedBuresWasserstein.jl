@@ -95,11 +95,7 @@ the [`GeneralizedBuresWassersteinMetric`](@ref) with matrix ``B``, given in Tabl
 where ``q=L_{p,B}(X)`` denotes the generalized Lyapunov operator, i.e. it solves ``pqB + Bqp = X``,
 as defined below Eq. (3) there.
 """
-exp(
-    ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
-    p,
-    X,
-)
+exp(::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric}, p, X)
 
 function exp!(
         M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
@@ -149,7 +145,7 @@ Return false. [`SymmetricPositiveDefinite`](@ref) with [`GeneralizedBuresWassers
 is not a flat manifold.
 """
 function is_flat(
-        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric}
     )
     return false
 end
@@ -164,11 +160,7 @@ the [`GeneralizedBuresWassersteinMetric`](@ref) with matrix ``B`` given by
     \log_p(q) = B(B^{-1}pB^{-1}q)^{\frac{1}{2}} + (qB^{-1}pB^{-1})^{\frac{1}{2}}B - 2 p.
 ```
 """
-log(
-    ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
-    p,
-    q,
-)
+log(::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric}, p, q)
 
 function log!(
         M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},

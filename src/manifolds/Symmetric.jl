@@ -38,9 +38,7 @@ function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symb
 end
 
 function allocation_promotion_function(
-        ::SymmetricMatrices{ℂ},
-        ::typeof(get_vector),
-        args::Tuple,
+        ::SymmetricMatrices{ℂ}, ::typeof(get_vector), args::Tuple
     )
     return complex
 end
@@ -57,8 +55,7 @@ The tolerance for the symmetry of `p` can be set using `kwargs...`.
 function check_point(M::SymmetricMatrices, p; kwargs...)
     if !isapprox(p, p'; kwargs...)
         return DomainError(
-            norm(p - p'),
-            "The point $(p) does not lie on $M, since it is not symmetric.",
+            norm(p - p'), "The point $(p) does not lie on $M, since it is not symmetric."
         )
     end
     return nothing
@@ -227,11 +224,8 @@ project(::SymmetricMatrices, ::Any, ::Any)
 project!(M::SymmetricMatrices, Y, p, X) = project!(M, Y, X)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::SymmetricMatrices,
-        pX;
-        σ::Real = one(real(eltype(pX))),
-        kwargs...,
+        rng::AbstractRNG, M::SymmetricMatrices, pX;
+        σ::Real = one(real(eltype(pX))), kwargs...,
     )
     rand!(rng, pX)
     pX .= (σ / (2 * norm(pX))) .* (pX + pX')

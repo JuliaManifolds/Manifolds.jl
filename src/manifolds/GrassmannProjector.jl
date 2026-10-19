@@ -103,13 +103,11 @@ Return the embedding of the [`ProjectorPoint`](@ref) representation of the [`Gra
 manifold, i.e. the Euclidean space ``\mathbb F^{n×n}``.
 """
 function get_embedding(
-        ::Grassmann{𝔽, TypeParameter{Tuple{n, k}}}, ::Type{<:ProjectorPoint},
+        ::Grassmann{𝔽, TypeParameter{Tuple{n, k}}}, ::Type{<:ProjectorPoint}
     ) where {n, k, 𝔽}
     return Euclidean(n, n; field = 𝔽)
 end
-function get_embedding(
-        M::Grassmann{𝔽, Tuple{Int, Int}}, ::Type{<:ProjectorPoint},
-    ) where {𝔽}
+function get_embedding(M::Grassmann{𝔽, Tuple{Int, Int}}, ::Type{<:ProjectorPoint}) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(n, n; field = 𝔽, parameter = :field)
 end
@@ -151,10 +149,7 @@ function allocate_result(M::Grassmann, ::typeof(canonical_project), p::StiefelPo
     return ProjectorPoint(allocate(p.value, (n, n)))
 end
 function allocate_result(
-        M::Grassmann,
-        ::typeof(diff_canonical_project),
-        X::StiefelTangentVector,
-        p::StiefelPoint,
+        M::Grassmann, ::typeof(diff_canonical_project), X::StiefelTangentVector, p::StiefelPoint
     )
     n, k = get_parameter(M.size)
     return ProjectorTangentVector(allocate(X.value, (n, n)))
@@ -177,10 +172,7 @@ function diff_canonical_project!(::Grassmann, Y::ProjectorTangentVector, p, X)
     return Y
 end
 function diff_canonical_project!(
-        M::Grassmann,
-        Y::ProjectorTangentVector,
-        p::StiefelPoint,
-        X::StiefelTangentVector,
+        M::Grassmann, Y::ProjectorTangentVector, p::StiefelPoint, X::StiefelTangentVector
     )
     diff_canonical_project!(M, Y, p.value, X.value)
     return Y
@@ -248,7 +240,7 @@ g_p(X,Y) = \frac{1}{2}\operatorname{tr}(X^{\mathrm{H}}Y).
 ```
 """
 function inner(
-        ::Grassmann, ::ProjectorPoint, X::ProjectorTangentVector, Y::ProjectorTangentVector,
+        ::Grassmann, ::ProjectorPoint, X::ProjectorTangentVector, Y::ProjectorTangentVector
     )
     return dot(X.value, Y.value) / 2
 end
@@ -304,10 +296,7 @@ i.e. to ``q=\exp_pd``. The formula is given in Proposition 3.5 of [BendokatZimme
 where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = A B - B A`` denotes the matrix commutator.
 """
 function parallel_transport_direction(
-        M::Grassmann,
-        p::ProjectorPoint,
-        X::ProjectorTangentVector,
-        d::ProjectorTangentVector,
+        M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector, d::ProjectorTangentVector
     )
     Y = allocate_result(M, vector_transport_direction, X, p, d)
     parallel_transport_direction!(M, Y, p, X, d)

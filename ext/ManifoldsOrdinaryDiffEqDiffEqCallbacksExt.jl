@@ -76,9 +76,7 @@ struct StitchedChartSolution{Prob, TM <: AbstractManifold, TA <: AbstractAtlas, 
     sols::Vector{Tuple{SciMLBase.AbstractODESolution, TChart}}
 end
 
-function StitchedChartSolution(
-        M::AbstractManifold, A::AbstractAtlas, problem::Symbol, TChart
-    )
+function StitchedChartSolution(M::AbstractManifold, A::AbstractAtlas, problem::Symbol, TChart)
     return StitchedChartSolution{problem, typeof(M), typeof(A), TChart}(M, A, [])
 end
 
@@ -192,7 +190,8 @@ function solve_chart_exp_ode(
     cur_i = i0
     # callback stops solver when we get too close to chart boundary
     cb = FunctionCallingCallback(
-        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs); func_start = false
+        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
+        func_start = false,
     )
     retcode = SciMLBase.ReturnCode.Terminated
     init_time = zero(final_time)
@@ -200,7 +199,8 @@ function solve_chart_exp_ode(
     while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
         params = (M, A, cur_i)
         prob = ODEProblem{true}(
-            chart_exp_problem!, u0, (init_time, final_time), params; callback = cb
+            chart_exp_problem!, u0, (init_time, final_time), params;
+            callback = cb,
         )
         sol = solve(prob, solver; kwargs...)
         retcode = sol.retcode
@@ -250,14 +250,17 @@ coordinates `Xc` in the induced basis.
 """
 function solve_chart_parallel_transport_ode(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
-        solver = AutoVern9(Rodas5P()), final_time::Real = 1.0, check_chart_switch_kwargs = NamedTuple(),
-        kwargs...
+        solver = AutoVern9(Rodas5P()),
+        final_time::Real = 1.0,
+        check_chart_switch_kwargs = NamedTuple(),
+        kwargs...,
     )
     u0 = ArrayPartition(copy(a), copy(Xc), copy(Yc))
     cur_i = i0
     # callback stops solver when we get too close to chart boundary
     cb = FunctionCallingCallback(
-        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs); func_start = false
+        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
+        func_start = false,
     )
     retcode = SciMLBase.ReturnCode.Terminated
     init_time = zero(final_time)
@@ -265,7 +268,8 @@ function solve_chart_parallel_transport_ode(
     while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
         params = (M, A, cur_i)
         prob = ODEProblem{true}(
-            chart_pt_problem!, u0, (init_time, final_time), params; callback = cb
+            chart_pt_problem!, u0, (init_time, final_time), params;
+            callback = cb,
         )
         sol = solve(prob, solver; kwargs...)
         retcode = sol.retcode
@@ -275,12 +279,8 @@ function solve_chart_parallel_transport_ode(
         a_final = sol.u[end].x[1]::typeof(a)
         new_i = get_chart_index(M, A, cur_i, a_final)
         transition_map!(M, u0.x[1], A, cur_i, new_i, a_final)
-        transition_map_diff!(
-            M, u0.x[2], A, cur_i, a_final, sol.u[end].x[2]::typeof(Xc), new_i
-        )
-        transition_map_diff!(
-            M, u0.x[3], A, cur_i, a_final, sol.u[end].x[3]::typeof(Yc), new_i
-        )
+        transition_map_diff!(M, u0.x[2], A, cur_i, a_final, sol.u[end].x[2]::typeof(Xc), new_i)
+        transition_map_diff!(M, u0.x[3], A, cur_i, a_final, sol.u[end].x[3]::typeof(Yc), new_i)
         cur_i = new_i
     end
     return sols
@@ -341,13 +341,16 @@ derivative.
 """
 function solve_chart_jacobi_field(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc, dYc;
-        solver = AutoVern9(Rodas5P()), final_time::Real = 1.0,
-        check_chart_switch_kwargs = NamedTuple(), kwargs...
+        solver = AutoVern9(Rodas5P()),
+        final_time::Real = 1.0,
+        check_chart_switch_kwargs = NamedTuple(),
+        kwargs...,
     )
     u0 = ArrayPartition(copy(a), copy(Xc), copy(Yc), copy(dYc))
     cur_i = i0
     cb = FunctionCallingCallback(
-        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs); func_start = false
+        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
+        func_start = false,
     )
     retcode = SciMLBase.ReturnCode.Terminated
     init_time = zero(final_time)
@@ -355,7 +358,8 @@ function solve_chart_jacobi_field(
     while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
         params = (M, A, cur_i)
         prob = ODEProblem{true}(
-            chart_jacobi_field_problem!, u0, (init_time, final_time), params; callback = cb
+            chart_jacobi_field_problem!, u0, (init_time, final_time), params;
+            callback = cb,
         )
         sol = solve(prob, solver; kwargs...)
         retcode = sol.retcode
@@ -449,11 +453,7 @@ Thus, the returned matrix ``Y(1)`` represents
 index and the final point coordinates.
 """
 function _jacobi_exp_matrix(
-        M::AbstractManifold,
-        a,
-        Xc,
-        A::AbstractAtlas,
-        i0;
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0;
         solver = AutoVern9(Rodas5P()),
         final_time::Real = 1.0,
         check_chart_switch_kwargs = NamedTuple(),
@@ -478,7 +478,8 @@ function _jacobi_exp_matrix(
     while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
         params = (M, A, cur_i)
         prob = ODEProblem{true}(
-            _chart_jacobi_field_matrix_problem!, u0, (init_time, final_time), params; callback = cb
+            _chart_jacobi_field_matrix_problem!, u0, (init_time, final_time), params;
+            callback = cb,
         )
         sol = solve(prob, solver; kwargs...)
         retcode = sol.retcode
@@ -529,9 +530,7 @@ end
 Compute the volume density of the exponential map in chart coordinates. The coordinates `a`
 and `Xc` are represented in the induced basis of chart `i0` from atlas `A`.
 """
-function solve_chart_volume_density(
-        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...
-    )
+function solve_chart_volume_density(M::AbstractManifold, a, Xc, A::AbstractAtlas, i0; kwargs...)
     E, final_i, a_final = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
     return abs(det(E)) * sqrt(
         det_local_metric(M, A, final_i, a_final) / det_local_metric(M, A, i0, a)
@@ -549,12 +548,7 @@ Solve the Jacobi equation for ``D_p\exp_p(X)[Y]``. The coordinate vectors
 The ODE is solved by `solve_chart_jacobi_field` with `dYc` set to `0`.
 """
 function solve_chart_differential_exp_basepoint(
-        M::AbstractManifold,
-        a,
-        Xc,
-        A::AbstractAtlas,
-        i0,
-        Yc;
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
         kwargs...,
     )
     return solve_chart_jacobi_field(M, a, Xc, A, i0, Yc, zero(Yc); kwargs...)
@@ -569,7 +563,8 @@ Solve the Jacobi equation for ``D_X\exp_p(X)[Y]``. The coordinate vectors
 `Xc` and `Yc` are represented in the chart-induced basis at `p`.
 """
 function solve_chart_differential_exp_argument(
-        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
+        kwargs...,
     )
     return solve_chart_jacobi_field(M, a, Xc, A, i0, zero(Yc), Yc; kwargs...)
 end
@@ -585,7 +580,8 @@ chart-induced basis at `p`; the differential is the covariant derivative in
 `solution(0)[4]`.
 """
 function solve_chart_differential_log_basepoint(
-        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
+        kwargs...,
     )
     baseline = solve_chart_jacobi_field(M, a, Xc, A, i0, Yc, zero(Yc); kwargs...)
     E, _, _ = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
@@ -605,7 +601,8 @@ chart-induced basis at `q`; the differential is the covariant derivative in
 `solution(0)[4]`.
 """
 function solve_chart_differential_log_argument(
-        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
+        kwargs...,
     )
     E, _, _ = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
     dYc = E \ Yc
@@ -624,7 +621,8 @@ of the final chart reached by the geodesic. `p` is the point with coordinates `a
 at `p`.
 """
 function solve_chart_adjoint_differential_exp_basepoint(
-        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
+        kwargs...,
     )
     B, final_i, a_final = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :basepoint, kwargs...)
     return _adjoint_coordinate_map(M, A, i0, a, B, final_i, a_final, Yc)
@@ -642,7 +640,8 @@ of the final chart reached by the geodesic. `p` is the point with coordinates `a
 at `p`.
 """
 function solve_chart_adjoint_differential_exp_argument(
-        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
+        kwargs...,
     )
     E, final_i, a_final = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
     return _adjoint_coordinate_map(M, A, i0, a, E, final_i, a_final, Yc)
@@ -659,7 +658,8 @@ basis of the initial chart. `p` is the point with coordinates `a` in chart `i0`.
 `X` is the tangent vector with coordinates `Xc` in the induced basis of chart `i0` at `p`.
 """
 function solve_chart_adjoint_differential_log_basepoint(
-        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
+        kwargs...,
     )
     E, _, _ = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
     B, _, _ = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :basepoint, kwargs...)
@@ -678,7 +678,8 @@ the output uses that of the final chart reached by the geodesic.
 coordinates `Xc` in the induced basis of chart `i0` at `p`.
 """
 function solve_chart_adjoint_differential_log_argument(
-        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc; kwargs...
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
+        kwargs...,
     )
     E, final_i, a_final = _jacobi_exp_matrix(M, a, Xc, A, i0; wrt = :argument, kwargs...)
     return _adjoint_coordinate_map(M, A, final_i, a_final, E \ I, i0, a, Yc)

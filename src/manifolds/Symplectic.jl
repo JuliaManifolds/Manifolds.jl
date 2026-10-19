@@ -48,7 +48,7 @@ function SymplecticMatrices(two_n::Int, field::AbstractNumbers = ℝ; parameter:
     )
     two_n % 2 == 0 || throw(
         ArgumentError(
-            "The matrix size `2n` of the symplectic manifold must be even, but was $(two_n).",
+            "The matrix size `2n` of the symplectic manifold must be even, but was $(two_n)."
         ),
     )
     size = wrap_type_parameter(parameter, (div(two_n, 2),))
@@ -197,10 +197,7 @@ In this case, we compute the mapping
 ````
 """
 function change_representer(
-        ::MetricManifold{<:Any, <:Euclidean, ExtendedSymplecticMetric},
-        ::EuclideanMetric,
-        p,
-        X,
+        ::MetricManifold{<:Any, <:Euclidean, ExtendedSymplecticMetric}, ::EuclideanMetric, p, X
     )
     return p * p' * X
 end
@@ -226,8 +223,7 @@ the identity, where ``A^+`` denotes the [`symplectic_inverse`](@ref).
 The tolerance can be set with `kwargs...`.
 """
 function check_point(
-        M::SymplecticMatrices,
-        p::T;
+        M::SymplecticMatrices, p::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
     ) where {T}
@@ -410,10 +406,7 @@ w.r.t the Riemannian metric ``g_p`` extended to the entire embedding space.
     vector space to comply with the [`RealSymplecticMetric`](@ref).
 """
 function ManifoldDiff.gradient(
-        M::SymplecticMatrices,
-        f,
-        p,
-        backend::RiemannianProjectionBackend;
+        M::SymplecticMatrices, f, p, backend::RiemannianProjectionBackend;
         extended_metric = true,
     )
     Y = allocate_result(M, gradient, p)
@@ -421,11 +414,7 @@ function ManifoldDiff.gradient(
 end
 
 function ManifoldDiff.gradient!(
-        M::SymplecticMatrices,
-        f,
-        X,
-        p,
-        backend::RiemannianProjectionBackend;
+        M::SymplecticMatrices, f, X, p, backend::RiemannianProjectionBackend;
         extended_metric = true,
     )
     _gradient!(f, X, p, backend.diff_backend)
@@ -691,10 +680,7 @@ and ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes t
 This function is not exported.
 """
 function project_normal!(
-        ::MetricManifold{𝔽, <:Euclidean, ExtendedSymplecticMetric},
-        Y,
-        p,
-        X,
+        ::MetricManifold{𝔽, <:Euclidean, ExtendedSymplecticMetric}, Y, p, X
     ) where {𝔽}
     J = SymplecticElement(p, X)
     pTJTX = p' * J' * X
@@ -729,11 +715,8 @@ and `X = pJS` is returned, where `J` is the [`SymplecticElement`](@ref).
 rand(SymplecticMatrices; σ::Real = 1.0, kwargs...)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::SymplecticMatrices,
-        pX;
-        vector_at = nothing,
-        σ::Real = 1.0,
+        rng::AbstractRNG, M::SymplecticMatrices, pX;
+        vector_at = nothing, σ::Real = 1.0,
     )
     n = get_parameter(M.size)[1]
     if vector_at === nothing

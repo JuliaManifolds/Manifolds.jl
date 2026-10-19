@@ -89,8 +89,7 @@ struct ArrayProjectiveSpace{𝔽, T} <: AbstractProjectiveSpace{𝔽}
 end
 function ArrayProjectiveSpace(
         n::Vararg{Int, I};
-        field::AbstractNumbers = ℝ,
-        parameter::Symbol = :type,
+        field::AbstractNumbers = ℝ, parameter::Symbol = :type,
     ) where {I}
     any(n .< 1) && throw(
         DomainError(
@@ -116,8 +115,7 @@ The tolerance for the norm check can be set using the `kwargs...`.
 function check_point(M::AbstractProjectiveSpace, p; kwargs...)
     if !isapprox(norm(p), 1; kwargs...)
         return DomainError(
-            norm(p),
-            "The point $(p) does not lie on the $(M) since its norm is not 1.",
+            norm(p), "The point $(p) does not lie on the $(M) since its norm is not 1."
         )
     end
     return nothing
@@ -133,9 +131,7 @@ and that the Frobenius inner product ``⟨p, X⟩_{\mathrm{F}} = 0`` up to `max(
 The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
-        M::AbstractProjectiveSpace,
-        p,
-        X::T;
+        M::AbstractProjectiveSpace, p, X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
@@ -238,22 +234,12 @@ function get_coordinates_orthonormal!(M::AbstractProjectiveSpace{ℝ}, c, p, X, 
     n = manifold_dimension(M)
     return _gc_impl!(c, p, X, n)
 end
-function get_coordinates_orthonormal!(
-        M::AbstractProjectiveSpace{ℂ},
-        c,
-        p,
-        X,
-        ::ComplexNumbers,
-    )
+function get_coordinates_orthonormal!(M::AbstractProjectiveSpace{ℂ}, c, p, X, ::ComplexNumbers)
     n = div(manifold_dimension(M), 2)
     return _gc_impl!(c, p, X, n)
 end
 function get_coordinates_orthonormal!(
-        M::AbstractProjectiveSpace{ℍ},
-        c,
-        p,
-        X,
-        ::QuaternionNumbers,
+        M::AbstractProjectiveSpace{ℍ}, c, p, X, ::QuaternionNumbers
     )
     n = div(manifold_dimension(M), 4)
     return _gc_impl!(c, p, X, n)
@@ -295,13 +281,7 @@ function get_vector_orthonormal!(M::AbstractProjectiveSpace{ℂ}, Y, p, X, ::Com
     n = div(manifold_dimension(M), 2)
     return _gv_impl!(Y, p, X, n)
 end
-function get_vector_orthonormal!(
-        M::AbstractProjectiveSpace{ℍ},
-        Y,
-        p,
-        X,
-        ::QuaternionNumbers,
-    )
+function get_vector_orthonormal!(M::AbstractProjectiveSpace{ℍ}, Y, p, X, ::QuaternionNumbers)
     n = div(manifold_dimension(M), 4)
     return _gv_impl!(Y, p, X, n)
 end
@@ -540,13 +520,7 @@ function ManifoldsBase.retract_project!(M::AbstractProjectiveSpace, q, p, X)
     return project!(M, q, q)
 end
 
-function ManifoldsBase.retract_project_fused!(
-        M::AbstractProjectiveSpace,
-        q,
-        p,
-        X,
-        t::Number,
-    )
+function ManifoldsBase.retract_project_fused!(M::AbstractProjectiveSpace, q, p, X, t::Number)
     q .= p .+ t .* X
     return project!(M, q, q)
 end
@@ -642,7 +616,7 @@ end
 
 function Random.rand!(
         rng::AbstractRNG, M::AbstractProjectiveSpace, pX;
-        vector_at = nothing, σ::Real = one(real(float(eltype(pX))))
+        vector_at = nothing, σ::Real = one(real(float(eltype(pX)))),
     )
     if vector_at === nothing
         randn!(rng, pX)

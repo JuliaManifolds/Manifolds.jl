@@ -636,11 +636,7 @@ Store in `c` the coordinates of a tangent vector `X` at `p` with respect to
 the basis induced by the standard [`GrassmannAtlas`](@ref).
 """
 function get_coordinates_induced_basis!(
-        M::Grassmann{ℝ},
-        c,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, <:GrassmannAtlas},
+        M::Grassmann{ℝ}, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:GrassmannAtlas}
     )
     rows = _grassmann_chart_rows(M, B.i)
     complement = _grassmann_chart_complement(M, B.i)
@@ -658,11 +654,7 @@ Store in `X` the tangent vector at `p` represented by coordinates `c` with
 respect to the basis induced by the standard [`GrassmannAtlas`](@ref).
 """
 function get_vector_induced_basis!(
-        M::Grassmann{ℝ},
-        X,
-        p,
-        c,
-        B::InducedBasis{ℝ, TangentSpaceType, <:GrassmannAtlas},
+        M::Grassmann{ℝ}, X, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:GrassmannAtlas}
     )
     rows = _grassmann_chart_rows(M, B.i)
     complement = _grassmann_chart_complement(M, B.i)

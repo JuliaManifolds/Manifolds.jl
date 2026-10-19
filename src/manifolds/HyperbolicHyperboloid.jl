@@ -34,17 +34,14 @@ function check_point(M::Hyperbolic, p; kwargs...)
     end
     if p[end] < 0
         return DomainError(
-            p[end],
-            "The point $(p) does not lie on $(M) since its last entry is negative.",
+            p[end], "The point $(p) does not lie on $(M) since its last entry is negative."
         )
     end
     return nothing
 end
 
 function check_vector(
-        M::Hyperbolic,
-        p,
-        X::T;
+        M::Hyperbolic, p, X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
@@ -63,17 +60,13 @@ function convert(::Type{HyperboloidTangentVector}, X::T) where {T <: AbstractVec
     return HyperboloidTangentVector(X)
 end
 function convert(
-        ::Type{HyperboloidTangentVector},
-        p::P,
-        X::T,
+        ::Type{HyperboloidTangentVector}, p::P, X::T
     ) where {P <: AbstractVector, T <: AbstractVector}
     return HyperboloidTangentVector(X)
 end
 convert(::Type{AbstractVector}, X::HyperboloidTangentVector) = X.value
 function convert(
-        ::Type{T},
-        p::HyperboloidPoint,
-        X::HyperboloidTangentVector,
+        ::Type{T}, p::HyperboloidPoint, X::HyperboloidTangentVector
     ) where {T <: AbstractVector}
     return X.value
 end
@@ -142,16 +135,12 @@ The push forward ``π_*(p)`` maps from ``ℝ^n`` to a subspace of ``ℝ^{n+1}``,
 ````
 """
 function convert(
-        ::Type{HyperboloidTangentVector},
-        p::PoincareBallPoint,
-        X::PoincareBallTangentVector,
+        ::Type{HyperboloidTangentVector}, p::PoincareBallPoint, X::PoincareBallTangentVector
     )
     return HyperboloidTangentVector(convert(AbstractVector, p, X))
 end
 function convert(
-        ::Type{T},
-        p::PoincareBallPoint,
-        X::PoincareBallTangentVector,
+        ::Type{T}, p::PoincareBallPoint, X::PoincareBallTangentVector
     ) where {T <: AbstractVector}
     t = (1 - norm(p.value)^2)
     den = 4 * dot(p.value, X.value) / (t^2)
@@ -197,20 +186,12 @@ function convert(
         p::PoincareHalfSpacePoint,
         X::PoincareHalfSpaceTangentVector,
     )
-    return convert(
-        t,
-        convert(Tuple{PoincareBallPoint, PoincareBallTangentVector}, (p, X))...,
-    )
+    return convert(t, convert(Tuple{PoincareBallPoint, PoincareBallTangentVector}, (p, X))...)
 end
 function convert(
-        t::Type{T},
-        p::PoincareHalfSpacePoint,
-        X::PoincareHalfSpaceTangentVector,
+        t::Type{T}, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTangentVector
     ) where {T <: AbstractVector}
-    return convert(
-        t,
-        convert(Tuple{PoincareBallPoint, PoincareBallTangentVector}, (p, X))...,
-    )
+    return convert(t, convert(Tuple{PoincareBallPoint, PoincareBallTangentVector}, (p, X))...)
 end
 
 @doc raw"""
@@ -289,9 +270,7 @@ end
 # overwrite the default construction on level 2 (dispatching on basis)
 # since this function should not call get_vector (that relies on get_basis itself on H2)
 function _get_basis(
-        M::Hyperbolic,
-        p,
-        B::DefaultOrthonormalBasis{ℝ, TangentSpaceType};
+        M::Hyperbolic, p, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType};
         kwargs...,
     )
     return get_basis_orthonormal(M, p, ℝ)
@@ -350,11 +329,7 @@ function get_coordinates_orthonormal!(M::Hyperbolic, c, p, X, r::RealNumbers)
     return c
 end
 function get_coordinates_diagonalizing!(
-        M::Hyperbolic,
-        c,
-        p,
-        X,
-        B::DiagonalizingOrthonormalBasis,
+        M::Hyperbolic, c, p, X, B::DiagonalizingOrthonormalBasis
     )
     Bp = DiagonalizingOrthonormalBasis(convert(AbstractVector, B.frame_direction))
     c = get_coordinates!(M, c, p, X, get_basis_diagonalizing(M, p, Bp))
@@ -473,11 +448,8 @@ Returns
 - `pX` (mutated) : the sampled point or tangent vector.
 """
 function Random.rand!(
-        rng::AbstractRNG,
-        M::Hyperbolic,
-        pX;
-        vector_at = nothing,
-        σ::Real = one(eltype(pX)) / sqrt(manifold_dimension(M)),
+        rng::AbstractRNG, M::Hyperbolic, pX;
+        vector_at = nothing, σ::Real = one(eltype(pX)) / sqrt(manifold_dimension(M)),
     )
     N = get_parameter(M.size)[1]
     if vector_at === nothing
@@ -496,10 +468,7 @@ function Random.rand!(
 end
 
 function parallel_transport_to!(::Hyperbolic, Y, p, X, q)
-    return copyto!(
-        Y,
-        X .+ minkowski_metric(q, X) ./ (1 - minkowski_metric(p, q)) .* (p + q),
-    )
+    return copyto!(Y, X .+ minkowski_metric(q, X) ./ (1 - minkowski_metric(p, q)) .* (p + q))
 end
 
 @doc raw"""
@@ -521,7 +490,8 @@ changed before the projection onto the tangent space, see Proposition 7.7 in [Bo
 riemannian_gradient(M::Hyperbolic, p, G)
 
 function riemannian_gradient!(
-        M::Hyperbolic, X, p, G; embedding_metric::AbstractMetric = EuclideanMetric()
+        M::Hyperbolic, X, p, G;
+        embedding_metric::AbstractMetric = EuclideanMetric(),
     )
     change_representer!(M, X, embedding_metric, p, G)
     project!(M, X, p, X)

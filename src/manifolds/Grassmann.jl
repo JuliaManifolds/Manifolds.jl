@@ -340,15 +340,7 @@ Store the Levi-Civita covariant derivative of `Yc` in direction `Xc` in
 \nabla_U V = -UG^{-1}Z^\mathsf{T}V - VG^{-1}Z^\mathsf{T}U.
 ````
 """
-function affine_connection!(
-        M::Grassmann{ℝ},
-        Zc,
-        ::GrassmannAtlas,
-        i::AbstractVector,
-        a,
-        Xc,
-        Yc,
-    )
+function affine_connection!(M::Grassmann{ℝ}, Zc, ::GrassmannAtlas, i::AbstractVector, a, Xc, Yc)
     _grassmann_chart_rows(M, i)
     n, k = get_parameter(M.size)
     coordinate_dimension = k * (n - k)

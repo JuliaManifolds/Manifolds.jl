@@ -259,12 +259,7 @@ using LinearAlgebra, Manifolds, Random, Test
 
             transported_inplace = (fill(NaN, 1), fill(NaN, n))
             @test vector_transport_to!(
-                M,
-                transported_inplace,
-                p,
-                X,
-                q,
-                ProjectionTransport(),
+                M, transported_inplace, p, X, q, ProjectionTransport()
             ) === transported_inplace
             @test transported_inplace[1] ≈ transported[1]
             @test transported_inplace[2] ≈ transported[2]

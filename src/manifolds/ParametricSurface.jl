@@ -153,9 +153,7 @@ function project!(M::ParametricSurface, Y, p, X)
     u = ManifoldsBase.allocate_on(M.M_param)
     M.inverse_f!(u, p)
     J = Matrix{promote_type(eltype(p), eltype(X))}(
-        undef,
-        manifold_dimension(M.M_embed),
-        manifold_dimension(M.M_param),
+        undef, manifold_dimension(M.M_embed), manifold_dimension(M.M_param)
     )
     M.jacobian_f!(J, u)
     Y .= J * (J \ X)
@@ -228,9 +226,7 @@ g_u(X_c, Y_c) = \langle JX_c, JY_c \rangle.
 function inner(M::ParametricSurface, A::ParametricSurfaceAtlas, i, a, Xc, Yc)
     u = get_point(M.M_param, A.A, i, a)
     J = Matrix{promote_type(eltype(u), eltype(Xc), eltype(Yc))}(
-        undef,
-        manifold_dimension(M.M_embed),
-        manifold_dimension(M.M_param),
+        undef, manifold_dimension(M.M_embed), manifold_dimension(M.M_param)
     )
     M.jacobian_f!(J, u)
     return dot(J * Xc, J * Yc)
@@ -299,9 +295,7 @@ function get_coordinates_induced_basis!(
     u = ManifoldsBase.allocate_on(M.M_param)
     M.inverse_f!(u, p)
     J = Matrix{promote_type(eltype(p), eltype(X))}(
-        undef,
-        manifold_dimension(M.M_embed),
-        manifold_dimension(M.M_param),
+        undef, manifold_dimension(M.M_embed), manifold_dimension(M.M_param)
     )
     M.jacobian_f!(J, u)
     B_param = induced_basis(M.M_param, B.A.A, B.i)
@@ -332,9 +326,7 @@ function get_vector_induced_basis!(
     B_param = induced_basis(M.M_param, B.A.A, B.i)
     X_param = get_vector(M.M_param, u, cX, B_param)
     J = Matrix{promote_type(eltype(p), eltype(X_param))}(
-        undef,
-        manifold_dimension(M.M_embed),
-        manifold_dimension(M.M_param),
+        undef, manifold_dimension(M.M_embed), manifold_dimension(M.M_param)
     )
     M.jacobian_f!(J, u)
     X .= J * X_param

@@ -70,7 +70,7 @@ macro tfvector_inner_via_get_vector(T)
         quote
             function inner(M::$T, p, X::TFVector, Y::TFVector)
                 return inner(
-                    M, p, get_vector(M, p, X.data, X.basis), get_vector(M, p, Y.data, Y.basis),
+                    M, p, get_vector(M, p, X.data, X.basis), get_vector(M, p, Y.data, Y.basis)
                 )
             end
         end,

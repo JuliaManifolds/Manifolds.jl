@@ -45,9 +45,7 @@ struct SymmetricPositiveSemidefiniteFixedRank{T, 𝔽} <: AbstractDecoratorManif
 end
 
 function SymmetricPositiveSemidefiniteFixedRank(
-        n::Int,
-        k::Int,
-        field::AbstractNumbers = ℝ;
+        n::Int, k::Int, field::AbstractNumbers = ℝ;
         parameter::Symbol = :type,
     )
     0 <= k <= n || throw(
@@ -75,8 +73,7 @@ function check_point(M::SymmetricPositiveSemidefiniteFixedRank, q; kwargs...)
     r = rank(p; kwargs...)
     if r < k
         return DomainError(
-            r,
-            "The point $(p) does not lie on $M, since its rank is less than $(k).",
+            r, "The point $(p) does not lie on $M, since its rank is less than $(k)."
         )
     end
     return nothing
@@ -95,13 +92,11 @@ Due to the reduced representation this is fulfilled as soon as the matrix is of 
 check_vector(M::SymmetricPositiveSemidefiniteFixedRank, q, Y; kwargs...)
 
 function get_embedding(
-        ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n, k}}, 𝔽},
+        ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n, k}}, 𝔽}
     ) where {n, k, 𝔽}
     return Euclidean(n, k; field = 𝔽)
 end
-function get_embedding(
-        M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int, Int}, 𝔽},
-    ) where {𝔽}
+function get_embedding(M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int, Int}, 𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(n, k; field = 𝔽, parameter = :field)
 end
@@ -161,9 +156,7 @@ the comparison is performed with the classical `isapprox`.
 The `kwargs...` are passed on to this accordingly.
 """
 function _isapprox(
-        M::SymmetricPositiveSemidefiniteFixedRank,
-        p::T,
-        q;
+        M::SymmetricPositiveSemidefiniteFixedRank, p::T, q;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
     ) where {T}
@@ -234,19 +227,16 @@ function project!(::SymmetricPositiveSemidefiniteFixedRank, Z, q, Y)
 end
 
 function Base.show(
-        io::IO,
-        ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n, k}}, 𝔽},
+        io::IO, ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n, k}}, 𝔽}
     ) where {n, k, 𝔽}
     return print(io, "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽))")
 end
 function Base.show(
-        io::IO,
-        M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int, Int}, 𝔽},
+        io::IO, M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int, Int}, 𝔽}
     ) where {𝔽}
     n, k = get_parameter(M.size)
     return print(
-        io,
-        "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽); parameter=:field)",
+        io, "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽); parameter=:field)"
     )
 end
 
@@ -257,11 +247,7 @@ Transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent
 at `q`.
 """
 vector_transport_to(
-    ::SymmetricPositiveSemidefiniteFixedRank,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::ProjectionTransport,
+    ::SymmetricPositiveSemidefiniteFixedRank, ::Any, ::Any, ::Any, ::ProjectionTransport
 )
 
 function vector_transport_to_project!(M::SymmetricPositiveSemidefiniteFixedRank, Y, p, X, q)

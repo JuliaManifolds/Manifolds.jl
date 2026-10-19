@@ -52,9 +52,7 @@ function SkewSymmetricMatrices(n::Int; parameter::Symbol = :type)
 end
 
 function allocation_promotion_function(
-        ::SkewHermitianMatrices{ℂ},
-        ::typeof(get_vector),
-        args::Tuple,
+        ::SkewHermitianMatrices{ℂ}, ::typeof(get_vector), args::Tuple
     )
     return complex
 end
@@ -71,8 +69,7 @@ The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 function check_point(M::SkewHermitianMatrices{𝔽}, p; kwargs...) where {𝔽}
     if !isapprox(p, -p'; kwargs...)
         return DomainError(
-            norm(p + p'),
-            "The point $(p) does not lie on $M, since it is not skew-hermitian.",
+            norm(p + p'), "The point $(p) does not lie on $M, since it is not skew-hermitian."
         )
     end
     return nothing
@@ -109,13 +106,7 @@ function get_coordinates_orthonormal!(M::SkewSymmetricMatrices, Y, p, X, ::RealN
     end
     return Y
 end
-function get_coordinates_orthonormal!(
-        M::SkewHermitianMatrices{ℂ},
-        Y,
-        p,
-        X,
-        ::RealNumbers,
-    )
+function get_coordinates_orthonormal!(M::SkewHermitianMatrices{ℂ}, Y, p, X, ::RealNumbers)
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -163,13 +154,7 @@ function get_vector_orthonormal!(M::SkewSymmetricMatrices, Y, p, X, ::RealNumber
     end
     return Y
 end
-function get_vector_orthonormal!(
-        M::SkewHermitianMatrices{ℂ},
-        Y,
-        p,
-        X,
-        ::RealNumbers,
-    )
+function get_vector_orthonormal!(M::SkewHermitianMatrices{ℂ}, Y, p, X, ::RealNumbers)
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -248,11 +233,8 @@ project(::SkewHermitianMatrices, ::Any, ::Any)
 project!(M::SkewHermitianMatrices, Y, p, X) = project!(M, Y, X)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::SkewHermitianMatrices,
-        pX;
-        σ::Real = one(real(eltype(pX))),
-        kwargs...,
+        rng::AbstractRNG, M::SkewHermitianMatrices, pX;
+        σ::Real = one(real(eltype(pX))), kwargs...,
     )
     rand!(rng, pX)
     pX .= (σ / (2 * norm(pX))) .* (pX - pX')

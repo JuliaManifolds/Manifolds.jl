@@ -52,10 +52,8 @@ include("../header.jl")
         @test_throws DomainError is_vector(NE, x[1:2], log(N, x, y); error = :error)
 
         Manifolds.test_manifold(
-            NE,
-            [x[1:2], y[1:2], z[1:2]];
-            test_representation_size = false,
-            test_inplace = true,
+            NE, [x[1:2], y[1:2], z[1:2]];
+            test_representation_size = false, test_inplace = true,
         )
         @test sprint(show, "text/plain", NE) == """
             GraphManifold

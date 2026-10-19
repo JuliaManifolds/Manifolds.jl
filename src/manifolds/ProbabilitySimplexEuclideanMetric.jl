@@ -1,10 +1,6 @@
 exp!(::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, q, p, X) = (q .= p .+ X)
 function exp_fused!(
-        ::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric},
-        q,
-        p,
-        X,
-        t::Number,
+        ::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, q, p, X, t::Number
     )
     return (q .= p .+ t .* X)
 end
@@ -41,8 +37,7 @@ to have a zero component sum.
 rand(::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}; σ::Real = 1.0)
 function Random.rand(
         M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric};
-        vector_at = nothing,
-        kwargs...,
+        vector_at = nothing, kwargs...,
     )
     if vector_at === nothing
         pX = allocate_result(M, rand)
@@ -53,10 +48,8 @@ function Random.rand(
     return pX
 end
 function Random.rand(
-        rng::AbstractRNG,
-        M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric};
-        vector_at = nothing,
-        kwargs...,
+        rng::AbstractRNG, M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric};
+        vector_at = nothing, kwargs...,
     )
     if vector_at === nothing
         pX = allocate_result(M, rand)
@@ -68,11 +61,8 @@ function Random.rand(
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        ::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric},
-        pX;
-        vector_at = nothing,
-        σ = one(eltype(pX)),
+        rng::AbstractRNG, ::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, pX;
+        vector_at = nothing, σ = one(eltype(pX)),
     )
     if isnothing(vector_at)
         Random.randexp!(rng, pX)
@@ -85,8 +75,7 @@ function Random.rand!(
 end
 
 function Random.rand!(
-        M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric},
-        pX;
+        M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, pX;
         kwargs...,
     )
     return rand!(Random.default_rng(), M, pX; kwargs...)

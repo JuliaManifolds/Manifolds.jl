@@ -56,9 +56,7 @@ function Random.rand(rng::AbstractRNG, d::ProductPointDistribution)
 end
 
 function Distributions._rand!(
-        rng::AbstractRNG,
-        d::ProductFVectorDistribution,
-        X::ArrayPartition,
+        rng::AbstractRNG, d::ProductFVectorDistribution, X::ArrayPartition
     )
     map(
         (t1, t2) -> Distributions._rand!(rng, t1, t2),
@@ -67,11 +65,7 @@ function Distributions._rand!(
     )
     return X
 end
-function Distributions._rand!(
-        rng::AbstractRNG,
-        d::ProductPointDistribution,
-        p::ArrayPartition,
-    )
+function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, p::ArrayPartition)
     map(
         (t1, t2) -> Distributions._rand!(rng, t1, t2),
         d.distributions,
@@ -90,8 +84,7 @@ function uniform_distribution(M::ProductManifold)
 end
 function uniform_distribution(M::ProductManifold, p)
     return ProductPointDistribution(
-        M,
-        map(uniform_distribution, M.manifolds, submanifold_components(M, p)),
+        M, map(uniform_distribution, M.manifolds, submanifold_components(M, p))
     )
 end
 
@@ -134,11 +127,7 @@ function Random.rand(rng::AbstractRNG, d::PowerPointDistribution)
     return x
 end
 
-function Distributions._rand!(
-        rng::AbstractRNG,
-        d::PowerFVectorDistribution,
-        v::AbstractArray,
-    )
+function Distributions._rand!(rng::AbstractRNG, d::PowerFVectorDistribution, v::AbstractArray)
     PM = d.type.manifold
     rep_size = representation_size(PM.manifold)
     for i in get_iterator(d.type.manifold)
@@ -176,11 +165,7 @@ struct NormalRotationDistribution{TResult, TM <: Rotations, TD <: Distribution} 
     distr::TD
 end
 
-function NormalRotationDistribution(
-        M::Rotations,
-        d::Distribution,
-        x::TResult,
-    ) where {TResult}
+function NormalRotationDistribution(M::Rotations, d::Distribution, x::TResult) where {TResult}
     return NormalRotationDistribution{TResult, typeof(M), typeof(d)}(M, d)
 end
 
@@ -201,8 +186,7 @@ function _fix_random_rotation(A::AbstractMatrix)
 end
 
 function Random.rand(
-        rng::AbstractRNG,
-        d::NormalRotationDistribution{TResult, <:Rotations},
+        rng::AbstractRNG, d::NormalRotationDistribution{TResult, <:Rotations}
     ) where {TResult}
     n = get_parameter(d.manifold.size)[1]
     return if n == 1
@@ -214,9 +198,7 @@ function Random.rand(
 end
 
 function Distributions._rand!(
-        rng::AbstractRNG,
-        d::NormalRotationDistribution,
-        x::AbstractArray{<:Real},
+        rng::AbstractRNG, d::NormalRotationDistribution, x::AbstractArray{<:Real}
     )
     return copyto!(x, rand(rng, d))
 end

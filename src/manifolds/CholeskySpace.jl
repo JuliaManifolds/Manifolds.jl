@@ -32,8 +32,7 @@ entries on the diagonal.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_point(
-        M::CholeskySpace,
-        p::T;
+        M::CholeskySpace, p::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
     ) where {T}
@@ -267,20 +266,15 @@ function Random.rand!(
     N = get_parameter(M.size)[1]
     if vector_at === nothing
         p_spd = rand(
-            rng,
-            SymmetricPositiveDefinite(N; parameter = :field);
-            σ = σ,
-            tangent_distr = tangent_distr,
+            rng, SymmetricPositiveDefinite(N; parameter = :field);
+            σ = σ, tangent_distr = tangent_distr,
         )
         pX .= cholesky(p_spd).L
     else
         p_spd = vector_at * vector_at'
         X_spd = rand(
-            rng,
-            SymmetricPositiveDefinite(N; parameter = :field);
-            vector_at = p_spd,
-            σ = σ,
-            tangent_distr = tangent_distr,
+            rng, SymmetricPositiveDefinite(N; parameter = :field);
+            vector_at = p_spd, σ = σ, tangent_distr = tangent_distr,
         )
         pX .= spd_to_cholesky(p_spd, X_spd)[2]
     end

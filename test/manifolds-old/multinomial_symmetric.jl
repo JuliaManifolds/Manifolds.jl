@@ -42,9 +42,7 @@ include("../header.jl")
 
     X2 = [-0.1 0.0 0.1; 0.0 0.2 -0.2; 0.1 -0.2 0.1]
     @test is_vector(
-        M,
-        p2,
-        vector_transport_to(M, p, X2, p2, ProjectionTransport());
+        M, p2, vector_transport_to(M, p, X2, p2, ProjectionTransport());
         atol = 10^-15,
     )
     X3 = [1.0 1.0 1.0; 0.0 0.0 0.0; 0.0 0.0 0.0]

@@ -170,9 +170,7 @@ For a the Poincaré ball as well as the Poincaré half plane model, `X` has to b
 check_vector(::Hyperbolic, ::Any, ::Any)
 
 function check_vector(
-        M::Hyperbolic,
-        p,
-        X::Union{PoincareBallTangentVector, PoincareHalfSpaceTangentVector};
+        M::Hyperbolic, p, X::Union{PoincareBallTangentVector, PoincareHalfSpaceTangentVector};
         kwargs...,
     )
     n = get_parameter(M.size)[1]
@@ -183,10 +181,7 @@ end
 #
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
     @eval convert(::Type{$T}, p::$P, X::$T) = X
-    @eval function convert(
-            ::Type{Tuple{AbstractVector, AbstractVector}},
-            (p, X)::Tuple{$P, $T},
-        )
+    @eval function convert(::Type{Tuple{AbstractVector, AbstractVector}}, (p, X)::Tuple{$P, $T})
         return (convert(AbstractVector, p), convert(AbstractVector, p, X))
     end
 end
@@ -241,8 +236,7 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
         function exp!(M::Hyperbolic, q::$P, p::$P, X::$T)
             q.value .=
                 convert(
-                $P,
-                exp(M, convert(AbstractVector, p), convert(AbstractVector, p, X)),
+                $P, exp(M, convert(AbstractVector, p), convert(AbstractVector, p, X))
             ).value
             return q
         end
@@ -250,12 +244,7 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
             q.value .=
                 convert(
                 $P,
-                exp_fused(
-                    M,
-                    convert(AbstractVector, p),
-                    convert(AbstractVector, p, X),
-                    t,
-                ),
+                exp_fused(M, convert(AbstractVector, p), convert(AbstractVector, p, X), t),
             ).value
             return q
         end

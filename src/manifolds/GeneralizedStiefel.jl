@@ -54,10 +54,7 @@ function Base.hash(M::GeneralizedStiefel, h::UInt)
 end
 
 function GeneralizedStiefel(
-        n::Int,
-        k::Int,
-        B::AbstractMatrix = Matrix{Float64}(I, n, n),
-        𝔽::AbstractNumbers = ℝ;
+        n::Int, k::Int, B::AbstractMatrix = Matrix{Float64}(I, n, n), 𝔽::AbstractNumbers = ℝ;
         parameter::Symbol = :type,
     )
     0 <= k <= n || throw(
@@ -237,11 +234,8 @@ random Matrix onto the tangent vector at `vector_at`.
 rand(::GeneralizedStiefel; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::GeneralizedStiefel,
-        pX;
-        vector_at = nothing,
-        σ::Real = one(real(eltype(pX))),
+        rng::AbstractRNG, M::GeneralizedStiefel, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
     )
     n, k = get_parameter(M.size)
     if vector_at === nothing
@@ -392,7 +386,7 @@ function ManifoldsBase.retract_pade!(M::GeneralizedStiefel{ℝ}, q, p, X, m::Pad
     return ManifoldsBase.retract_pade_fused!(M, q, p, X, one(eltype(p)), m)
 end
 function ManifoldsBase.retract_pade_fused!(
-        M::GeneralizedStiefel{ℝ}, q, p, X, t::Number, ::PadeRetraction{1},
+        M::GeneralizedStiefel{ℝ}, q, p, X, t::Number, ::PadeRetraction{1}
     )
     tX = t * X
     W = (I - p * p' * M.B / 2) * tX * p' * M.B - p * tX' * (I - M.B * p * p' / 2) * M.B

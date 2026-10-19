@@ -147,11 +147,7 @@ struct OrthographicInverseRetraction <: AbstractInverseRetractionMethod end
 
 # Layer II
 function _inverse_retract!(
-        M::AbstractManifold,
-        X,
-        p,
-        q,
-        ::OrthographicInverseRetraction;
+        M::AbstractManifold, X, p, q, ::OrthographicInverseRetraction;
         kwargs...,
     )
     return inverse_retract_orthographic!(M, X, p, q; kwargs...)
@@ -167,22 +163,13 @@ inverse_retract_orthographic!(M::AbstractManifold, X, p, q)
 
 ## Layer II
 function ManifoldsBase._retract_fused!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        t::Number,
-        ::OrthographicRetraction;
+        M::AbstractManifold, q, p, X, t::Number, ::OrthographicRetraction;
         kwargs...,
     )
     return retract_orthographic_fused!(M, q, p, X, t; kwargs...)
 end
 function ManifoldsBase._retract!(
-        M::AbstractManifold,
-        q,
-        p,
-        X,
-        ::OrthographicRetraction;
+        M::AbstractManifold, q, p, X, ::OrthographicRetraction;
         kwargs...,
     )
     return retract_orthographic!(M, q, p, X; kwargs...)
@@ -228,14 +215,13 @@ function Broadcast.BroadcastStyle(::Type{<:UMVTangentVector})
     return Broadcast.Style{UMVTangentVector}()
 end
 function Broadcast.BroadcastStyle(
-        ::Broadcast.AbstractArrayStyle{0},
-        b::Broadcast.Style{UMVTangentVector},
+        ::Broadcast.AbstractArrayStyle{0}, b::Broadcast.Style{UMVTangentVector}
     )
     return b
 end
 
 function Broadcast.instantiate(
-        bc::Broadcast.Broadcasted{Broadcast.Style{UMVTangentVector}, Nothing},
+        bc::Broadcast.Broadcasted{Broadcast.Style{UMVTangentVector}, Nothing}
     )
     return bc
 end
@@ -255,8 +241,7 @@ Broadcast.broadcastable(v::UMVTangentVector) = v
 end
 
 Base.@propagate_inbounds function Broadcast._broadcast_getindex(
-        v::UMVTangentVector,
-        ::Val{I},
+        v::UMVTangentVector, ::Val{I}
     ) where {I}
     return getfield(v, I)
 end
@@ -264,8 +249,7 @@ end
 Base.axes(::UMVTangentVector) = ()
 
 @inline function Base.copyto!(
-        dest::UMVTangentVector,
-        bc::Broadcast.Broadcasted{Broadcast.Style{UMVTangentVector}},
+        dest::UMVTangentVector, bc::Broadcast.Broadcasted{Broadcast.Style{UMVTangentVector}}
     )
     # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
     if bc.f === identity && bc.args isa Tuple{UMVTangentVector} # only a single input argument to broadcast!
@@ -357,9 +341,7 @@ This means that `X.U` and `X.Vt` are (columnwise) orthogonal to `p.U` and `p.Vt`
 and that its dimensions are consistent with `p` and `X.M`, i.e. correspond to `m`-by-`n` matrices of rank `k`.
 """
 function check_vector(
-        M::FixedRankMatrices,
-        p::SVDMPoint,
-        X::UMVTangentVector;
+        M::FixedRankMatrices, p::SVDMPoint, X::UMVTangentVector;
         atol::Real = sqrt(prod(representation_size(M)) * eps(real(float(eltype(p.U))))),
         kwargs...,
     )
@@ -507,7 +489,8 @@ For more details, see [AbsilOseledets:2014](@cite).
 inverse_retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicInverseRetraction)
 
 function inverse_retract_orthographic!(
-        M::FixedRankMatrices, X::UMVTangentVector, p::SVDMPoint, q::SVDMPoint; kwargs...
+        M::FixedRankMatrices, X::UMVTangentVector, p::SVDMPoint, q::SVDMPoint;
+        kwargs...,
     )
     project!(M, X, p, embed(M, q) - embed(M, p))
     return X
@@ -517,15 +500,11 @@ function _isapprox(::FixedRankMatrices, p::SVDMPoint, q::SVDMPoint; kwargs...)
     return isapprox(p.U * Diagonal(p.S) * p.Vt, q.U * Diagonal(q.S) * q.Vt; kwargs...)
 end
 function _isapprox(
-        ::FixedRankMatrices,
-        p::SVDMPoint,
-        X::UMVTangentVector,
-        Y::UMVTangentVector;
+        ::FixedRankMatrices, p::SVDMPoint, X::UMVTangentVector, Y::UMVTangentVector;
         kwargs...,
     )
     return isapprox(
-        p.U * X.M * p.Vt + X.U * p.Vt + p.U * X.Vt,
-        p.U * Y.M * p.Vt + Y.U * p.Vt + p.U * Y.Vt;
+        p.U * X.M * p.Vt + X.U * p.Vt + p.U * X.Vt, p.U * Y.M * p.Vt + Y.U * p.Vt + p.U * Y.Vt;
         kwargs...,
     )
 end
@@ -601,7 +580,8 @@ function Random.rand(M::FixedRankMatrices; vector_at = nothing, kwargs...)
     return rand(Random.default_rng(), M; vector_at = vector_at, kwargs...)
 end
 function Random.rand(
-        rng::AbstractRNG, M::FixedRankMatrices{𝔽}; vector_at = nothing, kwargs...
+        rng::AbstractRNG, M::FixedRankMatrices{𝔽};
+        vector_at = nothing, kwargs...,
     ) where {𝔽}
     m, n, k = get_parameter(M.size)
     T = 𝔽 === ℝ ? Float64 : ComplexF64
@@ -610,9 +590,7 @@ function Random.rand(
         return rand!(rng, M, p; kwargs...)
     else
         X = UMVTangentVector(
-            Matrix{T}(undef, m, k),
-            Matrix{T}(undef, k, k),
-            Matrix{T}(undef, k, n),
+            Matrix{T}(undef, m, k), Matrix{T}(undef, k, k), Matrix{T}(undef, k, n)
         )
         return rand!(rng, M, X; vector_at, kwargs...)
     end
@@ -620,7 +598,7 @@ end
 
 function Random.rand!(
         rng::AbstractRNG, M::FixedRankMatrices{𝔽}, pX;
-        vector_at = nothing, σ::Real = one(real(number_eltype(pX))), kwargs...
+        vector_at = nothing, σ::Real = one(real(number_eltype(pX))), kwargs...,
     ) where {𝔽}
     m, n, k = get_parameter(M.size)
     if vector_at === nothing
@@ -680,14 +658,15 @@ For more details, see [AbsilOseledets:2014](@cite).
 retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicRetraction)
 
 function retract_orthographic!(
-        M::FixedRankMatrices, q::SVDMPoint, p::SVDMPoint, X::UMVTangentVector; kwargs...
+        M::FixedRankMatrices, q::SVDMPoint, p::SVDMPoint, X::UMVTangentVector;
+        kwargs...,
     )
     return retract_orthographic_fused!(M, q, p, X, one(eltype(p)); kwargs...)
 end
 
 function retract_orthographic_fused!(
         M::FixedRankMatrices, q::SVDMPoint, p::SVDMPoint, X::UMVTangentVector, t::Number;
-        kwargs...
+        kwargs...,
     )
     m, n, k = get_parameter(M.size)
     tX = t * X
@@ -716,21 +695,12 @@ singular values and ``U`` and ``V`` are shortened accordingly.
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
 
-function retract_polar!(
-        M::FixedRankMatrices,
-        q::SVDMPoint,
-        p::SVDMPoint,
-        X::UMVTangentVector,
-    )
+function retract_polar!(M::FixedRankMatrices, q::SVDMPoint, p::SVDMPoint, X::UMVTangentVector)
     return ManifoldsBase.retract_polar_fused!(M, q, p, X, one(eltype(p.S)))
 end
 
 function ManifoldsBase.retract_polar_fused!(
-        M::FixedRankMatrices,
-        q::SVDMPoint,
-        p::SVDMPoint,
-        X::UMVTangentVector,
-        t::Number,
+        M::FixedRankMatrices, q::SVDMPoint, p::SVDMPoint, X::UMVTangentVector, t::Number
     )
     m, n, k = get_parameter(M.size)
     tX = t * X
@@ -780,8 +750,7 @@ function riemannian_Hessian!(M::FixedRankMatrices, Y, p, G, H, X)
 end
 
 function Base.show(
-        io::IO,
-        ::FixedRankMatrices{𝔽, TypeParameter{Tuple{m, n, k}}},
+        io::IO, ::FixedRankMatrices{𝔽, TypeParameter{Tuple{m, n, k}}}
     ) where {m, n, k, 𝔽}
     return print(io, "FixedRankMatrices($(m), $(n), $(k), $(𝔽))")
 end

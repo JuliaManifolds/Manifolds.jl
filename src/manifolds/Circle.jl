@@ -35,8 +35,7 @@ check_point(::Circle, ::Any...)
 function check_point(M::Circle{ℝ}, p; kwargs...)
     if !isapprox(sym_rem(p), p; kwargs...)
         return DomainError(
-            p,
-            "The point $(p) does not lie on $(M), since its is not in [-π,π).",
+            p, "The point $(p) does not lie on $(M), since its is not in [-π,π)."
         )
     end
     return nothing
@@ -44,8 +43,7 @@ end
 function check_point(M::Circle{ℂ}, p; kwargs...)
     if !isapprox(sum(abs.(p)), 1.0; kwargs...)
         return DomainError(
-            sum(abs.(p)),
-            "The point $(p) does not lie on the $(M) since its norm is not 1.",
+            sum(abs.(p)), "The point $(p) does not lie on the $(M) since its norm is not 1."
         )
     end
     return nothing
@@ -82,11 +80,8 @@ function check_vector(M::Circle{ℝ}, p, X; kwargs...)
     return nothing
 end
 function check_vector(
-        M::Circle{ℂ},
-        p,
-        X::T;
-        atol::Real = sqrt(eps(real(float(number_eltype(T))))),
-        kwargs...,
+        M::Circle{ℂ}, p, X::T;
+        atol::Real = sqrt(eps(real(float(number_eltype(T))))), kwargs...,
     ) where {T}
     if !isapprox(abs(complex_dot(p, X)), 0; atol = atol, kwargs...)
         return DomainError(
@@ -196,13 +191,7 @@ function get_coordinates_diagonalizing(::Circle{ℝ}, p, X, B::DiagonalizingOrth
     sbv = sign(B.frame_direction[])
     return X * (sbv == 0 ? one(sbv) : sbv)
 end
-function get_coordinates_diagonalizing!(
-        M::Circle{ℝ},
-        Y,
-        p,
-        X,
-        B::DiagonalizingOrthonormalBasis,
-    )
+function get_coordinates_diagonalizing!(M::Circle{ℝ}, Y, p, X, B::DiagonalizingOrthonormalBasis)
     Y[] = get_coordinates_diagonalizing(M, p, X, B)[]
     return Y
 end
@@ -214,11 +203,7 @@ Return tangent vector coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 get_coordinates(::Circle{ℂ}, p, X, ::DefaultOrthonormalBasis{<:Any, TangentSpaceType})
 function get_coordinates_orthonormal!(
-        M::Circle{ℂ},
-        Y,
-        p,
-        X,
-        n::Union{RealNumbers, ComplexNumbers},
+        M::Circle{ℂ}, Y, p, X, n::Union{RealNumbers, ComplexNumbers}
     )
     Y[] = get_coordinates_orthonormal(M, p, X, n)[]
     return Y
@@ -256,10 +241,7 @@ end
 Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 function get_vector_orthonormal(
-        ::Circle{ℂ},
-        p::StaticArray,
-        c,
-        ::Union{RealNumbers, ComplexNumbers},
+        ::Circle{ℂ}, p::StaticArray, c, ::Union{RealNumbers, ComplexNumbers}
     )
     return @SArray fill(1im * c[1] * p[1])
 end
@@ -404,12 +386,7 @@ mean(::Circle{ℝ}, ::Any)
 function Statistics.mean(::Circle{ℝ}, x::AbstractVector{<:Real}; kwargs...)
     return atan(1 / length(x) * sum(sin, x), 1 / length(x) * sum(cos, x))
 end
-function Statistics.mean(
-        ::Circle{ℝ},
-        x::AbstractVector{<:Real},
-        w::AbstractVector;
-        kwargs...,
-    )
+function Statistics.mean(::Circle{ℝ}, x::AbstractVector{<:Real}, w::AbstractVector; kwargs...)
     return atan(sum(w .* sin.(x)), sum(w .* cos.(x)))
 end
 @doc raw"""
@@ -437,9 +414,7 @@ function Statistics.mean(M::Circle{ℂ}, x::AbstractVector{<:Complex}; kwargs...
     return s / abs(s)
 end
 function Statistics.mean(
-        M::Circle{ℂ},
-        x::AbstractVector{<:Complex},
-        w::AbstractVector;
+        M::Circle{ℂ}, x::AbstractVector{<:Complex}, w::AbstractVector;
         kwargs...,
     )
     s = sum(w .* x)
@@ -516,11 +491,8 @@ function Random.rand(rng::AbstractRNG, M::Circle{ℂ}; vector_at = nothing, σ::
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::Circle,
-        pX;
-        vector_at = nothing,
-        σ::Real = one(real(eltype(pX))),
+        rng::AbstractRNG, M::Circle, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
     )
     pX .= rand(rng, M; vector_at, σ)
     return pX

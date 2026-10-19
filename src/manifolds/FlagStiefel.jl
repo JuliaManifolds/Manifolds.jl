@@ -23,10 +23,7 @@ as the default vector transport method for the [`Flag`](@ref) manifold.
 default_vector_transport_method(::Flag) = ProjectionTransport()
 
 function inner(
-        M::Flag{<:Any, dp1},
-        p::AbstractMatrix,
-        X::AbstractMatrix,
-        Y::AbstractMatrix,
+        M::Flag{<:Any, dp1}, p::AbstractMatrix, X::AbstractMatrix, Y::AbstractMatrix
     ) where {dp1}
     inner_prod = zero(eltype(X))
     pX = p' * X
@@ -84,9 +81,7 @@ X = \begin{bmatrix}
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
 """
 function check_vector(
-        M::Flag{<:Any, dp1},
-        p::AbstractMatrix,
-        X::AbstractMatrix;
+        M::Flag{<:Any, dp1}, p::AbstractMatrix, X::AbstractMatrix;
         atol = sqrt(eps(eltype(X))),
     ) where {dp1}
     for i in 1:(dp1 - 1)
@@ -95,10 +90,7 @@ function check_vector(
 
         pTX_norm = norm(p_i' * X_i)
         if pTX_norm > atol
-            return DomainError(
-                pTX_norm,
-                "Orthogonality condition check failed at subspace $i.",
-            )
+            return DomainError(pTX_norm, "Orthogonality condition check failed at subspace $i.")
         end
 
         for j in i:(dp1 - 1)
@@ -107,8 +99,7 @@ function check_vector(
             sum_norm = norm(p_i' * X_j + X_i' * p_j)
             if sum_norm > atol
                 return DomainError(
-                    sum_norm,
-                    "Tangent vector condition check failed at subspaces ($i, $j)",
+                    sum_norm, "Tangent vector condition check failed at subspaces ($i, $j)"
                 )
             end
         end
@@ -132,10 +123,7 @@ matrices for consecutive subspaces of the flag.
 project(::Flag, p, X)
 
 function project!(
-        M::Flag{<:Any, dp1},
-        Y::AbstractMatrix,
-        p::AbstractMatrix,
-        X::AbstractMatrix,
+        M::Flag{<:Any, dp1}, Y::AbstractMatrix, p::AbstractMatrix, X::AbstractMatrix
     ) where {dp1}
     Xc = X .- p * (p' * X) ./ 2
     for i in 1:(dp1 - 1)

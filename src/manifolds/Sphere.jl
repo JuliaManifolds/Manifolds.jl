@@ -96,13 +96,11 @@ struct ArraySphere{𝔽, T} <: AbstractSphere{𝔽}
 end
 function ArraySphere(
         n::Vararg{Int, I};
-        field::AbstractNumbers = ℝ,
-        parameter::Symbol = :type,
+        field::AbstractNumbers = ℝ, parameter::Symbol = :type,
     ) where {I}
     any(n .< 1) && throw(
         DomainError(
-            n,
-            "Every array size of an array sphere must be positive, but they were $(n).",
+            n, "Every array size of an array sphere must be positive, but they were $(n)."
         ),
     )
     size = wrap_type_parameter(parameter, n)
@@ -119,8 +117,7 @@ The tolerance for the last test can be set using the `kwargs...`.
 function check_point(M::AbstractSphere, p; kwargs...)
     if !isapprox(norm(p), 1.0; kwargs...)
         return DomainError(
-            norm(p),
-            "The point $(p) does not lie on the $(M) since its norm is not 1.",
+            norm(p), "The point $(p) does not lie on the $(M) since its norm is not 1."
         )
     end
     return nothing
@@ -135,9 +132,7 @@ and orthogonal to `p` up to `max(atol, rtol * norm(X))`.
 The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
-        M::AbstractSphere,
-        p,
-        X::T;
+        M::AbstractSphere, p, X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
@@ -379,9 +374,7 @@ function local_metric(M::Sphere{ℝ, Tuple{Int}}, p, ::DefaultOrthonormalBasis)
     return Diagonal(ones(eltype(p), n))
 end
 function local_metric(
-        ::Sphere{ℝ, TypeParameter{Tuple{n}}},
-        p,
-        B::DefaultOrthonormalBasis,
+        ::Sphere{ℝ, TypeParameter{Tuple{n}}}, p, B::DefaultOrthonormalBasis
     ) where {n}
     return Diagonal(ones(SVector{n, eltype(p)}))
 end
@@ -535,11 +528,8 @@ project(::AbstractSphere, ::Any, ::Any)
 project!(::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::AbstractSphere,
-        pX;
-        vector_at = nothing,
-        σ = one(eltype(pX)),
+        rng::AbstractRNG, M::AbstractSphere, pX;
+        vector_at = nothing, σ = one(eltype(pX)),
     )
     if vector_at === nothing
         project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
@@ -793,11 +783,7 @@ Store in `cX` the stereographic coordinate representation of the tangent vector 
 at `p` with respect to the induced basis `B`.
 """
 function get_coordinates_induced_basis!(
-        M::Sphere{ℝ},
-        cX,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas},
+        M::Sphere{ℝ}, cX, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas}
     )
     n = get_parameter(M.size)[1]
     if B.i === :north
@@ -819,11 +805,7 @@ Store in `X` the tangent vector at `p` represented by stereographic coordinates 
 with respect to the induced basis `B`.
 """
 function get_vector_induced_basis!(
-        M::Sphere{ℝ},
-        X,
-        p,
-        cX,
-        B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas},
+        M::Sphere{ℝ}, X, p, cX, B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas}
     )
     n = get_parameter(M.size)[1]
     a = get_parameters(M, B.A, B.i, p)
@@ -868,9 +850,7 @@ function det_local_metric(M::Sphere{ℝ}, ::StereographicAtlas, i, a)
 end
 # The InducedBasis variant of `local_metric` is deprecated, kept for compatibility with older versions of Manifolds.jl
 function local_metric(
-        M::Sphere{ℝ},
-        p,
-        B::InducedBasis{ℝ, TangentSpaceType, StereographicAtlas, Symbol},
+        M::Sphere{ℝ}, p, B::InducedBasis{ℝ, TangentSpaceType, StereographicAtlas, Symbol}
     )
     a = get_parameters(M, B.A, B.i, p)
     return local_metric(M, B.A, B.i, a)
@@ -889,9 +869,7 @@ coordinate expression is
 - a\langle X_c,Y_c\rangle\right).
 ````
 """
-function affine_connection!(
-        M::Sphere{ℝ}, Zc, A::StereographicAtlas, i, a, Xc, Yc
-    )
+function affine_connection!(M::Sphere{ℝ}, Zc, A::StereographicAtlas, i, a, Xc, Yc)
     factor = -2 / (1 + dot(a, a))
     Zc .= factor .* (Xc .* dot(a, Yc) .+ Yc .* dot(a, Xc) .- a .* dot(Xc, Yc))
     return Zc

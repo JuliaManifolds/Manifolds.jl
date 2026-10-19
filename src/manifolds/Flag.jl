@@ -198,10 +198,7 @@ Convert tangent vector from [`Flag`](@ref) manifold `M` from orthogonal represen
 Stiefel representation.
 """
 function convert(
-        ::Type{AbstractMatrix},
-        M::Flag,
-        p::OrthogonalPoint,
-        X::OrthogonalTangentVector,
+        ::Type{AbstractMatrix}, M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector
     )
     (N, k) = representation_size(M)
     return p.value * X.value[:, 1:k]
@@ -213,12 +210,7 @@ end
 Convert tangent vector from [`Flag`](@ref) manifold `M` from Stiefel representation to
 orthogonal representation.
 """
-function convert(
-        ::Type{OrthogonalTangentVector},
-        M::Flag,
-        p::AbstractMatrix,
-        X::AbstractMatrix,
-    )
+function convert(::Type{OrthogonalTangentVector}, M::Flag, p::AbstractMatrix, X::AbstractMatrix)
     (N, k) = representation_size(M)
     out = similar(X, N, N)
     fill!(out, 0)

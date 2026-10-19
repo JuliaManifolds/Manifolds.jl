@@ -103,8 +103,7 @@ function log_safe!(Y, A)
             if i !== nothing
                 throw(
                     DomainError(
-                        A[i, i],
-                        "All eigenvalues must be positive to compute a real logarithm.",
+                        A[i, i], "All eigenvalues must be positive to compute a real logarithm."
                     ),
                 )
             end
@@ -322,12 +321,8 @@ return curvature values larger than the exact ones.
 `X` and `Y` are orthonormalized internally, so the estimate depends only on the plane they span.
 """
 function estimated_sectional_curvature(
-        M::AbstractManifold,
-        p,
-        X,
-        Y;
-        r::Real = 1.0e-3,
-        N::Int = 10000,
+        M::AbstractManifold, p, X, Y;
+        r::Real = 1.0e-3, N::Int = 10000,
     )
     Xn = X ./ norm(M, p, X)
     Yo = Y .- real(inner(M, p, Xn, Y)) .* Xn
@@ -354,11 +349,8 @@ Estimate the matrix of sectional curvatures of manifold `M` at point `p` using
 surface spanned by vectors `i`  and `j` from basis `B`.
 """
 function estimated_sectional_curvature_matrix(
-        M::AbstractManifold,
-        p,
-        B::AbstractBasis;
-        r::Real = 1.0e-3,
-        N_pts::Int = 10000,
+        M::AbstractManifold, p, B::AbstractBasis;
+        r::Real = 1.0e-3, N_pts::Int = 10000,
     )
     V = get_vectors(M, p, get_basis(M, p, B))
     N = length(V)
@@ -375,11 +367,8 @@ function estimated_sectional_curvature_matrix(
 end
 
 function _ensure_nonzero_rng_determinant!(
-        rng,
-        M::AbstractManifold,
-        pX;
-        atol::Real = sqrt(eps(real(eltype(pX)))),
-        kwargs...,
+        rng, M::AbstractManifold, pX;
+        atol::Real = sqrt(eps(real(eltype(pX)))), kwargs...,
     )
     while abs(det(pX)) < atol
         rand!(rng, M, pX; kwargs...)

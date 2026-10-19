@@ -202,10 +202,7 @@ function log(
     return X
 end
 function log!(
-        M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric},
-        X,
-        p,
-        q;
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, X, p, q;
         tolerance = sqrt(eps(float(real(eltype(X))))),
         max_iterations = 1_000,
         num_transport_points = 4,
@@ -247,12 +244,10 @@ where ``P = I-pp^{\mathrm{H}}`` and ``g_p^{-1}W = PW + 2(α+1)pp^{\mathrm{H}}W``
 
 Compared to Eq. (5.6) we have that their ``α_0 = 1`` and ``α_1 = \frac{1}{2(α+1)}``.
 """
-riemannian_Hessian(
-    M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, p, G, H, X,
-)
+riemannian_Hessian(M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, p, G, H, X)
 
 function riemannian_Hessian!(
-        M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, Y, p, G, H, X,
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, Y, p, G, H, X
     )
     α = metric(M).α
     Gp = symmetrize(G' * p)
@@ -374,8 +369,7 @@ function Broadcast.BroadcastStyle(::Type{<:StiefelFactorization})
     return Broadcast.Style{StiefelFactorization}()
 end
 function Broadcast.BroadcastStyle(
-        ::Broadcast.AbstractArrayStyle{0},
-        b::Broadcast.Style{<:StiefelFactorization},
+        ::Broadcast.AbstractArrayStyle{0}, b::Broadcast.Style{<:StiefelFactorization}
     )
     return b
 end
@@ -397,7 +391,7 @@ function project!(M::Stiefel{ℝ}, q::StiefelFactorization, p::StiefelFactorizat
     return q
 end
 function project!(
-        M::Stiefel{ℝ}, Y::StiefelFactorization, p::StiefelFactorization, X::StiefelFactorization,
+        M::Stiefel{ℝ}, Y::StiefelFactorization, p::StiefelFactorization, X::StiefelFactorization
     )
     n, k = get_parameter(M.size)
     project!(Stiefel(2k, k), Y.Z, p.Z, X.Z)

@@ -93,28 +93,20 @@ using LinearAlgebra
         [0.3179988464944819, -0.8179412488450798, 0.479425538604203]
 
     p_exp = Manifolds.solve_chart_parallel_transport_ode(
-        M,
-        [0.0, 0.0],
-        X_p0x,
-        A,
-        i_p0x,
-        [1.0, 2.0];
+        M, [0.0, 0.0], X_p0x, A, i_p0x, [1.0, 2.0];
         final_time = 3.0,
     )
     pexp_3 = p_exp(3.0)
     @test isapprox(
-        pexp_3[1],
-        [2.701765894057119, 2.668437820810143, -1.8341712552932237];
+        pexp_3[1], [2.701765894057119, 2.668437820810143, -1.8341712552932237];
         atol = 2.0e-5,
     )
     @test isapprox(
-        pexp_3[2],
-        [-0.41778834843865575, 2.935021992911625, 0.7673987137187901];
+        pexp_3[2], [-0.41778834843865575, 2.935021992911625, 0.7673987137187901];
         atol = 2.0e-5,
     )
     @test isapprox(
-        pexp_3[3],
-        [7.661627684089519, 4.629037950515605, 3.7839234533367194];
+        pexp_3[3], [7.661627684089519, 4.629037950515605, 3.7839234533367194];
         atol = 1.0e-4,
     )
     @test_throws DomainError p_exp(10.0)
@@ -124,26 +116,17 @@ using LinearAlgebra
     p_exp = Manifolds.solve_chart_exp_ode(M, [0.0, 0.0], X_p0x, A, i_p0x; final_time = 3.0)
     pexp_3 = p_exp(3.0)
     @test isapprox(
-        pexp_3[1],
-        [2.701765894057119, 2.668437820810143, -1.8341712552932237],
-        rtol = 1.0e-5,
+        pexp_3[1], [2.701765894057119, 2.668437820810143, -1.8341712552932237], rtol = 1.0e-5
     )
     @test isapprox(
-        pexp_3[2],
-        [-0.41778834843865575, 2.935021992911625, 0.7673987137187901],
-        rtol = 1.0e-5,
+        pexp_3[2], [-0.41778834843865575, 2.935021992911625, 0.7673987137187901], rtol = 1.0e-5
     )
     @test_throws DomainError p_exp(10.0)
     @test_throws DomainError p_exp(-1.0)
 
     p_exp_switch = Manifolds.solve_chart_exp_ode(
-        M,
-        [0.0, 0.0],
-        X_p0x,
-        A,
-        i_p0x;
-        final_time = 3.0,
-        check_chart_switch_kwargs = (; ϵ = 1.5),
+        M, [0.0, 0.0], X_p0x, A, i_p0x;
+        final_time = 3.0, check_chart_switch_kwargs = (; ϵ = 1.5),
     )
     p_exp_switch_3 = p_exp_switch(3.0)
     @test isapprox(

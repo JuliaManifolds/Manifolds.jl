@@ -46,9 +46,7 @@ For details see Proposition 4.2 in [BendokatZimmermann:2021](@cite) and the defi
 especially the ``\bar{Ω}``, which is the representation for ``X`` used here.
 """
 function check_vector(
-        M::SymplecticGrassmann,
-        p::ProjectorPoint,
-        X::ProjectorTangentVector;
+        M::SymplecticGrassmann, p::ProjectorPoint, X::ProjectorTangentVector;
         kwargs...,
     )
     if !isapprox((Hamiltonian(X.value)^+).value, X.value; kwargs...)
@@ -79,8 +77,7 @@ embed(::SymplecticGrassmann, p::ProjectorPoint) = p.value
 embed(::SymplecticGrassmann, p::ProjectorPoint, X::ProjectorTangentVector) = X.value
 
 function get_embedding(
-        ::SymplecticGrassmann{ℝ, TypeParameter{Tuple{n, k}}},
-        ::Type{<:ProjectorPoint},
+        ::SymplecticGrassmann{ℝ, TypeParameter{Tuple{n, k}}}, ::Type{<:ProjectorPoint}
     ) where {n, k}
     return Euclidean(2n, 2n)
 end

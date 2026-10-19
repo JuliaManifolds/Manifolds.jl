@@ -26,9 +26,7 @@ end
             @test !is_point(M, [2.0, 0.0, 0.0])
             @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
             @test_throws DomainError is_vector(
-                M,
-                [1.0, 0.0, 0.0],
-                [1.0, 0.0, 0.0];
+                M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0];
                 error = :error,
             )
             @test injectivity_radius(M) == π / 2
@@ -125,15 +123,11 @@ end
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0], [1.0 + 0im, 0.0, 0.0])
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0], [-0.5im, 0.0, 0.0])
             @test_throws DomainError is_vector(
-                M,
-                [1.0 + 0im, 0.0, 0.0],
-                [1.0 + 0im, 0.0, 0.0];
+                M, [1.0 + 0im, 0.0, 0.0], [1.0 + 0im, 0.0, 0.0];
                 error = :error,
             )
             @test_throws DomainError is_vector(
-                M,
-                [1.0 + 0im, 0.0, 0.0],
-                [-0.5im, 0.0, 0.0];
+                M, [1.0 + 0im, 0.0, 0.0], [-0.5im, 0.0, 0.0];
                 error = :error,
             )
             @test injectivity_radius(M) == π / 2
@@ -214,24 +208,18 @@ end
             @test !is_vector(M, quat([1.0, 0.0, 0.0]), quat([1.0, 0.0, 0.0]))
             @test !is_vector(M, quat([1.0, 0.0, 0.0]), [quat(0, -0.5, 0, 0), 0.0, 0.0])
             @test_throws DomainError is_vector(
-                M,
-                Quaternion[1.0, 0.0, 0.0],
-                Quaternion[1.0, 0.0, 0.0];
+                M, Quaternion[1.0, 0.0, 0.0], Quaternion[1.0, 0.0, 0.0];
                 error = :error,
             )
             @test_throws DomainError is_vector(
-                M,
-                quat([1.0, 0.0, 0.0]),
-                quat([-0.5, 0.0, 0.0]);
+                M, quat([1.0, 0.0, 0.0]), quat([-0.5, 0.0, 0.0]);
                 error = :error,
             )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, Quaternion[1.0, 0.0, 0.0]) == π / 2
             @test injectivity_radius(
-                M,
-                Quaternion[1.0, 0.0, 0.0],
-                ExponentialRetraction(),
+                M, Quaternion[1.0, 0.0, 0.0], ExponentialRetraction()
             ) == π / 2
         end
         types = [Vector{Quaternion{Float64}}]

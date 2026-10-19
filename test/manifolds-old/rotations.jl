@@ -45,8 +45,7 @@ include("../header.jl")
         tvector_distributions =
             (T <: SMatrix) ? [] : [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)]
         Manifolds.test_manifold(
-            M,
-            pts;
+            M, pts;
             is_mutating = !(T <: SMatrix),
             test_injectivity_radius = false,
             test_project_tangent = true,
@@ -125,11 +124,10 @@ include("../header.jl")
                 DiagonalizingOrthonormalBasis(rand(SOn; vector_at = pts[1]))
             end
             diag_basis_2 = DiagonalizingOrthonormalBasis(
-                hat(SOn, pts[1], [1.0, zeros(manifold_dimension(SOn) - 1)...]),
+                hat(SOn, pts[1], [1.0, zeros(manifold_dimension(SOn) - 1)...])
             )
             Manifolds.test_manifold(
-                SOn,
-                pts;
+                SOn, pts;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
                 test_mutating_rand = true,
@@ -161,7 +159,7 @@ include("../header.jl")
                 @test Manifolds.hat(SOn, p, Xf) ≈ X
             end
             X = Matrix(
-                Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn)))),
+                Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn))))
             )
             p = exp(SOn, pts[1], X)
             X2 = log(SOn, pts[1], p)
@@ -224,10 +222,7 @@ include("../header.jl")
     end
     @testset "Edge cases of Rotations" begin
         @test_throws OutOfInjectivityRadiusError inverse_retract(
-            Rotations(2),
-            [1.0 0.0; 0.0 1.0],
-            [1.0 0.0; 0.0 -1.0],
-            PolarInverseRetraction(),
+            Rotations(2), [1.0 0.0; 0.0 1.0], [1.0 0.0; 0.0 -1.0], PolarInverseRetraction()
         )
     end
 

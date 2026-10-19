@@ -28,9 +28,7 @@ function WarpedMetric(A::Real)
 end
 
 function connected_by_geodesic(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        p,
-        q,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, q
     ) where {V, A}
     q = copy(M, q)
     closest_representative!(M, q, p)
@@ -38,9 +36,7 @@ function connected_by_geodesic(
 end
 
 function closest_representative!(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        q,
-        p,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, q, p
     ) where {V, A}
     return closest_representative!(M.manifold, q, p)
 end
@@ -253,11 +249,7 @@ Riemann tensor of the warped Segre manifold at ``p``.
 ``R_{\mathcal{S}_A}`` is zero in the remaining (orthogonal) directions.
 """
 function riemann_tensor(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        p,
-        X,
-        Y,
-        Z,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, X, Y, Z
     ) where {V, A}
     z = zero(p[1][1])
     return [
@@ -286,10 +278,7 @@ If ``p = (λ, x_1,…, x_d) ∈ \mathcal{S}``, ``u_i ∈ T_{x_i} \mathbb{S}^{n_i
 ``K_{\mathcal{S}_A}`` is zero in the remaining (orthogonal) directions.
 """
 function sectional_curvature(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        p,
-        X,
-        Y,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, X, Y
     ) where {V, A}
     return inner(M, p, riemann_tensor(M, p, X, Y, Y), X) /
         (inner(M, p, X, X) * inner(M, p, Y, Y) - inner(M, p, X, Y)^2)
@@ -300,9 +289,7 @@ function show(io::IO, ::WarpedMetric{A}) where {A}
 end
 
 function spherical_angle_sum(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        p,
-        q,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, q
     ) where {V, A}
     return spherical_angle_sum(M.manifold, p, q)
 end

@@ -156,9 +156,7 @@ The construction is based on an ONB for the symmetric matrices similar to [`get_
 just that the ONB here is build from the eigen vectors of ``p^{\frac{1}{2}}Vp^{\frac{1}{2}}``.
 """
 function get_basis_diagonalizing(
-        M::SymmetricPositiveDefinite,
-        p,
-        B::DiagonalizingOrthonormalBasis,
+        M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis
     )
     N = get_parameter(M.size)[1]
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
@@ -336,12 +334,7 @@ where ``\operatorname{Log}`` denotes to the matrix logarithm.
 """
 log(::SymmetricPositiveDefinite, ::Any...)
 
-function allocate_result(
-        M::SymmetricPositiveDefinite,
-        ::typeof(log),
-        q::SPDPoint,
-        p::SPDPoint,
-    )
+function allocate_result(M::SymmetricPositiveDefinite, ::typeof(log), q::SPDPoint, p::SPDPoint)
     return allocate_result(M, log, convert(AbstractMatrix, q), convert(AbstractMatrix, p))
 end
 

@@ -94,7 +94,8 @@ struct PolarLightInverseRetraction <: AbstractInverseRetractionMethod end
 function inverse_retract_polar_light! end
 # Forwarding functions Level 2
 function ManifoldsBase._inverse_retract!(
-        M::AbstractManifold, X, p, q, ::PolarLightInverseRetraction; kwargs...,
+        M::AbstractManifold, X, p, q, ::PolarLightInverseRetraction;
+        kwargs...,
     )
     return inverse_retract_polar_light!(M, X, p, q; kwargs...)
 end
@@ -110,7 +111,8 @@ end
 function retract_polar_light_fused! end
 # Forwarding function Level 2
 function ManifoldsBase._retract_fused!(
-        M::AbstractManifold, q, p, X, t::Number, ::PolarLightRetraction; kwargs...,
+        M::AbstractManifold, q, p, X, t::Number, ::PolarLightRetraction;
+        kwargs...,
     )
     return retract_polar_light_fused!(M, q, p, X, t; kwargs...)
 end
@@ -320,13 +322,13 @@ function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
 end
 
 function _stiefel_inv_retr_qr_mul_by_r!(
-        ::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A, ::Type,
+        ::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A, ::Type
     ) where {𝔽, n}
     @inbounds R = SMatrix{1, 1}(inv(real(A[1, 1])))
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A::StaticArray, ::Type{ElT},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A::StaticArray, ::Type{ElT}
     ) where {𝔽, n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
@@ -335,7 +337,7 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        ::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A, ::Type{ElT},
+        ::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A, ::Type{ElT}
     ) where {𝔽, n, ElT}
     R11 = inv(real(A[1, 1]))
     @inbounds R2 = A[SOneTo(2), SOneTo(2)] \ SA[-conj(R11 * A[2, 1]), one(ElT)]
@@ -350,7 +352,7 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A::StaticArray, ::Type{ElT},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A::StaticArray, ::Type{ElT}
     ) where {𝔽, n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
@@ -359,7 +361,7 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}, X, q, A::StaticArray, ::Type{ElT},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}, X, q, A::StaticArray, ::Type{ElT}
     ) where {𝔽, n, k, ElT}
     R = zeros(MMatrix{k, k, ElT})
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
@@ -595,7 +597,7 @@ function ManifoldsBase.retract_pade!(M::Stiefel, q, p, X, m::PadeRetraction)
 end
 
 function ManifoldsBase.retract_pade_fused!(
-        ::Stiefel, q, p, X, t::Number, ::PadeRetraction{m},
+        ::Stiefel, q, p, X, t::Number, ::PadeRetraction{m}
     ) where {m}
     tX = t * X
     Pp = I - 1 // 2 * p * p'
@@ -823,11 +825,7 @@ function get_point!(M::Stiefel{ℝ}, p, ::StiefelAtlas, i::StiefelChart, a)
 end
 
 function get_coordinates_induced_basis!(
-        M::Stiefel{ℝ},
-        c,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, <:StiefelAtlas},
+        M::Stiefel{ℝ}, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:StiefelAtlas}
     )
     length(c) == manifold_dimension(M) || throw(DimensionMismatch("Expected $(manifold_dimension(M)) basis coordinates."))
     Ω = _stiefel_chart_omega_from_action(M, B.i, p + B.i.center, p - B.i.center)
@@ -837,11 +835,7 @@ function get_coordinates_induced_basis!(
 end
 
 function get_vector_induced_basis!(
-        M::Stiefel{ℝ},
-        X,
-        p,
-        c,
-        B::InducedBasis{ℝ, TangentSpaceType, <:StiefelAtlas},
+        M::Stiefel{ℝ}, X, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:StiefelAtlas}
     )
     Ω = _stiefel_chart_omega_from_action(M, B.i, p + B.i.center, p - B.i.center)
     Δ = _stiefel_chart_omega_from_coordinates(M, B.i, c)
@@ -886,8 +880,7 @@ Since this is the differentiated retraction as a vector transport, the result wi
 tangent space at ``q=\operatorname{retr}_p(d)`` using the [`CayleyRetraction`](@extref `ManifoldsBase.CayleyRetraction`).
 """
 vector_transport_direction(
-    ::Stiefel, ::Any, ::Any, ::Any,
-    ::DifferentiatedRetractionVectorTransport{CayleyRetraction},
+    ::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetractionVectorTransport{CayleyRetraction}
 )
 
 @doc raw"""
@@ -907,8 +900,7 @@ where ``q = \operatorname{retr}^{\mathrm{Pol}}_p(d)``, and ``Λ`` is the unique 
 ```
 """
 vector_transport_direction(
-    ::Stiefel, ::Any, ::Any, ::Any,
-    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
+    ::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetractionVectorTransport{PolarRetraction}
 )
 
 @doc raw"""
@@ -932,12 +924,11 @@ A_{ij}&\text{ if } i > j\\
 ```
 """
 vector_transport_direction(
-    ::Stiefel, ::Any, ::Any, ::Any,
-    ::DifferentiatedRetractionVectorTransport{QRRetraction},
+    ::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetractionVectorTransport{QRRetraction}
 )
 
 function vector_transport_direction_diff!(
-        ::Stiefel, Y, p::AbstractArray, X, d, ::CayleyRetraction,
+        ::Stiefel, Y, p::AbstractArray, X, d, ::CayleyRetraction
     )
     Pp = I - 1 // 2 * p * p'
     Wpd = Pp * d * p' - p * d' * Pp
@@ -946,7 +937,7 @@ function vector_transport_direction_diff!(
     return copyto!(Y, (q1 \ WpX) * (q1 \ p))
 end
 function vector_transport_direction_diff!(
-        M::Stiefel, Y, p::AbstractArray, X, d, ::PolarRetraction,
+        M::Stiefel, Y, p::AbstractArray, X, d, ::PolarRetraction
     )
     q = retract(M, p, d, PolarRetraction())
     Iddsqrt = sqrt(I + d' * d)
@@ -986,8 +977,7 @@ and ``Λ`` is the unique solution of the Sylvester equation
 ```
 """
 vector_transport_to(
-    ::Stiefel, ::Any, ::Any, ::Any,
-    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
+    ::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetractionVectorTransport{PolarRetraction}
 )
 
 @doc raw"""
@@ -1012,8 +1002,7 @@ A_{ij}&\text{ if } i > j\\
 ```
 """
 vector_transport_to(
-    ::Stiefel, ::Any, ::Any, ::Any,
-    ::DifferentiatedRetractionVectorTransport{QRRetraction},
+    ::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetractionVectorTransport{QRRetraction}
 )
 
 @doc raw"""

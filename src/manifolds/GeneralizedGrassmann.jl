@@ -59,10 +59,7 @@ function Base.hash(M::GeneralizedGrassmann, h::UInt)
 end
 
 function GeneralizedGrassmann(
-        n::Int,
-        k::Int,
-        B::AbstractMatrix = Matrix{Float64}(I, n, n),
-        𝔽::AbstractNumbers = ℝ;
+        n::Int, k::Int, B::AbstractMatrix = Matrix{Float64}(I, n, n), 𝔽::AbstractNumbers = ℝ;
         parameter::Symbol = :type,
     )
     0 <= k <= n || throw(
@@ -396,11 +393,8 @@ random Matrix onto the tangent vector at `vector_at`.
 rand(::GeneralizedGrassmann; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::GeneralizedGrassmann,
-        pX;
-        vector_at = nothing,
-        σ::Real = one(real(eltype(pX))),
+        rng::AbstractRNG, M::GeneralizedGrassmann, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
     )
     n, k = get_parameter(M.size)
     if vector_at === nothing
@@ -476,8 +470,7 @@ function inverse_retract_polar!(M::GeneralizedGrassmann, X, p, q)
 end
 
 function Base.show(
-        io::IO,
-        M::GeneralizedGrassmann{𝔽, TypeParameter{Tuple{n, k}}},
+        io::IO, M::GeneralizedGrassmann{𝔽, TypeParameter{Tuple{n, k}}}
     ) where {n, k, 𝔽}
     return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
 end

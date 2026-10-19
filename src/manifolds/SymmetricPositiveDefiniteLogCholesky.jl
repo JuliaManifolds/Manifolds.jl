@@ -68,11 +68,7 @@ function exp!(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMet
     return copyto!(q, z * z')
 end
 function exp_fused!(
-        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
-        q,
-        p,
-        X,
-        t::Number,
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, q, p, X, t::Number
     )
     return exp!(M, q, p, t * X)
 end
@@ -183,28 +179,17 @@ transport of ``W`` on [`CholeskySpace`](@ref) from ``x`` to ``y``, the formula h
 ````
 """
 parallel_transport_to(
-    ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
-    ::Any,
-    ::Any,
-    ::Any,
+    ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, ::Any, ::Any, ::Any
 )
 
 function parallel_transport_to!(
-        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
-        Y,
-        p,
-        X,
-        q,
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, Y, p, X, q
     )
     N = get_parameter(M.manifold.size)[1]
     y = cholesky(q).L
     (x, W) = spd_to_cholesky(p, X)
     parallel_transport_to!(
-        CholeskySpace(N; parameter = get_parameter_type(M.manifold)),
-        Y,
-        x,
-        W,
-        y,
+        CholeskySpace(N; parameter = get_parameter_type(M.manifold)), Y, x, W, y
     )
     return tangent_cholesky_to_tangent_spd!(y, Y)
 end

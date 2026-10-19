@@ -54,9 +54,7 @@ d(p,q) =
 where ``(pq)^{\frac{1}{2}}`` is the matrix square root of ``pq``, see [HanMishraJawanpuriaGao:2023](@cite), Section 2, eq. (1).
 """
 function distance(
-        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric},
-        p,
-        q,
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric}, p, q
     )
     return sqrt(max(real(tr(p) + tr(q) - 2 * tr(sqrt(p * q))), 0))
 end
@@ -75,12 +73,7 @@ where ``q=L_p(X)`` denotes the Lyapunov operator, i.e. it solves ``pq + qp = X``
 """
 exp(::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric}, p, X)
 
-function exp!(
-        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric},
-        q,
-        p,
-        X,
-    )
+function exp!(::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric}, q, p, X)
     Y = lyap(p, -X) #lyap solves qp+pq-X=0
     q .= p .+ X .+ Y * p * Y
     return q
@@ -99,10 +92,7 @@ the [`BuresWassersteinMetric`](@ref) given by
 where ``q=L_p(X)`` denotes the Lyapunov operator, i.e. it solves ``pq + qp = X``.
 """
 function inner(
-        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric},
-        p,
-        X,
-        Y,
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric}, p, X, Y
     )
     return dot(lyap(p, -X), Y) / 2
 end
@@ -133,12 +123,7 @@ where ``q=L_p(X)`` denotes the Lyapunov operator, i.e. it solves ``pq + qp = X``
 """
 log(::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric}, p, q)
 
-function log!(
-        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric},
-        X,
-        p,
-        q,
-    )
+function log!(::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric}, X, p, q)
     X .= real.(Symmetric(sqrt(p * q) + sqrt(q * p)) - 2 * p)
     return X
 end

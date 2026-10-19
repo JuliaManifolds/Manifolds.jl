@@ -111,12 +111,10 @@ rb_onb_fd51 = TangentDiffBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 rb_onb_default2 = TangentDiffBackend(
     default_differential_backend();
     basis_arg = CachedBasis(
-        DefaultOrthonormalBasis(),
-        [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
+        DefaultOrthonormalBasis(), [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]]
     ),
     basis_val = CachedBasis(
-        DefaultOrthonormalBasis(),
-        [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
+        DefaultOrthonormalBasis(), [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]]
     ),
 )
 
@@ -174,12 +172,7 @@ end
 
     q = [sqrt(2) / 2, 0, sqrt(2) / 2]
     X = similar(q)
-    @test isapprox(
-        s2,
-        q,
-        Manifolds.jacobian(s2, s2, f1, q, rb_onb_default),
-        [1.0 0.0; 0.0 1.0],
-    )
+    @test isapprox(s2, q, Manifolds.jacobian(s2, s2, f1, q, rb_onb_default), [1.0 0.0; 0.0 1.0])
 
     q2 = [1.0, 0.0, 0.0]
     f2(X) = [0.0 0.0 0.0; 0.0 2.0 -1.0; 0.0 -3.0 1.0] * X
@@ -205,10 +198,7 @@ end
 
     f1(p) = distance(s2, q2, p)^2
 
-    @test isapprox(
-        ManifoldDiff.hessian(s2, f1, q, rb_onb_fwd_diff),
-        [2.0 0.0; 0.0 0.0],
-    )
+    @test isapprox(ManifoldDiff.hessian(s2, f1, q, rb_onb_fwd_diff), [2.0 0.0; 0.0 0.0])
     # the third coordinate, whose Riemannian Hessian is -p[3] times the identity
     f2(p) = p[3]
     @test isapprox(ManifoldDiff.hessian(s2, f2, q, rb_onb_fwd_diff), [-q[3] 0.0; 0.0 -q[3]])

@@ -202,13 +202,11 @@ using ManifoldDiff, Manifolds, Random, StaticArrays, Test, ManifoldsBase
         @testset "ManifoldsDiff cases" begin
             M = Circle()
             @test ManifoldDiff.adjoint_Jacobi_field(
-                M, 0.0, 1.0, 0.5, 2.0,
-                ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+                M, 0.0, 1.0, 0.5, 2.0, ManifoldDiff.βdifferential_shortest_geodesic_startpoint
             ) === 1.0
             @test ManifoldDiff.diagonalizing_projectors(M, 0.0, 2.0) == ((0.0, ManifoldDiff.ProjectorOntoVector(M, 0.0, SA[1.0])),)
             @test ManifoldDiff.jacobi_field(
-                M, 0.0, 1.0, 0.5, 2.0,
-                ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+                M, 0.0, 1.0, 0.5, 2.0, ManifoldDiff.βdifferential_shortest_geodesic_startpoint
             ) === 1.0
 
             # volume

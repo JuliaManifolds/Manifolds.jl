@@ -41,8 +41,7 @@ The norm of the column sums of `p` has to be at most `atol`, or at most `rtol * 
 The relative tolerance `rtol` refers to the size of `p`; its default is the one of `isapprox`.
 """
 function check_point(
-        M::CenteredMatrices,
-        p::T;
+        M::CenteredMatrices, p::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
@@ -54,7 +53,7 @@ function check_point(
         return DomainError(
             p,
             string(
-                "The point $(p) does not lie on $(M), since its columns do not sum to zero.",
+                "The point $(p) does not lie on $(M), since its columns do not sum to zero."
             ),
         )
     end
@@ -71,9 +70,7 @@ The column sums of `X` have to vanish up to `max(atol, rtol * sqrt(m) * norm(X))
 The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
-        M::CenteredMatrices,
-        p,
-        X::T;
+        M::CenteredMatrices, p, X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
@@ -203,7 +200,7 @@ onto `M`, which yields a random point as well as a random tangent vector at `vec
 """
 function Random.rand!(
         rng::AbstractRNG, M::CenteredMatrices, pX;
-        vector_at = nothing, σ::Real = one(real(eltype(pX)))
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
     )
     return project!(M, pX, σ .* randn(rng, eltype(pX), representation_size(M)))
 end

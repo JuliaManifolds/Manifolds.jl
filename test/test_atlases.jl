@@ -47,37 +47,27 @@ end
             volume_density(M, p, X) atol = 1.0e-8
 
         solution = Manifolds.solve_chart_differential_exp_basepoint(
-            M, a, Xc, A, i, Yc; final_time = 1.0
+            M, a, Xc, A, i, Yc;
+            final_time = 1.0,
         )
         p_final, _, Y_final, _ = solution(1.0)
 
         expected = zero_vector(M, p_final)
         ManifoldDiff.jacobi_field!(
-            M,
-            expected,
-            p,
-            exp(M, p, X),
-            1.0,
-            Y,
-            ManifoldDiff.βdifferential_exp_basepoint,
+            M, expected, p, exp(M, p, X), 1.0, Y, ManifoldDiff.βdifferential_exp_basepoint
         )
         @test isapprox(p_final, exp(M, p, X); atol = 1.0e-6)
         @test isapprox(Y_final, expected; atol = 1.0e-5)
 
         solution = Manifolds.solve_chart_differential_exp_argument(
-            M, a, Xc, A, i, Yc; final_time = 1.0
+            M, a, Xc, A, i, Yc;
+            final_time = 1.0,
         )
         p_final, _, Y_final, _ = solution(1.0)
 
         expected = zero_vector(M, p_final)
         ManifoldDiff.jacobi_field!(
-            M,
-            expected,
-            p,
-            exp(M, p, X),
-            1.0,
-            Y,
-            ManifoldDiff.βdifferential_exp_argument,
+            M, expected, p, exp(M, p, X), 1.0, Y, ManifoldDiff.βdifferential_exp_argument
         )
         @test isapprox(M, p_final, exp(M, p, X); atol = 1.0e-7)
         @test isapprox(M, p_final, Y_final, expected; atol = 1.0e-6)
@@ -88,19 +78,14 @@ end
     Y = get_vector(M, p, Yc, B)
 
     solution = Manifolds.solve_chart_differential_log_basepoint(
-        M, a, Xc, A, i, Yc; final_time = 1.0
+        M, a, Xc, A, i, Yc;
+        final_time = 1.0,
     )
     _, _, _, dY_initial = solution(0.0)
 
     expected = zero_vector(M, p)
     ManifoldDiff.jacobi_field!(
-        M,
-        expected,
-        p,
-        exp(M, p, X),
-        0.0,
-        Y,
-        ManifoldDiff.βdifferential_log_basepoint,
+        M, expected, p, exp(M, p, X), 0.0, Y, ManifoldDiff.βdifferential_log_basepoint
     )
     @test isapprox(M, p, dY_initial, expected; atol = 1.0e-7)
 
@@ -108,7 +93,8 @@ end
     Bq = induced_basis(M, A, i)
     Yq = get_vector(M, q, Yc, Bq)
     solution = Manifolds.solve_chart_differential_log_argument(
-        M, a, Xc, A, i, Yc; final_time = 1.0
+        M, a, Xc, A, i, Yc;
+        final_time = 1.0,
     )
     _, _, _, dY_initial = solution(0.0)
 
@@ -117,13 +103,7 @@ end
 
     expected = zero_vector(M, p)
     ManifoldDiff.jacobi_field!(
-        M,
-        expected,
-        q,
-        p,
-        1.0,
-        Yq,
-        ManifoldDiff.βdifferential_log_argument,
+        M, expected, q, p, 1.0, Yq, ManifoldDiff.βdifferential_log_argument
     )
     @test isapprox(M, p, dY_initial, expected; atol = 1.0e-8)
 

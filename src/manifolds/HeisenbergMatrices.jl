@@ -46,8 +46,7 @@ function check_point(M::HeisenbergMatrices, p; kwargs...)
     n = get_parameter(M.size)[1]
     if !isapprox(p[1, 1], 1; kwargs...)
         return DomainError(
-            p[1, 1],
-            "The matrix $(p) does not lie on $(M), since p[1, 1] is not equal to 1.",
+            p[1, 1], "The matrix $(p) does not lie on $(M), since p[1, 1] is not equal to 1."
         )
     end
     if !isapprox(p[n + 2, n + 2], 1; kwargs...)
@@ -275,11 +274,8 @@ mean 0 and standard deviation `σ`.
 rand(M::HeisenbergMatrices; vector_at = nothing, σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::HeisenbergMatrices,
-        pX;
-        σ::Real = one(eltype(pX)),
-        vector_at = nothing,
+        rng::AbstractRNG, M::HeisenbergMatrices, pX;
+        σ::Real = one(eltype(pX)), vector_at = nothing,
     )
     n = ManifoldsBase.get_parameter(M.size)[1]
     if vector_at === nothing

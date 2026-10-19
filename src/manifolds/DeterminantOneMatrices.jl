@@ -28,8 +28,7 @@ end
 function DeterminantOneMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     n < 1 && throw(
         DomainError(
-            n,
-            "The matrix size n of determinant one matrices must be positive, but was $(n).",
+            n, "The matrix size n of determinant one matrices must be positive, but was $(n)."
         ),
     )
     size = wrap_type_parameter(parameter, (n,))
@@ -186,11 +185,8 @@ function Random.rand!(M::DeterminantOneMatrices, pX; kwargs...)
     return rand!(Random.default_rng(), M, pX; kwargs...)
 end
 function Random.rand!(
-        rng::AbstractRNG,
-        M::DeterminantOneMatrices,
-        pX;
-        vector_at = nothing,
-        kwargs...,
+        rng::AbstractRNG, M::DeterminantOneMatrices, pX;
+        vector_at = nothing, kwargs...,
     )
     rand!(rng, get_embedding(M), pX; kwargs...)
     if vector_at === nothing # for points ensure invertibility

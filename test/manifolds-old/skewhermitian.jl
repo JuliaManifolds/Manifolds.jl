@@ -26,7 +26,7 @@ end
         @test riemann_tensor(M, A_skewsym, A_skewsym, B_skewsym, B_skewsym) == zeros(3, 3)
         @test sectional_curvature(M, A_skewsym, A_skewsym, B_skewsym) === 0.0
         @test sectional_curvature(
-            M_complex, A_skewsym_complex, A_skewsym_complex, B_skewsym_complex,
+            M_complex, A_skewsym_complex, A_skewsym_complex, B_skewsym_complex
         ) === 0.0
         @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{3, 3}}}
         @test check_point(M, B_skewsym) === nothing
@@ -39,9 +39,7 @@ end
         @test_throws ManifoldDomainError is_vector(M, A, B_skewsym; error = :error)
         @test_throws ManifoldDomainError is_vector(M, B_skewsym, D; error = :error)
         @test_throws ManifoldDomainError is_vector(
-            M,
-            B_skewsym,
-            1 * im * zero_vector(M, B_skewsym);
+            M, B_skewsym, 1 * im * zero_vector(M, B_skewsym);
             error = :error,
         )
         @test manifold_dimension(M) == 3

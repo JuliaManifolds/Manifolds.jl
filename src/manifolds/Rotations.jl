@@ -178,21 +178,11 @@ function jacobian_exp_argument(M::Rotations{TypeParameter{Tuple{3}}}, p, X)
     return jacobian_exp_argument!(M, J, p, X)
 end
 
-function jacobian_exp_argument!(
-        ::Rotations{TypeParameter{Tuple{2}}},
-        J::AbstractMatrix,
-        p,
-        X,
-    )
+function jacobian_exp_argument!(::Rotations{TypeParameter{Tuple{2}}}, J::AbstractMatrix, p, X)
     J .= 1
     return J
 end
-function jacobian_exp_argument!(
-        M::Rotations{TypeParameter{Tuple{3}}},
-        J::AbstractMatrix,
-        p,
-        X,
-    )
+function jacobian_exp_argument!(M::Rotations{TypeParameter{Tuple{3}}}, J::AbstractMatrix, p, X)
     θ = norm(M, p, X) / sqrt(2)
     copyto!(J, I)
     if θ ≉ 0
@@ -271,11 +261,8 @@ function project!(M::Rotations, q, p; check_det::Bool = true)
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::Rotations,
-        pX;
-        vector_at = nothing,
-        σ::Real = one(eltype(pX)),
+        rng::AbstractRNG, M::Rotations, pX;
+        vector_at = nothing, σ::Real = one(eltype(pX)),
     )
     if vector_at === nothing
         # Special case: Rotations(1) is just zero-dimensional

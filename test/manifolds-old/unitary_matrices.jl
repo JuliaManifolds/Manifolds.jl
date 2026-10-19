@@ -141,10 +141,7 @@ end
     pF2 = [quat(0, 1, 0, 0) 1.0; 0.0 -quat(0, 1, 0, 0)]
     @test_throws DomainError is_point(M, pF2; error = :error)
     p = QuaternionF64(
-        0.4815296357756736,
-        0.6041613272484806,
-        -0.2322369798903669,
-        0.5909181717450419,
+        0.4815296357756736, 0.6041613272484806, -0.2322369798903669, 0.5909181717450419
     )
     @test is_point(M, fill(p, 1, 1); error = :error)
     # Determinant not one

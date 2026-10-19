@@ -67,8 +67,7 @@ end
 function HamiltonianMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     n < 0 && throw(
         DomainError(
-            n,
-            "The matrix size 2n of Hamiltonian matrices must be nonnegative, but was $(n).",
+            n, "The matrix size 2n of Hamiltonian matrices must be nonnegative, but was $(n)."
         ),
     )
     n % 2 == 0 || throw(ArgumentError("The dimension of the symplectic manifold
@@ -250,11 +249,8 @@ rand(M::HamiltonianMatrices; σ::Real = 1.0)
 
 @doc "$(_doc_rand_hamiltonian)"
 function rand!(
-        rng::AbstractRNG,
-        M::HamiltonianMatrices{ℝ},
-        pX;
-        σ::Real = one(real(eltype(pX))),
-        vector_at = nothing,
+        rng::AbstractRNG, M::HamiltonianMatrices{ℝ}, pX;
+        σ::Real = one(real(eltype(pX))), vector_at = nothing,
     )
     n = get_parameter(M.size)[1]
     p1 = @view(pX[1:n, 1:n])

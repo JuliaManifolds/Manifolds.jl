@@ -74,9 +74,7 @@ end
         @test_throws CompositeManifoldError is_point(M, np2; error = :error)
         @test !is_vector(M, p1, 0.0)
         @test_throws DomainError is_vector(
-            M,
-            p1,
-            [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0];
+            M, p1, [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0];
             error = :error,
         )
         @test !is_vector(M, np1, [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0])

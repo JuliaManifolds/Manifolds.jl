@@ -25,11 +25,8 @@ function OrthogonalMatrices(n::Int; parameter::Symbol = :type)
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::OrthogonalMatrices,
-        pX;
-        vector_at = nothing,
-        σ::Real = one(eltype(pX)),
+        rng::AbstractRNG, M::OrthogonalMatrices, pX;
+        vector_at = nothing, σ::Real = one(eltype(pX)),
     )
     if vector_at === nothing
         # Special case: OrthogonalMatrices(1) is just zero-dimensional

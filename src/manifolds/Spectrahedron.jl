@@ -89,9 +89,7 @@ The relative tolerance `rtol` refers to the size of `X`; its default is the one 
 Note that symmetry of ``X`` holds by construction and is not explicitly checked.
 """
 function check_vector(
-        M::Spectrahedron,
-        q,
-        Y::T;
+        M::Spectrahedron, q, Y::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
@@ -175,7 +173,7 @@ onto `M`, or onto the tangent space at `vector_at`.
 """
 function Random.rand!(
         rng::AbstractRNG, M::Spectrahedron, pX;
-        vector_at = nothing, σ::Real = one(real(eltype(pX)))
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
     )
     A = σ .* randn(rng, eltype(pX), representation_size(M))
     if vector_at === nothing

@@ -254,7 +254,7 @@ using Random
         X1o_nan = Manifolds.OrthogonalTangentVector(X1_nan)
         @test check_vector(M, p1_ortho, X1o_nan; atol = 1.0e-5) isa DomainError
         X_int = Manifolds.OrthogonalTangentVector(
-            [0 -1 2 0 0; 1 0 0 1 0; -2 0 0 0 0; 0 -1 0 0 0; 0 0 0 0 0],
+            [0 -1 2 0 0; 1 0 0 1 0; -2 0 0 0 0; 0 -1 0 0 0; 0 0 0 0 0]
         )
         @test check_vector(M, p1_ortho, X_int) === nothing
         @test isapprox(M, p1_ortho, X2_ortho, project(M, p1_ortho, X2_ortho_wrong1))

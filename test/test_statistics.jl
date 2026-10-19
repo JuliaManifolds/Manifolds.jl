@@ -18,8 +18,7 @@ manifold_dimension(::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N
 function check_point(M::TestStatsSphere, p; kwargs...)
     if !isapprox(norm(p), 1.0; kwargs...)
         return DomainError(
-            norm(p),
-            "The point $(p) does not lie on the $(M) since its norm is not 1.",
+            norm(p), "The point $(p) does not lie on the $(M) since its norm is not 1."
         )
     end
     return nothing
@@ -46,14 +45,7 @@ manifold_dimension(::TestStatsEuclidean{N}) where {N} = manifold_dimension(Eucli
 function exp!(::TestStatsEuclidean{N}, q, p, X; kwargs...) where {N}
     return exp!(Euclidean(N), q, p, X; kwargs...)
 end
-function Manifolds.exp_fused!(
-        ::TestStatsEuclidean{N},
-        q,
-        p,
-        X,
-        t::Number;
-        kwargs...,
-    ) where {N}
+function Manifolds.exp_fused!(::TestStatsEuclidean{N}, q, p, X, t::Number; kwargs...) where {N}
     return Manifolds.exp_fused!(Euclidean(N), q, p, X, t; kwargs...)
 end
 function log!(::TestStatsEuclidean{N}, X, p, q; kwargs...) where {N}
@@ -96,11 +88,7 @@ function test_mean(M, x, yexp = nothing; kwargs...)
         end
         @test_throws DimensionMismatch mean(M, x, pweights(ones(n + 1)); kwargs...)
         @test_throws DimensionMismatch mean!(
-            M,
-            y,
-            x,
-            pweights(ones(n + 1)),
-            Manifolds.default_approximation_method(M, mean);
+            M, y, x, pweights(ones(n + 1)), Manifolds.default_approximation_method(M, mean);
             kwargs...,
         )
     end
@@ -108,11 +96,8 @@ function test_mean(M, x, yexp = nothing; kwargs...)
 end
 
 function test_median(
-        M,
-        x,
-        yexp = nothing;
-        method::Union{Nothing, AbstractApproximationMethod} = nothing,
-        kwargs...,
+        M, x, yexp = nothing;
+        method::Union{Nothing, AbstractApproximationMethod} = nothing, kwargs...,
     )
     @testset "median unweighted$(!isnothing(method) ? " ($method)" : "")" begin
         y = isnothing(method) ? median(M, x; kwargs...) : median(M, x, method; kwargs...)
@@ -188,10 +173,7 @@ function test_var(M, x, vexp = nothing; kwargs...)
         end
         @test_throws DimensionMismatch var(M, x, pweights(ones(n + 1)); kwargs...)
         @test_throws DimensionMismatch mean_and_var(
-            M,
-            x,
-            pweights(ones(n + 1)),
-            GeodesicInterpolation();
+            M, x, pweights(ones(n + 1)), GeodesicInterpolation();
             kwargs...,
         )
     end
@@ -300,10 +282,7 @@ function mean!(
     return fill!(y, 3)
 end
 function mean(
-        ::TestStatsOverload1,
-        ::AbstractVector,
-        ::AbstractWeights,
-        ::GradientDescentEstimation,
+        ::TestStatsOverload1, ::AbstractVector, ::AbstractWeights, ::GradientDescentEstimation
     )
     return fill(3, 1)
 end
@@ -336,21 +315,14 @@ function var(::TestStatsOverload1, ::AbstractVector, ::AbstractWeights, m; corre
     return 4 + 5 * corrected
 end
 function mean_and_var(
-        ::TestStatsOverload1,
-        ::AbstractVector,
-        ::AbstractWeights;
-        corrected = false,
-        kwargs...,
+        ::TestStatsOverload1, ::AbstractVector, ::AbstractWeights;
+        corrected = false, kwargs...,
     )
     return [4.0], 4 + 5 * corrected
 end
 function mean_and_var(
-        ::TestStatsOverload1,
-        ::AbstractVector,
-        ::AbstractWeights,
-        ::TestStatsMethod1;
-        corrected = false,
-        kwargs...,
+        ::TestStatsOverload1, ::AbstractVector, ::AbstractWeights, ::TestStatsMethod1;
+        corrected = false, kwargs...,
     )
     return [5.0], 9 + 7 * corrected
 end
@@ -420,11 +392,13 @@ end
                 ym = shortest_geodesic(M, x[1], x[3], 0.5)
                 for seed in 1:10
                     y = mean(
-                        M, x, wz, GeodesicInterpolation(); shuffle_rng = MersenneTwister(seed)
+                        M, x, wz, GeodesicInterpolation();
+                        shuffle_rng = MersenneTwister(seed),
                     )
                     @test isapprox(M, y, ym; atol = 10^-7)
                     y2, _ = mean_and_var(
-                        M, x, wz, GeodesicInterpolation(); shuffle_rng = MersenneTwister(seed)
+                        M, x, wz, GeodesicInterpolation();
+                        shuffle_rng = MersenneTwister(seed),
                     )
                     @test isapprox(M, y2, ym; atol = 10^-7)
                 end
@@ -555,13 +529,11 @@ end
 
         for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
             @test ManifoldsBase.get_forwarding_type_embedding(
-                ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(),
-                M, mf
+                ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(), M, mf
             ) === ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
 
             @test ManifoldsBase.get_forwarding_type_embedding(
-                ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding}(),
-                M, mf
+                ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding}(), M, mf
             ) === ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.IndirectEmbedding())
         end
     end
@@ -589,10 +561,7 @@ end
                     shortest_geodesic(S, x[1], x[2], 2 / 3)
                 m = mean(S, x, pweights([1, 2, 3]), GeodesicInterpolation())
                 @test m ≈ shortest_geodesic(
-                    S,
-                    shortest_geodesic(S, x[1], x[2], 2 / 3),
-                    x[3],
-                    1 / 2,
+                    S, shortest_geodesic(S, x[1], x[2], 2 / 3), x[3], 1 / 2
                 )
             end
 
@@ -661,10 +630,7 @@ end
                 @test v4 ≈ 0 atol = 1.0e-6
                 m5, v5 = mean_and_var(S, x, pweights([1, 2, 3]), GeodesicInterpolation())
                 @test m5 ≈ shortest_geodesic(
-                    S,
-                    shortest_geodesic(S, x[1], x[2], 2 / 3),
-                    x[3],
-                    1 / 2,
+                    S, shortest_geodesic(S, x[1], x[2], 2 / 3), x[3], 1 / 2
                 )
                 @test v5 ≈ var(S, x, pweights([1, 2, 3]), m5)
                 m6, v6 = mean_and_var(S, x, pweights([0, 0, 1]), GeodesicInterpolation())

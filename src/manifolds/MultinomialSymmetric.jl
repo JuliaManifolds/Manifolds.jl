@@ -164,7 +164,7 @@ rand(::MultinomialSymmetric; σ::Real = 1.0)
 
 function Random.rand!(
         rng::AbstractRNG, M::MultinomialSymmetric, pX;
-        vector_at = nothing, σ::Real = one(real(eltype(pX))), kwargs...
+        vector_at = nothing, σ::Real = one(real(eltype(pX))), kwargs...,
     )
     n = get_parameter(M.size)[1]
     rand!(rng, SymmetricMatrices(n), pX; σ = σ)

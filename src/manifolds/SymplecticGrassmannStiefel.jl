@@ -98,7 +98,7 @@ function inner(M::SymplecticGrassmann, p, X, Y)
     # 1) we permute X' and Y c to c^{\mathrm{T}}Y^{\mathrm{T}}X = a\(Y'X) (avoids a large interims matrix)
     # 2) the second we compute as c (X'p)(p^+Y) since both brackets are the smaller matrices
     return tr(a \ (Y' * X)) - tr(
-        a \ ((X' * p) * symplectic_inverse_times(SymplecticStiefel(2 * n, 2 * k), p, Y)),
+        a \ ((X' * p) * symplectic_inverse_times(SymplecticStiefel(2 * n, 2 * k), p, Y))
     )
 end
 
@@ -129,7 +129,8 @@ Random tangent vectors, that is `rand` with `vector_at`, are not yet available.
 rand(::SymplecticGrassmann; σ::Real = 1.0, kwargs...)
 
 function Random.rand!(
-        rng::AbstractRNG, M::SymplecticGrassmann, pX; vector_at = nothing, σ::Real = 1.0
+        rng::AbstractRNG, M::SymplecticGrassmann, pX;
+        vector_at = nothing, σ::Real = 1.0,
     )
     vector_at === nothing || throw(
         ArgumentError("Random tangent vectors on the symplectic Grassmann manifold are not yet available."),

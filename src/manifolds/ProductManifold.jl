@@ -100,10 +100,7 @@ Return volume density on the [`ProductManifold`](@extref `ManifoldsBase.ProductM
 """
 function volume_density(M::ProductManifold, p, X)
     dens = map(
-        volume_density,
-        M.manifolds,
-        submanifold_components(M, p),
-        submanifold_components(M, X),
+        volume_density, M.manifolds, submanifold_components(M, p), submanifold_components(M, X)
     )
     return prod(dens)
 end
@@ -161,21 +158,13 @@ function get_point!(M::ProductManifold, p, A::ProductAtlas, i::Tuple, a)
 end
 
 function get_coordinates_induced_basis!(
-        M::ProductManifold,
-        c,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, <:ProductAtlas},
+        M::ProductManifold, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:ProductAtlas}
     )
     offset = 0
     map(M.manifolds, submanifold_components(M, p), submanifold_components(M, X), B.A.atlases, B.i) do Mj, pj, Xj, Aj, ij
         dim = manifold_dimension(Mj)
         get_coordinates_induced_basis!(
-            Mj,
-            view(c, (offset + 1):(offset + dim)),
-            pj,
-            Xj,
-            induced_basis(Mj, Aj, ij),
+            Mj, view(c, (offset + 1):(offset + dim)), pj, Xj, induced_basis(Mj, Aj, ij)
         )
         offset += dim
     end
@@ -188,21 +177,13 @@ end
 
 
 function get_vector_induced_basis!(
-        M::ProductManifold,
-        Y,
-        p,
-        c,
-        B::InducedBasis{ℝ, TangentSpaceType, <:ProductAtlas},
+        M::ProductManifold, Y, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:ProductAtlas}
     )
     offset = 0
     map(M.manifolds, submanifold_components(M, Y), submanifold_components(M, p), B.A.atlases, B.i) do Mj, Yj, pj, Aj, ij
         dim = manifold_dimension(Mj)
         get_vector_induced_basis!(
-            Mj,
-            Yj,
-            pj,
-            view(c, (offset + 1):(offset + dim)),
-            induced_basis(Mj, Aj, ij),
+            Mj, Yj, pj, view(c, (offset + 1):(offset + dim)), induced_basis(Mj, Aj, ij)
         )
         offset += dim
     end

@@ -197,11 +197,7 @@ function get_point!(M::EmbeddedTorus, p, ::DefaultTorusAtlas, i, x)
 end
 
 function get_coordinates_induced_basis!(
-        M::EmbeddedTorus,
-        Y,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, DefaultTorusAtlas},
+        M::EmbeddedTorus, Y, p, X, B::InducedBasis{ℝ, TangentSpaceType, DefaultTorusAtlas}
     )
     θ, φ = get_parameters(M, B.A, B.i, p)
 
@@ -218,11 +214,7 @@ function get_coordinates_induced_basis!(
 end
 
 function get_vector_induced_basis!(
-        M::EmbeddedTorus,
-        Y,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, DefaultTorusAtlas},
+        M::EmbeddedTorus, Y, p, X, B::InducedBasis{ℝ, TangentSpaceType, DefaultTorusAtlas}
     )
     θ, φ = get_parameters(M, B.A, B.i, p)
     dθ, dφ = X

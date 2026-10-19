@@ -82,10 +82,7 @@ end
             Base.get_extension(Manifolds, :ManifoldsDistributionsExt).PowerPointDistribution
 
         PowerFVectorDistribution =
-            Base.get_extension(
-            Manifolds,
-            :ManifoldsDistributionsExt,
-        ).PowerFVectorDistribution
+            Base.get_extension(Manifolds, :ManifoldsDistributionsExt).PowerFVectorDistribution
         power_s1_pt_dist = PowerPointDistribution(Ms1, sphere_dist, randn(Float64, 3, 5))
         power_s2_pt_dist = PowerPointDistribution(Ms2, sphere_dist, randn(Float64, 3, 5, 7))
         push!(point_distributions_Ms2, power_s2_pt_dist)
@@ -93,12 +90,10 @@ end
         sphere_tv_dist =
             Manifolds.normal_tvector_distribution(Ms, (@MVector [1.0, 0.0, 0.0]), 1.0)
         power_s1_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Ms1, rand(power_s1_pt_dist)),
-            sphere_tv_dist,
+            TangentSpace(Ms1, rand(power_s1_pt_dist)), sphere_tv_dist
         )
         power_s2_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Ms2, rand(power_s2_pt_dist)),
-            sphere_tv_dist,
+            TangentSpace(Ms2, rand(power_s2_pt_dist)), sphere_tv_dist
         )
         push!(tvector_distributions_Ms2, power_s2_tv_dist)
 
@@ -107,36 +102,28 @@ end
         power_r1_pt_dist =
             PowerPointDistribution(Mr1, rotations_dist, randn(Float64, 3, 3, 5))
         power_rn1_pt_dist = PowerPointDistribution(
-            Mrn1,
-            rotations_dist,
-            [randn(Float64, 3, 3) for i in 1:5],
+            Mrn1, rotations_dist, [randn(Float64, 3, 3) for i in 1:5]
         )
         push!(point_distributions_Mrn1, power_rn1_pt_dist)
         power_r2_pt_dist =
             PowerPointDistribution(Mr2, rotations_dist, randn(Float64, 3, 3, 5, 7))
         power_rn2_pt_dist = PowerPointDistribution(
-            Mrn2,
-            rotations_dist,
-            [randn(Float64, 3, 3) for i in 1:5, j in 1:7],
+            Mrn2, rotations_dist, [randn(Float64, 3, 3) for i in 1:5, j in 1:7]
         )
         push!(point_distributions_Mr2, power_r2_pt_dist)
         rotations_tv_dist = Manifolds.normal_tvector_distribution(Mr, MMatrix(id_rot), 1.0)
         power_r1_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Mr1, rand(power_r1_pt_dist)),
-            rotations_tv_dist,
+            TangentSpace(Mr1, rand(power_r1_pt_dist)), rotations_tv_dist
         )
         power_rn1_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Mrn1, rand(power_rn1_pt_dist)),
-            rotations_tv_dist,
+            TangentSpace(Mrn1, rand(power_rn1_pt_dist)), rotations_tv_dist
         )
         push!(tvector_distributions_Mrn1, power_rn1_tv_dist)
         power_r2_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Mr2, rand(power_r2_pt_dist)),
-            rotations_tv_dist,
+            TangentSpace(Mr2, rand(power_r2_pt_dist)), rotations_tv_dist
         )
         power_rn2_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Mrn2, rand(power_rn2_pt_dist)),
-            rotations_tv_dist,
+            TangentSpace(Mrn2, rand(power_rn2_pt_dist)), rotations_tv_dist
         )
         push!(tvector_distributions_Mrn2, power_rn2_tv_dist)
 
@@ -225,8 +212,7 @@ end
         @testset "Type $(trim(string(T)))..." begin
             pts2 = [convert(T, rand(Ms2)) for _ in 1:3]
             Manifolds.test_manifold(
-                Ms2,
-                pts2;
+                Ms2, pts2;
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
                 retraction_methods = retraction_methods,
@@ -246,8 +232,7 @@ end
         @testset "Type $(trim(string(T)))..." begin
             pts1 = [convert(T, rand(Mrn1)) for _ in 1:3]
             Manifolds.test_manifold(
-                Mrn1,
-                pts1;
+                Mrn1, pts1;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
                 retraction_methods = retraction_methods,
@@ -269,8 +254,7 @@ end
         @testset "Type $(trim(string(T)))..." begin
             pts2 = [convert(T, rand(Mr2)) for _ in 1:3]
             Manifolds.test_manifold(
-                Mr2,
-                pts2;
+                Mr2, pts2;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
                 retraction_methods = retraction_methods,
@@ -289,8 +273,7 @@ end
         @testset "Type $(trim(string(T)))..." begin
             pts2 = [convert(T, rand(Mrn2)) for _ in 1:3]
             Manifolds.test_manifold(
-                Mrn2,
-                pts2;
+                Mrn2, pts2;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
                 retraction_methods = retraction_methods,
@@ -312,8 +295,7 @@ end
         @test representation_size(MT) == (3,)
         @test pts_t[2][MT, 3] == 2.4
         Manifolds.test_manifold(
-            MT,
-            pts_t;
+            MT, pts_t;
             test_injectivity_radius = false,
             test_musical_isomorphisms = true,
             retraction_methods = retraction_methods,

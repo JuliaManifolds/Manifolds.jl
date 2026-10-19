@@ -19,7 +19,7 @@ tolerance `atol`.
 """
 function check_vector(
         M::Flag{<:Any, dp1}, p::OrthogonalPoint, X::OrthogonalTangentVector;
-        atol::Real = sqrt(eps(float(eltype(X)))), kwargs...
+        atol::Real = sqrt(eps(float(eltype(X)))), kwargs...,
     ) where {dp1}
     for i in 1:dp1
         for j in i:dp1
@@ -89,10 +89,7 @@ function _extract_flag(M::Flag, p::AbstractMatrix, i::Int, j::Int)
 end
 
 function inner(
-        ::Flag,
-        p::OrthogonalPoint,
-        X::OrthogonalTangentVector,
-        Y::OrthogonalTangentVector,
+        ::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector, Y::OrthogonalTangentVector
     )
     return dot(X.value, Y.value) / 2
 end
@@ -137,11 +134,7 @@ X = \begin{bmatrix}
 ````
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
 """
-function project(
-        M::Flag{<:Any, dp1},
-        ::OrthogonalPoint,
-        X::OrthogonalTangentVector,
-    ) where {dp1}
+function project(M::Flag{<:Any, dp1}, ::OrthogonalPoint, X::OrthogonalTangentVector) where {dp1}
     N = get_parameter(M.size)[1]
     Y = project(SkewHermitianMatrices(N), X.value)
     for i in 1:dp1
@@ -188,10 +181,7 @@ as the first order approximation to the exponential map. Similar to QR retractio
 retract(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector, ::QRRetraction)
 
 function ManifoldsBase.retract_qr!(
-        M::Flag,
-        q::OrthogonalPoint,
-        p::OrthogonalPoint,
-        X::OrthogonalTangentVector,
+        M::Flag, q::OrthogonalPoint, p::OrthogonalPoint, X::OrthogonalTangentVector
     )
     return ManifoldsBase.retract_qr_fused!(M, q, p, X, one(eltype(p)))
 end

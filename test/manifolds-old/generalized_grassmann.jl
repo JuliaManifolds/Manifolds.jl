@@ -68,22 +68,17 @@ end
             @test !is_flat(M)
             @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0]; error = :error)
             @test_throws ManifoldDomainError is_point(
-                M,
-                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0];
+                M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0];
                 error = :error,
             )
             @test_throws ManifoldDomainError is_point(M, 2 * p; error = :error)
             @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
             @test_throws ManifoldDomainError is_vector(
-                M,
-                p,
-                [0.0, 0.0, 1.0, 0.0];
+                M, p, [0.0, 0.0, 1.0, 0.0];
                 error = :error,
             )
             @test_throws ManifoldDomainError is_vector(
-                M,
-                p,
-                1 * im * zero_vector(M, p);
+                M, p, 1 * im * zero_vector(M, p);
                 error = :error,
             )
             @test_throws ManifoldDomainError is_vector(M, p, X; error = :error)

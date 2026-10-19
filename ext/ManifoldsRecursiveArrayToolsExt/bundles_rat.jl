@@ -23,8 +23,7 @@ function get_vector(M::FiberBundle, p::ArrayPartition, c::AbstractVector, B::Abs
     xp1, xp2 = submanifold_components(M, p)
     F = Fiber(M.manifold, xp1, M.type)
     return ArrayPartition(
-        get_vector(M.manifold, xp1, c[1:n], B),
-        get_vector(F, xp2, c[(n + 1):end], B),
+        get_vector(M.manifold, xp1, c[1:n], B), get_vector(F, xp2, c[(n + 1):end], B)
     )
 end
 # disambiguation
@@ -88,7 +87,7 @@ component, respectively.
 end
 
 function _vector_transport_direction(
-        M::VectorBundle, p::ArrayPartition, X, d, m::FiberBundleProductVectorTransport,
+        M::VectorBundle, p::ArrayPartition, X, d, m::FiberBundleProductVectorTransport
     )
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
@@ -100,7 +99,7 @@ function _vector_transport_direction(
 end
 
 function _vector_transport_to(
-        M::VectorBundle, p::ArrayPartition, X, q, m::FiberBundleProductVectorTransport,
+        M::VectorBundle, p::ArrayPartition, X, q, m::FiberBundleProductVectorTransport
     )
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)

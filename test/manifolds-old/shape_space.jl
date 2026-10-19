@@ -23,14 +23,11 @@ include("../header.jl")
     ]
     @test_throws DomainError is_point(M, [1 0 1; 1 -1 0] / 2; error = :error)
     @test_throws DomainError is_vector(
-        M,
-        [-1 0 1.0; 0 0 0] / sqrt(2),
-        [1.0 0 1; 1 -1 0];
+        M, [-1 0 1.0; 0 0 0] / sqrt(2), [1.0 0 1; 1 -1 0];
         error = :error,
     )
     Manifolds.test_manifold(
-        M,
-        [p1, p2, p3];
+        M, [p1, p2, p3];
         is_point_atol_multiplier = 1,
         is_tangent_atol_multiplier = 1,
         exp_log_atol_multiplier = 5,
@@ -134,8 +131,7 @@ end
     end
 
     Manifolds.test_manifold(
-        M,
-        [p1, p2, p3];
+        M, [p1, p2, p3];
         is_point_atol_multiplier = 1,
         is_tangent_atol_multiplier = 1,
         exp_log_atol_multiplier = 2.0e8,

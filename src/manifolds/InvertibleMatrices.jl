@@ -59,20 +59,13 @@ embed(::InvertibleMatrices, p) = p
 embed(::InvertibleMatrices, p, X) = X
 
 function get_coordinates(
-        ::InvertibleMatrices{ℝ, <:Any},
-        p,
-        X,
-        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+        ::InvertibleMatrices{ℝ, <:Any}, p, X, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType}
     )
     return vec(X)
 end
 
 function get_coordinates!(
-        ::InvertibleMatrices{ℝ, <:Any},
-        Xⁱ,
-        p,
-        X,
-        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+        ::InvertibleMatrices{ℝ, <:Any}, Xⁱ, p, X, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType}
     )
     return copyto!(Xⁱ, X)
 end
@@ -90,21 +83,14 @@ function ManifoldsBase.get_embedding_type(::InvertibleMatrices)
 end
 
 function get_vector(
-        M::InvertibleMatrices{ℝ, <:Any},
-        p,
-        Xⁱ,
-        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+        M::InvertibleMatrices{ℝ, <:Any}, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType}
     )
     n = get_parameter(M.size)[1]
     return reshape(Xⁱ, n, n)
 end
 
 function get_vector!(
-        ::InvertibleMatrices{ℝ, <:Any},
-        X,
-        p,
-        Xⁱ,
-        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+        ::InvertibleMatrices{ℝ, <:Any}, X, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType}
     )
     return copyto!(X, Xⁱ)
 end
@@ -159,11 +145,8 @@ embedding.
 rand(M::InvertibleMatrices; kwargs...)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::InvertibleMatrices,
-        pX;
-        vector_at = nothing,
-        kwargs...,
+        rng::AbstractRNG, M::InvertibleMatrices, pX;
+        vector_at = nothing, kwargs...,
     )
     rand!(rng, get_embedding(M), pX; kwargs...)
     if vector_at === nothing # for points ensure invertibility

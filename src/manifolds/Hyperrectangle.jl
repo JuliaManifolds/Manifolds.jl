@@ -154,13 +154,7 @@ function get_vector_orthonormal(::Hyperrectangle{<:AbstractVector}, ::Any, c, ::
     return c
 end
 
-function get_vector_orthonormal!(
-        ::Hyperrectangle{<:AbstractVector},
-        Y,
-        ::Any,
-        c,
-        ::RealNumbers,
-    )
+function get_vector_orthonormal!(::Hyperrectangle{<:AbstractVector}, Y, ::Any, c, ::RealNumbers)
     # this method is defined just to skip a reshape
     copyto!(Y, c)
     return Y
@@ -272,10 +266,7 @@ end
 #
 # When Statistics / Statsbase.mean! is consistent with mean, we can pass this on to them as well
 function Statistics.mean!(
-        ::Hyperrectangle,
-        y,
-        x::AbstractVector,
-        ::EfficientEstimator;
+        ::Hyperrectangle, y, x::AbstractVector, ::EfficientEstimator;
         kwargs...,
     )
     n = length(x)
@@ -287,11 +278,7 @@ function Statistics.mean!(
     return y
 end
 function Statistics.mean!(
-        ::Hyperrectangle,
-        y,
-        x::AbstractVector,
-        w::AbstractWeights,
-        ::EfficientEstimator;
+        ::Hyperrectangle, y, x::AbstractVector, w::AbstractWeights, ::EfficientEstimator;
         kwargs...,
     )
     n = length(x)
@@ -388,11 +375,8 @@ function project!(M::Hyperrectangle, Y, p, X)
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::Hyperrectangle,
-        pX;
-        σ = one(eltype(pX)),
-        vector_at = nothing,
+        rng::AbstractRNG, M::Hyperrectangle, pX;
+        σ = one(eltype(pX)), vector_at = nothing,
     )
     if vector_at === nothing
         for i in eachindex(M.ub)

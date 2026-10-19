@@ -52,14 +52,13 @@ function check_vector(M::MultinomialSymmetricPositiveDefinite, p, X; kwargs...)
     n = get_parameter(M.size)[1]
     s = check_vector(SymmetricPositiveDefinite(n), p, X; kwargs...)
     !isnothing(s) && return ManifoldDomainError(
-        "The vector $(X) is not a tangent vector to $(p) on $(M)",
-        s,
+        "The vector $(X) is not a tangent vector to $(p) on $(M)", s
     )
     return nothing
 end
 
 function get_embedding(
-        ::MultinomialSymmetricPositiveDefinite{TypeParameter{Tuple{n}}},
+        ::MultinomialSymmetricPositiveDefinite{TypeParameter{Tuple{n}}}
     ) where {n}
     return MultinomialSymmetric(n)
 end
@@ -158,9 +157,7 @@ function Random.rand!(
         uutd = dm \ Vlu.U
         random_totally_positive = uutd * dm * Vlu.L
         MMDS = MultinomialDoubleStochastic(n)
-        ds = project(
-            MMDS, random_totally_positive; maxiter = 1000, warn_nonconvergence = false
-        )
+        ds = project(MMDS, random_totally_positive; maxiter = 1000, warn_nonconvergence = false)
         p .= (ds .+ ds') ./ 2
         # Sinkhorn's algorithm converges very slowly for nearly decomposable matrices,
         # so reject samples for which it did not converge
@@ -190,8 +187,7 @@ function ManifoldsBase.retract_project!(M::MultinomialSymmetricPositiveDefinite,
 end
 
 function Base.show(
-        io::IO,
-        ::MultinomialSymmetricPositiveDefinite{TypeParameter{Tuple{n}}},
+        io::IO, ::MultinomialSymmetricPositiveDefinite{TypeParameter{Tuple{n}}}
     ) where {n}
     return print(io, "MultinomialSymmetricPositiveDefinite($(n))")
 end

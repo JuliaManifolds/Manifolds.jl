@@ -182,7 +182,7 @@ Draw a random point, or a random tangent vector at `vector_at`, on the
 """
 function Random.rand!(
         rng::AbstractRNG, M::SPDFixedDeterminant, pX;
-        vector_at = nothing, σ::Real = one(real(eltype(pX)))
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
     )
     if vector_at === nothing
         rand!(rng, get_embedding(M), pX; σ = σ)

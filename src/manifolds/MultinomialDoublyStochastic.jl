@@ -218,17 +218,13 @@ function project(M::AbstractMultinomialDoublyStochastic, p; kwargs...)
 end
 
 function project!(
-        ::AbstractMultinomialDoublyStochastic,
-        q,
-        p;
+        ::AbstractMultinomialDoublyStochastic, q, p;
         maxiter::Int = 1000,
         tolerance::Real = eps(real(float(eltype(p)))),
         warn_nonconvergence::Bool = true,
     )
     any(p .<= 0) && throw(
-        DomainError(
-            "The matrix $p can not be projected, since it has nonpositive entries.",
-        ),
+        DomainError("The matrix $p can not be projected, since it has nonpositive entries.")
     )
     iter = 0
     d1 = float.(sum(p, dims = 1))
@@ -268,12 +264,8 @@ multiplied by `σ` and projected onto the tangent space.
 rand(::MultinomialDoubleStochastic; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::MultinomialDoubleStochastic,
-        pX;
-        vector_at = nothing,
-        σ::Real = one(real(eltype(pX))),
-        kwargs...,
+        rng::AbstractRNG, M::MultinomialDoubleStochastic, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX))), kwargs...,
     )
     rand!(rng, pX)
     pX .*= σ
@@ -298,11 +290,7 @@ function ManifoldsBase.retract_project!(M::MultinomialDoubleStochastic, q, p, X)
     return project!(M, q, p .* exp.(X ./ p))
 end
 function ManifoldsBase.retract_project_fused!(
-        M::MultinomialDoubleStochastic,
-        q,
-        p,
-        X,
-        t::Number,
+        M::MultinomialDoubleStochastic, q, p, X, t::Number
     )
     return project!(M, q, p .* exp.(t .* X ./ p))
 end

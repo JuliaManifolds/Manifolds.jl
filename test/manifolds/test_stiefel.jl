@@ -64,12 +64,12 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
             qca = retract(M, p, X, rca)
             @test is_point(M, qca; error = :error)
             Yca = vector_transport_direction(
-                M, p, X, X, DifferentiatedRetractionVectorTransport(CayleyRetraction()),
+                M, p, X, X, DifferentiatedRetractionVectorTransport(CayleyRetraction())
             )
             @test is_vector(M, qca, Yca; atol = 10^-15, error = :error)
             Zca = zero_vector(M, p)
             vector_transport_direction!(
-                M, Zca, p, X, X, DifferentiatedRetractionVectorTransport(CayleyRetraction()),
+                M, Zca, p, X, X, DifferentiatedRetractionVectorTransport(CayleyRetraction())
             )
             @test is_vector(M, qca, Zca; atol = 10^-15)
             @test isapprox(M, qca, Yca, Zca)
@@ -373,17 +373,14 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
             M21 = Stiefel(2, 1)
             p21 = SMatrix{2, 1}([0.0, 1.0])
             X21 = inverse_retract(
-                M21, p21, SMatrix{2, 1}([sqrt(2), sqrt(2)]),
-                QRInverseRetraction(),
+                M21, p21, SMatrix{2, 1}([sqrt(2), sqrt(2)]), QRInverseRetraction()
             )
             @test isapprox(M21, p21, X21, SMatrix{2, 1}([1.0, 0.0]))
         end
         @testset "Stiefel(3, 2) StaticArray inverse QR retraction cases" begin
             pS = SMatrix{3, 2}(p)
             qS = SMatrix{3, 2}(q)
-            XS = inverse_retract(
-                M, pS, qS, QRInverseRetraction(),
-            )
+            XS = inverse_retract(M, pS, qS, QRInverseRetraction())
             q32 = Manifolds.retract(M, pS, XS, QRRetraction())
             @test isapprox(M, qS, q32)
             @test isapprox(M, pS, XS, SMatrix{3, 2}([0.0 -1.0; 1.0 0.0; 0.0 0.0]))
@@ -394,10 +391,7 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
             X43 = [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0; 1.0 1.0 1.0]
             q43 = retract(M43, p43, X43, QRRetraction())
             Y243 = inverse_retract(
-                M43,
-                SMatrix{4, 3}(p43),
-                SMatrix{4, 3}(q43),
-                QRInverseRetraction(),
+                M43, SMatrix{4, 3}(p43), SMatrix{4, 3}(q43), QRInverseRetraction()
             )
             Z243 = inverse_retract(M43, p43, q43, QRInverseRetraction())
             @test isapprox(M43, p43, Y243, Z243)
@@ -406,10 +400,7 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
             q243 = exp(M, p243, [0.0 0.0; 0.0 0.0; 1.0 1.0])
 
             Y243 = inverse_retract(
-                M,
-                SMatrix{3, 2}(p243),
-                SMatrix{3, 2}(q243),
-                QRInverseRetraction(),
+                M, SMatrix{3, 2}(p243), SMatrix{3, 2}(q243), QRInverseRetraction()
             )
             Z243 = inverse_retract(M, p243, q243, QRInverseRetraction())
             @test isapprox(M, p243, Y243, Z243)

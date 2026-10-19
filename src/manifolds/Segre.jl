@@ -535,7 +535,7 @@ where ``\sphericalangle(x_i, y_i)`` is the distance between ``x_i`` and ``y_i`` 
 """
 function spherical_angle_sum(::Segre{ℝ, V}, p, q) where {V}
     return sqrt(
-        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
+        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])])
     )
 end
 
@@ -555,7 +555,8 @@ If `vector_at` is not `nothing`, return a random tangent vector from a normal di
 Base.rand(M::Segre{ℝ, V}; vector_at = nothing, kwargs...) where {V}
 
 function Random.rand!(
-        rng::AbstractRNG, M::Segre{ℝ, V}, pX; vector_at = nothing, kwargs...
+        rng::AbstractRNG, M::Segre{ℝ, V}, pX;
+        vector_at = nothing, kwargs...,
     ) where {V}
     if isnothing(vector_at)
         rand!(rng, PositiveArrays(1), pX[1]; kwargs...)

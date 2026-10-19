@@ -52,12 +52,7 @@ end
             error = :error,
         )
         @test !is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0])
-        @test_throws DomainError is_vector(
-            M,
-            [0.0, 0.0, 1.0],
-            [1.0, 0.0, 1.0];
-            error = :error,
-        )
+        @test_throws DomainError is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0]; error = :error)
         @test is_default_metric(M, MinkowskiMetric())
         @test manifold_dimension(M) == 2
 
@@ -109,18 +104,12 @@ end
         @test is_point(M, pB)
         @test convert(AbstractVector, pB) == p # convert back yields again p
         @test convert(HyperboloidPoint, pB).value == pH.value
-        @test_throws DomainError is_point(
-            M,
-            PoincareBallPoint([0.9, 0.0, 0.0]);
-            error = :error,
-        )
+        @test_throws DomainError is_point(M, PoincareBallPoint([0.9, 0.0, 0.0]); error = :error)
         @test_throws DomainError is_point(M, PoincareBallPoint([1.1, 0.0]); error = :error)
 
         @test is_vector(M, pB, PoincareBallTangentVector([2.0, 2.0]))
         @test_throws DomainError is_vector(
-            M,
-            pB,
-            PoincareBallTangentVector([2.0, 2.0, 3.0]);
+            M, pB, PoincareBallTangentVector([2.0, 2.0, 3.0]);
             error = :error,
         )
         pS = convert(PoincareHalfSpacePoint, p)
@@ -128,13 +117,11 @@ end
         pS3 = convert(PoincareHalfSpacePoint, pH)
 
         @test_throws DomainError is_point(
-            M,
-            PoincareHalfSpacePoint([0.0, 0.0, 1.0]);
+            M, PoincareHalfSpacePoint([0.0, 0.0, 1.0]);
             error = :error,
         )
         @test_throws DomainError is_point(
-            M,
-            PoincareHalfSpacePoint([0.0, -1.0]);
+            M, PoincareHalfSpacePoint([0.0, -1.0]);
             error = :error,
         )
 

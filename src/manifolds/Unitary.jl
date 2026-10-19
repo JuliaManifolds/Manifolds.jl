@@ -187,8 +187,7 @@ function Random.rand(M::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}; vector_at
     end
 end
 function Random.rand(
-        rng::AbstractRNG,
-        M::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}};
+        rng::AbstractRNG, M::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}};
         vector_at = nothing,
     )
     if vector_at === nothing
@@ -211,11 +210,8 @@ distributed matrix onto the tangent space.
 rand(::UnitaryMatrices; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::UnitaryMatrices,
-        pX;
-        vector_at = nothing,
-        σ::Real = one(real(eltype(pX))),
+        rng::AbstractRNG, M::UnitaryMatrices, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
     )
     n = get_parameter(M.size)[1]
     if vector_at === nothing

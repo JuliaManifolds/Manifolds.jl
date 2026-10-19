@@ -114,10 +114,7 @@ Check whether `p` is a point on the [`PositiveNumbers`](@ref) `M`, i.e. $p>0$.
 """
 function check_point(M::PositiveNumbers, p; kwargs...)
     if any(p .<= 0.0)
-        return DomainError(
-            p,
-            "The point $(p) does not lie on $(M), since it is nonpositive.",
-        )
+        return DomainError(p, "The point $(p) does not lie on $(M), since it is nonpositive.")
     end
     return nothing
 end
@@ -284,8 +281,7 @@ representation_size(::PositiveNumbers) = ()
 Base.show(io::IO, ::PositiveNumbers) = print(io, "PositiveNumbers()")
 
 function Base.show(
-        io::IO,
-        M::PowerManifold{ℝ, PositiveNumbers, TSize, ArrayPowerRepresentation},
+        io::IO, M::PowerManifold{ℝ, PositiveNumbers, TSize, ArrayPowerRepresentation}
     ) where {TSize <: TypeParameter}
     s = get_parameter(M.size)
     (length(s) == 1) && return print(io, "PositiveVectors($(s[1]))")
@@ -293,8 +289,7 @@ function Base.show(
     return print(io, "PositiveArrays($(join(s, ", ")))")
 end
 function Base.show(
-        io::IO,
-        M::PowerManifold{ℝ, PositiveNumbers, TSize, ArrayPowerRepresentation},
+        io::IO, M::PowerManifold{ℝ, PositiveNumbers, TSize, ArrayPowerRepresentation}
     ) where {TSize <: Tuple}
     s = get_parameter(M.size)
     (length(s) == 1) && return print(io, "PositiveVectors($(s[1]); parameter=:field)")
@@ -336,11 +331,8 @@ function Random.rand(rng::AbstractRNG, ::PositiveNumbers; σ = 1.0, vector_at = 
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        ::PositiveNumbers,
-        pX;
-        σ = one(eltype(pX)),
-        vector_at = nothing,
+        rng::AbstractRNG, ::PositiveNumbers, pX;
+        σ = one(eltype(pX)), vector_at = nothing,
     )
     if vector_at === nothing
         pX .= exp(randn(rng) * σ)
@@ -370,11 +362,7 @@ function riemannian_Hessian!(::PositiveNumbers, Y, p, G, H, X)
 end
 
 function vector_transport_direction(
-        M::PositiveNumbers,
-        p,
-        X,
-        Y,
-        m::AbstractVectorTransportMethod,
+        M::PositiveNumbers, p, X, Y, m::AbstractVectorTransportMethod
     )
     q = exp(M, p, Y)
     return vector_transport_to(M, p, X, q, m)

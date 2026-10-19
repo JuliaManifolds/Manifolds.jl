@@ -72,8 +72,6 @@ using Manifolds, Test, LinearAlgebra
 
     M = CholeskySpace(3; parameter = :field)
     Manifolds.Test.test_manifold(
-        M,
-        Dict(:Functions => [repr]),
-        Dict(repr => "CholeskySpace(3; parameter=:field)")
+        M, Dict(:Functions => [repr]), Dict(repr => "CholeskySpace(3; parameter=:field)")
     )
 end

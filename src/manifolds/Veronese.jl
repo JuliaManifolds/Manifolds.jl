@@ -144,9 +144,7 @@ function ManifoldsBase.allocate_result_embedding(M::Veronese, ::typeof(embed), X
     return zeros(T, n^d)
 end
 
-function ManifoldsBase.allocate_result_embedding(
-        ::Veronese, ::typeof(project), A, p,
-    )
+function ManifoldsBase.allocate_result_embedding(::Veronese, ::typeof(project), A, p)
     return (similar(p[1]), similar(p[2]))
 end
 
@@ -233,9 +231,7 @@ function check_vector(M::Veronese, p, X; kwargs...)
     e = check_size(M, p, X)
     isnothing(e) || return e
     n, _ = get_parameter(M.size)
-    return check_vector(
-        Sphere(n - 1; parameter = get_parameter_type(M)), p[2], X[2]; kwargs...,
-    )
+    return check_vector(Sphere(n - 1; parameter = get_parameter_type(M)), p[2], X[2]; kwargs...)
 end
 
 @doc raw"""
@@ -517,8 +513,7 @@ function exp_fused!(M::Veronese, q, p, X, t::Number)
     if iszero(m)
         radial_endpoint > 0 || throw(
             DomainError(
-                t,
-                "The exponential curve reaches the zero tensor, which is not part of $M.",
+                t, "The exponential curve reaches the zero tensor, which is not part of $M."
             ),
         )
         q[1][1] = scale_sign * radial_endpoint
@@ -554,9 +549,7 @@ c
 """
 get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
 
-function get_coordinates_orthonormal!(
-        M::Veronese, c, p, X, ::RealNumbers; kwargs...,
-    )
+function get_coordinates_orthonormal!(M::Veronese, c, p, X, ::RealNumbers; kwargs...)
     n, d = get_parameter(M.size)
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
     c[1] = X[1][1]
@@ -592,9 +585,7 @@ vector in ``T_x\mathbb S^{N-1}``.
 """
 get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
 
-function get_vector_orthonormal!(
-        M::Veronese, X, p, c, ::RealNumbers; kwargs...,
-    )
+function get_vector_orthonormal!(M::Veronese, X, p, c, ::RealNumbers; kwargs...)
     n, d = get_parameter(M.size)
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
     X[1][1] = c[1]
@@ -641,9 +632,7 @@ passed on to this; `atol` defaults to `sqrt(max_eps(X[1], X[2], Y[1], Y[2]))`.
 """
 isapprox(::Veronese, ::Any, ::Any, ::Any)
 
-function _isapprox(
-        M::Veronese, p, q; atol = sqrt(max_eps(p[1], p[2], q[1], q[2])), kwargs...,
-    )
+function _isapprox(M::Veronese, p, q; atol = sqrt(max_eps(p[1], p[2], q[1], q[2])), kwargs...)
     if is_point(M, p) && is_point(M, q)
         return isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
     end
@@ -651,9 +640,7 @@ function _isapprox(
         all(isapprox(pi, qi; atol = atol, kwargs...) for (pi, qi) in zip(p, q))
 end
 
-function _isapprox(
-        ::Veronese, p, X, Y; atol = sqrt(max_eps(X[1], X[2], Y[1], Y[2])), kwargs...,
-    )
+function _isapprox(::Veronese, p, X, Y; atol = sqrt(max_eps(X[1], X[2], Y[1], Y[2])), kwargs...)
     return length(X) == length(Y) &&
         all(isapprox(Xi, Yi; atol = atol, kwargs...) for (Xi, Yi) in zip(X, Y))
 end
@@ -721,7 +708,7 @@ function log!(M::Veronese, X, p, q)
     q_closest = copy(M, q)
     closest_representative!(M, q_closest, p)
     connected_by_geodesic(M, p, q_closest) || throw(
-        DomainError(q, "The points are not connected by a minimizing geodesic on $M."),
+        DomainError(q, "The points are not connected by a minimizing geodesic on $M.")
     )
 
     n, d = get_parameter(M.size)
@@ -857,9 +844,7 @@ component by ``Dλ^2``.
 """
 Random.rand(M::Veronese; vector_at = nothing, σ::Real = 1)
 
-function Random.rand!(
-        rng::AbstractRNG, M::Veronese, pX; vector_at = nothing, σ::Real = 1,
-    )
+function Random.rand!(rng::AbstractRNG, M::Veronese, pX; vector_at = nothing, σ::Real = 1)
     n, _ = get_parameter(M.size)
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
     if isnothing(vector_at)

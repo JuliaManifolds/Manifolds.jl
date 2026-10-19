@@ -125,9 +125,7 @@ include("../header.jl")
             @test is_vector(M, p, v)
             @test !is_vector(M, p_small, v)
             @test !is_vector(
-                M,
-                p,
-                TuckerTangentVector(ones(T, r⃗), map(u⊥ -> u⊥[:, 1:(end - 1)], U⊥)),
+                M, p, TuckerTangentVector(ones(T, r⃗), map(u⊥ -> u⊥[:, 1:(end - 1)], U⊥))
             )
             # factors of a tangent vector are orthogonal to those of the point
             v_parallel = TuckerTangentVector(copy(v.Ċ), map(copy, p.hosvd.U))
@@ -356,10 +354,7 @@ include("../header.jl")
     end
 
     @testset "product of Tucker manifolds" begin
-        M = ProductManifold(
-            Tucker((18, 16, 14), (4, 3, 3)),
-            Tucker((18, 16, 14), (4, 3, 3)),
-        )
+        M = ProductManifold(Tucker((18, 16, 14), (4, 3, 3)), Tucker((18, 16, 14), (4, 3, 3)))
         p0 = rand(M)
         X = rand(M; vector_at = p0)
         Y = copy(M, X)

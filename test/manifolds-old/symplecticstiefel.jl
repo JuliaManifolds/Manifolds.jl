@@ -236,8 +236,7 @@ end
             @testset "Type $(type)" begin
                 @testset "CayleyRetraction" begin
                     Manifolds.test_manifold(
-                        M,
-                        convert.(type, points);
+                        M, convert.(type, points);
                         retraction_methods = [CayleyRetraction()],
                         default_retraction_method = CayleyRetraction(),
                         default_inverse_retraction_method = CayleyInverseRetraction(),
@@ -254,8 +253,7 @@ end
 
                 @testset "ExponentialRetraction" begin
                     Manifolds.test_manifold(
-                        M,
-                        convert.(type, close_points);
+                        M, convert.(type, close_points);
                         retraction_methods = [ExponentialRetraction()],
                         default_retraction_method = ExponentialRetraction(),
                         default_inverse_retraction_method = CayleyInverseRetraction(),
@@ -307,8 +305,7 @@ end
         fd_diff = RiemannianProjectionBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 
         @test isapprox(
-            Manifolds.gradient(M, test_f, p_grad, fd_diff),
-            analytical_grad_f(p_grad);
+            Manifolds.gradient(M, test_f, p_grad, fd_diff), analytical_grad_f(p_grad);
             atol = 1.0e-9,
         )
 

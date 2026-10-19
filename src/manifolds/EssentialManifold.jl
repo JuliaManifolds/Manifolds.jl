@@ -65,11 +65,7 @@ Check whether the matrix is a valid point on the [`EssentialManifold`](@ref) `M`
 i.e. a 2-element array containing SO(3) matrices.
 """
 function check_point(M::EssentialManifold, p; kwargs...)
-    return check_point(
-        PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
-        p;
-        kwargs...,
-    )
+    return check_point(PowerManifold(M.manifold, NestedPowerRepresentation(), 2), p; kwargs...)
 end
 
 """
@@ -80,9 +76,7 @@ i.e. `X` has to be a 2-element array of `3`-by-`3` skew-symmetric matrices.
 """
 function check_vector(M::EssentialManifold, p, X; kwargs...)
     return check_vector(
-        PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
-        p,
-        X;
+        PowerManifold(M.manifold, NestedPowerRepresentation(), 2), p, X;
         kwargs...,
     )
 end
@@ -135,9 +129,7 @@ to this; `atol` defaults to 18 times the machine epsilon of the entries of `q`.
 isapprox(::EssentialManifold, ::Any, ::Any)
 
 function _isapprox(
-        M::EssentialManifold,
-        p,
-        q::T;
+        M::EssentialManifold, p, q::T;
         atol::Real = 2 * prod(representation_size(M.manifold)) * eps(real(float(number_eltype(number_eltype(T))))),
         kwargs...,
     ) where {T}
@@ -293,15 +285,7 @@ function dist_min_angle_pair(p, q)
                     df_break1p * (t_search2 - t_search1) / (df_break2n - df_break1p)
                 #use Newton's search to find t_min
                 t_min, f_min = dist_min_angle_pair_df_newton(
-                    m1,
-                    Φ1,
-                    c1,
-                    m2,
-                    Φ2,
-                    c2,
-                    t_min0,
-                    t_search1,
-                    t_search2,
+                    m1, Φ1, c1, m2, Φ2, c2, t_min0, t_search1, t_search2
                 )
             end
             t_search1 = t_search1 + 2 * pi
@@ -312,15 +296,7 @@ function dist_min_angle_pair(p, q)
                     df_break2p * (t_search1 - t_search2) / (df_break1n - df_break2p)
                 #use Newton's search to find t_min
                 t_min2, f_min2 = dist_min_angle_pair_df_newton(
-                    m1,
-                    Φ1,
-                    c1,
-                    m2,
-                    Φ2,
-                    c2,
-                    t_min0,
-                    t_search2,
-                    t_search1,
+                    m1, Φ1, c1, m2, Φ2, c2, t_min0, t_search2, t_search1
                 )
                 #choose t with lower function values
                 if f_min2 < f_min
@@ -586,7 +562,8 @@ function Random.rand!(M::EssentialManifold, pX; kwargs...)
     return rand!(Random.default_rng(), M, pX; kwargs...)
 end
 function Random.rand!(
-        rng::AbstractRNG, M::EssentialManifold, pX; vector_at = nothing, σ::Real = 1.0
+        rng::AbstractRNG, M::EssentialManifold, pX;
+        vector_at = nothing, σ::Real = 1.0,
     )
     N = PowerManifold(M.manifold, NestedPowerRepresentation(), 2)
     rand!(rng, N, pX; vector_at = vector_at, σ = σ)

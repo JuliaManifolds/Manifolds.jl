@@ -508,11 +508,8 @@ Gaussian entries scaled by `σ` before returning ``X = pΩ_X``.
 rand(M::SymplecticStiefel; σ::Real = 1.0, kwargs...)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::SymplecticStiefel,
-        pX;
-        vector_at = nothing,
-        σ::Real = 1.0,
+        rng::AbstractRNG, M::SymplecticStiefel, pX;
+        vector_at = nothing, σ::Real = 1.0,
     )
     n, k = get_parameter(M.size)
     if vector_at === nothing
@@ -601,14 +598,16 @@ where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes
 
 """
 function riemannian_gradient(
-        ::SymplecticStiefel, p, Y; embedding_metric::EuclideanMetric = EuclideanMetric(),
+        ::SymplecticStiefel, p, Y;
+        embedding_metric::EuclideanMetric = EuclideanMetric(),
     )
     Jp = SymplecticElement(p, Y) * p
     return Y * (p' * p) .+ Jp * (Y' * Jp)
 end
 
 function riemannian_gradient!(
-        ::SymplecticStiefel, X, p, Y; embedding_metric::EuclideanMetric = EuclideanMetric(),
+        ::SymplecticStiefel, X, p, Y;
+        embedding_metric::EuclideanMetric = EuclideanMetric(),
     )
     Jp = SymplecticElement(p, Y) * p
     X .= Y * (p' * p) .+ Jp * (Y' * Jp)

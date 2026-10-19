@@ -39,10 +39,8 @@ Check whether `p` is a valid point on [`KendallsPreShapeSpace`](@ref), i.e. whet
 each row has zero mean. Other conditions are checked via embedding in [`ArraySphere`](@ref).
 """
 function check_point(
-        M::KendallsPreShapeSpace,
-        p;
-        atol::Real = sqrt(eps(float(eltype(p)))),
-        kwargs...,
+        M::KendallsPreShapeSpace, p;
+        atol::Real = sqrt(eps(float(eltype(p)))), kwargs...,
     )
     for p_row in eachrow(p)
         if !isapprox(mean(p_row), 0; atol = atol, kwargs...)
@@ -62,11 +60,8 @@ Check whether `X` is a valid tangent vector on [`KendallsPreShapeSpace`](@ref), 
 each row has zero mean. Other conditions are checked via embedding in [`ArraySphere`](@ref).
 """
 function check_vector(
-        M::KendallsPreShapeSpace,
-        p,
-        X;
-        atol::Real = sqrt(eps(float(eltype(X)))),
-        kwargs...,
+        M::KendallsPreShapeSpace, p, X;
+        atol::Real = sqrt(eps(float(eltype(X)))), kwargs...,
     )
     for X_row in eachrow(X)
         if !isapprox(mean(X_row), 0; atol = atol, kwargs...)
@@ -200,11 +195,8 @@ function project!(::KendallsPreShapeSpace, Y, p, X)
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::KendallsPreShapeSpace,
-        pX;
-        vector_at = nothing,
-        σ = one(eltype(pX)),
+        rng::AbstractRNG, M::KendallsPreShapeSpace, pX;
+        vector_at = nothing, σ = one(eltype(pX)),
     )
     if vector_at === nothing
         project!(M, pX, randn(rng, eltype(pX), representation_size(M)))

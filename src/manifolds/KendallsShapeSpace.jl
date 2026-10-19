@@ -232,11 +232,8 @@ with mean zero and standard deviation `σ`.
 rand(::KendallsShapeSpace; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::KendallsShapeSpace,
-        pX;
-        vector_at = nothing,
-        σ::Real = one(eltype(pX)),
+        rng::AbstractRNG, M::KendallsShapeSpace, pX;
+        vector_at = nothing, σ::Real = one(eltype(pX)),
     )
     rand!(rng, get_embedding(M), pX; vector_at = vector_at, σ = σ)
     vector_at === nothing || horizontal_component!(M, pX, vector_at, pX)

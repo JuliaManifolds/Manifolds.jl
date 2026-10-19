@@ -42,7 +42,7 @@ matrices `M` with the [`LogEuclideanMetric`](@ref). Its value is always the zero
 vector, since ``R = 0`` for this metric, see Table 4 of [ThanwerdasPennec:2023](@cite).
 """
 riemann_tensor(
-    M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogEuclideanMetric}, p, X, Y, Z,
+    M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogEuclideanMetric}, p, X, Y, Z
 )
 
 function riemann_tensor!(
@@ -64,7 +64,7 @@ The Riemann tensor of this metric is ``R = 0``, see Table 4 of [ThanwerdasPennec
 so ``⟨R(X,Y)Y,X⟩_p = 0`` for all linearly independent ``X, Y ∈ T_p\mathcal M``.
 """
 function sectional_curvature(
-        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogEuclideanMetric}, p, X, Y,
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogEuclideanMetric}, p, X, Y
     )
     return 0.0
 end
@@ -77,7 +77,7 @@ The Riemann tensor of this metric is ``R = 0``, see Table 4 of [ThanwerdasPennec
 so every sectional curvature is 0.
 """
 function sectional_curvature_max(
-        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogEuclideanMetric},
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogEuclideanMetric}
     )
     return 0.0
 end
@@ -90,7 +90,7 @@ The Riemann tensor of this metric is ``R = 0``, see Table 4 of [ThanwerdasPennec
 so every sectional curvature is 0.
 """
 function sectional_curvature_min(
-        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogEuclideanMetric},
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogEuclideanMetric}
     )
     return 0.0
 end

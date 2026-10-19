@@ -10,9 +10,7 @@ include("../header.jl")
     M5 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.BuresWassersteinMetric())
     M6 = MetricManifold(
         SymmetricPositiveDefinite(3),
-        Manifolds.GeneralizedBuresWassersteinMetric(
-            [2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0],
-        ),
+        Manifolds.GeneralizedBuresWassersteinMetric([2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0]),
     )
 
     @test repr(M6.metric) ==
@@ -243,9 +241,7 @@ include("../header.jl")
         @test is_point(M1, p)
         @test is_vector(M1, p, rand(M1; vector_at = p, tangent_distr = :Rician))
         @test is_vector(
-            M1,
-            p,
-            rand(MersenneTwister(123), M1; vector_at = p, tangent_distr = :Rician),
+            M1, p, rand(MersenneTwister(123), M1; vector_at = p, tangent_distr = :Rician)
         )
         # coordinates of a Gaussian tangent vector in an orthonormal basis at the point
         q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1.0]
@@ -313,9 +309,7 @@ include("../header.jl")
         @test ManifoldsBase.check_size(M1, p, Matrix{Float64}(I, 3, 3); atol = 1.0e-8) === nothing
         pS = SPDPoint(
             2 * Matrix{Float64}(I, 3, 3);
-            store_p = false,
-            store_sqrt = false,
-            store_sqrt_inv = false,
+            store_p = false, store_sqrt = false, store_sqrt_inv = false,
         )
         m = missing
         s = "$(typeof(pS))\np:\n $m\np^{1/2}:\n $m\np^{-1/2}:\n $m"
@@ -330,9 +324,7 @@ include("../header.jl")
         @test !ismissing(pF2.sqrt_inv)
         pF3 = SPDPoint(
             Matrix{Float64}(I, 3, 3);
-            store_p = false,
-            store_sqrt = false,
-            store_sqrt_inv = false,
+            store_p = false, store_sqrt = false, store_sqrt_inv = false,
         )
         copyto!(pF3, pF2) # do not fill values from F
         @test ismissing(pF3.p)

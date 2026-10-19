@@ -224,11 +224,11 @@ function Manifolds.test_manifold(
         Test.@test isapprox(M, pts[2], exp(M, pts[1], X1); atol = atolp1p2, rtol = rtolp1p2)
         Test.@test isapprox(
             M, pts[1], Manifolds.exp_fused(M, pts[1], X1, 0);
-            atol = atolp1p2, rtol = rtolp1p2
+            atol = atolp1p2, rtol = rtolp1p2,
         )
         Test.@test isapprox(
             M, pts[2], Manifolds.exp_fused(M, pts[1], X1, 1);
-            atol = atolp1p2, rtol = rtolp1p2
+            atol = atolp1p2, rtol = rtolp1p2,
         )
         if is_mutating
             q2 = allocate(pts[1])
@@ -240,14 +240,14 @@ function Manifolds.test_manifold(
         Test.@test is_point(M, exp(M, pts[1], X1); atol = atolp1p2, rtol = rtolp1p2)
         Test.@test isapprox(
             M, pts[1], Manifolds.exp_fused(M, pts[1], X1, 0);
-            atol = atolp1p2, rtol = rtolp1p2
+            atol = atolp1p2, rtol = rtolp1p2,
         )
         for p in pts
             epsx = Manifolds.find_eps(p)
             Test.@test isapprox(
                 M, p, zero_vector(M, p), log(M, p, p);
                 atol = epsx * exp_log_atol_multiplier,
-                rtol = exp_log_atol_multiplier == 0.0 ? sqrt(epsx) * exp_log_rtol_multiplier : 0
+                rtol = exp_log_atol_multiplier == 0.0 ? sqrt(epsx) * exp_log_rtol_multiplier : 0,
             )
             Test.@test isapprox(
                 M, p, zero_vector(M, p), inverse_retract(M, p, p);
@@ -299,7 +299,9 @@ function Manifolds.test_manifold(
 
     parallel_transport && Manifolds.test_parallel_transport(
         M, pts;
-        to = parallel_transport_to, direction = parallel_transport_direction, mutating = is_mutating,
+        to = parallel_transport_to,
+        direction = parallel_transport_direction,
+        mutating = is_mutating,
     )
 
     Test.@testset "(inverse &) retraction tests" begin # COV_EXCL_LINE
@@ -311,7 +313,7 @@ function Manifolds.test_manifold(
                 Test.@test isapprox(
                     M, p, Manifolds.retract_fused(M, p, X, 0, retr_method);
                     atol = epsx * retraction_atol_multiplier,
-                    rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0
+                    rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0,
                 )
                 if is_mutating
                     new_pt = allocate(p)
@@ -340,7 +342,7 @@ function Manifolds.test_manifold(
                 Test.@test isapprox(
                     M, p, zero_vector(M, p), X;
                     atol = epsx * retraction_atol_multiplier,
-                    rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0
+                    rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0,
                 )
                 if (test_inplace && is_mutating)
                     Y = copy(M, p, X)
@@ -348,7 +350,7 @@ function Manifolds.test_manifold(
                     Test.@test isapprox(
                         M, p, zero_vector(M, p), Y;
                         atol = epsx * retraction_atol_multiplier,
-                        rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0
+                        rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0,
                     )
                 end
             end
@@ -479,7 +481,7 @@ function Manifolds.test_manifold(
                     Test.@test is_vector(M, pts32, v1t2; atol = tvatol, error = :warn)
                 test_to && Test.@test isapprox(
                     M, pts[1], vector_transport_to(M, pts[1], X1, pts[1], vtm), X1;
-                    atol = tvatol
+                    atol = tvatol,
                 )
                 test_dir && Test.@test isapprox(
                     M, pts[1], vector_transport_direction(M, pts[1], X1, zero_vector(M, pts[1]), vtm), X1;
@@ -553,9 +555,7 @@ function Manifolds.test_manifold(
                 Xb = get_coordinates(M, p, X1, btype)
 
                 Test.@test get_coordinates(M, p, X1, b) ≈ Xb
-                Test.@test isapprox(
-                    M, p, get_vector(M, p, Xb, b), get_vector(M, p, Xb, btype)
-                )
+                Test.@test isapprox(M, p, get_vector(M, p, Xb, b), get_vector(M, p, Xb, btype))
             end
         end
     end
