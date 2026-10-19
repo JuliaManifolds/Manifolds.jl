@@ -1058,7 +1058,6 @@ provide weights `w` and/or a precomputed
 [`mean`](@ref mean(::AbstractManifold, args...)) `m`.
 """
 function StatsBase.kurtosis(M::AbstractManifold, x::AbstractVector, w::AbstractWeights)
-    m, v = mean_and_var(M, x, w; corrected = false)
     return kurtosis(M, x, w, mean(M, x, w))
 end
 function StatsBase.kurtosis(M::AbstractManifold, x::AbstractVector, w::AbstractWeights, m)

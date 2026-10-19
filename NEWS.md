@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `riemann_tensor`, `sectional_curvature`, `sectional_curvature_max` and `sectional_curvature_min` on `SymmetricPositiveDefinite` with the `LogEuclideanMetric` return zero.
 * `rand` generates random points on the `SymplecticGrassmann` manifold.
 * `is_flat` for the `SymplecticGrassmann` manifold.
+* `project` onto `HeisenbergMatrices` and onto their tangent spaces.
 
 ### Changed
 

@@ -189,6 +189,79 @@ Return the dimension of [`HeisenbergMatrices`](@ref)`(n)`, which is equal to ``2
 manifold_dimension(M::HeisenbergMatrices) = 2 * get_parameter(M.size)[1] + 1
 
 @doc raw"""
+    project(M::HeisenbergMatrices, p)
+
+Project the matrix `p` onto the [`HeisenbergMatrices`](@ref) `M`, orthogonally in the Frobenius
+inner product of the embedding.
+
+The points of `M` are the matrices ``I_{n+2} + X`` with ``X`` in the subspace ``T`` of matrices
+that vanish outside the positions ``(1,j)``, ``j=2,\dots,n+2``, and ``(i,n+2)``, ``i=2,\dots,n+1``,
+of ``\mathbf{a}``, ``c`` and ``\mathbf{b}``. The matrices ``E_{ij}`` with a one at one of these
+positions and zeros elsewhere form an orthonormal basis of ``T``, so the orthogonal projection onto
+``T`` is ``P_T(X) = \sum_{(i,j)} X_{ij}E_{ij}`` by 6.57(i) in [Axler:2024](@cite). By 6.61 in
+[Axler:2024](@cite), applied to ``p - I_{n+2}``, the closest point to `p` is
+``I_{n+2} + P_T(p - I_{n+2})``, and since ``P_T(I_{n+2}) = 0`` this is
+
+```math
+\operatorname{proj}_{\mathcal M}(p) = I_{n+2} + P_T(p) = \begin{bmatrix} 1 & \mathbf{a} & c \\
+\mathbf{0}_n & I_n & \mathbf{b} \\
+0 & \mathbf{0}_n^\mathrm{T} & 1 \end{bmatrix},
+```
+
+where ``\mathbf{a} = (p_{1,2},\dots,p_{1,n+1})``, ``c = p_{1,n+2}`` and
+``\mathbf{b} = (p_{2,n+2},\dots,p_{n+1,n+2})^\mathrm{T}``.
+"""
+project(::HeisenbergMatrices, ::Any)
+
+function project!(M::HeisenbergMatrices, q, p)
+    n = get_parameter(M.size)[1]
+    # a, b and c are already in place when q is p
+    if q !== p
+        copyto!(view(q, 1, 2:(n + 2)), view(p, 1, 2:(n + 2)))
+        copyto!(view(q, 2:(n + 1), n + 2), view(p, 2:(n + 1), n + 2))
+    end
+    # the remaining entries are the lower left block and the corners q[1, 1] and q[n+2, n+2]
+    fill!(view(q, 2:(n + 2), 1:(n + 1)), 0)
+    copyto!(view(q, 2:(n + 1), 2:(n + 1)), I)
+    q[1, 1] = 1
+    q[n + 2, n + 2] = 1
+    return q
+end
+
+@doc raw"""
+    project(M::HeisenbergMatrices, p, X)
+
+Project the matrix `X` onto the tangent space at `p` of the [`HeisenbergMatrices`](@ref) `M`,
+orthogonally in the Frobenius inner product of the embedding.
+
+The tangent space ``T_p\mathcal M`` consists of the matrices that vanish outside the positions
+``(1,j)``, ``j=2,\dots,n+2``, and ``(i,n+2)``, ``i=2,\dots,n+1``, of ``\mathbf{a}``, ``c`` and
+``\mathbf{b}``. The matrices ``E_{ij}`` with a one at one of these positions and zeros elsewhere
+form an orthonormal basis of ``T_p\mathcal M``, so by 6.57(i) in [Axler:2024](@cite)
+
+```math
+\operatorname{proj}_p(X) = \sum_{(i,j)} ⟨X, E_{ij}⟩E_{ij} = \sum_{(i,j)} X_{ij}E_{ij},
+```
+
+that is, the entries of `X` at these positions are kept and all other entries are set to zero.
+"""
+project(::HeisenbergMatrices, ::Any, ::Any)
+
+function project!(M::HeisenbergMatrices, Y, p, X)
+    n = get_parameter(M.size)[1]
+    # a, b and c are already in place when Y is X
+    if Y !== X
+        copyto!(view(Y, 1, 2:(n + 2)), view(X, 1, 2:(n + 2)))
+        copyto!(view(Y, 2:(n + 1), n + 2), view(X, 2:(n + 1), n + 2))
+    end
+    # the remaining entries are the lower left block and the corners Y[1, 1] and Y[n+2, n+2]
+    fill!(view(Y, 2:(n + 2), 1:(n + 1)), 0)
+    Y[1, 1] = 0
+    Y[n + 2, n + 2] = 0
+    return Y
+end
+
+@doc raw"""
     Random.rand(M::HeisenbergMatrices; vector_at = nothing, σ::Real=1.0)
 
 If `vector_at` is `nothing`, return a random point on the [`HeisenbergMatrices`](@ref) `M`

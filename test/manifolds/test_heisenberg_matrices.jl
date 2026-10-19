@@ -88,4 +88,18 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
         @test is_vector(M2, p, X)
         @test get_coordinates(M2, p, X, DefaultOrthonormalBasis()) == c
     end
+
+    @testset "project for n = 2" begin
+        M2 = HeisenbergMatrices(2)
+        A = reshape(collect(1.0:16.0), 4, 4) ./ 7
+        # W marks the entries a, b and c
+        W = [0.0 1.0 1.0 1.0; 0.0 0.0 0.0 1.0; 0.0 0.0 0.0 1.0; 0.0 0.0 0.0 0.0]
+        p = project(M2, A)
+        @test p == I + W .* A
+        @test project(M2, p, A) == W .* A
+        q = copy(A)
+        @test project!(M2, q, q) == p
+        Y = copy(A)
+        @test project!(M2, Y, p, Y) == W .* A
+    end
 end
