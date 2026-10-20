@@ -46,22 +46,17 @@ the same subspace).
 Points can also be represented as orthogonal projectors, where
 
 ```math
-\operatorname{Gr}(n,k) := \bigl\{ p \in \mathbb R^{n×n} : p = p^{\mathrm{T}}, p^2 = p, \operatorname{rank}(p) = k\},
+\operatorname{Gr}(n,k) := \bigl\{ p \in \mathbb 𝔽^{n×n} : p = p^{\mathrm{H}, p^2 = p, \operatorname{rank}(p) = k\},
 ```
 
 with tangent space
 
 ```math
 T_p\mathrm{Gr}(n,k) = \bigl\{
-X ∈ \mathbb R^{n×n} : X=X^{\mathrm{T}} \text{ and } X = pX+Xp \bigr\},
+X ∈ \mathbb 𝔽^{n×n} : X=X^{\mathrm{H}} \text{ and } X = pX+Xp \bigr\},
 ```
 
 see also [`ProjectorPoint`](@ref) and [`ProjectorTangentVector`](@ref).
-
-The two sets above are those for ``𝔽 = ℝ``. For ``𝔽 = ℂ`` the points are the Hermitian
-projectors ``p ∈ ℂ^{n×n}`` with ``p = p^{\mathrm{H}}``, ``p^2 = p`` and ``\operatorname{rank}(p) = k``,
-see Section 1.2, p. 9, of [HelmkeMoore:1994](@cite), and the tangent vectors are the
-``X ∈ ℂ^{n×n}`` with ``X = X^{\mathrm{H}}`` and ``X = pX+Xp``.
 
 The manifold is named after
 [Hermann G. Graßmann](https://en.wikipedia.org/wiki/Hermann_Grassmann) (1809-1877).
