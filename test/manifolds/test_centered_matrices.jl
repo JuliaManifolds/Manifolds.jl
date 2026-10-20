@@ -3,6 +3,11 @@ using Manifolds, Random, Test
 Test.@testset "Centered Matrices" begin
     Test.@test_throws DomainError CenteredMatrices(0, 2)
 
+    Test.@testset "curvature bounds" begin
+        Test.@test sectional_curvature_max(CenteredMatrices(3, 2)) === 0.0
+        Test.@test sectional_curvature_min(CenteredMatrices(3, 2)) === 0.0
+    end
+
     Test.@testset "tangent vectors of any length" begin
         N = CenteredMatrices(3, 2)
         p = [1.0 2.0; -3.0 0.0; 2.0 -2.0]

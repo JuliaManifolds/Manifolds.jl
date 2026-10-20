@@ -506,6 +506,38 @@ representation_size(::Circle) = ()
 Base.show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
 
 @doc raw"""
+    riemann_tensor(M::Circle, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on the [`Circle`](@ref) `M`.
+Its value is always the zero tangent vector, since `M` is flat.
+"""
+riemann_tensor(::Circle, p, X, Y, Z)
+riemann_tensor(::Circle, p, X::Number, Y, Z) = zero(X)
+
+riemann_tensor!(::Circle, Xresult, p, X, Y, Z) = fill!(Xresult, 0)
+
+@doc raw"""
+    sectional_curvature(M::Circle, p, X, Y)
+
+Return the sectional curvature 0 of the [`Circle`](@ref) `M`, which is flat.
+"""
+sectional_curvature(::Circle, p, X, Y) = 0.0
+
+@doc raw"""
+    sectional_curvature_max(M::Circle)
+
+Return the upper bound 0 of the sectional curvature of the [`Circle`](@ref) `M`, which is flat.
+"""
+sectional_curvature_max(::Circle) = 0.0
+
+@doc raw"""
+    sectional_curvature_min(M::Circle)
+
+Return the lower bound 0 of the sectional curvature of the [`Circle`](@ref) `M`, which is flat.
+"""
+sectional_curvature_min(::Circle) = 0.0
+
+@doc raw"""
     sym_rem(x,[T=π])
 
 Compute symmetric remainder of `x` with respect to the interall 2*`T`, i.e.

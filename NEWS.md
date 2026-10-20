@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `is_flat` for the `SymplecticGrassmann` manifold.
 * `project` onto `HeisenbergMatrices` and onto their tangent spaces.
 * `project` onto the tangent spaces of `InvertibleMatrices`.
+* `riemann_tensor`, `sectional_curvature`, `sectional_curvature_max` and `sectional_curvature_min` on `HamiltonianMatrices`, `InvertibleMatrices`, `HeisenbergMatrices`, `CholeskySpace`, `Circle` and `SymmetricPositiveDefinite` under the `LogCholeskyMetric`, the last two also on `SymmetricMatrices`, `SkewHermitianMatrices` and `CenteredMatrices`.
 * `project(M, p)` projects a point onto the hyperboloid of the `Hyperbolic` space.
 
 ### Changed

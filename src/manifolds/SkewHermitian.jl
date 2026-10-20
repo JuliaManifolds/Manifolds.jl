@@ -283,6 +283,24 @@ function Base.show(io::IO, M::SkewSymmetricMatrices{Tuple{Int}})
 end
 
 @doc raw"""
+    sectional_curvature_max(M::SkewHermitianMatrices)
+
+Return the upper bound 0 of the sectional curvature of [`SkewHermitianMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_max(::SkewHermitianMatrices)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::SkewHermitianMatrices)
+
+Return the lower bound 0 of the sectional curvature of [`SkewHermitianMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_min(::SkewHermitianMatrices)
+    return 0.0
+end
+
+@doc raw"""
     Y = Weingarten(M::SkewSymmetricMatrices, p, X, V)
     Weingarten!(M::SkewSymmetricMatrices, Y, p, X, V)
 

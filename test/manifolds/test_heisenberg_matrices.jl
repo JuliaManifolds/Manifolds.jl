@@ -80,6 +80,13 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
         Dict(get_embedding => Euclidean(3, 3; parameter = :field), repr => "HeisenbergMatrices(1; parameter=:field)")
     )
 
+    @testset "curvature" begin
+        @test riemann_tensor(M, p1, X1, X2, X3) == zeros(3, 3)
+        @test sectional_curvature(M, p1, X1, X2) === 0.0
+        @test sectional_curvature_max(M) === 0.0
+        @test sectional_curvature_min(M) === 0.0
+    end
+
     @testset "get_vector for n = 2" begin
         M2 = HeisenbergMatrices(2)
         p = Matrix{Float64}(I, 4, 4)

@@ -41,6 +41,12 @@ include("../header.jl")
         @test_throws DomainError is_point(M, ones(4, 4), true)
         @test_throws DomainError is_vector(M, p, ones(4, 4), true, true)
     end
+    @testset "curvature" begin
+        @test riemann_tensor(M, p, p, q, p) == zeros(4, 4)
+        @test sectional_curvature(M, p, p, q) === 0.0
+        @test sectional_curvature_max(M) === 0.0
+        @test sectional_curvature_min(M) === 0.0
+    end
     @testset "Basics" begin
         @test repr(M) == "HamiltonianMatrices(4, ℝ)"
         @test repr(Mf) == "HamiltonianMatrices(4, ℝ; parameter=:field)"

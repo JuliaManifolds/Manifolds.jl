@@ -285,6 +285,14 @@ using ManifoldDiff, Manifolds, Random, StaticArrays, Test, ManifoldsBase
         @test get_vector(M, [1.0], [2.0]) == [2.0]
         @test get_vector(M, Scalar(1.0), SA[2.0]) isa SArray
     end
+    @testset "curvature" begin
+        @test riemann_tensor(M, 0.5, 1.0, 2.0, 2.0) === 0.0
+        @test riemann_tensor(M, fill(0.5), fill(1.0), fill(2.0), fill(2.0)) == fill(0.0)
+        @test riemann_tensor(Circle(ℂ), 1.0im, 0.5 + 0.0im, 1.0 + 0.0im, 1.0 + 0.0im) === 0.0 + 0.0im
+        @test sectional_curvature(M, 0.5, 1.0, 2.0) === 0.0
+        @test sectional_curvature_max(M) === 0.0
+        @test sectional_curvature_min(M) === 0.0
+    end
     @testset "Cotangent vectors" begin
         rrcv = Manifolds.RieszRepresenterCotangentVector(M, 0.0, 1.0)
         @test flat(M, 0.0, 1.0) == rrcv

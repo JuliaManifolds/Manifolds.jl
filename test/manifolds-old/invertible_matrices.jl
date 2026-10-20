@@ -25,6 +25,11 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
         @test embed(M, A, A) === A
         @test manifold_dimension(M) == 9
         @test Weingarten(M, A, A, A) == zero(A)
+        @test riemann_tensor(M, A, A, B, A) == zero(A)
+        @test sectional_curvature(M, A, A, B) === 0.0
+        @test sectional_curvature(Mc, Ac, Ac, im .* Ac) === 0.0
+        @test sectional_curvature_max(M) === 0.0
+        @test sectional_curvature_min(M) === 0.0
         @test Weingarten!(M, similar(A), A, A, A) == zero(A)
 
         @test is_point(M, rand(M))

@@ -37,6 +37,8 @@ include("../header.jl")
         )
         @test manifold_dimension(M) == 6
         @test manifold_dimension(M_complex) == 9
+        @test sectional_curvature_max(M) === 0.0
+        @test sectional_curvature_min(M) === 0.0
         @test A_sym2 == project!(M, A_sym, A_sym)
         @test A_sym2 == project(M, A_sym, A_sym)
         @test project(M, A) == [1 3 5; 3 5 7; 5 7 9] # the point projection symmetrizes

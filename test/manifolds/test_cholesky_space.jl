@@ -58,6 +58,12 @@ using Manifolds, Test, LinearAlgebra
         @test norm(c) ≈ norm(M, p2, W)
         @test get_vector(M, p2, c, DefaultOrthonormalBasis()) ≈ W
     end
+    @testset "curvature" begin
+        @test riemann_tensor(M, p2, X1, X2, X1) == zeros(3, 3)
+        @test sectional_curvature(M, p2, X1, X2) === 0.0
+        @test sectional_curvature_max(M) === 0.0
+        @test sectional_curvature_min(M) === 0.0
+    end
     @testset "parallel transport is an isometry and keeps the strictly lower part" begin
         W = [1.0 0.0 0.0; 2.0 3.0 0.0; -1.0 0.5 2.0]
         Wt = parallel_transport_to(M, p2, W, p3)

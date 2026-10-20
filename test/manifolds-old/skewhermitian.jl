@@ -44,6 +44,8 @@ end
         )
         @test manifold_dimension(M) == 3
         @test manifold_dimension(M_complex) == 9
+        @test sectional_curvature_max(M) === 0.0
+        @test sectional_curvature_min(M) === 0.0
         @test A_skewsym2 == project!(M, A_skewsym, A_skewsym)
         @test A_skewsym2 == project(M, A_skewsym, A_skewsym)
         @test project(M, A) == [0 -1 -2; 1 0 -1; 2 1 0] # the point projection antisymmetrizes

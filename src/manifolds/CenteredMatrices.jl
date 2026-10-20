@@ -237,6 +237,24 @@ function Base.show(io::IO, M::CenteredMatrices{ğ”½, Tuple{Int, Int}}) where {ğ
 end
 
 @doc raw"""
+    sectional_curvature_max(M::CenteredMatrices)
+
+Return the upper bound 0 of the sectional curvature of [`CenteredMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_max(::CenteredMatrices)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::CenteredMatrices)
+
+Return the lower bound 0 of the sectional curvature of [`CenteredMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_min(::CenteredMatrices)
+    return 0.0
+end
+
+@doc raw"""
     Y = Weingarten(M::CenteredMatrices, p, X, V)
     Weingarten!(M::CenteredMatrices, Y, p, X, V)
 

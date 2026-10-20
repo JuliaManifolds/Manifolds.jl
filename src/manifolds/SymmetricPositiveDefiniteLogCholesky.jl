@@ -193,3 +193,57 @@ function parallel_transport_to!(
     )
     return tangent_cholesky_to_tangent_spd!(y, Y)
 end
+
+@doc raw"""
+    riemann_tensor(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at `p` on the [`SymmetricPositiveDefinite`](@ref) matrices `M` with the [`LogCholeskyMetric`](@ref).
+Its value is always the zero tangent vector, since `M` is flat.
+"""
+riemann_tensor(
+    M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, p, X, Y, Z,
+)
+
+function riemann_tensor!(
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
+        Xresult,
+        p,
+        X,
+        Y,
+        Z,
+    )
+    return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, X, Y)
+
+Return the sectional curvature 0 of the [`SymmetricPositiveDefinite`](@ref) matrices `M` with the [`LogCholeskyMetric`](@ref), which is flat.
+"""
+function sectional_curvature(
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, p, X, Y,
+    )
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_max(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric})
+
+Return the upper bound 0 of the sectional curvature of the [`SymmetricPositiveDefinite`](@ref) matrices `M` with the [`LogCholeskyMetric`](@ref), which is flat.
+"""
+function sectional_curvature_max(
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
+    )
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric})
+
+Return the lower bound 0 of the sectional curvature of the [`SymmetricPositiveDefinite`](@ref) matrices `M` with the [`LogCholeskyMetric`](@ref), which is flat.
+"""
+function sectional_curvature_min(
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
+    )
+    return 0.0
+end

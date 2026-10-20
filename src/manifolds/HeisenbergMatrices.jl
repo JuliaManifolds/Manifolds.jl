@@ -295,6 +295,45 @@ function Random.rand!(
     return pX
 end
 
+@doc raw"""
+    riemann_tensor(M::HeisenbergMatrices, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`HeisenbergMatrices`](@ref) `M`.
+Its value is always the zero tangent vector, since `M` is flat.
+"""
+riemann_tensor(M::HeisenbergMatrices, p, X, Y, Z)
+
+function riemann_tensor!(::HeisenbergMatrices, Xresult, p, X, Y, Z)
+    return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(M::HeisenbergMatrices, p, X, Y)
+
+Return the sectional curvature 0 of [`HeisenbergMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature(::HeisenbergMatrices, p, X, Y)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_max(M::HeisenbergMatrices)
+
+Return the upper bound 0 of the sectional curvature of [`HeisenbergMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_max(::HeisenbergMatrices)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::HeisenbergMatrices)
+
+Return the lower bound 0 of the sectional curvature of [`HeisenbergMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_min(::HeisenbergMatrices)
+    return 0.0
+end
+
 function Base.show(io::IO, ::HeisenbergMatrices{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "HeisenbergMatrices($(n))")
 end

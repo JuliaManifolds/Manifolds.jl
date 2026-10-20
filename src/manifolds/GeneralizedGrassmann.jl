@@ -153,13 +153,21 @@ end
 Compute the Riemannian distance on [`GeneralizedGrassmann`](@ref)
 manifold `M```= \mathrm{Gr}(n,k,B)``.
 
-The distance is given by
+The distance is the arc length
 ````math
-d_{\mathrm{Gr}(n,k,B)}(p,q) = \operatorname{norm}(\log_p(q)).
+d_{\mathrm{Gr}(n,k,B)}(p,q) = \operatorname{norm}(\log_p(q)) = \Bigl(\sum_{i=1}^k θ_i^2\Bigr)^{1/2}
 ````
+of the principal angles ``θ_1,…,θ_k`` between the spans of ``B^{1/2}p`` and ``B^{1/2}q``,
+see Sections 4.3 and 4.5 of [EdelmanAriasSmith:1998](@cite); these are the principal angles between the spans
+of `p` and `q` in the inner product given by ``B``, see Theorem 4.2 of [KnyazevArgentati:2002](@cite).
+They are computed with Algorithm 3.2 there, applied to ``B^{1/2}p`` and ``B^{1/2}q``: for the singular value
+decomposition ``p^{\mathrm{H}}Bq = YΣZ^{\mathrm{H}}``, ``Σ = \operatorname{diag}(σ_1,…,σ_k)``, the angles with
+``σ_i ≤ \frac{\sqrt{2}}{2}`` are ``θ_i = \arccos(σ_i)``, and the others are ``θ_i = \arcsin(\min\{μ_i, 1\})``, where
+``μ_i`` are the singular values of ``B^{1/2}(R - p(p^{\mathrm{H}}BR))`` and the columns of ``R`` are the columns
+of ``qZ`` that belong to these other ``σ_i``. Algorithm 3.2 takes the arc sine also for ``σ_i = \frac{\sqrt{2}}{2}``,
+where both formulas give ``\frac{π}{4}``.
 """
 function distance(M::GeneralizedGrassmann, p, q)
-    # principal angles in the inner product of B, Knyazev, Argentati, 2002, Algorithm 3.2
     F = svd(p' * M.B * q)
     s = min.(F.S, 1)
     small = s .> sqrt(2) / 2

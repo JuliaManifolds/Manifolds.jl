@@ -23,6 +23,15 @@ include("../header.jl")
     @test injectivity_radius(M1, one(zeros(3, 3)), ExponentialRetraction()) == Inf
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M2, one(zeros(3, 3)))
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M3, one(zeros(3, 3)))
+    @testset "curvature of the log-Cholesky metric" begin
+        p = [2.0 1.0 0.0; 1.0 2.0 0.0; 0.0 0.0 1.0]
+        X = [1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
+        Y = [0.0 1.0 0.0; 1.0 0.0 0.0; 0.0 0.0 0.0]
+        @test riemann_tensor(M3, p, X, Y, X) == zero(X)
+        @test sectional_curvature(M3, p, X, Y) === 0.0
+        @test sectional_curvature_max(M3) === 0.0
+        @test sectional_curvature_min(M3) === 0.0
+    end
     metrics = [M1, M2, M3, M5, M6]
     types = [Matrix{Float64}, MMatrix{3, 3, Float64, 9}, SPDPoint]
 
