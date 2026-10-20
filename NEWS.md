@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `is_flat` for the `SymplecticGrassmann` manifold.
 * `project` onto `HeisenbergMatrices` and onto their tangent spaces.
 * `project` onto the tangent spaces of `InvertibleMatrices`.
+* `project(M, p)` projects a point onto the hyperboloid of the `Hyperbolic` space.
 
 ### Changed
 
@@ -43,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * embedding of the `MultinomialSymmetricPositiveDefinite` manifold is changed from `MultinomialMatrices` to `MultinomialSymmetric`, and is marked as `IsometricallyEmbeddedManifoldType` instead of `EmbeddedManifoldType`. Consequently, `inner`, `norm` and `riemannian_gradient` are now also available.
 * `project` onto the tangent space of `MultinomialMatrices` is now orthogonal with respect to the Fisher–Rao metric instead of subtracting the mean of each column.
 * Basis-based methods of `christoffel_symbols_first`, `christoffel_symbols_second`, `christoffel_symbols_second_jacobian`, `det_local_metric`, `einstein_tensor`, `gaussian_curvature`, `inverse_local_metric`, `local_metric`, `local_metric_jacobian`, `log_local_metric_density`, `ricci_curvature`, `ricci_tensor`, `riemann_tensor` and `solve_exp_ode` (taking a point `p` and an `AbstractBasis` `B`) are deprecated. Use their chart-based variants taking an atlas `A`, chart index `i` and parameters `a` instead, for example `ricci_curvature(M, A, i, a)`; `solve_exp_ode` is replaced by `solve_chart_exp_ode`, while `local_metric_jacobian` and `christoffel_symbols_second_jacobian` have no direct replacements and are covered by the chart-based `christoffel_symbols_first`, `christoffel_symbols_second` and `riemann_tensor`.
+* The default retraction of the `Hyperbolic` space in the hyperboloid model is the `StabilizedRetraction` of the exponential map, which projects onto the hyperboloid afterwards.
 
 ### Fixed
 
