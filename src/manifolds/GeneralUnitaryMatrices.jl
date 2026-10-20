@@ -690,8 +690,8 @@ inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
     inverse_retract(M::OrthogonalMatrices, p, q, ::PolarInverseRetraction)
 
 Compute a vector `X` (as an element of the Lie algebra) from the tangent space ``T_p\mathcal M``
-of the point `p` on the real [`GeneralUnitaryMatrices`](@ref) manifold `M`, for example the
-[`Rotations`](@ref) or the [`OrthogonalMatrices`](@ref), with which the point `q` can be reached by the
+of the point `p` on the real [`GeneralUnitaryMatrices`](@ref) manifold `M`. This covers the
+[`Rotations`](@ref) and the [`OrthogonalMatrices`](@ref), and with `X` the point `q` is reached by the
 [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) from the point `p` after time 1.
 
 The formula reads
@@ -737,8 +737,8 @@ end
     inverse_retract(M::OrthogonalMatrices, p, q, ::QRInverseRetraction)
 
 Compute a vector `X` (as an element of the Lie algebra) from the tangent space ``T_p\mathcal M``
-of the point `p` on the real [`GeneralUnitaryMatrices`](@ref) manifold `M`, for example the
-[`Rotations`](@ref) or the [`OrthogonalMatrices`](@ref), with which the point `q` can be reached by the
+of the point `p` on the real [`GeneralUnitaryMatrices`](@ref) manifold `M`. This covers the
+[`Rotations`](@ref) and the [`OrthogonalMatrices`](@ref), and with `X` the point `q` is reached by the
 [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) from the point `p` after time 1.
 
 The QR retraction does not leave the connected component of `p`, since
@@ -963,7 +963,7 @@ end
     parallel_transport_direction(M::GeneralUnitaryMatrices, p, X, d)
 
 Compute the parallel transport of `X` from `p` in direction `d` on the
-[`GeneralUnitaryMatrices`](@ref) `M`, that is on the [`Rotations`](@ref), the
+[`GeneralUnitaryMatrices`](@ref) `M`. This covers the [`Rotations`](@ref), the
 [`OrthogonalMatrices`](@ref), the [`UnitaryMatrices`](@ref) and the [`SpecialUnitaryMatrices`](@ref),
 with tangent vectors represented in the Lie algebra. The formula, provided in
 [Rentmeesters:2011](@cite) for the rotations, reads

@@ -173,7 +173,7 @@ end
 @doc raw"""
     retract(M::MultinomialSymmetricPositiveDefinite, p, X, ::ProjectionRetraction)
 
-Compute the projection retraction of the [`MultinomialSymmetric`](@ref) matrices, which projects
+Compute the projection retraction of the [`MultinomialSymmetric`](@ref) matrices. It projects
 ``p⊙\exp(X⨸p)`` onto the doubly stochastic matrices, where ``⊙,⨸`` are elementwise
 multiplication and division and ``\exp`` is the elementwise exponential.
 The result is positive definite only for tangent vectors `X` small enough,

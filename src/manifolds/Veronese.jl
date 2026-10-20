@@ -170,12 +170,9 @@ end
 
 @doc raw"""
     check_size(M::Veronese, p)
-    check_size(M::Veronese, p, X)
 
-For `M = Veronese(N, D)`, check the sizes of a stored point `p = ([λ], x)` and,
-optionally, of a tangent vector `X = ([ν], u)`. Both use two-component tuple
-representations with component sizes `(1,)` and `(N,)`, corresponding
-respectively to their radial and spherical parts.
+For `M = Veronese(N, D)`, check the size of a stored point `p = ([λ], x)`, a two-component
+tuple with component sizes `(1,)` and `(N,)` for its radial and spherical part.
 """
 function check_size(M::Veronese, p)
     p_size = only.(size.(p))
@@ -191,6 +188,13 @@ function check_size(M::Veronese, p)
 
     return nothing
 end
+@doc raw"""
+    check_size(M::Veronese, p, X)
+
+For `M = Veronese(N, D)`, check the sizes of a stored point `p = ([λ], x)` and of a tangent
+vector `X = ([ν], u)` at `p`. Both are two-component tuples with component sizes `(1,)` and
+`(N,)` for their radial and spherical parts.
+"""
 function check_size(M::Veronese, p, X)
     p_size = only.(size.(p))
     X_size = only.(size.(X))
@@ -617,7 +621,7 @@ end
     isapprox(M::Veronese, p, q; kwargs...)
 
 Test whether two points `p`, `q` on the [`Veronese`](@ref) manifold `M` are (approximately) the same,
-that is whether ``d_{\mathcal M}(p,q) \approx 0`` with the classical `isapprox`; if one of them is not
+that is whether ``d_{\mathcal M}(p,q) \approx 0`` with the classical `isapprox`. If one of them is not
 a point on `M`, their components are compared instead. The `kwargs...` are passed on to this;
 `atol` defaults to `sqrt(max_eps(p[1], p[2], q[1], q[2]))`.
 """

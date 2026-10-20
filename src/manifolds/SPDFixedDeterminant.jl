@@ -175,7 +175,7 @@ end
 
 @doc raw"""
     rand(M::SPDFixedDeterminant; vector_at=nothing, σ::Real=1.0)
-    rand!(M::SPDFixedDeterminant, pX; vector_at=nothing, σ::Real=1.0)
+    rand!(rng::AbstractRNG, M::SPDFixedDeterminant, pX; vector_at=nothing, σ::Real=1.0)
 
 Draw a random point, or a random tangent vector at `vector_at`, on the
 [`SymmetricPositiveDefinite`](@ref) matrices and project it onto `M`.

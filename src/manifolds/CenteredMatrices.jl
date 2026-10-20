@@ -193,7 +193,7 @@ project!(::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X, dims = 1))
 
 @doc raw"""
     rand(M::CenteredMatrices; vector_at=nothing, σ::Real=1.0)
-    rand!(M::CenteredMatrices, pX; vector_at=nothing, σ::Real=1.0)
+    rand!(rng::AbstractRNG, M::CenteredMatrices, pX; vector_at=nothing, σ::Real=1.0)
 
 Project a matrix of independent normally distributed entries with standard deviation `σ`
 onto `M`, which yields a random point as well as a random tangent vector at `vector_at`.

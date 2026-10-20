@@ -168,7 +168,7 @@ end
 
 @doc raw"""
     rand(M::Elliptope; vector_at=nothing, σ::Real=1.0)
-    rand!(M::Elliptope, pX; vector_at=nothing, σ::Real=1.0)
+    rand!(rng::AbstractRNG, M::Elliptope, pX; vector_at=nothing, σ::Real=1.0)
 
 Project a matrix of independent normally distributed entries with standard deviation `σ`
 onto `M`, or onto the tangent space at `vector_at`.
