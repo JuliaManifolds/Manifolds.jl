@@ -350,15 +350,19 @@ surface spanned by vectors `i`  and `j` from basis `B`.
 """
 function estimated_sectional_curvature_matrix(
         M::AbstractManifold, p, B::AbstractBasis;
-        r::Real = 1.0e-3, N_pts::Int = 10000,
+        r::Real = 1.0e-3, N::Int = 10000, N_pts::Union{Missing, Int} = missing,
     )
+    if !ismissing(N_pts)
+        @warn "The keyword `N_pts` of `estimated_sectional_curvature_matrix` is deprecated. Consider using `N` instead" maxlog = 1
+        N = N_pts
+    end
     V = get_vectors(M, p, get_basis(M, p, B))
-    N = length(V)
-    result = zeros(real(float(number_eltype(p))), N, N)
+    n = length(V)
+    result = zeros(real(float(number_eltype(p))), n, n)
     for (i, e_i) in enumerate(V)
         for (j, e_j) in enumerate(V)
             if i < j
-                result[i, j] = estimated_sectional_curvature(M, p, e_i, e_j; r = r, N = N_pts)
+                result[i, j] = estimated_sectional_curvature(M, p, e_i, e_j; r = r, N = N)
                 result[j, i] = result[i, j]
             end
         end

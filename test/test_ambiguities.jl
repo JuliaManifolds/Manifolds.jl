@@ -30,7 +30,7 @@ function has_type_in_signature(sig, T::Type)
 end
 
 @testset "Ambiguities" begin
-    if VERSION.prerelease == () && !Sys.iswindows() && VERSION < v"1.14.0"
+    if VERSION.prerelease == () && !Sys.iswindows()
         mbs = Test.detect_ambiguities(ManifoldsBase)
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
@@ -64,6 +64,6 @@ end
         # this test takes way too long to perform regularly
         # @test length(our_base_ambiguities()) <= 4
     else
-        @info "Skipping Ambiguity tests for pre-release versions"
+        @info "Skipping Ambiguity tests on pre-release versions and on Windows"
     end
 end

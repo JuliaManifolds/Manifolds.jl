@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+* `estimated_sectional_curvature_matrix` takes the number of points as the keyword `N`, as its docstring says; the keyword `N_pts` still works and issues a deprecation warning.
 * The default retraction and inverse retraction of `FixedRankMatrices` are `OrthographicRetraction` and `OrthographicInverseRetraction`.
 * `default_retraction_method` on the doubly stochastic multinomial manifolds is now the
 `ProjectionRetraction`.

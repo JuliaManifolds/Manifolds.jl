@@ -16,4 +16,13 @@ using Manifolds, Test
             @test (@test_logs (:warn, msg) match_mode = :any f(M, p, B)) == v
         end
     end
+
+    @testset "N_pts of estimated_sectional_curvature_matrix" begin
+        M = Sphere(2)
+        p = [1.0, 0.0, 0.0]
+        B = DefaultOrthonormalBasis()
+        msg = r"^The keyword `N_pts` of `estimated_sectional_curvature_matrix` is deprecated"
+        cm = Manifolds.estimated_sectional_curvature_matrix(M, p, B; r = 1.0e-3, N = 200)
+        @test (@test_logs (:warn, msg) Manifolds.estimated_sectional_curvature_matrix(M, p, B; r = 1.0e-3, N_pts = 200)) == cm
+    end
 end

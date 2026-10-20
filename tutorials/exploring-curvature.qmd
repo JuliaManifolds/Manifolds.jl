@@ -35,11 +35,11 @@ cm = sectional_curvature_matrix(M, p, DefaultOrthonormalBasis())
 
 We can verify that the curvature is consistent with an approximation based on the Bertrand–Diguet–Puiseux theorem, which relies only on an ONB, exponential map and distance calculation:
 ```{julia}
-cm_bdp = Manifolds.estimated_sectional_curvature_matrix(M, p, DefaultOrthonormalBasis(); r = 1.0e-3, N_pts = 100000)
+cm_bdp = Manifolds.estimated_sectional_curvature_matrix(M, p, DefaultOrthonormalBasis(); r = 1.0e-3, N = 100000)
 println(norm(cm - cm_bdp))
 ```
 
-This approximation converges quite slowly with `N_pts` and is prone to numerical errors at low values of `r` and large values of `N_pts`.
+This approximation converges quite slowly with `N` and is prone to numerical errors at low values of `r` and large values of `N`.
 
 You can also take the vectors from the basis and see what kind of planes they correspond to.
 It may be easier to see for the identity matrix as the base point.

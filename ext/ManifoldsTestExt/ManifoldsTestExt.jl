@@ -186,12 +186,12 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (embed_project in functions)
             approx_p = get(properties, :EmbeddedPoints, [points[1]])[1]
-            approx_X = get(properties, :EmbeddedVectors, [vectors[1]])[1]
+            approx_X = get(properties, :EmbeddedVectors, n_vectors ≥ 1 ? vectors : [missing])[1]
             Manifolds.Test.test_embed_project(
                 M, approx_p, approx_X;
                 available_functions = functions,
                 expected_point = points[1],
-                expected_vector = vectors[1],
+                expected_vector = n_vectors ≥ 1 ? vectors[1] : NoExpectation(),
                 test_aliased = aliased,
                 test_mutating = (embed_project! in functions) ? true : mutating,
                 atol = get(function_atols, embed_project, atol),
