@@ -58,6 +58,11 @@ X ∈ \mathbb R^{n×n} : X=X^{\mathrm{T}} \text{ and } X = pX+Xp \bigr\},
 
 see also [`ProjectorPoint`](@ref) and [`ProjectorTangentVector`](@ref).
 
+The two sets above are those for ``𝔽 = ℝ``. For ``𝔽 = ℂ`` the points are the Hermitian
+projectors ``p ∈ ℂ^{n×n}`` with ``p = p^{\mathrm{H}}``, ``p^2 = p`` and ``\operatorname{rank}(p) = k``,
+see Section 1.2, p. 9, of [HelmkeMoore:1994](@cite), and the tangent vectors are the
+``X ∈ ℂ^{n×n}`` with ``X = X^{\mathrm{H}}`` and ``X = pX+Xp``.
+
 The manifold is named after
 [Hermann G. Graßmann](https://en.wikipedia.org/wiki/Hermann_Grassmann) (1809-1877).
 
