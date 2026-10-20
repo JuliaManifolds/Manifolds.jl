@@ -391,6 +391,11 @@ end
         # not symmetric
         pF3 = ProjectorPoint([0.0 1.0 0.0; 0.0 1.0 0.0; 0.0 0.0 0.0])
         @test_throws DomainError is_point(M, pF3; error = :error)
+        # complex projectors are Hermitian, not symmetric
+        G = Grassmann(3, 1, ℂ)
+        pc = convert(ProjectorPoint, StiefelPoint(reshape([1.0, 1.0im, 0.0] ./ sqrt(2), 3, 1)))
+        @test is_point(G, pc; error = :error)
+        @test !is_point(G, ProjectorPoint([4 2im 0; 2im -1 0; 0 0 0] ./ 3))
 
         # not symmetric
         XF1 = ProjectorTangentVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 0.0 0.0])
