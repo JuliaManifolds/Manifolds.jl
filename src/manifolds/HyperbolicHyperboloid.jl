@@ -389,6 +389,18 @@ see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the
 """
 inner(M::Hyperbolic, p, X, Y)
 
+"""
+    default_retraction_method(M::Hyperbolic)
+
+The default retraction on the hyperboloid is usually the exponential map. However, since that map
+leaves the hyperboloid by rounding, which the logarithmic map at such a point enlarges, we use a
+stabilized version as default that projects onto the hyperboloid afterwards, see
+[`StabilizedRetraction`](@extref `ManifoldsBase.StabilizedRetraction`).
+"""
+default_retraction_method(::Hyperbolic) = StabilizedRetraction(ExponentialRetraction())
+default_retraction_method(::Hyperbolic, ::Type{<:PoincareBallPoint}) = ExponentialRetraction()
+default_retraction_method(::Hyperbolic, ::Type{<:PoincareHalfSpacePoint}) = ExponentialRetraction()
+
 function log!(M::Hyperbolic, X, p, q)
     d = distance(M, p, q)
     s = sinh(d)
@@ -409,6 +421,30 @@ end
 function minkowski_metric(a::HyperboloidTangentVector, b::HyperboloidTangentVector)
     return minkowski_metric(a.value, b.value)
 end
+
+@doc raw"""
+    project(M::Hyperbolic, p)
+
+Project the point `p` from the embedding onto the [`Hyperbolic`](@ref) space `M` in the
+hyperboloid model,
+
+````math
+\operatorname{proj}(p) = \frac{p}{\sqrt{-⟨p,p⟩_{\mathrm{M}}}},
+````
+
+where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding,
+the [`Lorentz`](@ref)ian manifold. This is the orthogonal projection with respect to that metric,
+since the normal space at a point ``q`` of the hyperboloid is spanned by ``q``,
+see Section 7.6 in [Boumal:2023](@cite).
+"""
+project(::Hyperbolic, ::Any)
+
+project!(::Hyperbolic, q, p) = (q .= p ./ sqrt(-minkowski_metric(p, p)))
+function project!(::Hyperbolic, q::HyperboloidPoint, p)
+    q.value .= p ./ sqrt(-minkowski_metric(p, p))
+    return q
+end
+project!(M::Hyperbolic, q::HyperboloidPoint, p::HyperboloidPoint) = project!(M, q, p.value)
 
 function project(::Hyperbolic, p::HyperboloidPoint, X)
     return HyperboloidTangentVector(X .+ minkowski_metric(p.value, X) .* p.value)

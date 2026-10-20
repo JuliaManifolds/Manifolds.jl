@@ -212,6 +212,7 @@ end
             Manifolds.test_manifold(
                 M,
                 pts,
+                test_project_point = is_plain_array || T == HyperboloidPoint,
                 test_project_tangent = is_plain_array || T == HyperboloidPoint,
                 test_musical_isomorphisms = is_plain_array,
                 test_default_vector_transport = true,
