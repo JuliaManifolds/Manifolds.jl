@@ -25,7 +25,9 @@ ManifoldsBase.@manifold_element_forwards ProjectorPoint value
 
 Check whether an orthogonal projector is a point from the [`Grassmann`](@ref)`(n,k)` manifold,
 i.e. the [`ProjectorPoint`](@ref) ``p ∈ \mathbb F^{n×n}``, ``\mathbb F ∈ \{\mathbb R, \mathbb C\}``
-has to fulfill ``p^{\mathrm{T}} = p``, ``p^2=p``, and ``\operatorname{rank} p = k`.
+has to fulfill ``p^{\mathrm{H}} = p``, ``p^2=p``, and ``\operatorname{rank} p = k``.
+Here ``⋅^{\mathrm{H}}`` denotes the conjugate transpose, which is the transpose for real matrices.
+For ``\mathbb F = \mathbb C`` these are the conditions in Section 1.2, p. 9, of [HelmkeMoore:1994](@cite).
 """
 function check_point(M::Grassmann, p::ProjectorPoint; kwargs...)
     n, k = get_parameter(M.size)
@@ -36,10 +38,10 @@ function check_point(M::Grassmann, p::ProjectorPoint; kwargs...)
             "The point $(p) is not equal to its square $c, so it does not lie on $M.",
         )
     end
-    if !isapprox(p.value, transpose(p.value); kwargs...)
+    if !isapprox(p.value, p.value'; kwargs...)
         return DomainError(
-            norm(p.value - transpose(p.value)),
-            "The point $(p) is not equal to its transpose, so it does not lie on $M.",
+            norm(p.value - p.value'),
+            "The point $(p) is not equal to its conjugate transpose, so it does not lie on $M.",
         )
     end
     k2 = rank(p.value; kwargs...)

@@ -69,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `project` onto the tangent space of the complex `SymmetricMatrices` returns the Hermitian part, so that its result is a tangent vector.
 * `rand` and `rand!` on the `Segre` manifold draw from a given random number generator.
 * `vector_transport_to` with `ProjectionTransport` is available on the `Segre` manifold with a `WarpedMetric`.
+* `is_point` on the complex `Grassmann` manifold accepts points in the projector representation and rejects projectors that are not Hermitian.
 * `check_point` and `check_vector` on a `FiberBundle` check the base part and the fiber part and report the errors of both.
 * `isapprox` for tangent vectors on a `FiberBundle` compares the base part as a tangent vector at the base point.
 * `is_point` on `FixedRankMatrices` accepts a plain matrix of rank `k` for every `k` and requires the rank to be exactly `k`, also for an `SVDMPoint`.
