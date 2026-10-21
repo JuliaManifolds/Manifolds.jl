@@ -11,7 +11,7 @@ where the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 # Constructor
 
-    InvertibleMatrices(n::Int, field::AbstractNumbers=ℝ)
+    InvertibleMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of ``n×n`` invertible matrices.
 """
@@ -20,6 +20,9 @@ struct InvertibleMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function InvertibleMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of invertible matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return InvertibleMatrices{field, typeof(size)}(size)
 end
@@ -56,20 +59,13 @@ embed(::InvertibleMatrices, p) = p
 embed(::InvertibleMatrices, p, X) = X
 
 function get_coordinates(
-        ::InvertibleMatrices{ℝ, <:Any},
-        p,
-        X,
-        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+        ::InvertibleMatrices{ℝ, <:Any}, p, X, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType}
     )
     return vec(X)
 end
 
 function get_coordinates!(
-        ::InvertibleMatrices{ℝ, <:Any},
-        Xⁱ,
-        p,
-        X,
-        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+        ::InvertibleMatrices{ℝ, <:Any}, Xⁱ, p, X, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType}
     )
     return copyto!(Xⁱ, X)
 end
@@ -87,21 +83,14 @@ function ManifoldsBase.get_embedding_type(::InvertibleMatrices)
 end
 
 function get_vector(
-        M::InvertibleMatrices{ℝ, <:Any},
-        p,
-        Xⁱ,
-        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+        M::InvertibleMatrices{ℝ, <:Any}, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType}
     )
     n = get_parameter(M.size)[1]
     return reshape(Xⁱ, n, n)
 end
 
 function get_vector!(
-        ::InvertibleMatrices{ℝ, <:Any},
-        X,
-        p,
-        Xⁱ,
-        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+        ::InvertibleMatrices{ℝ, <:Any}, X, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType}
     )
     return copyto!(X, Xⁱ)
 end
@@ -112,6 +101,14 @@ end
 Return true. [`InvertibleMatrices`](@ref) is a flat manifold.
 """
 is_flat(M::InvertibleMatrices) = true
+
+function get_coordinates_orthonormal!(M::InvertibleMatrices, c, p, X, N)
+    return get_coordinates_orthonormal!(get_embedding(M), c, p, X, N)
+end
+
+function get_vector_orthonormal!(M::InvertibleMatrices, X, p, c, N)
+    return get_vector_orthonormal!(get_embedding(M), X, p, c, N)
+end
 
 @doc raw"""
     manifold_dimension(M::InvertibleMatrices{n,𝔽})
@@ -124,10 +121,22 @@ function manifold_dimension(M::InvertibleMatrices{<:Any, 𝔽}) where {𝔽}
 end
 
 @doc raw"""
+    project(M::InvertibleMatrices, p, X)
+
+Project `X` onto the tangent space at `p` of the [`InvertibleMatrices`](@ref) `M`. Since the
+invertible matrices are an open subset of their embedding, the tangent space consists of all
+matrices, and the projection is the identity.
+"""
+project(::InvertibleMatrices, ::Any, ::Any)
+
+project!(::InvertibleMatrices, Y, p, X) = copyto!(Y, X)
+
+@doc raw"""
     Random.rand(M::InvertibleMatrices; vector_at=nothing, kwargs...)
 
 If `vector_at` is `nothing`, return a random point on the [`InvertibleMatrices`](@ref)
-manifold `M` by using `rand` in the embedding.
+manifold `M` by using `rand` in the embedding. The point is drawn again while the absolute
+value of its determinant is below the square root of the machine epsilon of its entries.
 
 If `vector_at` is not `nothing`, return a random tangent vector from the tangent space of
 the point `vector_at` on the [`InvertibleMatrices`](@ref) by using by using `rand` in the
@@ -136,17 +145,53 @@ embedding.
 rand(M::InvertibleMatrices; kwargs...)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::InvertibleMatrices,
-        pX;
-        vector_at = nothing,
-        kwargs...,
+        rng::AbstractRNG, M::InvertibleMatrices, pX;
+        vector_at = nothing, kwargs...,
     )
     rand!(rng, get_embedding(M), pX; kwargs...)
     if vector_at === nothing # for points ensure invertibility
         _ensure_nonzero_rng_determinant!(rng, get_embedding(M), pX; kwargs...)
     end
     return pX
+end
+
+@doc raw"""
+    riemann_tensor(M::InvertibleMatrices, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`InvertibleMatrices`](@ref) `M`.
+Its value is always the zero tangent vector, since `M` is flat.
+"""
+riemann_tensor(M::InvertibleMatrices, p, X, Y, Z)
+
+function riemann_tensor!(::InvertibleMatrices, Xresult, p, X, Y, Z)
+    return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(M::InvertibleMatrices, p, X, Y)
+
+Return the sectional curvature 0 of [`InvertibleMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature(::InvertibleMatrices, p, X, Y)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_max(M::InvertibleMatrices)
+
+Return the upper bound 0 of the sectional curvature of [`InvertibleMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_max(::InvertibleMatrices)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::InvertibleMatrices)
+
+Return the lower bound 0 of the sectional curvature of [`InvertibleMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_min(::InvertibleMatrices)
+    return 0.0
 end
 
 function Base.show(io::IO, ::InvertibleMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}

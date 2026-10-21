@@ -1,5 +1,5 @@
 ---
-title: Accurcay tests on the Hyperboloid
+title: Accuracy tests on the Hyperboloid
 ---
 
 
@@ -12,14 +12,16 @@ cd(@__DIR__)
 Pkg.activate("."); # for reproducibility use the local accuracy environment.
 ```
 
-In this small note we compare different implementations of several functions on the [Hyperbolic]().
-We compare the functions prior [PR #]() to vs those introduced therein.
+In this small note we compare different implementations of several functions on the
+[Hyperbolic](../manifolds/hyperbolic.md).
+We compare the functions prior to
+[PR #631](https://github.com/JuliaManifolds/Manifolds.jl/pull/631) to those introduced therein.
 We compare the previous version (always called `_1`) and the new version `_2`, where we leave out the manifold to indicate, that these are the local functions here.
 We compare this to the one given in `Manifolds.jl` at time of writing (which is the first one), on `BigFloat` on several scales of magnitudes.
 
 ```{julia}
 #| output: false
-using Manifolds, Random, NamedColors, Plots
+using Manifolds, Random, NamedColors, Plots, LinearAlgebra
 using Manifolds: minkowski_metric
 
 paul_tol = load_paul_tol()
@@ -43,6 +45,7 @@ Xbns = [norm(M, p, X) for X in Xbs]
 qbs = [exp(M, pb, Y) for Y in Xbs]
 Xs = [Float64.(X) for X in Xbs]
 qs = [Float64.(q) for q in qbs]
+Xns = [norm(M, p, Y) for Y in Xs]
 ```
 
 ## Distance
@@ -70,11 +73,15 @@ fig = plot(;
     ylabel = raw"Error to BigFloat (log. scale)",
     yaxis = :log,
     xaxis = :log,
-    ylims = (1.0e-16, 1.0e2),
+    ylims = (1.0e-34, 1.0e2),
     xlims = (1.0e-17, 10^3),
 )
 plot!(fig, lengths, abs.(Xbns .- d_1), color = indigo, label = "1 - acosh-based")
 plot!(fig, lengths, abs.(Xbns .- d_2), color = teal, label = "2 - asinh-based")
+plot!(
+    fig, lengths, abs.(Xbns .- Xns);
+    color = :gray, linestyle = :dash, label = "the reference in Float64",
+)
 ```
 
 ```{julia}
@@ -83,4 +90,92 @@ abs.(Xbns .- d_1)
 
 ```{julia}
 abs.(Xbns .- d_2)
+```
+
+Below a length of `1` the `asinh`-based version two is the more accurate one: version one returns
+`0` for every length up to `1.0e-8`, and at `0.1` its error `9.5e-16` is about a hundred times that
+of version two. At `1` the two are equally accurate. From `10` on the order reverses: version one is
+off by `8.9e-16` and version two by `4.9e-14`. At `100` the coordinates of `q` are near `1.0e43`,
+and the Minkowski metric of `q - p` would need forty-three of their digits where double precision
+keeps sixteen, so it comes out as `-2.8e70`, the `max` clamps it to zero and version two returns
+`0` instead of `100`, while version one is off by `8.9e-15`. From `1000` on the coordinates of `q`
+overflow double precision and both versions return `NaN`. All lengths are measured from
+`p = [0, 0, 1]`, where version one reads only the last coordinate of `q`.
+
+## Where to switch between the two versions
+
+To find where version one becomes the more accurate one, we look at distances `s` between `0.01`
+and `20`, measured from base points at several distances `r` from `[0, 0, 1]`.
+For each pair we draw random directions, compute the points in `BigFloat`, round them to `Float64`,
+and average the relative error of both versions to the exact distance `s`.
+We plot the errors against `m`, the Minkowski norm of `q - p` that version two computes;
+it is related to the distance by ``m = 2\sinh(s/2)``.
+
+```{julia}
+#| output: false
+function mean_relative_errors(r, s; n = 200, rng = MersenneTwister(42))
+    e_1, e_2 = 0.0, 0.0
+    for _ in 1:n
+        Y = BigFloat.([normalize(randn(rng, 2)); 0])
+        pb_r = exp(M, pb, r * Y)
+        Z = project(M, pb_r, BigFloat.([randn(rng, 2); 0]))
+        qb_s = exp(M, pb_r, s * Z / norm(M, pb_r, Z))
+        p_r, q_s = Float64.(pb_r), Float64.(qb_s)
+        e_1 += abs(distance_1(p_r, q_s) - s) / s
+        e_2 += abs(distance_2(p_r, q_s) - s) / s
+    end
+    return e_1 / n, e_2 / n
+end
+radii = [0.0, 1.0, 5.0]
+ss = 10.0 .^ range(-2, log10(20); length = 40)
+ms = 2 .* sinh.(ss ./ 2)
+errors = Dict(r => [mean_relative_errors(r, s) for s in ss] for r in radii)
+```
+
+```{julia}
+fig2 = plot(;
+    legend = :topleft,
+    xlabel = raw"$m = 2\sinh(s/2)$ (log. scale)",
+    ylabel = raw"mean relative error (log. scale)",
+    yaxis = :log,
+    xaxis = :log,
+)
+for (r, ls) in zip(radii, [:solid, :dash, :dot])
+    plot!(fig2, ms, max.(first.(errors[r]), 1.0e-20); color = indigo, linestyle = ls, label = "1 - acosh, r = $r")
+    plot!(fig2, ms, max.(last.(errors[r]), 1.0e-20); color = teal, linestyle = ls, label = "2 - asinh, r = $r")
+end
+vline!(fig2, [1.0]; color = :gray, label = raw"$m = 1$")
+fig2
+```
+
+For all base points the curves cross at about `m = 1`, which corresponds to a distance of
+``2\operatorname{asinh}(1/2) ≈ 0.96`` and to ``-⟨p,q⟩_{\mathrm{M}} = 1 + m^2/2 = 1.5``.
+Below that the `asinh`-based version two is up to a few hundred times more accurate,
+above it the `acosh`-based version one is, and its advantage grows quickly with the distance.
+
+We hence combine both. The switch tests ``-⟨p,q⟩_{\mathrm{M}} > 1.5`` instead of ``m > 1``:
+for far apart points the Minkowski metric of `q - p` suffers from the cancellation described above
+(at length `100` it is `-2.8e70`), so a test on ``m`` would pick the wrong version exactly where
+version two fails.
+
+```{julia}
+#| output: false
+function distance_3(p, q)
+    c = -minkowski_metric(p, q)
+    c > 3 // 2 && return acosh(c)
+    w = q - p
+    return 2 * asinh(sqrt(max(0.0, minkowski_metric(w, w))) / 2)
+end
+```
+
+which is what `distance` on the
+[Hyperbolic](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/hyperbolic/)
+manifold uses.
+On the reference data from above it is as accurate as the better of the two versions
+for all lengths up to `100`; for `1000` and `10000` all versions return `NaN`, since `q` overflows.
+
+```{julia}
+d_3 = [distance_3(p, q) for q in qs]
+finite = isfinite.(d_3)
+all(abs.(Xbns .- d_3)[finite] .<= min.(abs.(Xbns .- d_1), abs.(Xbns .- d_2))[finite])
 ```

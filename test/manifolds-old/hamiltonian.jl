@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Hamiltonian matrices" begin
+    @test_throws DomainError HamiltonianMatrices(-2)
     M = HamiltonianMatrices(4)
     Mf = HamiltonianMatrices(4; parameter = :field)
     # A has to be of the Form JS, S symmetric
@@ -40,6 +41,12 @@ include("../header.jl")
         @test_throws DomainError is_point(M, ones(4, 4), true)
         @test_throws DomainError is_vector(M, p, ones(4, 4), true, true)
     end
+    @testset "curvature" begin
+        @test riemann_tensor(M, p, p, q, p) == zeros(4, 4)
+        @test sectional_curvature(M, p, p, q) === 0.0
+        @test sectional_curvature_max(M) === 0.0
+        @test sectional_curvature_min(M) === 0.0
+    end
     @testset "Basics" begin
         @test repr(M) == "HamiltonianMatrices(4, ℝ)"
         @test repr(Mf) == "HamiltonianMatrices(4, ℝ; parameter=:field)"
@@ -50,8 +57,23 @@ include("../header.jl")
         @test get_embedding(Mf) == Euclidean(4, 4; field = ℝ, parameter = :field)
         @test embed(M, p) == p
         @test embed(M, p, p) == p
+        A_h = [1.0 -2.0 0.5 3.0; 4.0 1.5 -1.0 2.0; -3.0 0.25 2.0 -1.0; 0.5 5.0 -2.5 1.0]
+        P_h = project(M, A_h)
+        @test is_point(M, P_h)
+        @test project(M, P_h) == P_h
+        @test dot(A_h - P_h, p) == 0
+        @test project(M, p, A_h) == P_h
+        @test project(HamiltonianMatrices(4, ℂ), A_h + im * p) == P_h + im * p
         @test is_flat(M)
+        @test manifold_dimension(M) == (2 * 2 + 1) * 2
+        @test manifold_dimension(Mf) == manifold_dimension(M)
+        @test manifold_dimension(HamiltonianMatrices(4, ℂ)) == 2 * manifold_dimension(M)
         Random.seed!(42)
-        is_point(M, rand(M))
+        @test is_point(M, rand(M))
+    end
+    @testset "Random Hamiltonian matrices" begin
+        q = rand(MersenneTwister(42), M)
+        @test is_point(M, q)
+        @test q[3:4, 1:2] != q[1:2, 3:4]
     end
 end

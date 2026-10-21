@@ -21,30 +21,24 @@ struct TestConnection <: AbstractAffineConnection end
 Manifolds.connection(::TestEuclidean) = TestConnection()
 ManifoldsBase.default_retraction_method(::TestEuclidean) = TestRetraction()
 function ManifoldsBase.default_retraction_method(
-        ::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric},
+        ::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric}
     )
     return TestRetraction()
 end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
 function Manifolds.local_metric(
-        M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric},
-        ::Any,
-        ::InducedBasis,
+        M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric}, ::Any, ::InducedBasis
     )
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-        M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric},
-        ::Any,
-        ::T,
+        M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric}, ::Any, ::T
     ) where {T <: ManifoldsBase.AbstractOrthogonalBasis}
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-        M::MetricManifold{ℝ, <:TestEuclidean, <:TestScaledEuclideanMetric},
-        ::Any,
-        ::T,
+        M::MetricManifold{ℝ, <:TestEuclidean, <:TestScaledEuclideanMetric}, ::Any, ::T
     ) where {T <: ManifoldsBase.AbstractOrthogonalBasis}
     return 2 .* Diagonal(1.0:manifold_dimension(M))
 end
@@ -77,10 +71,7 @@ function Manifolds.get_vector_orthonormal!(
     return X
 end
 function Manifolds.get_coordinates_orthogonal!(
-        M::MetricManifold{ℝ, <:TestEuclidean, <:TestScaledEuclideanMetric},
-        c,
-        ::Any,
-        X,
+        M::MetricManifold{ℝ, <:TestEuclidean, <:TestScaledEuclideanMetric}, c, ::Any, X
     )
     c .= 1 ./ (2 .* [1.0:manifold_dimension(M)...]) .* X
     return c
@@ -111,9 +102,7 @@ struct TestSphericalMetric <: AbstractMetric end
 
 Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
 function Manifolds.local_metric(
-        M::MetricManifold{ℝ, <:TestSphere, <:TestSphericalMetric},
-        p,
-        ::InducedBasis,
+        M::MetricManifold{ℝ, <:TestSphere, <:TestSphericalMetric}, p, ::InducedBasis
     )
     r = base_manifold(M).r
     d = allocate(p)
@@ -146,26 +135,17 @@ Manifolds._injectivity_radius(::BaseManifold, ::ExponentialRetraction) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::AbstractRetractionMethod) = Inf
 Manifolds._injectivity_radius(::BaseManifold, ::Any, ::ExponentialRetraction) = Inf
 function Manifolds.local_metric(
-        ::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
-        p,
-        ::InducedBasis,
+        ::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}}, p, ::InducedBasis
     ) where {N}
     return 2 * one(p * p')
 end
 function Manifolds.exp!(
-        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
-        q,
-        p,
-        X,
+        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}}, q, p, X
     ) where {N}
     return exp!(base_manifold(M), q, p, X)
 end
 function Manifolds.exp_fused!(
-        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
-        q,
-        p,
-        X,
-        t::Number,
+        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}}, q, p, X, t::Number
     ) where {N}
     return Manifolds.exp_fused!(base_manifold(M), q, p, X, t)
 end
@@ -173,27 +153,17 @@ function Manifolds.parallel_transport_to!(::BaseManifold, Y, p, X, q)
     return (Y .= X)
 end
 function Manifolds.get_basis(
-        ::BaseManifold{N},
-        p,
-        B::DefaultOrthonormalBasis{<:Any, ManifoldsBase.TangentSpaceType},
+        ::BaseManifold{N}, p, B::DefaultOrthonormalBasis{<:Any, ManifoldsBase.TangentSpaceType}
     ) where {N}
     return CachedBasis(B, [(Matrix{eltype(p)}(I, N, N)[:, i]) for i in 1:N])
 end
 function Manifolds.get_coordinates_orthonormal!(
-        ::BaseManifold,
-        Y,
-        p,
-        X,
-        ::ManifoldsBase.AbstractNumbers,
+        ::BaseManifold, Y, p, X, ::ManifoldsBase.AbstractNumbers
     )
     return Y .= X
 end
 function Manifolds.get_vector_orthonormal!(
-        ::BaseManifold,
-        Y,
-        p,
-        X,
-        ::ManifoldsBase.AbstractNumbers,
+        ::BaseManifold, Y, p, X, ::ManifoldsBase.AbstractNumbers
     )
     return Y .= X
 end
@@ -228,10 +198,26 @@ function Manifolds.sharp!(
     v.data .= w.data ./ 2
     return v
 end
+function Manifolds.flat(M::BaseManifold, x, w::ManifoldsBase.TFVector{<:Any, <:AbstractBasis})
+    return flat!(M, ManifoldsBase.CoTFVector(similar(w.data), dual_basis(M, x, w.basis)), x, w)
+end
+function Manifolds.sharp(M::BaseManifold, x, w::ManifoldsBase.CoTFVector{<:Any, <:AbstractBasis})
+    return sharp!(M, ManifoldsBase.TFVector(similar(w.data), dual_basis(M, x, w.basis)), x, w)
+end
 
 # test for https://github.com/JuliaManifolds/Manifolds.jl/issues/539
 struct Issue539Metric <: RiemannianMetric end
 Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, p, X, Y) = 3
+
+# a metric whose local matrix does not commute with the one of TestEuclideanMetric
+struct TestNonDiagonalMetric <: AbstractMetric end
+function Manifolds.local_metric(
+        ::MetricManifold{ℝ, TestEuclidean{2}, TestNonDiagonalMetric},
+        ::Any,
+        ::DefaultOrthogonalBasis,
+    )
+    return [2.0 0.5; 0.5 1.0]
+end
 
 @testset "Metrics" begin
     # some tests failed due to insufficient accuracy for a particularly bad RNG state
@@ -258,13 +244,14 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         @test default_vector_transport_method(M, T) == default_vector_transport_method(E, T)
         @test !is_default_connection(TestEuclidean{3}(), LeviCivitaConnection())
         @test Manifolds.connection(TestEuclidean{3}()) == TestConnection()
+        @test isdefined(Manifolds, :AbstractAffineConnection)
     end
 
     @testset "solve_exp_ode error message" begin
         E = TestEuclidean{3}()
         g = TestEuclideanMetric()
         M = MetricManifold(E, g)
-        default_retraction_method(::TestEuclidean) = TestRetraction()
+        @test default_retraction_method(E) === TestRetraction()
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
         q = similar(X)
@@ -523,6 +510,7 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         @test Y == Y2
 
         X = [0.5, 0.7, 0.11]
+        Y = [0.13, 0.17, 0.19]
 
         chart_p = get_chart_index(M, A, p)
         B_p = induced_basis(M, A, chart_p, TangentSpaceType())
@@ -536,24 +524,23 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         @test Manifolds.exp_fused(M, p, X, 0.5) == p + X
         @test exp(MM2, p, X) == exp(M, p, X)
         @test Manifolds.exp_fused(MM2, p, X, 0.5) == Manifolds.exp_fused(M, p, X, 0.5)
-        @test exp!(MM, q, p, X) === exp!(M, q, p, X)
-        @test Manifolds.exp_fused!(MM, q, p, X, 0.5) ===
-            Manifolds.exp_fused!(M, q, p, X, 0.5)
-        @test retract!(MM, q, p, X) === retract!(M, q, p, X)
-        @test Manifolds.retract_fused!(MM, q, p, X, 1) ===
-            Manifolds.retract_fused!(M, q, p, X, 1)
+        @test exp!(MM, q, p, X) == exp!(M, copy(q), p, X)
+        @test Manifolds.exp_fused!(MM, q, p, X, 0.5) ==
+            Manifolds.exp_fused!(M, copy(q), p, X, 0.5)
+        @test retract!(MM, q, p, X) == retract!(M, copy(q), p, X)
+        @test Manifolds.retract_fused!(MM, q, p, X, 1) ==
+            Manifolds.retract_fused!(M, copy(q), p, X, 1)
         @test Manifolds.retract_fused(MM, p, X, 1) ==
             Manifolds.retract_fused(M, p, X, 1)
-        @test project!(MM, Y, p, X) === project!(M, Y, p, X)
-        @test project!(MM, q, p) === project!(M, q, p)
+        @test project!(MM, Y, p, X) == project!(M, copy(Y), p, X)
+        @test project!(MM, q, p) == project!(M, copy(q), p)
         # without a definition for the metric from the embedding, no projection possible
-        @test_throws MethodError log!(MM, Y, p, q) === project!(M, Y, p, q)
-        @test_throws MethodError vector_transport_to!(MM, Y, p, X, q) ===
-            vector_transport_to!(M, Y, p, X, q)
+        @test_throws MethodError log!(MM, Y, p, q)
+        @test_throws MethodError vector_transport_to!(MM, Y, p, X, q)
         # without DiffEq, these error
         @test_throws MethodError exp(MM, p, X, 1:3)
         # these always fall back anyways.
-        @test zero_vector!(MM, X, p) === zero_vector!(M, X, p)
+        @test zero_vector!(MM, copy(X), p) == zero_vector!(M, copy(X), p)
 
         @test injectivity_radius(MM, p) === injectivity_radius(M, p)
         @test injectivity_radius(MM) === injectivity_radius(M)
@@ -573,32 +560,33 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         @test_throws MethodError local_metric_jacobian(MM2, p, B_p)
         @test_throws MethodError christoffel_symbols_second_jacobian(MM2, p, B_p)
         # MM falls back to nondefault error
-        if VERSION >= v"1.9"
-            @test_throws MethodError Manifolds.projected_distribution(MM, 1, p)
-            @test_throws MethodError Manifolds.projected_distribution(MM, 1)
-        end
+        @test_throws MethodError Manifolds.projected_distribution(MM, 1, p)
+        @test_throws MethodError Manifolds.projected_distribution(MM, 1)
 
         @test inner(MM2, p, X, Y) === inner(M, p, X, Y)
         @test norm(MM2, p, X) === norm(M, p, X)
         @test distance(MM2, p, q) === distance(M, p, q)
-        @test exp!(MM2, q, p, X) === exp!(M, q, p, X)
+        @test exp!(MM2, q, p, X) == exp!(M, copy(q), p, X)
         @test exp(MM2, p, X) == exp(M, p, X)
-        @test log!(MM2, X, p, q) === log!(M, X, p, q)
+        @test log!(MM2, X, p, q) == log!(M, copy(X), p, q)
         @test log(MM2, p, q) == log(M, p, q)
-        @test retract!(MM2, q, p, X) === retract!(M, q, p, X)
-        @test Manifolds.retract_fused!(MM2, q, p, X, 1) ===
-            Manifolds.retract_fused!(M, q, p, X, 1)
+        @test retract!(MM2, q, p, X) == retract!(M, copy(q), p, X)
+        @test Manifolds.retract_fused!(MM2, q, p, X, 1) ==
+            Manifolds.retract_fused!(M, copy(q), p, X, 1)
 
-        @test project!(MM2, q, p) === project!(M, q, p)
-        @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
-        @test parallel_transport_to(MM2, p, X, q) == parallel_transport_to(M, q, X, p)
+        @test project!(MM2, q, p) == project!(M, copy(q), p)
+        @test project!(MM2, Y, p, X) == project!(M, copy(Y), p, X)
+        X = [0.5, 0.7, 0.11]
+        q = exp(M, p, X)
+        @test parallel_transport_to(MM2, p, X, q) == parallel_transport_to(M, p, X, q)
         @test parallel_transport_to!(MM2, Y, p, X, q) ==
-            parallel_transport_to!(M, Y, q, X, p)
-        @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
-        @test vector_transport_to!(MM2, Y, p, X, q) == vector_transport_to!(M, Y, p, X, q)
+            parallel_transport_to!(M, copy(Y), p, X, q)
+        @test project(MM2, p, X) == project(M, p, X)
+        @test vector_transport_to!(MM2, Y, p, X, q) ==
+            vector_transport_to!(M, copy(Y), p, X, q)
         c = 2 * ones(3)
         m = ParallelTransport()
-        @test zero_vector!(MM2, X, p) === zero_vector!(M, X, p)
+        @test zero_vector!(MM2, X, p) == zero_vector!(M, copy(X), p)
         @test injectivity_radius(MM2, p) === injectivity_radius(M, p)
         @test injectivity_radius(MM2) === injectivity_radius(M)
         @test injectivity_radius(MM2, p, ExponentialRetraction()) ===
@@ -612,13 +600,9 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         @test is_point(MM2, p) === is_point(M, p)
         @test is_vector(MM2, p, X) === is_vector(M, p, X)
 
-        a = Manifolds.projected_distribution(
-            M,
-            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
-        )
+        a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0 * I))
         b = Manifolds.projected_distribution(
-            MM2,
-            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
+            MM2, Distributions.MvNormal(zero(zeros(3)), 1.0 * I)
         )
         @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
         @test isapprox(a.distribution.μ, b.distribution.μ)
@@ -626,7 +610,9 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
             get_basis(MM2, p, DefaultOrthonormalBasis()).data
         @test_throws MethodError get_basis(MM, p, DefaultOrthonormalBasis())
 
+        X = [0.5, 0.7, 0.11]
         fX = ManifoldsBase.TFVector(X, B_p)
+        Y = [0.13, 0.17, 0.19]
         fY = ManifoldsBase.TFVector(Y, B_p)
         coX = flat(M, p, X)
         coY = flat(M, p, Y)
@@ -648,6 +634,10 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         coMMfY = flat(MM, p, fY)
         @test inner(MM, p, fX, fY) ≈ inner(cotspace2, X0p, coMMfX, coMMfY)
         @test isapprox(sharp(MM, p, coMMfX).data, fX.data)
+        fZ = ManifoldsBase.TFVector([0.5, 0.7, 0.11], B_p)
+        @test flat(MM, p, fZ).data ≈ 2 .* fZ.data
+        @test flat(MM, p, fZ).data !== fZ.data
+        @test sharp(MM, p, flat(MM, p, fZ)).data ≈ fZ.data
 
         @testset "Mutating flat/sharp" begin
             cofX2 = allocate(cofX)
@@ -675,6 +665,12 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
             fX3b = allocate(fX3a)
             sharp!(MM2, fX3b, p, cofX)
             @test isapprox(fX3a.data, fX3b.data)
+
+            S = Sphere(2)
+            fXS = ManifoldsBase.TFVector([1.0, 0.0], DefaultOrthonormalBasis())
+            coXS = ManifoldsBase.CoTFVector([0.0, 0.0], DefaultOrthonormalBasis())
+            @test_throws MethodError flat!(S, coXS, [1.0, 0.0, 0.0], fXS)
+            @test_throws MethodError sharp!(S, fXS, [1.0, 0.0, 0.0], coXS)
         end
     end
 
@@ -689,9 +685,26 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         @test change_metric(M, TestEuclideanMetric(), p, X) == X
         Y = change_metric(M, G, p, X)
         @test Y ≈ sqrt(2) .* X #scaled metric has a factor 2, removing introduces this factor
+        H = TestNonDiagonalMetric()
+        B = DefaultOrthogonalBasis()
+        G1, G2 = local_metric(M, p, B), local_metric(H(M), p, B)
+        X1, X2 = [1.0, 2.0], [-0.5, 3.0]
+        x1, x2 = get_coordinates(M, p, X1, B), get_coordinates(M, p, X2, B)
+        z1 = get_coordinates(M, p, change_metric(M, H, p, X1), B)
+        z2 = get_coordinates(M, p, change_metric(M, H, p, X2), B)
+        # converting keeps inner products also when G1 and G2 do not commute
+        @test dot(z1, G1 * z2) ≈ dot(x1, G2 * x2)
+        @test dot(z1, G1 * z1) ≈ dot(x1, G2 * x1)
         @test change_representer(M, TestEuclideanMetric(), p, X) == X
         Y2 = change_representer(M, G, p, X)
         @test Y2 ≈ 2 .* X #scaled metric has a factor 2, removing introduces this factor
+        H = TestNonDiagonalMetric()
+        B = DefaultOrthogonalBasis()
+        X1 = [1.0, 2.0]
+        c1 = get_coordinates(M, p, change_representer(M, H, p, X1), B)
+        x1 = get_coordinates(M, p, X1, B)
+        # g1(c(X1), Z) = g2(X1, Z) for every Z, also when G1 and G2 do not commute
+        @test local_metric(M, p, B) * c1 ≈ local_metric(H(M), p, B) * x1
     end
 
     @testset "issue #539" begin
@@ -702,5 +715,60 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         @test norm(MM, p, X)^2 ≈ 3
         @test get_embedding(MM) === get_embedding(M)
         @test get_embedding(MM, Float64) === get_embedding(M, Float64)
+    end
+
+    @testset "inner of TFVectors for metrics with a closed-form inner" begin
+        p = [1.0, 2.0, 3.0]
+        B = get_basis(Euclidean(3), p, DefaultOrthonormalBasis())
+        fX = TFVector([1.0, 0.5, -1.0], B)
+        fY = TFVector([0.0, 2.0, 1.0], B)
+        @test inner(Lorentz(3), p, fX, fY) ≈ 2.0
+
+        p_st = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+        p_spd = [2.0 0.5 0.1; 0.5 1.5 -0.3; 0.1 -0.3 1.0]
+        p_segre = [[0.5], [0.6, 0.8], [0.0, 1.0, 0.0]]
+        cases = [
+            (MetricManifold(Stiefel(4, 2), CanonicalMetric()), p_st),
+            (MetricManifold(Stiefel(4, 2), StiefelSubmersionMetric(0.5)), p_st),
+            (MetricManifold(SymmetricPositiveDefinite(3), BuresWassersteinMetric()), p_spd),
+            (
+                MetricManifold(
+                    SymmetricPositiveDefinite(3),
+                    GeneralizedBuresWassersteinMetric([2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0]),
+                ),
+                p_spd,
+            ),
+            (MetricManifold(SymmetricPositiveDefinite(3), LogCholeskyMetric()), p_spd),
+            (MetricManifold(Segre(2, 3), WarpedMetric(1.5)), p_segre),
+        ]
+        for (M, p) in cases
+            B = get_basis(base_manifold(M), p, DefaultOrthonormalBasis())
+            vs = get_vectors(base_manifold(M), p, B)
+            d = length(vs)
+            c1 = collect(range(1.0, 2.0; length = d))
+            c2 = collect(range(-1.0, 0.5; length = d))
+            X = sum(c1[i] * vs[i] for i in 1:d)
+            Y = sum(c2[i] * vs[i] for i in 1:d)
+            @test inner(M, p, TFVector(c1, B), TFVector(c2, B)) ≈ inner(M, p, X, Y)
+        end
+
+        M = MetricManifold(Euclidean(3), EuclideanMetric())
+        @test inner(M, p, fX, fY) ≈ dot([1.0, 0.5, -1.0], [0.0, 2.0, 1.0])
+        @test norm(M, p, fX) ≈ norm([1.0, 0.5, -1.0])
+    end
+
+    @testset "cotangent basis on a MetricManifold" begin
+        M = Sphere(2)
+        MM = MetricManifold(M, EuclideanMetric())
+        p = [1.0, 0.0, 0.0]
+        X = [0.0, 2.0, -1.0]
+        Bc = DefaultOrthonormalBasis(ℝ, CotangentSpaceType())
+        c = get_coordinates(M, p, X, DefaultOrthonormalBasis())
+        ξ = flat(MM, p, X)
+        @test get_coordinates(MM, p, ξ, Bc) ≈ c
+        @test get_coordinates!(MM, similar(c), p, ξ, Bc) ≈ c
+        @test get_vector(MM, p, c, Bc).X ≈ X
+        ξ2 = Manifolds.RieszRepresenterCotangentVector(MM, p, zero_vector(M, p))
+        @test get_vector!(MM, ξ2, p, c, Bc).X ≈ X
     end
 end

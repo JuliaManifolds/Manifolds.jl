@@ -16,13 +16,13 @@ see [`minkowski_metric`](@ref) for the formula.
 struct MinkowskiMetric <: LorentzMetric end
 
 @doc raw"""
-    Lorentz{T} = MetricManifold{Euclidean{T,ℝ},LorentzMetric}
+    Lorentz{T} = MetricManifold{ℝ,Euclidean{ℝ,T},<:LorentzMetric}
 
 The Lorentz manifold (or Lorentzian) is a pseudo-Riemannian manifold.
 
 # Constructor
 
-    Lorentz(n[, metric=MinkowskiMetric()])
+    Lorentz(n[, m=MinkowskiMetric()]; parameter::Symbol=:type)
 
 Generate the Lorentz manifold of dimension `n` with the [`LorentzMetric`](@ref) `m`,
 which is by default set to the [`MinkowskiMetric`](@ref).
@@ -37,6 +37,14 @@ function Lorentz(E::Euclidean{𝔽, T}, m::LorentzMetric = MinkowskiMetric()) wh
     return Lorentz{T, typeof(m)}(E, m)
 end
 
+"""
+    is_flat(M::Lorentz{<:Any, MinkowskiMetric})
+
+Return whether the [`Lorentz`](@ref) manifold `M` is flat. This is the case for the
+[`MinkowskiMetric`](@ref), since it is the same matrix at every point.
+"""
+is_flat(M::Lorentz{<:Any, MinkowskiMetric}) = true
+
 function local_metric(M::Lorentz{<:Any, MinkowskiMetric}, p)
     n = get_parameter(M.manifold.size)[1]
     return Diagonal([ones(n - 1)..., -1])
@@ -45,6 +53,9 @@ end
 function inner(::Lorentz{<:Any, MinkowskiMetric}, p, X, Y)
     return minkowski_metric(X, Y)
 end
+
+@tfvector_inner_via_get_vector Lorentz{<:Any, MinkowskiMetric}
+
 @doc raw"""
     minkowski_metric(a, b)
 

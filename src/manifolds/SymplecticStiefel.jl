@@ -27,7 +27,7 @@ The symplectic Stiefel tangent space at ``p`` can be parametrized as [BendokatZi
 \end{align*}
 ```
 
-where ``Ω ∈ \mathfrak{sp}(2n,F)`` is [`Hamiltonian`](@ref) and ``p^s`` means
+where ``Ω ∈ \mathfrak{sp}(2k,F)`` is [`Hamiltonian`](@ref) and ``p^s`` means
 the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``.
 Here ``p^+`` denotes the [`symplectic_inverse`](@ref).
 
@@ -35,7 +35,8 @@ You can also use [`StiefelPoint`](@ref) and [`StiefelTangentVector`](@ref) with 
 they are equivalent to using arrays.
 
 # Constructor
-    SymplecticStiefel(2n::Int, 2k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+
+    SymplecticStiefel(2n::Int, 2k::Int; parameter::Symbol=:type)
 
 Generate the (real-valued) symplectic Stiefel manifold of ``2n×2k``
 matrices which span a ``2k`` dimensional symplectic subspace of ``ℝ^{2n×2k}``.
@@ -48,6 +49,12 @@ struct SymplecticStiefel{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SymplecticStiefel(two_n::Int, two_k::Int; parameter::Symbol = :type)
+    0 <= two_k <= two_n || throw(
+        DomainError(
+            (two_n, two_k),
+            "The matrix sizes `2n` and `2k` of the symplectic Stiefel manifold must satisfy 0 ≤ 2k ≤ 2n, but they were $(two_n) and $(two_k).",
+        ),
+    )
     two_n % 2 == 0 || throw(
         ArgumentError(
             "The first matrix size of the symplectic Stiefel manifold must be even, but was $(two_n).",
@@ -116,19 +123,18 @@ function check_point(M::SymplecticStiefel{ℝ}, p; kwargs...)
 end
 
 @doc raw"""
-    check_vector(M::SymplecticMatrices, p, X; kwargs...)
+    check_vector(M::SymplecticStiefel, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`SymplecticStiefel`](@ref),
 ``\mathrm{SpSt}(2n, 2k)`` manifold.
 
 The check consists of verifying that ``H = p^{+}X ∈ 𝔤_{2k}``, where ``𝔤``
 is the Lie Algebra of the symplectic group ``\mathrm{Sp}(2k)``, that is
-the set of [`HamiltonianMatrices`])(@ref), where ``(⋅)^+`` denotes the [`symplectic_inverse`](@ref).
+the set of [`HamiltonianMatrices`](@ref), where ``(⋅)^+`` denotes the [`symplectic_inverse`](@ref).
 """
 check_vector(::SymplecticStiefel, ::Any...)
 
 function check_vector(M::SymplecticStiefel{𝔽}, p, X::T; kwargs...) where {T, 𝔽}
-    n, k = get_parameter(M.size)
     # From Bendokat-Zimmermann: T_pSpSt(2n, 2k) = \{p*H | H^{+} = -H  \}
     H = inv(M, p) * X  # ∈ ℝ^{2k×2k}, should be Hamiltonian.
 
@@ -215,14 +221,17 @@ With the above defined matrices it holds that ``\bar{\Omega} = λγ^{\mathrm{T}}
 With these matrix constructions done, we can compute the
 exponential mapping as
 ```math
-  \exp_p(X) = Γ \operatorname{Exp}(ΛΓ^{\mathrm{T}})
+  \exp_p(X) = Γ \operatorname{Exp}(Λ^{\mathrm{T}}Γ)
     \begin{bmatrix} 0_{4k} \\ I_{4k} \end{bmatrix}
-    \operatorname{Exp}(λγ^{\mathrm{T}})
+    \operatorname{Exp}(λ^{\mathrm{T}}γ)
     \begin{bmatrix} 0_{2k} \\ I_{2k} \end{bmatrix}.
 ```
 
 which only requires computing the matrix exponentials of
-``ΛΓ^{\mathrm{T}} ∈ ℝ^{8k×8k}`` and ``λγ^{\mathrm{T}} ∈ ℝ^{4k×4k}``.
+``Λ^{\mathrm{T}}Γ ∈ ℝ^{8k×8k}`` and ``λ^{\mathrm{T}}γ ∈ ℝ^{4k×4k}``.
+This formula is equation (4.3.19) of Proposition 4.3.12 in [Bendokat:2021](@cite), page 97,
+whose ``U``, ``Δ``, ``X``, ``Y``, ``\hat X`` and ``\hat Y`` are
+``p``, ``X``, ``γ``, ``λ``, ``Γ`` and ``Λ`` here.
 """
 exp(::SymplecticStiefel, p, X)
 
@@ -300,7 +309,7 @@ function get_total_space(M::SymplecticStiefel{ℝ, Tuple{Int, Int}})
 end
 
 @doc raw"""
-    inner(M::SymplecticStiefel, p, X. Y)
+    inner(M::SymplecticStiefel, p, X, Y)
 
 Compute the Riemannian inner product ``g^{\mathrm{SpSt}}`` at
 ``p ∈ \mathrm{SpSt}`` of tangent vectors ``Y, X ∈ T_p\mathrm{SpSt}``.
@@ -323,7 +332,7 @@ function inner(::SymplecticStiefel, p, X, Y)
     # 1) we permute X' and Y c to c^{\mathrm{T}}Y^{\mathrm{T}}X = a\(Y'X) (avoids a large interims matrix)
     # 2) we permute Y c up front, the center term is symmetric, so we get cY'b c b' X
     # and (b'X) again avoids a large interims matrix, so does Y'b.
-    return tr(a \ (Y' * X)) - (1 / 2) * tr(a \ ((Y' * b) * (a \ (b' * X))))
+    return tr(a \ (Y' * X)) - tr(a \ ((Y' * b) * (a \ (b' * X)))) / 2
 end
 
 @doc raw"""
@@ -338,7 +347,7 @@ A =
 \begin{bmatrix}
 A_{1, 1} & A_{1, 2} \\
 A_{2, 1} & A_{2, 2}
-\end{bmatrix}, \quad A_{i, j} ∈ ℝ^{2n×2k}
+\end{bmatrix}, \quad A_{i, j} ∈ ℝ^{n×k}
 ````
 
 the symplectic inverse is defined as:
@@ -493,17 +502,14 @@ this code exploits the second tangent vector space parametrization of
 [`SymplecticStiefel`](@ref), that any ``X ∈ T_p\mathrm{SpSt}(2n, 2k)``
 can be written as ``X = pΩ_X + p^sB_X``.
 To generate random tangent vectors at ``p`` then, this function sets ``B_X = 0``
-and generates a random Hamiltonian matrix ``Ω_X ∈ \mathfrak{sp}(2n,F)`` with
-Frobenius norm of `σ` before returning ``X = pΩ_X``.
+and generates a random Hamiltonian matrix ``Ω_X ∈ \mathfrak{sp}(2k,F)`` from
+Gaussian entries scaled by `σ` before returning ``X = pΩ_X``.
 """
 rand(M::SymplecticStiefel; σ::Real = 1.0, kwargs...)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::SymplecticStiefel,
-        pX;
-        vector_at = nothing,
-        σ::Real = 1.0,
+        rng::AbstractRNG, M::SymplecticStiefel, pX;
+        vector_at = nothing, σ::Real = 1.0,
     )
     n, k = get_parameter(M.size)
     if vector_at === nothing
@@ -574,7 +580,7 @@ function ManifoldsBase.retract_cayley!(M::SymplecticStiefel, q, p, X)
 end
 
 @doc raw"""
-    X = riemannian_gradient(::SymplecticStiefel, p, Y)
+    X = riemannian_gradient(::SymplecticStiefel, p, Y; embedding_metric::EuclideanMetric=EuclideanMetric())
     riemannian_gradient!(::SymplecticStiefel, X, p, Y; embedding_metric::EuclideanMetric=EuclideanMetric())
 
 Compute the riemannian gradient `X` of `f` on [`SymplecticStiefel`](@ref)  at a point `p`,
@@ -591,13 +597,17 @@ where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes
 
 
 """
-function riemannian_gradient(::SymplecticStiefel, p, Y)
+function riemannian_gradient(
+        ::SymplecticStiefel, p, Y;
+        embedding_metric::EuclideanMetric = EuclideanMetric(),
+    )
     Jp = SymplecticElement(p, Y) * p
     return Y * (p' * p) .+ Jp * (Y' * Jp)
 end
 
 function riemannian_gradient!(
-        ::SymplecticStiefel, X, p, Y; embedding_metric::EuclideanMetric = EuclideanMetric(),
+        ::SymplecticStiefel, X, p, Y;
+        embedding_metric::EuclideanMetric = EuclideanMetric(),
     )
     Jp = SymplecticElement(p, Y) * p
     X .= Y * (p' * p) .+ Jp * (Y' * Jp)

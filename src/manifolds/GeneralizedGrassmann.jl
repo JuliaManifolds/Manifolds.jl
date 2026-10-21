@@ -21,9 +21,9 @@ a whole equivalence class of representers. For ``B=I_n`` this simplifies to the 
 The tangent space at a point (subspace) ``p`` is given by
 
 ````math
-T_x\mathrm{Gr}(n,k,B) = \bigl\{
+T_p\mathrm{Gr}(n,k,B) = \bigl\{
 X ∈ 𝔽^{n×k} :
-X^{\mathrm{H}}Bp + p^{\mathrm{H}}BX = 0_{k} \bigr\},
+p^{\mathrm{H}}BX = 0_{k} \bigr\},
 ````
 
 where ``0_{k}`` denotes the ``k×k`` zero matrix.
@@ -38,7 +38,7 @@ The manifold is named after
 
 # Constructor
 
-    GeneralizedGrassmann(n, k, B=I_n, field=ℝ)
+    GeneralizedGrassmann(n, k, B=I_n, field=ℝ; parameter::Symbol=:type)
 
 Generate the (real-valued) Generalized Grassmann manifold of ``n×k`` dimensional
 orthonormal matrices with scalar product `B`.
@@ -48,12 +48,25 @@ struct GeneralizedGrassmann{𝔽, T, TB <: AbstractMatrix} <: AbstractDecoratorM
     B::TB
 end
 
+function Base.:(==)(M::GeneralizedGrassmann{𝔽}, N::GeneralizedGrassmann{𝔽}) where {𝔽}
+    return M.size == N.size && M.B == N.B
+end
+function Base.isequal(M::GeneralizedGrassmann{𝔽}, N::GeneralizedGrassmann{𝔽}) where {𝔽}
+    return isequal(M.size, N.size) && isequal(M.B, N.B)
+end
+function Base.hash(M::GeneralizedGrassmann, h::UInt)
+    return hash(M.B, hash(M.size, hash(:GeneralizedGrassmann, h)))
+end
+
 function GeneralizedGrassmann(
-        n::Int,
-        k::Int,
-        B::AbstractMatrix = Matrix{Float64}(I, n, n),
-        𝔽::AbstractNumbers = ℝ;
+        n::Int, k::Int, B::AbstractMatrix = Matrix{Float64}(I, n, n), 𝔽::AbstractNumbers = ℝ;
         parameter::Symbol = :type,
+    )
+    0 <= k <= n || throw(
+        DomainError(
+            (n, k),
+            "The number of columns k of a generalized Grassmann manifold must satisfy 0 ≤ k ≤ n, but n and k were $(n) and $(k).",
+        ),
     )
     size = wrap_type_parameter(parameter, (n, k))
     return GeneralizedGrassmann{𝔽, typeof(size), typeof(B)}(size, B)
@@ -63,13 +76,13 @@ end
     change_representer(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
 
 Change `X` to the corresponding representer of a cotangent vector at `p` with respect to the scaled metric
-of the [`GeneralizedGrassmann`](@ref) `M`, i.e, since
+of the [`GeneralizedGrassmann`](@ref) `M`. Since
 
 ```math
-g_p(X,Y) = \operatorname{tr}(Y^{\mathrm{H}}BZ) = \operatorname{tr}(X^{\mathrm{H}}Z) = ⟨X,Z⟩
+g_p(Y,Z) = \operatorname{tr}(Y^{\mathrm{H}}BZ) = \operatorname{tr}(X^{\mathrm{H}}Z) = ⟨X,Z⟩
 ```
 
-has to hold for all ``Z``, where the repreenter `X` is given, the resulting representer with
+has to hold for all ``Z``, where the representer `X` is given, the resulting representer with
 respect to the metric on the [`GeneralizedGrassmann`](@ref) is given by ``Y = B^{-1}X``.
 """
 change_representer(::GeneralizedGrassmann, ::EuclideanMetric, ::Any, ::Any)
@@ -82,14 +95,27 @@ end
     change_metric(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
 
 Change `X` to the corresponding vector with respect to the metric of the [`GeneralizedGrassmann`](@ref) `M`,
-i.e. let ``B=LL'`` be the Cholesky decomposition of the matrix `M.B`, then the corresponding vector is ``L\X``.
+i.e. find ``c\colon T_p\mathrm{Gr}(n,k,B) → T_p\mathrm{Gr}(n,k,B)`` such that for all
+``X, Y ∈ T_p\mathrm{Gr}(n,k,B)`` it holds
+
+```math
+⟨X,Y⟩ = \operatorname{tr}(X^{\mathrm{H}}Y) = \operatorname{tr}(c(X)^{\mathrm{H}}Bc(Y)) = g_p(c(X),c(Y)).
+```
+
+Let ``B=LL^{\mathrm{H}}`` be the Cholesky decomposition of the matrix `M.B`,
+``P = L^{\mathrm{H}}p`` and ``Q = I_n - PP^{\mathrm{H}}``. Then
+``c(X) = L^{-\mathrm{H}}(QL^{-1}L^{-\mathrm{H}}Q)^{1/2}L^{\mathrm{H}}X``,
+which is the positive square root of the change of representer ``X ↦ (B^{-1} - pp^{\mathrm{H}})X``
+on the tangent space, see Section 4.5 of [EdelmanAriasSmith:1998](@cite) for the latter.
 """
 change_metric(M::GeneralizedGrassmann, ::EuclideanMetric, ::Any, ::Any)
 
 function change_metric!(M::GeneralizedGrassmann, Y, ::EuclideanMetric, p, X)
     C2 = cholesky(M.B).L
-    copyto!(Y, X)
-    ldiv!(C2, Y)
+    P = C2' * p
+    R = C2' \ (I - P * P')
+    copyto!(Y, sqrt(Hermitian(R' * R)) * (C2' * X))
+    ldiv!(C2', Y)
     return Y
 end
 
@@ -127,18 +153,29 @@ end
 Compute the Riemannian distance on [`GeneralizedGrassmann`](@ref)
 manifold `M```= \mathrm{Gr}(n,k,B)``.
 
-The distance is given by
+The distance is the arc length
 ````math
-d_{\mathrm{Gr}(n,k,B)}(p,q) = \operatorname{norm}(\log_p(q)).
+d_{\mathrm{Gr}(n,k,B)}(p,q) = \operatorname{norm}(\log_p(q)) = \Bigl(\sum_{i=1}^k θ_i^2\Bigr)^{1/2}
 ````
+of the principal angles ``θ_1,…,θ_k`` between the spans of ``B^{1/2}p`` and ``B^{1/2}q``,
+see Sections 4.3 and 4.5 of [EdelmanAriasSmith:1998](@cite); these are the principal angles between the spans
+of `p` and `q` in the inner product given by ``B``, see Theorem 4.2 of [KnyazevArgentati:2002](@cite).
+They are computed with Algorithm 3.2 there, applied to ``B^{1/2}p`` and ``B^{1/2}q``: for the singular value
+decomposition ``p^{\mathrm{H}}Bq = YΣZ^{\mathrm{H}}``, ``Σ = \operatorname{diag}(σ_1,…,σ_k)``, the angles with
+``σ_i ≤ \frac{\sqrt{2}}{2}`` are ``θ_i = \arccos(σ_i)``, and the others are ``θ_i = \arcsin(\min\{μ_i, 1\})``, where
+``μ_i`` are the singular values of ``B^{1/2}(R - p(p^{\mathrm{H}}BR))`` and the columns of ``R`` are the columns
+of ``qZ`` that belong to these other ``σ_i``. Algorithm 3.2 takes the arc sine also for ``σ_i = \frac{\sqrt{2}}{2}``,
+where both formulas give ``\frac{π}{4}``.
 """
 function distance(M::GeneralizedGrassmann, p, q)
-    z = p' * M.B' * q
-    X = allocate_result(M, log, p, q)
-    X .= q / z .- p
-    d = svd(X)
-    X .= d.U .* atan.(d.S')
-    return norm(M, p, X)
+    F = svd(p' * M.B * q)
+    s = min.(F.S, 1)
+    small = s .> sqrt(2) / 2
+    any(small) || return norm(acos.(s))
+    Q = q * F.V[:, small]
+    K = sqrt(Hermitian(M.B))
+    μ = svdvals(K * (Q - p * (p' * (M.B * Q))))
+    return norm(vcat(acos.(s[.!small]), asin.(min.(μ, 1))))
 end
 
 embed(::GeneralizedGrassmann, p) = p
@@ -148,8 +185,10 @@ embed(::GeneralizedGrassmann, p, X) = X
     exp(M::GeneralizedGrassmann, p, X)
 
 Compute the exponential map on the [`GeneralizedGrassmann`](@ref) `M` ``= \mathrm{Gr}(n,k,B)``
-starting in `p` with tangent vector (direction) `X`. Let ``X^{\mathrm{H}}BX = USV`` denote the
-SVD decomposition of ``X^{\mathrm{H}}BX``. Then the exponential map is written using
+starting in `p` with tangent vector (direction) `X`. Let ``X = USV^{\mathrm{H}}`` with
+``U^{\mathrm{H}}BU = I_k``, ``S`` diagonal and nonnegative and ``V`` unitary, so that
+``X^{\mathrm{H}}BX = VS^2V^{\mathrm{H}}``. Then the exponential map is written, see Section 4.5
+of [EdelmanAriasSmith:1998](@cite), using
 
 ````math
 \exp_p X = p V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
@@ -163,9 +202,9 @@ exp(::GeneralizedGrassmann, ::Any...)
 function exp!(M::GeneralizedGrassmann, q, p, X)
     norm(M, p, X) ≈ 0 && return copyto!(q, p)
     d = svd(X' * M.B * X)
-    V = d.Vt
+    V = d.V
     S = abs.(sqrt.(d.S))
-    mul!(q, p * (V .* cos.(S')) + X * (V .* usinc.(S')), V)
+    mul!(q, p * (V .* cos.(S')) + X * (V .* usinc.(S')), d.Vt)
     project!(M, q, q)
     return q
 end
@@ -215,11 +254,30 @@ where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian
 """
 inner(M::GeneralizedGrassmann, p, X, Y) = dot(X, M.B, Y)
 
+@doc raw"""
+    isapprox(M::GeneralizedGrassmann, p, X, Y; kwargs...)
+
+Test whether two tangent vectors `X`, `Y` at `p` on the [`GeneralizedGrassmann`](@ref) manifold `M` are (approximately)
+the same, that is whether ``\lVert X - Y \rVert_p \approx 0`` with the classical `isapprox`.
+The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(X, Y))`.
+"""
+isapprox(::GeneralizedGrassmann, ::Any, ::Any, ::Any)
+
+@doc raw"""
+    isapprox(M::GeneralizedGrassmann, p, q; kwargs...)
+
+Test whether two points `p`, `q` on the [`GeneralizedGrassmann`](@ref) manifold `M` are (approximately) the same.
+Since this is a quotient manifold, the test is performed by checking their distance if they are
+not equal, that is ``d_{\mathcal M}(p,q) \approx 0`` with the classical `isapprox`.
+The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(p, q))`.
+"""
+isapprox(::GeneralizedGrassmann, ::Any, ::Any)
+
 function _isapprox(M::GeneralizedGrassmann, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end
 function _isapprox(M::GeneralizedGrassmann, p, q; atol = sqrt(max_eps(p, q)), kwargs...)
-    return isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
+    return p == q || isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
 end
 
 @doc raw"""
@@ -230,15 +288,17 @@ i.e. the tangent vector `X` whose corresponding [`geodesic`](@extref `ManifoldsB
 reaches `q` after time 1 on `M`. The formula reads
 
 ````math
-\log_p q = V⋅ \operatorname{atan}(S) ⋅ U^\mathrm{H},
+\log_p q = B^{-1/2}U⋅ \operatorname{atan}(S) ⋅ V^\mathrm{H},
 ````
 
-where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian
+and ``B^{1/2}`` is the square root of ``B``; multiplying by it turns the metric into the
+Euclidean one, see Section 4.5 of [EdelmanAriasSmith:1998](@cite).
 The matrices ``U`` and ``V`` are the unitary matrices, and ``S`` is the diagonal matrix
 containing the singular values of the SVD-decomposition
 
 ````math
-USV = (q^\mathrm{H}Bp)^{-1} ( q^\mathrm{H} - q^\mathrm{H}Bpp^\mathrm{H}).
+USV^\mathrm{H} = B^{1/2}\bigl(q(p^\mathrm{H}Bq)^{-1} - p\bigr).
 ````
 
 In this formula the ``\operatorname{atan}`` is meant elementwise.
@@ -246,10 +306,11 @@ In this formula the ``\operatorname{atan}`` is meant elementwise.
 log(::GeneralizedGrassmann, ::Any...)
 
 function log!(M::GeneralizedGrassmann, X, p, q)
+    K = sqrt(Hermitian(M.B))
     z = p' * M.B' * q
     X .= q / z .- p
-    d = svd(X)
-    return mul!(X, d.U, atan.(d.S) .* d.Vt)
+    d = svd(K * X)
+    return mul!(X, K \ d.U, atan.(d.S) .* d.Vt)
 end
 
 @doc raw"""
@@ -297,7 +358,7 @@ project(::GeneralizedGrassmann, ::Any)
 
 function project!(M::GeneralizedGrassmann, q, p)
     s = svd(p)
-    e = eigen(s.U' * M.B * s.U)
+    e = eigen(Hermitian(s.U' * M.B * s.U))
     qsinv = e.vectors ./ sqrt.(transpose(e.values))
     q .= s.U * qsinv * e.vectors' * s.V'
     return q
@@ -321,7 +382,7 @@ project(::GeneralizedGrassmann, ::Any, ::Any)
 function project!(M::GeneralizedGrassmann, Y, p, X)
     A = p' * M.B' * X
     copyto!(Y, X)
-    mul!(Y, p, Hermitian((A .+ A') ./ 2), -1, 1)
+    mul!(Y, p, A, -1, 1)
     return Y
 end
 
@@ -340,11 +401,8 @@ random Matrix onto the tangent vector at `vector_at`.
 rand(::GeneralizedGrassmann; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::GeneralizedGrassmann{ℝ},
-        pX;
-        vector_at = nothing,
-        σ::Real = one(real(eltype(pX))),
+        rng::AbstractRNG, M::GeneralizedGrassmann, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
     )
     n, k = get_parameter(M.size)
     if vector_at === nothing
@@ -353,7 +411,6 @@ function Random.rand!(
     else
         Z = σ * randn(rng, eltype(pX), size(pX))
         project!(M, pX, vector_at, Z)
-        normalize!(pX)
     end
     return pX
 end
@@ -393,9 +450,35 @@ function ManifoldsBase.retract_project_fused!(M::GeneralizedGrassmann, q, p, X, 
     return q
 end
 
+"""
+    default_vector_transport_method(M::GeneralizedGrassmann)
+
+Return the [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`)
+as the default vector transport method for the [`GeneralizedGrassmann`](@ref) manifold.
+"""
+default_vector_transport_method(::GeneralizedGrassmann) = ProjectionTransport()
+
+@doc raw"""
+    inverse_retract(M::GeneralizedGrassmann, p, q, ::PolarInverseRetraction)
+
+Compute the inverse of the [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
+[`GeneralizedGrassmann`](@ref) manifold `M`, i.e.
+
+````math
+\operatorname{retr}_p^{-1}q = q(p^{\mathrm{H}}Bq)^{-1} - p,
+````
+
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
+"""
+inverse_retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarInverseRetraction)
+
+function inverse_retract_polar!(M::GeneralizedGrassmann, X, p, q)
+    X .= q / (p' * M.B' * q) .- p
+    return X
+end
+
 function Base.show(
-        io::IO,
-        M::GeneralizedGrassmann{𝔽, TypeParameter{Tuple{n, k}}},
+        io::IO, M::GeneralizedGrassmann{𝔽, TypeParameter{Tuple{n, k}}}
     ) where {n, k, 𝔽}
     return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
 end

@@ -1,5 +1,5 @@
 @doc raw"""
-    check_vector(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector; kwargs... )
+    check_vector(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector; atol=sqrt(eps(float(eltype(X)))), kwargs... )
 
 Check whether `X` is a tangent vector to point `p` on the [`Flag`](@ref) manifold `M`
 ``\operatorname{Flag}(n_1, n_2, ..., n_d; N)`` in the orthogonal matrix representation,
@@ -13,18 +13,19 @@ X = \begin{bmatrix}
 \end{bmatrix}
 ````
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
+
+Both conditions are checked block by block in the Frobenius norm, up to the absolute
+tolerance `atol`.
 """
 function check_vector(
-        M::Flag{<:Any, dp1},
-        p::OrthogonalPoint,
-        X::OrthogonalTangentVector;
-        kwargs...,
+        M::Flag{<:Any, dp1}, p::OrthogonalPoint, X::OrthogonalTangentVector;
+        atol::Real = sqrt(eps(float(eltype(X)))), kwargs...,
     ) where {dp1}
     for i in 1:dp1
         for j in i:dp1
             if i == j
                 Bi = _extract_flag(M, X.value, i)
-                if !iszero(Bi)
+                if !(norm(Bi) <= atol)
                     return DomainError(
                         norm(Bi),
                         "All diagonal blocks of matrix X must be zero; block $i has norm $(norm(Bi)).",
@@ -34,7 +35,7 @@ function check_vector(
                 Bij = _extract_flag(M, X.value, i, j)
                 Bji = _extract_flag(M, X.value, j, i)
                 Bdiff = Bij + Bji'
-                if !iszero(Bdiff)
+                if !(norm(Bdiff) <= atol)
                     return DomainError(
                         norm(Bdiff),
                         "Matrix X must be block skew-symmetric; block ($i, $j) violates this with norm of sum equal to $(norm(Bdiff)).",
@@ -45,6 +46,14 @@ function check_vector(
     end
     return nothing
 end
+
+"""
+    default_retraction_method(M::Flag, ::Type{<:OrthogonalPoint})
+
+Return [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`)
+as the default retraction for the [`Flag`](@ref) manifold in the orthogonal matrix representation.
+"""
+default_retraction_method(::Flag, ::Type{<:OrthogonalPoint}) = QRRetraction()
 
 embed(::Flag, p::OrthogonalPoint) = p.value
 embed!(::Flag, q, p::OrthogonalPoint) = copyto!(q, p.value)
@@ -65,7 +74,7 @@ function get_embedding(M::Flag{Tuple{Int}}, ::Type{<:OrthogonalPoint})
     return OrthogonalMatrices(M.size[1]; parameter = :field)
 end
 function ManifoldsBase.get_embedding_type(::Flag, ::Type{<:OrthogonalPoint})
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 function _extract_flag(M::Flag, p::AbstractMatrix, i::Int)
@@ -80,12 +89,17 @@ function _extract_flag(M::Flag, p::AbstractMatrix, i::Int, j::Int)
 end
 
 function inner(
-        ::Flag,
-        p::OrthogonalPoint,
-        X::OrthogonalTangentVector,
-        Y::OrthogonalTangentVector,
+        ::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector, Y::OrthogonalTangentVector
     )
     return dot(X.value, Y.value) / 2
+end
+
+function Base.isapprox(M::Flag, p::OrthogonalPoint, q::OrthogonalPoint; kwargs...)
+    return isapprox(M, convert(AbstractMatrix, M, p), convert(AbstractMatrix, M, q); kwargs...)
+end
+
+function norm(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector)
+    return sqrt(inner(M, p, X, X))
 end
 
 function project!(
@@ -120,11 +134,7 @@ X = \begin{bmatrix}
 ````
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
 """
-function project(
-        M::Flag{<:Any, dp1},
-        ::OrthogonalPoint,
-        X::OrthogonalTangentVector,
-    ) where {dp1}
+function project(M::Flag{<:Any, dp1}, ::OrthogonalPoint, X::OrthogonalTangentVector) where {dp1}
     N = get_parameter(M.size)[1]
     Y = project(SkewHermitianMatrices(N), X.value)
     for i in 1:dp1
@@ -171,10 +181,7 @@ as the first order approximation to the exponential map. Similar to QR retractio
 retract(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector, ::QRRetraction)
 
 function ManifoldsBase.retract_qr!(
-        M::Flag,
-        q::OrthogonalPoint,
-        p::OrthogonalPoint,
-        X::OrthogonalTangentVector,
+        M::Flag, q::OrthogonalPoint, p::OrthogonalPoint, X::OrthogonalTangentVector
     )
     return ManifoldsBase.retract_qr_fused!(M, q, p, X, one(eltype(p)))
 end

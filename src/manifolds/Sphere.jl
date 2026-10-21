@@ -40,7 +40,7 @@ and the [`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited f
 
 # Constructor
 
-    Sphere(n[, field=ℝ])
+    Sphere(n[, field=ℝ]; parameter::Symbol=:type)
 
 Generate the (real-valued) sphere ``𝕊^{n} ⊂ ℝ^{n+1}``, where `field` can also be used to
 generate the complex- and quaternionic-valued sphere.
@@ -49,6 +49,8 @@ struct Sphere{𝔽, T} <: AbstractSphere{𝔽}
     size::T
 end
 function Sphere(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 &&
+        throw(DomainError(n, "The dimension n of a sphere must be nonnegative, but was $(n)."))
     size = wrap_type_parameter(parameter, (n,))
     return Sphere{field, typeof(size)}(size)
 end
@@ -94,9 +96,13 @@ struct ArraySphere{𝔽, T} <: AbstractSphere{𝔽}
 end
 function ArraySphere(
         n::Vararg{Int, I};
-        field::AbstractNumbers = ℝ,
-        parameter::Symbol = :type,
+        field::AbstractNumbers = ℝ, parameter::Symbol = :type,
     ) where {I}
+    any(n .< 1) && throw(
+        DomainError(
+            n, "Every array size of an array sphere must be positive, but they were $(n)."
+        ),
+    )
     size = wrap_type_parameter(parameter, n)
     return ArraySphere{field, typeof(size)}(size)
 end
@@ -111,33 +117,31 @@ The tolerance for the last test can be set using the `kwargs...`.
 function check_point(M::AbstractSphere, p; kwargs...)
     if !isapprox(norm(p), 1.0; kwargs...)
         return DomainError(
-            norm(p),
-            "The point $(p) does not lie on the $(M) since its norm is not 1.",
+            norm(p), "The point $(p) does not lie on the $(M) since its norm is not 1."
         )
     end
     return nothing
 end
 
 """
-    check_vector(M::AbstractSphere, p, X; kwargs... )
+    check_vector(M::AbstractSphere, p, X; atol, rtol, kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`AbstractSphere`](@ref) `M`, i.e.
 after [`check_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
-and orthogonal to `p`.
-The tolerance for the last test can be set using the `kwargs...`.
+and orthogonal to `p` up to `max(atol, rtol * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
-        M::AbstractSphere,
-        p,
-        X::T;
+        M::AbstractSphere, p, X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
     absdot = abs(real(dot(p, X)))
-    if !isapprox(absdot, 0; atol = atol, kwargs...)
+    if !(absdot <= atol || absdot <= rtol * norm(X))
         return DomainError(
             absdot,
-            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding (tolerance: $atol).",
+            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding (tolerance: $(max(atol, rtol * norm(X)))).",
         )
     end
     return nothing
@@ -191,14 +195,25 @@ tangent space at `p` of the [`AbstractSphere`](@ref) `M`.
 """
 exp(::AbstractSphere, ::Any...)
 
-function exp!(M::AbstractSphere, q, p, X)
-    θ = norm(M, p, X)
-    q .= cos(θ) .* p .+ usinc(θ) .* X
+# cos(θ) and sin(θ)/θ as functions of θ², using series for small θ so that automatic
+# differentiation (also of higher order) stays finite at θ = 0
+function _cos_usinc_sq(θ²)
+    # the first omitted terms are about θ⁶ / 720
+    if θ² < cbrt(eps(typeof(θ²)))
+        return 1 - θ² * (1 // 2 - θ² / 24), 1 - θ² * (1 // 6 - θ² / 120)
+    end
+    θ = sqrt(θ²)
+    return cos(θ), usinc(θ)
+end
+
+function exp!(::AbstractSphere, q, p, X)
+    c, s = _cos_usinc_sq(real(dot(X, X)))
+    q .= c .* p .+ s .* X
     return q
 end
-function exp_fused!(M::AbstractSphere, q, p, X, t::Number)
-    θ = abs(t) * norm(M, p, X)
-    q .= cos(θ) .* p .+ usinc(θ) .* t .* X
+function exp_fused!(::AbstractSphere, q, p, X, t::Number)
+    c, s = _cos_usinc_sq(abs2(t) * real(dot(X, X)))
+    q .= c .* p .+ s .* t .* X
     return q
 end
 
@@ -249,6 +264,9 @@ function get_embedding(M::AbstractSphere{𝔽}) where {𝔽}
     return Euclidean(representation_size(M)...; field = 𝔽)
 end
 function get_embedding(M::Sphere{𝔽, <:Tuple}) where {𝔽}
+    return Euclidean(representation_size(M)...; field = 𝔽, parameter = :field)
+end
+function get_embedding(M::ArraySphere{𝔽, <:Tuple}) where {𝔽}
     return Euclidean(representation_size(M)...; field = 𝔽, parameter = :field)
 end
 
@@ -356,9 +374,7 @@ function local_metric(M::Sphere{ℝ, Tuple{Int}}, p, ::DefaultOrthonormalBasis)
     return Diagonal(ones(eltype(p), n))
 end
 function local_metric(
-        ::Sphere{ℝ, TypeParameter{Tuple{n}}},
-        p,
-        B::DefaultOrthonormalBasis,
+        ::Sphere{ℝ, TypeParameter{Tuple{n}}}, p, B::DefaultOrthonormalBasis
     ) where {n}
     return Diagonal(ones(SVector{n, eltype(p)}))
 end
@@ -368,22 +384,49 @@ end
 
 Compute the logarithmic map on the [`AbstractSphere`](@ref) `M`, i.e. the tangent vector,
 whose geodesic starting from `p` reaches `q` after time 1.
-The formula reads for ``x ≠ -y``
+The formula reads for ``p ≠ -q``
 
 ````math
 \log_p q = d_{𝕊}(p,q) \frac{q-\Re(⟨p,q⟩) p}{\lVert q-\Re(⟨p,q⟩) p \rVert_2},
 ````
 
-and a deterministic choice from the set of tangent vectors is returned if ``x=-y``, i.e. for
-opposite points.
+and a deterministic choice from the set of tangent vectors of length ``π`` is returned if
+``p = -q``, i.e. for opposite points.
+To avoid cancellation, the direction is computed from ``q-p`` or, for nearly opposite
+points, from ``q+p``, and the distance using `atan`.
 """
 log(::AbstractSphere, ::Any...)
 
 function log!(M::AbstractSphere, X, p, q)
     cosθ = clamp(real(dot(p, q)), -1, 1)
-    if cosθ ≈ -1 # appr. opposing points, return deterministic choice from set-valued log
+    # Work with q - p (or q + p for nearly opposite points), which avoids cancellation
+    # in the direction; its tangent component equals q - cosθ p.
+    if cosθ >= 0
+        X .= q .- p
+    else
+        X .= q .+ p
+    end
+    X .-= real(dot(p, X)) .* p
+    sin²θ = real(dot(X, X))
+    if cosθ >= 0
+        # scale X by θ / sinθ; for small θ use the series of asin(s) / s in s² = sin²θ,
+        # which is accurate and keeps automatic differentiation finite at p = q
+        # (the first omitted term is about sin⁶θ / 20)
+        if sin²θ < cbrt(eps(typeof(sin²θ)))
+            X .*= 1 + sin²θ * (1 // 6 + sin²θ * 3 // 40)
+        else
+            sinθ = sqrt(sin²θ)
+            X .*= atan(sinθ, cosθ) / sinθ
+        end
+        return project!(M, X, p, X)
+    end
+    # q + p may be almost parallel to p, so the rounding error of the projection above can
+    # be as large as the tangent component; orthogonalize once more
+    X .-= real(dot(p, X)) .* p
+    sinθ = norm(X)
+    if iszero(sinθ) # opposing points, return deterministic choice from set-valued log
         fill!(X, zero(eltype(X)))
-        if p[1] ≈ 1
+        if abs(real(p[1])) ≈ 1
             X[2] = 1
         else
             X[1] = 1
@@ -391,8 +434,9 @@ function log!(M::AbstractSphere, X, p, q)
         copyto!(X, X .- real(dot(p, X)) .* p)
         X .*= π / norm(X)
     else
-        θ = acos(cosθ)
-        X .= (q .- cosθ .* p) ./ usinc(θ)
+        # θ = π - φ, where φ is the angle between -p and q
+        θ = π - atan(sinθ, -cosθ)
+        X .*= θ / sinθ
     end
     return project!(M, X, p, X)
 end
@@ -484,11 +528,8 @@ project(::AbstractSphere, ::Any, ::Any)
 project!(::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::AbstractSphere,
-        pX;
-        vector_at = nothing,
-        σ = one(eltype(pX)),
+        rng::AbstractRNG, M::AbstractSphere, pX;
+        vector_at = nothing, σ = one(eltype(pX)),
     )
     if vector_at === nothing
         project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
@@ -555,11 +596,10 @@ Compute the parallel transport on the [`Sphere`](@ref) of the tangent vector `X`
 to `q`, provided, the [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`) between `p` and `q` is unique. The formula reads
 
 ````math
-P_{p←q}(X) = X - \frac{\Re(⟨\log_p q,X⟩_p)}{d^2_𝕊(p,q)}
-\bigl(\log_p q + \log_q p \bigr).
+\mathcal P_{q←p}(X) = X - \frac{2\Re(⟨X,q⟩)}{\lVert p+q \rVert^2}(p+q).
 ````
 """
-parallel_transport_to(::AbstractSphere, ::Any, ::Any, ::Any, ::Any)
+parallel_transport_to(::AbstractSphere, ::Any, ::Any, ::Any)
 
 function parallel_transport_to!(::AbstractSphere, Y, p, X, q)
     m = p .+ q
@@ -623,7 +663,7 @@ end
     volume_density(M::AbstractSphere{ℝ}, p, X)
 
 Compute volume density function of a sphere, i.e. determinant of the differential of
-exponential map `exp(M, p, X)`. The formula reads ``(\sin(\lVert X\rVert)/\lVert X\rVert)^(n-1)``
+exponential map `exp(M, p, X)`. The formula reads ``(\sin(\lVert X\rVert)/\lVert X\rVert)^{n-1}``
 where `n` is the dimension of `M`. It is derived from Eq. (4.1) in [ChevallierLiLuDunson:2022](@cite).
 """
 function volume_density(M::AbstractSphere{ℝ}, p, X)
@@ -633,22 +673,28 @@ function volume_density(M::AbstractSphere{ℝ}, p, X)
 end
 
 @doc raw"""
-    Y = Weingarten(M::Sphere, p, X, V)
-    Weingarten!(M::Sphere, Y, p, X, V)
+    Y = Weingarten(M::AbstractSphere, p, X, V)
+    Weingarten!(M::AbstractSphere, Y, p, X, V)
 
-Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Sphere`](@ref) `M` with respect to the
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`AbstractSphere`](@ref) `M` with respect to the
 tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
 
-The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
+The formula reads
 
 ```math
-\mathcal W_p(X,V) = -Xp^{\mathrm{T}}V
+\mathcal W_p(X,V) = -\Re(⟨p,V⟩)X,
 ```
-"""
-Weingarten(::Sphere, p, X, V)
 
-function Weingarten!(::Sphere, Y, p, X, V)
-    Y .= -dot(p, V) .* X
+where ``⟨⋅,⋅⟩`` denotes the inner product in the embedding, whose real part is the inner product
+of the embedding as a real vector space.
+This is ``\mathcal W_p(X, P_p^{\perp}U) = P_p(D_XP)U`` of Theorem 1 in [AbsilMahonyTrumpf:2013](@cite)
+for the orthogonal projection ``P_p`` onto ``T_p\mathcal M``, which Section 4.2 there evaluates
+to ``-Xp^{\mathrm{T}}V`` on the real unit sphere.
+"""
+Weingarten(::AbstractSphere, p, X, V)
+
+function Weingarten!(::AbstractSphere, Y, p, X, V)
+    Y .= -real(dot(p, V)) .* X
     return Y
 end
 
@@ -737,11 +783,7 @@ Store in `cX` the stereographic coordinate representation of the tangent vector 
 at `p` with respect to the induced basis `B`.
 """
 function get_coordinates_induced_basis!(
-        M::Sphere{ℝ},
-        cX,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas},
+        M::Sphere{ℝ}, cX, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas}
     )
     n = get_parameter(M.size)[1]
     if B.i === :north
@@ -763,11 +805,7 @@ Store in `X` the tangent vector at `p` represented by stereographic coordinates 
 with respect to the induced basis `B`.
 """
 function get_vector_induced_basis!(
-        M::Sphere{ℝ},
-        X,
-        p,
-        cX,
-        B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas},
+        M::Sphere{ℝ}, X, p, cX, B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas}
     )
     n = get_parameter(M.size)[1]
     a = get_parameters(M, B.A, B.i, p)
@@ -805,16 +843,14 @@ g_a = \frac{4}{(1 + \lVert a \rVert^2)^2} I.
 ````
 """
 function local_metric(M::Sphere{ℝ}, A::StereographicAtlas, i, a)
-    return (4 / (1 + dot(a, a))^2) * I
+    return Diagonal(fill(4 / (1 + dot(a, a))^2, length(a)))
 end
 function det_local_metric(M::Sphere{ℝ}, ::StereographicAtlas, i, a)
     return (4 / (1 + dot(a, a))^2)^manifold_dimension(M)
 end
 # The InducedBasis variant of `local_metric` is deprecated, kept for compatibility with older versions of Manifolds.jl
 function local_metric(
-        M::Sphere{ℝ},
-        p,
-        B::InducedBasis{ℝ, TangentSpaceType, StereographicAtlas, Symbol},
+        M::Sphere{ℝ}, p, B::InducedBasis{ℝ, TangentSpaceType, StereographicAtlas, Symbol}
     )
     a = get_parameters(M, B.A, B.i, p)
     return local_metric(M, B.A, B.i, a)
@@ -833,9 +869,7 @@ coordinate expression is
 - a\langle X_c,Y_c\rangle\right).
 ````
 """
-function affine_connection!(
-        M::Sphere{ℝ}, Zc, A::StereographicAtlas, i, a, Xc, Yc
-    )
+function affine_connection!(M::Sphere{ℝ}, Zc, A::StereographicAtlas, i, a, Xc, Yc)
     factor = -2 / (1 + dot(a, a))
     Zc .= factor .* (Xc .* dot(a, Yc) .+ Yc .* dot(a, Xc) .- a .* dot(Xc, Yc))
     return Zc

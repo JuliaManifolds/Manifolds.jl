@@ -42,14 +42,11 @@ struct RetractionAtlas{
 end
 
 function RetractionAtlas(
-        retr::AbstractRetractionMethod,
-        invretr::AbstractInverseRetractionMethod,
+        retr::AbstractRetractionMethod, invretr::AbstractInverseRetractionMethod
     )
     basis = DefaultOrthonormalBasis()
     return RetractionAtlas{ℝ, typeof(retr), typeof(invretr), typeof(basis)}(
-        retr,
-        invretr,
-        basis,
+        retr, invretr, basis
     )
 end
 RetractionAtlas() = RetractionAtlas(ExponentialRetraction(), LogarithmicInverseRetraction())
@@ -68,8 +65,8 @@ end
 """
     affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
 
-Calculate the affine connection on manifold `M` at point with parameters `a` in chart `i` of an
-an [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Zc` and `Yc` in induced basis and save the result
+Calculate the affine connection on manifold `M` at point with parameters `a` in chart `i` of
+an [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Xc` and `Yc` in induced basis and save the result
 in `Zc`.
 """
 affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
@@ -88,7 +85,7 @@ end
 
 function christoffel_symbols_second!(
         M::AbstractManifold, Γ, A::AbstractAtlas, index, a;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     # number of coordinates
     n = length(a)
@@ -105,9 +102,7 @@ function christoffel_symbols_second!(
     dg = zeros(T, n, n, n)  # Tensor to store ∂_i g_jl
     for i in 1:n, j in 1:n, l in 1:n
         dg[i, j, l] = DI.derivative(
-            t -> inner(M, A, index, a .+ t .* e[i], e[j], e[l]),
-            backend,
-            0.0,
+            t -> inner(M, A, index, a .+ t .* e[i], e[j], e[l]), backend, 0.0
         )
     end
 
@@ -124,7 +119,7 @@ end
     christoffel_symbols_first(M::AbstractManifold, A::AbstractAtlas, i, a; backend::AbstractADType = AutoForwardDiff())
 
 Compute the Christoffel symbols of the first kind ``Γ_{i j k}`` in chart `i` of
-[`AbstractAtlas`] `A` at coordinates `a`.
+[`AbstractAtlas`](@ref) `A` at coordinates `a`.
 
 The symbols are obtained by lowering the first index of the second-kind Christoffel
 symbols:
@@ -151,7 +146,7 @@ Returns an ``n×n×n`` array with ordering ``(i, j, k)``.
 """
 function christoffel_symbols_first(
         M::AbstractManifold, A::AbstractAtlas, i, a;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     n = length(a)
     T = eltype(a)
@@ -161,7 +156,7 @@ end
 
 function christoffel_symbols_first!(
         M::AbstractManifold, Γ, A::AbstractAtlas, i, a;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     # Compute second-kind symbols and lower the first index: Γ_{i j k} = g_{k l} Γ^l_{i j}
     Γ2 = christoffel_symbols_second(M, A, i, a; backend = backend)
@@ -209,7 +204,7 @@ They are computed using, respectively, [`ricci_tensor`](@ref), [`local_metric`](
 """
 function einstein_tensor(
         M::AbstractManifold, A::AbstractAtlas, i, a;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     n = length(a)
     T = eltype(a)
@@ -219,7 +214,7 @@ end
 
 function einstein_tensor!(
         M::AbstractManifold, G::AbstractMatrix, A::AbstractAtlas, i, a;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     # compute Ricci tensor and scalar curvature
     ricci_tensor!(M, G, A, i, a; backend = backend)
@@ -268,9 +263,7 @@ function allocate_result(M::AbstractManifold, f::typeof(get_parameters), p)
 end
 # disambiguation
 @invoke_maker 1 AbstractManifold allocate_result(
-    M::AbstractDecoratorManifold,
-    f::typeof(get_parameters),
-    p,
+    M::AbstractDecoratorManifold, f::typeof(get_parameters), p
 )
 
 """
@@ -316,9 +309,7 @@ function allocate_result(M::AbstractManifold, f::typeof(get_point), a)
 end
 # disambiguation
 @invoke_maker 1 AbstractManifold allocate_result(
-    M::AbstractDecoratorManifold,
-    f::typeof(get_point),
-    a,
+    M::AbstractDecoratorManifold, f::typeof(get_point), a
 )
 
 function get_point(M::AbstractManifold, A::RetractionAtlas, i, a)
@@ -416,9 +407,9 @@ end
     log_local_metric_density(M::AbstractManifold, A::AbstractAtlas, i, a)
 
 Return the natural logarithm of the metric density ``ρ`` of `M` at the point with
-parametrization `a` in chart `i` of [`AbstractAtlas`](@ref) `A`, which is given by
+parametrization `a` in chart `i` of [`AbstractAtlas`](@ref) `A`. The density is given by
 ````math
-ρ = \log \sqrt{\lvert \det g_{ij} \rvert}
+ρ = \sqrt{\lvert \det g_{ij} \rvert}
 ````
 for the metric tensor expressed in the same chart.
 
@@ -500,12 +491,7 @@ Note that, similarly to [`get_parameters`](@ref), this method should fail the sa
 [`AbstractAtlas`](@ref), [`get_parameters`](@ref), [`get_point`](@ref)
 """
 function transition_map(
-        M::AbstractManifold,
-        A_from::AbstractAtlas,
-        i_from,
-        A_to::AbstractAtlas,
-        i_to,
-        a,
+        M::AbstractManifold, A_from::AbstractAtlas, i_from, A_to::AbstractAtlas, i_to, a
     )
     return get_parameters(M, A_to, i_to, get_point(M, A_from, i_from, a))
 end
@@ -515,13 +501,7 @@ function transition_map(M::AbstractManifold, A::AbstractAtlas, i_from, i_to, a)
 end
 
 function transition_map!(
-        M::AbstractManifold,
-        y,
-        A_from::AbstractAtlas,
-        i_from,
-        A_to::AbstractAtlas,
-        i_to,
-        a,
+        M::AbstractManifold, y, A_from::AbstractAtlas, i_from, A_to::AbstractAtlas, i_to, a
     )
     return get_parameters!(M, y, A_to, i_to, get_point(M, A_from, i_from, a))
 end
@@ -550,13 +530,7 @@ end
 Compute [`transition_map_diff`](@ref) on given arguments and save the result in `c_out`.
 """
 function transition_map_diff!(
-        M::AbstractManifold,
-        c_out,
-        A::AbstractAtlas,
-        i_from,
-        a,
-        c_in,
-        i_to,
+        M::AbstractManifold, c_out, A::AbstractAtlas, i_from, a, c_in, i_to
     )
     old_B = induced_basis(M, A, i_from)
     new_B = induced_basis(M, A, i_to)
@@ -621,10 +595,7 @@ space of type `vs`. Returns an object of type [`InducedBasis`](@ref).
 [`VectorSpaceType`](@extref `ManifoldsBase.VectorSpaceType`), [`AbstractBasis`](@extref `ManifoldsBase.AbstractBasis`)
 """
 function induced_basis(
-        ::AbstractManifold{𝔽},
-        A::AbstractAtlas,
-        i,
-        VST::VectorSpaceType = TangentSpaceType(),
+        ::AbstractManifold{𝔽}, A::AbstractAtlas, i, VST::VectorSpaceType = TangentSpaceType()
     ) where {𝔽}
     return InducedBasis{𝔽, typeof(VST), typeof(A), typeof(i)}(VST, A, i)
 end
@@ -637,16 +608,12 @@ Injectivity radius of `get_point` for chart `i` from an [`AbstractAtlas`](@ref) 
 inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
 
 function dual_basis(
-        M::AbstractManifold{𝔽},
-        ::Any,
-        B::InducedBasis{𝔽, TangentSpaceType},
+        M::AbstractManifold{𝔽}, ::Any, B::InducedBasis{𝔽, TangentSpaceType}
     ) where {𝔽}
     return induced_basis(M, B.A, B.i, CotangentSpaceType())
 end
 function dual_basis(
-        M::AbstractManifold{𝔽},
-        ::Any,
-        B::InducedBasis{𝔽, CotangentSpaceType},
+        M::AbstractManifold{𝔽}, ::Any, B::InducedBasis{𝔽, CotangentSpaceType}
     ) where {𝔽}
     return induced_basis(M, B.A, B.i, TangentSpaceType())
 end
@@ -688,7 +655,7 @@ and the inverse local metric `g^{ij}` (returned by `inverse_local_metric`) to fo
 contraction:
 
 ````math
-    K = g^{u v} g^{i p} g^{j q} g^{k r} R^u_{i j k} R^v_{p q r}
+    K = g_{u v} g^{i p} g^{j q} g^{k r} R^u_{i j k} R^v_{p q r}
 ````
 
 # Arguments
@@ -710,6 +677,7 @@ function kretschmann_scalar(
     n = length(a)
     T = eltype(a)
     R = riemann_tensor(M, A, i, a; backend = backend)   # R[u, ii, j, k] == R^u_{ijk}
+    g = local_metric(M, A, i, a)                        # g_{ij}
     ginv = inverse_local_metric(M, A, i, a)             # g^{ij}
 
     K = zero(T)
@@ -719,7 +687,7 @@ function kretschmann_scalar(
             continue
         end
         for v in 1:n, p in 1:n, q in 1:n, r in 1:n
-            K += ginv[u, v] * ginv[ii, p] * ginv[j, q] * ginv[k, r] * Ruijk * R[v, p, q, r]
+            K += g[u, v] * ginv[ii, p] * ginv[j, q] * ginv[k, r] * Ruijk * R[v, p, q, r]
         end
     end
     return K
@@ -738,7 +706,7 @@ local_metric(::AbstractManifold, ::Any, ::InducedBasis)
 
 Compute the allocating version of Levi-Civita affine connection on the manifold `M` at a point with parameters `a`
 in chart `i` of an  [`AbstractAtlas`](@ref) `A`. The connection is calculated for vectors
-with coefficients `Xc` and `Yc` in the induced basis, and the result is stored in `Zc`.
+with coefficients `Xc` and `Yc` in the induced basis.
 """
 function levi_civita_affine_connection(M::AbstractManifold, A, i, a, Xc, Yc; backend::AbstractADType = AutoForwardDiff())
     Zc = similar(Xc, Base.promote_type(eltype(Xc), eltype(Yc), eltype(a)))
@@ -789,7 +757,7 @@ The result is stored in `Zc`, which represents the Levi-Civita connection in the
 """
 function levi_civita_affine_connection!(
         M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     # number of coordinates
     n = length(a)
@@ -855,11 +823,7 @@ The result is stored in `c`, which contains the coordinates of the tangent vecto
 [`InducedBasis`](@ref), [`AbstractAtlas`](@ref)
 """
 function get_coordinates_induced_basis!(
-        M::AbstractManifold,
-        c,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas};
+        M::AbstractManifold, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas};
         backend::AbstractADType = AutoForwardDiff(),
     )
     DI.derivative!(t -> get_parameters(M, B.A, B.i, p .+ t .* X), c, backend, zero(eltype(c)))
@@ -902,11 +866,7 @@ in the induced basis `B`.
 [`InducedBasis`](@ref), [`AbstractAtlas`](@ref)
 """
 function get_vector_induced_basis!(
-        M::AbstractManifold,
-        Y,
-        p,
-        Xc,
-        B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas};
+        M::AbstractManifold, Y, p, Xc, B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas};
         backend::AbstractADType = AutoForwardDiff(),
     )
     p_i = get_parameters(M, B.A, B.i, p)
@@ -924,7 +884,7 @@ The scalar curvature is the trace of the Ricci tensor with respect to the invers
 local metric:
 ````math
     R = g^{ij} R_{ij}
-````math
+````
 
 # Arguments
 
@@ -946,6 +906,29 @@ function ricci_curvature(
     Ric = ricci_tensor(M, A, i, a; backend = backend)
     S = sum(Ginv .* Ric)
     return S
+end
+
+"""
+    gaussian_curvature(M::AbstractManifold, A::AbstractAtlas, i, a; backend=AutoForwardDiff())
+
+Compute the Gaussian curvature of the manifold `M` at the point given by coordinates `a`
+in chart `i` of atlas `A`. This is equal to half of the scalar Ricci curvature,
+see [`ricci_curvature`](@ref).
+
+# Arguments
+
+- `M::AbstractManifold` : manifold
+- `A::AbstractAtlas`   : atlas providing charts / induced basis
+- `i`                  : chart index in `A`
+- `a`                  : coordinates of the point in chart `i` (length `n`)
+- `backend::AbstractADType` : automatic-differentiation backend (default `AutoForwardDiff()`)
+
+# Returns
+
+- scalar (same element type as `a`) equal to the Gaussian curvature at the point
+"""
+function gaussian_curvature(M::AbstractManifold, A::AbstractAtlas, i, a; kwargs...)
+    return ricci_curvature(M, A, i, a; kwargs...) / 2
 end
 
 """
@@ -978,7 +961,7 @@ The Ricci tensor is the contraction of the Riemann tensor:
 """
 function ricci_tensor(
         M::AbstractManifold, A::AbstractAtlas, i, a;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     n = length(a)
     T = eltype(a)
@@ -988,7 +971,7 @@ end
 
 function ricci_tensor!(
         M::AbstractManifold, Ric, A::AbstractAtlas, i, a;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     # Compute the full Riemann tensor and contract: Ric_{pq} = R^u_{u p q}.
     R = riemann_tensor(M, A, i, a; backend = backend)
@@ -1004,7 +987,7 @@ function ricci_tensor!(
     return Ric
 end
 
-"""
+@doc raw"""
     riemann_tensor(M::AbstractManifold, A::AbstractAtlas, i, a;
         backend::AbstractADType = AutoForwardDiff()
 
@@ -1013,10 +996,12 @@ chart `i` of atlas `A`.
 
 Returns a 4-dimensional array `R` of size (n,n,n,n) with components `R[u,i,j,k] = R^u_{ijk}`,
 where the first index is the contravariant (upper) index and the remaining three are covariant
-(lower) indices. The components satisfy, for coordinate vector fields e_i:
+(lower) indices. With ``Γ^u_{ij}`` denoting the Christoffel symbols of the second kind,
+the components are
 
 ````math
-    R^u_{ijk} e_u = (∇_{e_i} ∇_{e_j} - ∇_{e_j} ∇_{e_i} - ∇_{[e_i,e_j]}) e_k
+    R^u_{ijk} = ∂_i Γ^u_{jk} - ∂_j Γ^u_{ik}
+        + \sum_m \left(Γ^m_{jk} Γ^u_{im} - Γ^m_{ik} Γ^u_{jm}\right).
 ````
 
 # Arguments
@@ -1042,7 +1027,7 @@ where the first index is the contravariant (upper) index and the remaining three
 """
 function riemann_tensor(
         M::AbstractManifold, A::AbstractAtlas, i, a;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     n = length(a)
     T = eltype(a)
@@ -1052,7 +1037,7 @@ end
 
 function riemann_tensor!(
         M::AbstractManifold, R, A::AbstractAtlas, i, a;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     n = length(a)
     T = eltype(a)
@@ -1100,7 +1085,7 @@ Compute the action of the Riemann curvature tensor `R` on tangent vectors with c
 `Xc`, `Yc` and `Zc` at the point specified by parameters `a` in chart `i` of atlas `A` on
 manifold `M`.
 
-This function returns the vector `W (in induced-chart coordinates) given by
+This function returns the vector `W` (in induced-chart coordinates) given by
 ``(R(X, Y) Z)``, i.e. the result of applying the curvature operator to `Zc`.
 
 # Arguments
@@ -1131,7 +1116,7 @@ This function returns the vector `W (in induced-chart coordinates) given by
 """
 function riemann_tensor(
         M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc, Zc;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     Wc = similar(Xc)
     return riemann_tensor!(M, Wc, A, i, a, Xc, Yc, Zc; backend = backend)
@@ -1139,7 +1124,7 @@ end
 
 function riemann_tensor!(
         M::AbstractManifold, Wc, A::AbstractAtlas, i, a, Xc, Yc, Zc;
-        backend::AbstractADType = AutoForwardDiff()
+        backend::AbstractADType = AutoForwardDiff(),
     )
     # number of coordinates
     n = length(a)

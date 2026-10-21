@@ -35,3 +35,17 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
         if: ${{ matrix.os =='ubuntu-latest' }}
+  jet:
+    name: JET - Julia ${{ matrix.julia-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        julia-version: ["1"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: ${{ matrix.julia-version }}
+      - uses: julia-actions/cache@v3
+      - name: Run JET tests
+        run: julia --project=test/jet -e 'using Pkg; Pkg.instantiate(); include("test/jet/runtests.jl")'

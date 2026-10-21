@@ -1,4 +1,5 @@
 include("../header.jl")
+using ADTypes
 using FiniteDifferences
 using Manifolds: RiemannianProjectionBackend
 using ManifoldDiff
@@ -15,13 +16,14 @@ function Ω(::SymplecticStiefel, p, X)
     return Ω
 end
 
-function exp_naiive!(M::SymplecticStiefel, q, p, X)
+function exp_naive!(M::SymplecticStiefel, q, p, X)
     Ω_X = Ω(M, p, X)
     q .= exp(Ω_X - Ω_X') * exp(Array(Ω_X')) * p
     return q
 end
 
 @testset "SymplecticStiefel" begin
+    @test_throws DomainError SymplecticStiefel(2, 4)
     M = SymplecticStiefel(6, 4)
 
     p_6_4 = [
@@ -186,11 +188,18 @@ end
             inverse_retract(M, p_6_4, q_6_4, CayleyInverseRetraction())
         @test isapprox(X_inv_cayley_retraction, X_inv_cayley_retraction_2; atol = 1.0e-16)
         @test isapprox(X_inv_cayley_retraction, X1; atol = 1.0e-12)
+        # exp agrees with its definition, evaluated directly by exp_naive!
+        pc = convert(Matrix{Float64}, close_points[1])
+        Xc = inverse_retract(
+            M, pc, convert(Matrix{Float64}, close_points[2]), CayleyInverseRetraction()
+        )
+        @test isapprox(exp(M, pc, Xc), exp_naive!(M, similar(pc), pc, Xc))
     end
     @testset "Riemannian Metric" begin
         X1_norm = 37.85466645
         @test isapprox(norm(M, p_6_4, X1), X1_norm; atol = 1.0e-8)
         @test isapprox(norm(M, p_6_4, X1), √inner(M, p_6_4, X1, X1); atol = 1.0e-8)
+        @test inner(M, Float32.(p_6_4), Float32.(X1), Float32.(X1)) isa Float32
 
         X2_norm = 1.0
         @test isapprox(norm(M, p_6_4, X2), X2_norm; atol = 1.0e-6)
@@ -227,8 +236,7 @@ end
             @testset "Type $(type)" begin
                 @testset "CayleyRetraction" begin
                     Manifolds.test_manifold(
-                        M,
-                        convert.(type, points);
+                        M, convert.(type, points);
                         retraction_methods = [CayleyRetraction()],
                         default_retraction_method = CayleyRetraction(),
                         default_inverse_retraction_method = CayleyInverseRetraction(),
@@ -245,8 +253,7 @@ end
 
                 @testset "ExponentialRetraction" begin
                     Manifolds.test_manifold(
-                        M,
-                        convert.(type, close_points);
+                        M, convert.(type, close_points);
                         retraction_methods = [ExponentialRetraction()],
                         default_retraction_method = ExponentialRetraction(),
                         default_inverse_retraction_method = CayleyInverseRetraction(),
@@ -293,11 +300,12 @@ end
             return Q_grad * p * (euc_grad_f') * Q_grad * p + euc_grad_f * p' * p
         end
         p_grad = convert(Array{Float64}, points[1])
+        X_r = riemannian_gradient(M, points[1], X2)
+        @test riemannian_gradient(M, points[1], X2; embedding_metric = EuclideanMetric()) == X_r
         fd_diff = RiemannianProjectionBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 
         @test isapprox(
-            Manifolds.gradient(M, test_f, p_grad, fd_diff),
-            analytical_grad_f(p_grad);
+            Manifolds.gradient(M, test_f, p_grad, fd_diff), analytical_grad_f(p_grad);
             atol = 1.0e-9,
         )
 

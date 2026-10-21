@@ -33,7 +33,7 @@ using solver `solver`. Geodesic γ is sampled at time interval `dt`, with γ(0) 
 """
 function solve_chart_log_bvp(
         M::AbstractManifold, a1, a2, A::AbstractAtlas, i;
-        solver = MIRK4(), dt::Real = 0.05, kwargs...
+        solver = MIRK4(), dt::Real = 0.05, kwargs...,
     )
     tspan = (0.0, 1.0)
     function bc1!(residual, u, p, t)
@@ -62,7 +62,7 @@ Estimate distance between points on [`AbstractManifold`](@extref `ManifoldsBase.
 """
 function estimate_distance_from_bvp(
         M::AbstractManifold, a1, a2, A::AbstractAtlas, i;
-        solver = MIRK4(), dt = 0.05, kwargs...
+        solver = MIRK4(), dt = 0.05, kwargs...,
     )
     sol = solve_chart_log_bvp(M, a1, a2, A, i; solver, dt, kwargs...)
     mid = length(a1)

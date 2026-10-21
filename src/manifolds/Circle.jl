@@ -16,8 +16,8 @@ struct Circle{𝔽} <: AbstractManifold{𝔽} end
 
 Circle(𝔽::AbstractNumbers = ℝ) = Circle{𝔽}()
 
-function adjoint_Jacobi_field(::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
-    return X
+function adjoint_Jacobi_field(M::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 ManifoldsBase.allocate_on(::Circle{ℝ}) = Array{Float64, 0}(undef)
@@ -35,8 +35,7 @@ check_point(::Circle, ::Any...)
 function check_point(M::Circle{ℝ}, p; kwargs...)
     if !isapprox(sym_rem(p), p; kwargs...)
         return DomainError(
-            p,
-            "The point $(p) does not lie on $(M), since its is not in [-π,π).",
+            p, "The point $(p) does not lie on $(M), since its is not in [-π,π)."
         )
     end
     return nothing
@@ -44,8 +43,7 @@ end
 function check_point(M::Circle{ℂ}, p; kwargs...)
     if !isapprox(sum(abs.(p)), 1.0; kwargs...)
         return DomainError(
-            sum(abs.(p)),
-            "The point $(p) does not lie on the $(M) since its norm is not 1.",
+            sum(abs.(p)), "The point $(p) does not lie on the $(M) since its norm is not 1."
         )
     end
     return nothing
@@ -82,11 +80,8 @@ function check_vector(M::Circle{ℝ}, p, X; kwargs...)
     return nothing
 end
 function check_vector(
-        M::Circle{ℂ},
-        p,
-        X::T;
-        atol::Real = sqrt(eps(real(float(number_eltype(T))))),
-        kwargs...,
+        M::Circle{ℂ}, p, X::T;
+        atol::Real = sqrt(eps(real(float(number_eltype(T))))), kwargs...,
     ) where {T}
     if !isapprox(abs(complex_dot(p, X)), 0; atol = atol, kwargs...)
         return DomainError(
@@ -196,13 +191,7 @@ function get_coordinates_diagonalizing(::Circle{ℝ}, p, X, B::DiagonalizingOrth
     sbv = sign(B.frame_direction[])
     return X * (sbv == 0 ? one(sbv) : sbv)
 end
-function get_coordinates_diagonalizing!(
-        M::Circle{ℝ},
-        Y,
-        p,
-        X,
-        B::DiagonalizingOrthonormalBasis,
-    )
+function get_coordinates_diagonalizing!(M::Circle{ℝ}, Y, p, X, B::DiagonalizingOrthonormalBasis)
     Y[] = get_coordinates_diagonalizing(M, p, X, B)[]
     return Y
 end
@@ -214,11 +203,7 @@ Return tangent vector coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 get_coordinates(::Circle{ℂ}, p, X, ::DefaultOrthonormalBasis{<:Any, TangentSpaceType})
 function get_coordinates_orthonormal!(
-        M::Circle{ℂ},
-        Y,
-        p,
-        X,
-        n::Union{RealNumbers, ComplexNumbers},
+        M::Circle{ℂ}, Y, p, X, n::Union{RealNumbers, ComplexNumbers}
     )
     Y[] = get_coordinates_orthonormal(M, p, X, n)[]
     return Y
@@ -256,10 +241,7 @@ end
 Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 function get_vector_orthonormal(
-        ::Circle{ℂ},
-        p::StaticArray,
-        c,
-        ::Union{RealNumbers, ComplexNumbers},
+        ::Circle{ℂ}, p::StaticArray, c, ::Union{RealNumbers, ComplexNumbers}
     )
     return @SArray fill(1im * c[1] * p[1])
 end
@@ -313,8 +295,8 @@ Return true. [`Circle`](@ref) is a flat manifold.
 """
 is_flat(M::Circle) = true
 
-function jacobi_field(::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
-    return X
+function jacobi_field(M::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
+    return β(zero(t), t, distance(M, p, q)) * X
 end
 
 @doc raw"""
@@ -333,13 +315,21 @@ log(::Circle, ::Any...)
 Base.log(::Circle{ℝ}, p::Real, q::Real) = sym_rem(q - p)
 function Base.log(M::Circle{ℂ}, p::Number, q::Number)
     cosθ = complex_dot(p, q)
-    if cosθ ≈ -1  # appr. opposing points, return deterministic choice from set-valued log
-        X = real(p) ≈ 1 ? 1im : 1 + 0im
+    cosθ = clamp(complex_dot(p, q), -1, 1)
+    Xⁱ = complex_dot(im * p, q) # coordinate of q along i p, for nearly opposing points
+    if cosθ ≈ -1  # appr. opposing points, angle from that coordinate
+        θ = atan(abs(Xⁱ), complex_dot(p, q))
+    else
+        θ = acos(cosθ)
+    end
+    if θ ≈ π  # opposing points, return deterministic choice from set-valued log
+        X = abs(real(p)) ≈ 1 ? 1im : 1 + 0im
         X = X - complex_dot(p, X) * p
         X *= π / norm(X)
+    elseif cosθ ≈ -1  # nearly opposing points, scale the tangent part of q to the angle
+        X = Xⁱ * im * p
+        X *= θ / norm(X)
     else
-        cosθ = cosθ > 1 ? one(cosθ) : cosθ
-        θ = acos(cosθ)
         X = (q - cosθ * p) / usinc(θ)
     end
     return project(M, p, X)
@@ -348,13 +338,21 @@ end
 log!(::Circle{ℝ}, X, p, q) = (X .= sym_rem(q[] - p[]))
 function log!(M::Circle{ℂ}, X, p, q)
     cosθ = complex_dot(p, q)
-    if cosθ ≈ -1
-        X .= sum(real.(p)) ≈ 1 ? 1.0im : 1.0 + 0.0im
-        X .= X - complex_dot(p, X) * p
-        X .*= π / norm(X)
+    cosθ = clamp(complex_dot(p, q), -1, 1)
+    Xⁱ = complex_dot(im * p, q) # coordinate of q along i p, for nearly opposing points
+    if cosθ ≈ -1  # appr. opposing points, angle from that coordinate
+        θ = atan(abs(Xⁱ), complex_dot(p, q))
     else
-        cosθ = cosθ > 1 ? one(cosθ) : cosθ
         θ = acos(cosθ)
+    end
+    if θ ≈ π  # opposing points, return deterministic choice from set-valued log
+        X .= abs(sum(real.(p))) ≈ 1 ? 1.0im : 1.0 + 0.0im
+        X .-= complex_dot(p, X) .* p
+        X .*= π / norm(X)
+    elseif cosθ ≈ -1  # nearly opposing points, scale the tangent part of q to the angle
+        X .= Xⁱ .* im .* p
+        X .*= θ / norm(X)
+    else
         X .= (q - cosθ * p) / usinc(θ)
     end
     return project!(M, X, p, X)
@@ -378,22 +376,17 @@ manifold_volume(::Circle) = 2 * π
 @doc raw"""
     mean(M::Circle{ℝ}, x::AbstractVector[, w::AbstractWeights])
 
-Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
-the [`Circle`](@ref) ``𝕊^1``, represented by real numbers, i.e. the angular mean
+Compute the (optionally weighted) angular mean of the ``n`` points `x` on the
+[`Circle`](@ref) ``𝕊^1``, represented by real numbers, i.e.
 ````math
-\operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\sin(x_i) \Bigr).
+\operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\cos(x_i) \Bigr).
 ````
 """
 mean(::Circle{ℝ}, ::Any)
 function Statistics.mean(::Circle{ℝ}, x::AbstractVector{<:Real}; kwargs...)
     return atan(1 / length(x) * sum(sin, x), 1 / length(x) * sum(cos, x))
 end
-function Statistics.mean(
-        ::Circle{ℝ},
-        x::AbstractVector{<:Real},
-        w::AbstractVector;
-        kwargs...,
-    )
+function Statistics.mean(::Circle{ℝ}, x::AbstractVector{<:Real}, w::AbstractVector; kwargs...)
     return atan(sum(w .* sin.(x)), sum(w .* cos.(x)))
 end
 @doc raw"""
@@ -421,9 +414,7 @@ function Statistics.mean(M::Circle{ℂ}, x::AbstractVector{<:Complex}; kwargs...
     return s / abs(s)
 end
 function Statistics.mean(
-        M::Circle{ℂ},
-        x::AbstractVector{<:Complex},
-        w::AbstractVector;
+        M::Circle{ℂ}, x::AbstractVector{<:Complex}, w::AbstractVector;
         kwargs...,
     )
     s = sum(w .* x)
@@ -434,7 +425,7 @@ function Statistics.mean(
 end
 
 mid_point(M::Circle{ℝ}, p1, p2) = exp(M, p1, 0.5 * log(M, p1, p2))
-mid_point(::Circle{ℂ}, p1::Complex, p2::Complex) = exp(im * (angle(p1) + angle(p2)) / 2)
+mid_point(M::Circle{ℂ}, p1::Complex, p2::Complex) = exp(M, p1, 0.5 * log(M, p1, p2))
 mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = Scalar(mid_point(M, p1[], p2[]))
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
@@ -442,12 +433,16 @@ mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = Scalar(mid_point(M
 number_of_coordinates(::Circle, ::AbstractBasis) = 1
 
 @doc raw"""
-    project(M::Circle{ℂ}, p)
+    project(M::Circle, p)
 
-Project a point `p` onto the complex [`Circle`](@ref) `M`, i.e. the unit circle in the complex plane.
+Project a point `p` onto the [`Circle`](@ref) `M`.
+For the real-valued case this is the symmetric remainder [`sym_rem`](@ref) of `p`,
+for the complex-valued case it is the projection onto the unit circle in the complex plane.
 """
 project(::Circle, ::Any)
+project(::Circle{ℝ}, p::Real) = sym_rem(p)
 project(::Circle{ℂ}, p::Number) = p / abs(p)
+project!(::Circle{ℝ}, q, p) = (q .= sym_rem(p))
 project!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 @doc raw"""
@@ -455,12 +450,16 @@ project!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 Project a value `X` onto the tangent space of the point `p` on the [`Circle`](@ref) `M`.
 
+For the real-valued case the tangent space is all of ``ℝ``, so `X` is returned unchanged.
+
 For the complex valued case `X` is projected onto the line in the complex plane
 that is parallel to the tangent to `p` on the unit circle and contains `0`.
 """
 project(::Circle, ::Any, ::Any)
+project(::Circle{ℝ}, p::Real, X::Real) = X
 project(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
-project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
+project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
+project!(::Circle{ℂ}, Y, p, X) = (Y .= X .- complex_dot(p, X) .* p)
 
 @doc raw"""
     Random.rand(M::Circle{ℝ}; vector_at = nothing, σ::Real=1.0)
@@ -492,22 +491,51 @@ function Random.rand(rng::AbstractRNG, M::Circle{ℂ}; vector_at = nothing, σ::
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::Circle,
-        pX;
-        vector_at = nothing,
-        σ::Real = one(real(eltype(pX))),
+        rng::AbstractRNG, M::Circle, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
     )
     pX .= rand(rng, M; vector_at, σ)
     return pX
 end
 
-retract(M::Circle, p, q) = retract(M, p, q, ExponentialRetraction())
-retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)
+retract(M::Circle, p, X) = retract(M, p, X, ExponentialRetraction())
+retract(M::Circle, p, X, m::ExponentialRetraction) = exp(M, p, X)
 
 representation_size(::Circle) = ()
 
 Base.show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
+
+@doc raw"""
+    riemann_tensor(M::Circle, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on the [`Circle`](@ref) `M`.
+Its value is always the zero tangent vector, since `M` is flat.
+"""
+riemann_tensor(::Circle, p, X, Y, Z)
+riemann_tensor(::Circle, p, X::Number, Y, Z) = zero(X)
+
+riemann_tensor!(::Circle, Xresult, p, X, Y, Z) = fill!(Xresult, 0)
+
+@doc raw"""
+    sectional_curvature(M::Circle, p, X, Y)
+
+Return the sectional curvature 0 of the [`Circle`](@ref) `M`, which is flat.
+"""
+sectional_curvature(::Circle, p, X, Y) = 0.0
+
+@doc raw"""
+    sectional_curvature_max(M::Circle)
+
+Return the upper bound 0 of the sectional curvature of the [`Circle`](@ref) `M`, which is flat.
+"""
+sectional_curvature_max(::Circle) = 0.0
+
+@doc raw"""
+    sectional_curvature_min(M::Circle)
+
+Return the lower bound 0 of the sectional curvature of the [`Circle`](@ref) `M`, which is flat.
+"""
+sectional_curvature_min(::Circle) = 0.0
 
 @doc raw"""
     sym_rem(x,[T=π])

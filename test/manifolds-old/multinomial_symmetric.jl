@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Multinomial symmetric matrices" begin
+    @test_throws DomainError MultinomialSymmetric(0)
     M = MultinomialSymmetric(3)
     @test manifold_dimension(M) == 3
     @test repr(M) == "MultinomialSymmetric(3)"
@@ -18,8 +19,12 @@ include("../header.jl")
     @test_throws ManifoldDomainError is_vector(M, p, Xf1; error = :error)
     Xf2 = [0.0 -1.0 0.0; -1.0 0.0 0.0; 0.0 0.0 0.0] # nonzero sums
     @test_throws ManifoldDomainError is_vector(M, p, Xf2; error = :error)
+    Xf3 = [-0.1 0.0 0.1; 0.0 0.2 -0.2; 0.1 -0.2 0.1] .+ 1.0e-6 / 3 # row sums 1.0e-6
+    @test !is_vector(M, p, Xf3)
+    @test is_vector(M, p, Xf3; atol = 1.0e-3)
     @test representation_size(M) == (3, 3)
     @test !is_flat(M)
+    @test is_flat(MultinomialSymmetric(2))
     pE = similar(p)
     embed!(M, pE, p)
     pE2 = embed(M, p)
@@ -37,13 +42,20 @@ include("../header.jl")
 
     X2 = [-0.1 0.0 0.1; 0.0 0.2 -0.2; 0.1 -0.2 0.1]
     @test is_vector(
-        M,
-        p2,
-        vector_transport_to(M, p, X2, p2, ProjectionTransport());
+        M, p2, vector_transport_to(M, p, X2, p2, ProjectionTransport());
         atol = 10^-15,
     )
     X3 = [1.0 1.0 1.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
     @test inner(M, p, X3, X3) == 9.0
+    @testset "Nonsymmetric input from the embedding" begin
+        Y = [1.0 2.0 0.0; 0.0 1.0 -1.0; 3.0 0.0 1.0]
+        @test is_vector(M, p2, project(M, p2, Y))
+        @test project(M, p2, Y) ≈ project(M, p2, (Y + Y') / 2)
+        @test is_vector(M, p2, riemannian_gradient(M, p2, Y))
+        H = [1.0 0.5 2.0; 0.3 1.0 0.0; 1.5 0.2 1.0]
+        Hs = riemannian_Hessian(M, p2, (Y + Y') / 2, (H + H') / 2, X2)
+        @test riemannian_Hessian(M, p2, Y, H, X2) ≈ Hs
+    end
 
     types = [Matrix{Float64}]
 
@@ -78,6 +90,10 @@ include("../header.jl")
         @test is_point(M, p)
         X = rand(M; vector_at = p)
         @test is_vector(M, p, X)
+        Y = rand(MersenneTwister(2), M; vector_at = p, σ = 3.0)
+        @test Y ≈ 3 .* rand(MersenneTwister(2), M; vector_at = p)
+        A = rand(MersenneTwister(1), SymmetricMatrices(3))
+        @test rand(MersenneTwister(1), M; tolerance = 0.1) == project(M, A; tolerance = 0.1)
     end
     @testset "Hessian call" begin
         p = ones(3, 3) ./ 3

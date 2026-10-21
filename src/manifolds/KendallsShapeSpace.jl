@@ -12,12 +12,20 @@ translation and scaling and rotation of all points [Kendall:1984](@cite)[Kendall
     KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
 
 # References
+
+[Kendall:1984](@cite), [Kendall:1989](@cite)
 """
 struct KendallsShapeSpace{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
 function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol = :type)
+    (n < 1 || k < 2) && throw(
+        DomainError(
+            (n, k),
+            "Kendall's shape spaces need a positive dimension n and at least k = 2 landmarks, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return KendallsShapeSpace{typeof(size)}(size)
 end
@@ -94,6 +102,8 @@ function ManifoldsBase.get_embedding_type(::KendallsShapeSpace)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
+metric(::KendallsShapeSpace) = EuclideanMetric()
+
 """
     horizontal_component(::KendallsShapeSpace, p, X)
 
@@ -104,6 +114,22 @@ horizontal_component(::KendallsShapeSpace, p, X)
 
 function horizontal_component!(::KendallsShapeSpace, Y, p, X)
     B = p * transpose(p)
+    n, k = size(p)
+    if rank(B) < n
+        # remove the projection onto the vertical space, spanned by (e_j e_i^T - e_i e_j^T) p
+        V = zeros(promote_type(eltype(p), eltype(X)), n * k, div(n * (n - 1), 2))
+        L = LinearIndices(p)
+        c = 0
+        for i in 1:n, j in (i + 1):n
+            c += 1
+            for l in 1:k
+                V[L[i, l], c] = -p[j, l]
+                V[L[j, l], c] = p[i, l]
+            end
+        end
+        Y .= X .- reshape(V * (V \ vec(X)), n, k)
+        return Y
+    end
     C = X * transpose(p) - p * transpose(X)
     A = sylvc(B, B, C)
     Y .= X .- A * p
@@ -116,11 +142,30 @@ function inner(M::KendallsShapeSpace, p, X, Y)
     return inner(get_embedding(M), p, Xh, Yh)
 end
 
+@doc raw"""
+    isapprox(M::KendallsShapeSpace, p, X, Y; kwargs...)
+
+Test whether two tangent vectors `X`, `Y` at `p` on the [`KendallsShapeSpace`](@ref) `M` are (approximately)
+the same, that is whether ``\lVert X - Y \rVert_p \approx 0`` with the classical `isapprox`.
+The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(X, Y))`.
+"""
+isapprox(::KendallsShapeSpace, ::Any, ::Any, ::Any)
+
+@doc raw"""
+    isapprox(M::KendallsShapeSpace, p, q; kwargs...)
+
+Test whether two points `p`, `q` on the [`KendallsShapeSpace`](@ref) `M` are (approximately) the same.
+Since this is a quotient manifold, the test is performed by checking their distance if they are
+not equal, that is ``d_{\mathcal M}(p,q) \approx 0`` with the classical `isapprox`.
+The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(p, q))`.
+"""
+isapprox(::KendallsShapeSpace, ::Any, ::Any)
+
 function _isapprox(M::KendallsShapeSpace, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end
 function _isapprox(M::KendallsShapeSpace, p, q; atol = sqrt(max_eps(p, q)), kwargs...)
-    return isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
+    return p == q || isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
 end
 
 """
@@ -134,7 +179,7 @@ is_flat(M::KendallsShapeSpace) = false
     log(M::KendallsShapeSpace, p, q)
 
 Compute the logarithmic map on [`KendallsShapeSpace`](@ref) `M`.
-See the [`exp`](@ref exp(::KendallsShapeSpace, ::Any, ::Any)onential map for more details
+See the [`exp`](@ref exp(::KendallsShapeSpace, ::Any, ::Any))onential map for more details.
 """
 log(M::KendallsShapeSpace, p, q)
 
@@ -148,17 +193,13 @@ end
 
 Return the dimension of the [`KendallsShapeSpace`](@ref) manifold `M`. The dimension is
 given by ``n(k - 1) - 1 - n(n - 1)/2`` in the typical case where ``k \geq n+1``, and
-``(k + 1)(k - 2) / 2`` otherwise, unless ``k`` is equal to 1, in which case the dimension
-is 0. See [Kendall:1984](@cite) for a discussion of the over-dimensioned case.
+``(k + 1)(k - 2) / 2`` otherwise. See [Kendall:1984](@cite) for a discussion of the
+over-dimensioned case.
 """
 function manifold_dimension(M::KendallsShapeSpace)
     n, k = get_parameter(M.size)
     if k < n + 1 # over-dimensioned case
-        if k == 1
-            return 0
-        else
-            return div((k + 1) * (k - 2), 2)
-        end
+        return div((k + 1) * (k - 2), 2)
     else
         return n * (k - 1) - 1 - div(n * (n - 1), 2)
     end
@@ -174,7 +215,9 @@ function project!(M::KendallsShapeSpace, q, p)
 end
 
 function project!(M::KendallsShapeSpace, Y, p, X)
-    return project!(get_embedding(M), Y, p, X)
+    project!(get_embedding(M), Y, p, X)
+    horizontal_component!(M, Y, p, Y)
+    return Y
 end
 
 @doc raw"""
@@ -189,13 +232,11 @@ with mean zero and standard deviation `σ`.
 rand(::KendallsShapeSpace; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::KendallsShapeSpace,
-        pX;
-        vector_at = nothing,
-        σ::Real = one(eltype(pX)),
+        rng::AbstractRNG, M::KendallsShapeSpace, pX;
+        vector_at = nothing, σ::Real = one(eltype(pX)),
     )
     rand!(rng, get_embedding(M), pX; vector_at = vector_at, σ = σ)
+    vector_at === nothing || horizontal_component!(M, pX, vector_at, pX)
     return pX
 end
 

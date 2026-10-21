@@ -9,12 +9,12 @@ fiber_bundle_transport(M::AbstractManifold, ::FiberType) =
     default_vector_transport_method(M)
 
 """
-    VectorBundle{𝔽,TVS,TM,VTV} = FiberBundle{𝔽,TVS,TM,TVT} where {TVS<:VectorSpaceType}
+    VectorBundle{𝔽,TVS,TM,TVT} = FiberBundle{𝔽,TVS,TM,TVT} where {TVS<:VectorSpaceType}
 
 Alias for [`FiberBundle`](@ref) when fiber type is a `TVS` of type
 [`VectorSpaceType`](@extref `ManifoldsBase.VectorSpaceType`).
 
-`VectorSpaceFiberType` is used to encode vector spaces as fiber types.
+`VectorSpaceType` is used to encode vector spaces as fiber types.
 """
 const VectorBundle{𝔽, TVS, TM, TVT} = FiberBundle{
     𝔽,
@@ -117,7 +117,7 @@ end
     inner(B::VectorBundle, p, X, Y)
 
 Inner product of tangent vectors `X` and `Y` at point `p` from the
-vector bundle `B` over manifold `B.fiber` (denoted ``\mathcal M``).
+vector bundle `B` over manifold `B.manifold` (denoted ``\mathcal M``).
 
 Notation:
   * The point ``p = (x_p, V_p)`` where ``x_p ∈ \mathcal M`` and ``V_p`` belongs to the
@@ -184,7 +184,7 @@ is_flat(M::VectorBundle) = is_flat(M.manifold)
     project(B::VectorBundle, p)
 
 Project the point `p` from the ambient space of the vector bundle `B`
-over manifold `B.fiber` (denoted ``\mathcal M``) to the vector bundle.
+over manifold `B.manifold` (denoted ``\mathcal M``) to the vector bundle.
 
 Notation:
   * The point ``p = (x_p, V_p)`` where ``x_p`` belongs to the ambient space of ``\mathcal M``
@@ -237,12 +237,12 @@ function project!(B::VectorBundle, Y, p, X)
 end
 
 """
-    retract(M::VectorBundle, p, q, ::FiberBundleProductRetraction)
+    retract(M::VectorBundle, p, X, ::FiberBundleProductRetraction)
 
 Compute the allocating variant of the [`FiberBundleProductRetraction`](@ref),
 which by default allocates and calls `retract_product!`.
 """
-retract(::VectorBundle, p, q, ::FiberBundleProductRetraction)
+retract(::VectorBundle, p, X, ::FiberBundleProductRetraction)
 
 function ManifoldsBase._retract!(M::VectorBundle, q, p, X, ::FiberBundleProductRetraction)
     return retract_product!(M, q, p, X)
@@ -253,22 +253,13 @@ function retract_product!(M::VectorBundle, q, p, X)
 end
 
 function ManifoldsBase._retract_fused(
-        M::VectorBundle,
-        p,
-        X,
-        t::Number,
-        ::FiberBundleProductRetraction,
+        M::VectorBundle, p, X, t::Number, ::FiberBundleProductRetraction
     )
     return retract_product_fused(M, p, X, t)
 end
 
 function ManifoldsBase._retract_fused!(
-        M::VectorBundle,
-        q,
-        p,
-        X,
-        t::Number,
-        ::FiberBundleProductRetraction,
+        M::VectorBundle, q, p, X, t::Number, ::FiberBundleProductRetraction
     )
     return retract_product_fused!(M, q, p, X, t)
 end
@@ -286,12 +277,7 @@ function retract_product_fused!(B::VectorBundle, q, p, X, t::Number)
     # this temporary avoids overwriting `p` when `q` and `p` occupy the same memory
     xqt = exp(B.manifold, xp, VXM)
     vector_transport_direction!(
-        B.manifold,
-        Xq,
-        xp,
-        Xp + VXF,
-        VXM,
-        B.vector_transport.method_horizontal,
+        B.manifold, Xq, xp, Xp + VXF, VXM, B.vector_transport.method_vertical
     )
     copyto!(B.manifold, xq, xqt)
     return q
@@ -301,12 +287,7 @@ function ManifoldsBase.retract_sasaki!(M::VectorBundle, q, p, X, m::SasakiRetrac
     return ManifoldsBase.retract_sasaki_fused!(M, q, p, X, one(eltype(p)), m)
 end
 function ManifoldsBase.retract_sasaki_fused!(
-        B::TangentBundle,
-        q,
-        p,
-        X,
-        t::Number,
-        m::SasakiRetraction,
+        B::TangentBundle, q, p, X, t::Number, m::SasakiRetraction
     )
     tX = t * X
     xp, Xp = submanifold_components(B.manifold, p)
@@ -325,10 +306,7 @@ function ManifoldsBase.retract_sasaki_fused!(
         p_kp1 = exp(B.manifold, p_k, ϵ * Y_k)
         X_kp1 = parallel_transport_to(B.manifold, p_k, X_k .+ ϵ .* Z_k, p_kp1)
         Y_kp1 = parallel_transport_to(
-            B.manifold,
-            p_k,
-            Y_k .+ ϵ .* riemann_tensor(B.manifold, p_k, X_k, Z_k, Y_k),
-            p_kp1,
+            B.manifold, p_k, Y_k .+ ϵ .* riemann_tensor(B.manifold, p_k, X_k, Z_k, Y_k), p_kp1
         )
         Z_kp1 = parallel_transport_to(B.manifold, p_k, Z_k, p_kp1)
         copyto!(B.manifold, p_k, p_kp1)
@@ -352,20 +330,15 @@ function vector_transport_direction!(M::VectorBundle, Y, p, X, d)
 end
 
 function _vector_transport_direction!(
-        M::VectorBundle,
-        Y,
-        p,
-        X,
-        d,
-        m::FiberBundleProductVectorTransport,
+        M::VectorBundle, Y, p, X, d, m::FiberBundleProductVectorTransport
     )
     VYM, VYF = submanifold_components(M.manifold, Y)
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     dx, dVx = submanifold_components(M.manifold, d)
-    return vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal),
-        vector_transport_direction!(M.manifold, VYF, px, VXF, dx, m.method_vertical),
-        return Y
+    vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal)
+    bundle_transport_tangent_direction!(M, VYF, px, pVx, VXF, dx, m.method_vertical)
+    return Y
 end
 
 @doc raw"""
@@ -374,13 +347,7 @@ end
 Compute the vector transport the tangent vector `X`at `p` to `q` on the
 [`VectorBundle`](@ref) `M` using the [`FiberBundleProductVectorTransport`](@ref) `m`.
 """
-vector_transport_to(
-    ::VectorBundle,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::FiberBundleProductVectorTransport,
-)
+vector_transport_to(::VectorBundle, ::Any, ::Any, ::Any, ::FiberBundleProductVectorTransport)
 
 function vector_transport_to(M::VectorBundle, p, X, q)
     return vector_transport_to(M, p, X, q, M.vector_transport)
@@ -390,12 +357,7 @@ function vector_transport_to!(M::VectorBundle, Y, p, X, q)
     return vector_transport_to!(M, Y, p, X, q, M.vector_transport)
 end
 function vector_transport_to!(
-        M::TangentBundle,
-        Y,
-        p,
-        X,
-        q,
-        m::FiberBundleProductVectorTransport,
+        M::TangentBundle, Y, p, X, q, m::FiberBundleProductVectorTransport
     )
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)

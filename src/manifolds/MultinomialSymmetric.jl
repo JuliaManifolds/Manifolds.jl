@@ -6,7 +6,7 @@ positive entries such that each column sums to one, i.e.
 
 ````math
 \begin{aligned}
-\mathcal{SP}(n) \coloneqq \bigl\{p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m,\\
+\mathcal{SP}(n) \coloneqq \bigl\{p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,n,\\
 & p^\mathrm{T} = p,\\
 & p\mathbf{1}_n = \mathbf{1}_n
 \bigr\},
@@ -35,7 +35,7 @@ More details can be found in Section IV [DouikHassibi:2019](@cite).
 
 # Constructor
 
-    MultinomialSymmetric(n)
+    MultinomialSymmetric(n::Int; parameter::Symbol=:type)
 
 Generate the manifold of matrices ``ℝ^{n×n}`` that are doubly stochastic and symmetric.
 """
@@ -44,6 +44,9 @@ struct MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic
 end
 
 function MultinomialSymmetric(n::Int; parameter::Symbol = :type)
+    n < 1 && throw(
+        DomainError(n, "The matrix size n of symmetric multinomial matrices must be positive, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return MultinomialSymmetric{typeof(size)}(size)
 end
@@ -51,7 +54,7 @@ end
 @doc raw"""
     check_point(M::MultinomialSymmetric, p)
 
-Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(m,n)` `M`,
+Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(n)` `M`,
 i.e. is a symmetric matrix with positive entries whose rows sum to one.
 """
 function check_point(M::MultinomialSymmetric, p; kwargs...)
@@ -72,7 +75,7 @@ function check_vector(M::MultinomialSymmetric, p, X; kwargs...)
     n = get_parameter(M.size)[1]
     s = check_vector(SymmetricMatrices(n, ℝ), p, X; kwargs...)
     !isnothing(s) && return s
-    s2 = check_vector(MultinomialMatrices(n, n), p, X)
+    s2 = check_vector(MultinomialMatrices(n, n), p, X; kwargs...)
     return s2
 end
 
@@ -92,11 +95,12 @@ function ManifoldsBase.get_embedding_type(::MultinomialSymmetric)
 end
 
 """
-    is_flat(::MultinomialSymmetric)
+    is_flat(M::MultinomialSymmetric)
 
-Return false. [`MultinomialSymmetric`](@ref) is not a flat manifold.
+Return true if the [`MultinomialSymmetric`](@ref) `M` is one-dimensional, that is for ``n = 2``,
+and false otherwise. Every Riemannian 1-manifold is flat, see p. 222 of [Lee:2019](@cite).
 """
-is_flat(M::MultinomialSymmetric) = false
+is_flat(M::MultinomialSymmetric) = manifold_dimension(M) == 1
 
 @doc raw"""
     manifold_dimension(M::MultinomialSymmetric)
@@ -116,6 +120,8 @@ end
     project(M::MultinomialSymmetric, p, Y)
 
 Project `Y` onto the tangent space at `p` on the [`MultinomialSymmetric`](@ref) `M`, return the result in `X`.
+A nonsymmetric `Y` is first replaced by its symmetric part ``\frac{1}{2}(Y+Y^{\mathrm{T}})``,
+since the formula below is stated for symmetric matrices.
 
 The formula from [DouikHassibi:2019](@cite), Sec. VI reads
 
@@ -133,8 +139,9 @@ project(::MultinomialSymmetric, ::Any, ::Any)
 
 function project!(M::MultinomialSymmetric, X, p, Y)
     n = get_parameter(M.size)[1]
-    α = (I + p) \ sum(Y, dims = 2) # Formula (49) from 1802.02628
-    return X .= Y .- (repeat(α, 1, n) .+ repeat(α', n, 1)) .* p
+    Ys = (Y .+ Y') ./ 2
+    α = (I + p) \ sum(Ys, dims = 2) # Formula (49) from 1802.02628
+    return X .= Ys .- (repeat(α, 1, n) .+ repeat(α', n, 1)) .* p
 end
 
 @doc raw"""
@@ -146,25 +153,23 @@ or tangent vectors at the point `vector_at` if that is not `nothing`.
 Let ``n×n`` denote the matrix dimension of the [`MultinomialSymmetric`](@ref).
 
 When `vector_at` is nothing, this is done by generating a random matrix `rand(n, n)`
-with positive entries and projecting it onto the manifold. The `kwargs...` are
+with positive entries and projecting it onto the manifold; `σ` has no effect in this
+case, since the projection normalizes rows and columns. The `kwargs...` are
 passed to this projection.
 
-When `vector_at` is not `nothing`, a random matrix in the ambient space is generated
-and projected onto the tangent space
+When `vector_at` is not `nothing`, a random matrix in the ambient space is generated,
+multiplied by `σ` and projected onto the tangent space.
 """
 rand(::MultinomialSymmetric; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::MultinomialSymmetric,
-        pX;
-        vector_at = nothing,
-        kwargs...,
+        rng::AbstractRNG, M::MultinomialSymmetric, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX))), kwargs...,
     )
     n = get_parameter(M.size)[1]
-    rand!(rng, SymmetricMatrices(n), pX; kwargs...)
+    rand!(rng, SymmetricMatrices(n), pX; σ = σ)
     if vector_at === nothing
-        project!(M, pX, pX)
+        project!(M, pX, pX; kwargs...)
     else
         project!(M, pX, vector_at, pX)
     end
@@ -210,11 +215,13 @@ function riemannian_Hessian!(M::MultinomialSymmetric, Y, p, G, H, X)
     n = get_parameter(M.size)[1]
     ov = ones(n) # \bf 1
     I_p = lu(I + p)
-    γ = G .* p
+    Gs = (G .+ G') ./ 2
+    Hs = (H .+ H') ./ 2
+    γ = Gs .* p
     α = I_p \ (γ * ov)
     α_sq = (repeat(α, 1, n) .+ repeat(α', n, 1))
     δ = γ .- α_sq .* p
-    γ_dot = H .* p + G .* X
+    γ_dot = Hs .* p + Gs .* X
     α_dot = (I_p \ γ_dot .- (I_p \ X) * (I_p \ γ)) * ov
     δ_dot = γ_dot .- (repeat(α_dot, 1, n) .+ repeat(α_dot', n, 1)) .* p .- α_sq .* X
     project!(M, Y, p, δ_dot .- 0.5 * ((δ .* X) ./ p))

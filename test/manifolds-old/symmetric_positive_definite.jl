@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "Symmetric Positive Definite Matrices" begin
+    @test_throws DomainError SymmetricPositiveDefinite(-1)
     M1 = SymmetricPositiveDefinite(3)
     @test repr(M1) == "SymmetricPositiveDefinite(3)"
     M2 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.AffineInvariantMetric())
@@ -9,20 +10,30 @@ include("../header.jl")
     M5 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.BuresWassersteinMetric())
     M6 = MetricManifold(
         SymmetricPositiveDefinite(3),
-        Manifolds.GeneralizedBuresWassersteinMetric(
-            [2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0],
-        ),
+        Manifolds.GeneralizedBuresWassersteinMetric([2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0]),
     )
 
-    @test !is_flat(M4)
+    @test repr(M6.metric) ==
+        "GeneralizedBuresWassersteinMetric([2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0])"
+
+    @test is_flat(M4)
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1, one(zeros(3, 3))) == Inf
     @test injectivity_radius(M1, ExponentialRetraction()) == Inf
     @test injectivity_radius(M1, one(zeros(3, 3)), ExponentialRetraction()) == Inf
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M2, one(zeros(3, 3)))
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M3, one(zeros(3, 3)))
+    @testset "curvature of the log-Cholesky metric" begin
+        p = [2.0 1.0 0.0; 1.0 2.0 0.0; 0.0 0.0 1.0]
+        X = [1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
+        Y = [0.0 1.0 0.0; 1.0 0.0 0.0; 0.0 0.0 0.0]
+        @test riemann_tensor(M3, p, X, Y, X) == zero(X)
+        @test sectional_curvature(M3, p, X, Y) === 0.0
+        @test sectional_curvature_max(M3) === 0.0
+        @test sectional_curvature_min(M3) === 0.0
+    end
     metrics = [M1, M2, M3, M5, M6]
-    types = [Matrix{Float64}, SPDPoint]
+    types = [Matrix{Float64}, MMatrix{3, 3, Float64, 9}, SPDPoint]
 
     for M in metrics
         basis_types = if (M == M1 || M == M2 || M == M3)
@@ -39,20 +50,12 @@ include("../header.jl")
             end
             for T in types
                 exp_log_atol_multiplier = 8.0
-                if T <: MMatrix{3, 3, Float64}
-                    # eigendecomposition of 3x3 SPD matrices from StaticArrays is not very accurate
-                    exp_log_atol_multiplier = 5.0e7
-                end
                 if M == M6
                     # we have to raise this slightly for the nondiagonal case.
                     exp_log_atol_multiplier = 5.0e1
                 end
                 if T == SPDPoint && (M != M1 && M != M2)
                     # SPDPoint only meant for Affine metric
-                    continue
-                end
-                if M == M3 && T <: MMatrix
-                    # Cholesky or something does not work in vector_transport yet for MMatrix
                     continue
                 end
                 A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
@@ -65,7 +68,7 @@ include("../header.jl")
                 Manifolds.test_manifold(
                     M,
                     pts;
-                    vector_transport_methods = typeof(M) == SymmetricPositiveDefinite{3} ?
+                    vector_transport_methods = M isa SymmetricPositiveDefinite ?
                         [ParallelTransport()] : [],
                     exp_log_atol_multiplier = exp_log_atol_multiplier,
                     basis_types_vecs = basis_types,
@@ -94,6 +97,10 @@ include("../header.jl")
     end
     p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
     q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
+    @testset "element type of the Bures-Wasserstein inner product" begin
+        Xf = Float32[0.0 1.0 0.0; 1.0 0.0 0.0; 0.0 0.0 1.0]
+        @test inner(M5, Float32.(p), Xf, Xf) isa Float32
+    end
     @testset "Convert Eucl/Emb to (Generalised) BW" begin
         Z = ones(3, 3)
         em = EuclideanMetric()
@@ -103,6 +110,26 @@ include("../header.jl")
         y = 2 .* (Z * p * M6.metric.M + M6.metric.M * p' * Z)
         Y = change_representer(M6, em, p, Z)
         @test isapprox(y, Y)
+        @test M6.metric == GeneralizedBuresWassersteinMetric(copy(M6.metric.M))
+        @test hash(M6.metric) == hash(GeneralizedBuresWassersteinMetric(copy(M6.metric.M)))
+        g6 = GeneralizedBuresWassersteinMetric([2.0 1.0 -0.0; 1.0 2.0 1.0; 0.0 1.0 2.0])
+        @test !isequal(M6.metric, g6)
+    end
+    @testset "Bures-Wasserstein logarithm of points whose product is not symmetric" begin
+        p2 = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1.0]
+        X2 = [0.5 0.0 0.2; 0.0 -1.0 0.3; 0.2 0.3 0.5]
+        @test isapprox(M5, p2, log(M5, p2, exp(M5, p2, X2)), X2)
+    end
+    @testset "Bures-Wasserstein distances are real numbers" begin
+        @test distance(M6, q, q) isa Real
+        A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
+        B(α) = [cos(α) sin(α) 0.0; -sin(α) cos(α) 0.0; 0.0 0.0 1.0]
+        p1 = A(π / 4) * [1.0e-6 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0e6] * transpose(A(π / 4))
+        q1 = B(π / 4) * [1.0e6 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0e-6] * transpose(B(π / 4))
+        for M in (M5, M6)
+            @test distance(M, p1, p1) isa Real
+            @test distance(M, p1, q1) isa Real
+        end
     end
     @testset "Convert SPD to Cholesky" begin
         v = log(M1, p, q)
@@ -110,6 +137,14 @@ include("../header.jl")
         (xs, vs) = Manifolds.cholesky_to_spd(l, w)
         @test isapprox(xs, p)
         @test isapprox(vs, v)
+    end
+    @testset "Orthonormal basis of the Log-Cholesky metric away from the identity" begin
+        pc = [2.0 1.0 0.0; 1.0 2.0 0.0; 0.0 0.0 4.0]
+        X = [1.0 1.0 0.5; 1.0 1.0 0.0; 0.5 0.0 1.0]
+        c = get_coordinates(M3, pc, X, DefaultOrthonormalBasis())
+        @test get_vector(M3, pc, c, DefaultOrthonormalBasis()) ≈ X
+        Vs = get_vectors(M3, pc, get_basis(M3, pc, DefaultOrthonormalBasis()))
+        @test [inner(M3, pc, V, W) for V in Vs, W in Vs] ≈ Matrix{Float64}(I, 6, 6)
     end
     @testset "Preliminary tests for LogEuclidean" begin
         @test representation_size(M4) == (3, 3)
@@ -138,7 +173,7 @@ include("../header.jl")
         p1 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
         p2 = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
         p3 = A(π / 6) * [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1] * transpose(A(π / 6))
-        embed(M, p1) == p1
+        @test embed(M, p1) == p1
         X1 = log(M, p1, p3)
         Y1 = vector_transport_to(M, p1, X1, p2)
         @test is_vector(M, p2, Y1)
@@ -148,6 +183,8 @@ include("../header.jl")
         @test is_vector(M, p2, Y3)
         @test isapprox(M, p2, Y1, Y2) # pole is exact on SPDs, i.e. identical to parallel transport
         @test norm(M, p1, X1) ≈ norm(M, p2, Y1) # parallel transport is length preserving
+        p4 = A(0.3) * [1.0e6 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0e-6] * transpose(A(0.3))
+        @test parallel_transport_to(M, p4, X1, p4) == X1 # transport to the same point
         # test isometry
         X2 = log(M, p1, p2)
         Y4 = vector_transport_to(M, p1, X2, p2)
@@ -157,6 +194,15 @@ include("../header.jl")
         @test inner(M, p1, X1, X2) ≈ inner(M, p2, Y1, Y4) # parallel transport isometric
         @test inner(M, p1, X1, X2) ≈ inner(M, p2, Y2, Y5) # pole ladder transport isometric
     end
+    @testset "Points that are symmetric up to rounding" begin
+        Arot(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
+        p_rot = Arot(π / 6) * [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1] * transpose(Arot(π / 6))
+        @test is_point(M1, exp(M1, p_rot, [1.0 1.0 0.5; 1.0 1.0 0.0; 0.5 0.0 1.0]))
+        q_near = [2.0e3 1.0e3 0.0; nextfloat(1.0e3) 2.0e3 0.0; 0.0 0.0 4.0e3]
+        @test is_point(M1, q_near)
+        @test is_point(SymmetricPositiveDefinite(3; parameter = :field), q_near)
+        @test !is_point(M1, [2.0 0.0 1.0; 0.0 1.0 0.0; 0.0 0.0 4.0])
+    end
     @testset "Metric change for Linear Affine Metric" begin
         X = log(M1, p, q)
         Y = change_metric(M1, EuclideanMetric(), p, X)
@@ -164,11 +210,25 @@ include("../header.jl")
         Z = change_representer(M1, EuclideanMetric(), p, X)
         @test Z == p * X * p
     end
+    @testset "Affine invariant distance of points far apart" begin
+        pD = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0e-30]
+        qD = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0e-20]
+        @test distance(M1, pD, qD) ≈ log(1.0e10)
+        E = Matrix{Float64}(I, 3, 3)
+        @test distance(M1, 1.0e-9 * E, 1.0e9 * E) ≈ sqrt(3) * log(1.0e18)
+        @test distance(M1, 1.0e-20 * E, 2.0e-20 * E) ≈ sqrt(3) * log(2)
+    end
     @testset "Projection on Tangent space" begin
         p = Matrix{Float64}(I, 3, 3)
         X = [1.0 2.0 1.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
         Y = project(M1, p, X)
         @test is_vector(M1, p, Y)
+    end
+    @testset "Affine invariant logarithm between points far apart" begin
+        E = Matrix{Float64}(I, 3, 3)
+        X = log(M1, 1.0e9 * E, 1.0e-9 * E)
+        @test norm(M1, 1.0e9 * E, X) ≈ sqrt(3) * log(1.0e18)
+        @test exp(M1, 1.0e9 * E, X) ≈ 1.0e-9 * E
     end
     @testset "Tangent ONB" begin
         q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
@@ -190,10 +250,26 @@ include("../header.jl")
         @test is_point(M1, p)
         @test is_vector(M1, p, rand(M1; vector_at = p, tangent_distr = :Rician))
         @test is_vector(
-            M1,
-            p,
-            rand(MersenneTwister(123), M1; vector_at = p, tangent_distr = :Rician),
+            M1, p, rand(MersenneTwister(123), M1; vector_at = p, tangent_distr = :Rician)
         )
+        # coordinates of a Gaussian tangent vector in an orthonormal basis at the point
+        q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1.0]
+        B = get_basis(M1, q, DiagonalizingOrthonormalBasis(Matrix{Float64}(I, 3, 3)))
+        z = randn(MersenneTwister(42), 6)
+        X = rand(MersenneTwister(42), M1; vector_at = q, σ = 2.0)
+        @test get_coordinates(M1, q, X, B) ≈ 2 * z
+        Y = rand(MersenneTwister(42), M1; vector_at = q)
+        @test get_coordinates(M1, q, Y, B) ≈ z / sqrt(3)
+        # the Rician draw at an SPDPoint equals the one at its matrix
+        qS = SPDPoint(q)
+        XR = rand(MersenneTwister(42), M1; vector_at = q, tangent_distr = :Rician)
+        @test rand(MersenneTwister(42), M1; vector_at = qS, tangent_distr = :Rician) ≈ XR
+        # a random point drawn into an SPDPoint stores its matrix square roots
+        pR = rand!(MersenneTwister(42), M1, SPDPoint(q))
+        @test pR.sqrt ≈ SPDPoint(pR.p).sqrt
+        @test pR.sqrt_inv ≈ SPDPoint(pR.p).sqrt_inv
+        pN = SPDPoint(q; store_sqrt = false, store_sqrt_inv = false)
+        @test rand!(MersenneTwister(42), M1, pN).p == pR.p
     end
     @testset "metric" begin
         p = [
@@ -224,16 +300,25 @@ include("../header.jl")
 
         @test isapprox(M1, p, riemann_tensor(M1, p, X1, X2, X3), X_rt)
     end
+    @testset "curvature of the log-Euclidean metric" begin
+        p = [2.0 1.0 0.0; 1.0 2.0 0.0; 0.0 0.0 1.0]
+        X = [1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
+        Y = [0.0 1.0 0.0; 1.0 0.0 0.0; 0.0 0.0 0.0]
+        @test riemann_tensor(M4, p, X, Y, X) == zero(X)
+        @test sectional_curvature(M4, p, X, Y) === 0.0
+        @test sectional_curvature_max(M4) === 0.0
+        @test sectional_curvature_min(M4) === 0.0
+    end
     @testset "SPDPoint functions" begin
         p = SPDPoint(2 * Matrix{Float64}(I, 3, 3))
         p2 = copy(p)
         @test SPDPoint(p2) === p2
         @test p2.eigen == p.eigen
+        @test ManifoldsBase.check_size(M1, p; atol = 1.0e-8) === nothing
+        @test ManifoldsBase.check_size(M1, p, Matrix{Float64}(I, 3, 3); atol = 1.0e-8) === nothing
         pS = SPDPoint(
             2 * Matrix{Float64}(I, 3, 3);
-            store_p = false,
-            store_sqrt = false,
-            store_sqrt_inv = false,
+            store_p = false, store_sqrt = false, store_sqrt_inv = false,
         )
         m = missing
         s = "$(typeof(pS))\np:\n $m\np^{1/2}:\n $m\np^{-1/2}:\n $m"
@@ -248,9 +333,7 @@ include("../header.jl")
         @test !ismissing(pF2.sqrt_inv)
         pF3 = SPDPoint(
             Matrix{Float64}(I, 3, 3);
-            store_p = false,
-            store_sqrt = false,
-            store_sqrt_inv = false,
+            store_p = false, store_sqrt = false, store_sqrt_inv = false,
         )
         copyto!(pF3, pF2) # do not fill values from F
         @test ismissing(pF3.p)
@@ -268,6 +351,10 @@ include("../header.jl")
         @test isapprox(exp!(M, pS, p, zero_vector(M, p)), p)
         @test ismissing(pS.sqrt)
         @test ismissing(pS.sqrt_inv)
+        qR = SPDPoint(Matrix{Float64}(I, 3, 3); store_p = false)
+        exp!(M, qR, p, ones(3, 3))
+        @test isapprox(M, qR, exp(M, p, ones(3, 3)))
+        @test exp(M, p, ones(3, 3)) == qR
         @test allocate_result(M1, zero_vector, p) isa Matrix
         c1 = ManifoldsBase.allocate_coordinates(M, p, Float64, 6)
         c2 = ManifoldsBase.allocate_coordinates(M, embed(M, p), Float64, 6)
@@ -308,7 +395,7 @@ include("../header.jl")
             0.2591587910302816 0.3649975914025044 -0.2888865063584093
             0.9739140395169474 -0.2888865063584093 -0.9564259306801289
         ]
-        @test volume_density(M, p, X) ≈ 5.141867280770719
+        @test volume_density(M, p, X) ≈ 1.1326952644501451
     end
     @testset "field parameter" begin
         M = SymmetricPositiveDefinite(3; parameter = :field)
@@ -319,7 +406,13 @@ include("../header.jl")
 
     @testset "Curvature" begin
         @test sectional_curvature_min(SymmetricPositiveDefinite(1)) == 0.0
-        @test sectional_curvature_min(SymmetricPositiveDefinite(3)) == -0.25
+        @test sectional_curvature_min(SymmetricPositiveDefinite(2)) == -0.5
+        @test sectional_curvature_min(SymmetricPositiveDefinite(3)) == -0.5
         @test sectional_curvature_max(SymmetricPositiveDefinite(3)) == 0.0
+        M = SymmetricPositiveDefinite(3)
+        p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
+        X = [0.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 -1.0] / sqrt(2)
+        Y = [0.0 0.0 0.0; 0.0 0.0 1.0; 0.0 1.0 0.0] / sqrt(2)
+        @test sectional_curvature(M, p, X, Y) ≈ sectional_curvature_min(M)
     end
 end

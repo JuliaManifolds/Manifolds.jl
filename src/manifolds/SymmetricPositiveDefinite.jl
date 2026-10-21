@@ -31,6 +31,9 @@ struct SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
 end
 
 function SymmetricPositiveDefinite(n::Int; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of symmetric positive definite matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return SymmetricPositiveDefinite{typeof(size)}(size)
 end
@@ -49,7 +52,8 @@ when required.
 
     SPDPoint(p::AbstractMatrix; store_p=true, store_sqrt=true, store_sqrt_inv=true)
 
-Create an SPD point using an symmetric positive defincite matrix `p`, where you can optionally store `p`, `sqrt` and `sqrt_inv`
+Create an SPD point using a symmetric positive definite matrix `p`, where you can optionally
+store `p`, `sqrt` and `sqrt_inv`.
 """
 struct SPDPoint{
         P <: Union{AbstractMatrix, Missing},
@@ -85,10 +89,7 @@ function SPDPoint(p::AbstractMatrix; store_p = true, store_sqrt = true, store_sq
         q = missing
     end
     return SPDPoint{typeof(q), typeof(p_sqrt), typeof(p_sqrt_inv), typeof(e)}(
-        q,
-        e,
-        p_sqrt,
-        p_sqrt_inv,
+        q, e, p_sqrt, p_sqrt_inv
     )
 end
 convert(::Type{SPDPoint}, p::AbstractMatrix) = SPDPoint(p)
@@ -132,13 +133,13 @@ of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the `kwargs...`.
 """
 function check_point(M::SymmetricPositiveDefinite, p; kwargs...)
-    if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
+    if !isapprox(p, transpose(p); kwargs...)
         return DomainError(
             norm(p - transpose(p)),
             "The point $(p) does not lie on $(M) since its not a symmetric matrix:",
         )
     end
-    if !isposdef(p)
+    if !isposdef(Symmetric(p))
         return DomainError(
             eigvals(p),
             "The point $p does not lie on $(M) since its not a positive definite matrix.",
@@ -172,10 +173,10 @@ function check_vector(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
 end
 
 function check_size(M::SymmetricPositiveDefinite, p::SPDPoint; kwargs...)
-    return check_size(M, convert(AbstractMatrix, p); kwargs...)
+    return check_size(M, convert(AbstractMatrix, p))
 end
 function check_size(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
-    return check_size(M, convert(AbstractMatrix, p), X; kwargs...)
+    return check_size(M, convert(AbstractMatrix, p), X)
 end
 
 function Base.copy(p::SPDPoint)
@@ -346,7 +347,7 @@ This method assumes that `p` represents an spd matrix.
 """
 spd_sqrt_inv(p::SPDPoint) = Symmetric(p.sqrt_inv)
 function spd_sqrt_inv(
-        p::SPDPoint{P, Q, Missing},
+        p::SPDPoint{P, Q, Missing}
     ) where {P <: Union{AbstractMatrix, Missing}, Q <: Union{AbstractMatrix, Missing}}
     U = p.eigen.vectors
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
@@ -380,17 +381,17 @@ function spd_sqrt_and_sqrt_inv(p::SPDPoint{P}) where {P <: Union{Missing, Abstra
     return (Symmetric(p.sqrt), Symmetric(p.sqrt_inv))
 end
 function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Q, Missing},
+        p::SPDPoint{P, Q, Missing}
     ) where {P <: Union{Missing, AbstractMatrix}, Q <: AbstractMatrix}
     return (Symmetric(p.sqrt), spd_sqrt_inv(p))
 end
 function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Missing, R},
+        p::SPDPoint{P, Missing, R}
     ) where {P <: Union{Missing, AbstractMatrix}, R <: AbstractMatrix}
     return (spd_sqrt(p), Symmetric(p.sqrt_inv))
 end
 function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Missing, Missing},
+        p::SPDPoint{P, Missing, Missing}
     ) where {P <: Union{Missing, AbstractMatrix}}
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
     U = p.eigen.vectors
@@ -412,10 +413,18 @@ project(::SymmetricPositiveDefinite, p, X)
 project!(::SymmetricPositiveDefinite, Y, p, X) = (Y .= Symmetric((X + X') / 2))
 
 @doc raw"""
-    rand(M::SymmetricPositiveDefinite; σ::Real=1)
+    rand(M::SymmetricPositiveDefinite; vector_at=nothing, tangent_distr=:Gaussian, σ::Real=1/sqrt(n))
 
 Generate a random symmetric positive definite matrix on the
-`SymmetricPositiveDefinite` manifold `M`.
+`SymmetricPositiveDefinite` manifold `M`, or, if `vector_at` is a point ``p``, a random
+tangent vector at ``p``. The parameter `σ` has no effect on a point.
+
+For `tangent_distr = :Gaussian` the coordinates of the tangent vector in an orthonormal basis
+of ``T_p\mathcal P(n)`` are independent and normally distributed with standard deviation `σ`.
+For `tangent_distr = :Rician` the tangent vector is ``RR^{\mathrm{T}}`` with
+``R = L + \sqrt{σ}U``, where ``L`` is the lower triangular Cholesky factor of ``p`` and ``U`` is
+upper triangular with independent standard normal entries; here `σ` defaults to
+``1/\lVert p\rVert_{\mathrm{F}}`` instead.
 """
 rand(M::SymmetricPositiveDefinite; σ::Real = 1)
 
@@ -428,9 +437,10 @@ function Random.rand!(
         M::SymmetricPositiveDefinite,
         pX;
         vector_at = nothing,
-        σ::Real = one(eltype(pX)) /
-            (vector_at === nothing ? 1 : norm(convert(AbstractMatrix, vector_at))),
         tangent_distr = :Gaussian,
+        σ::Real = (tangent_distr === :Rician && vector_at !== nothing) ?
+            one(eltype(pX)) / norm(convert(AbstractMatrix, vector_at)) :
+            one(eltype(pX)) / sqrt(get_parameter(M.size)[1]),
     )
     N = get_parameter(M.size)[1]
     if vector_at === nothing
@@ -439,30 +449,21 @@ function Random.rand!(
         if pX isa SPDPoint
             pX.eigen.values .= D.diag
             pX.eigen.vectors .= s.Q
-            !ismissing(pX.p) && pX.p .= Symmetric(s.Q * D * transpose(s.Q))
-            !ismissing(pX.sqrt) && pX.sqrt .= sqrt.(D.diag)
-            !ismissing(pX.sqrt_inv) && pX.sqrt_inv .= inv.(sqrt.(D.diag))
+            sq = sqrt.(D.diag)
+            !ismissing(pX.p) && (pX.p .= Symmetric(s.Q * D * transpose(s.Q)))
+            !ismissing(pX.sqrt) && (pX.sqrt .= s.Q * Diagonal(sq) * transpose(s.Q))
+            !ismissing(pX.sqrt_inv) && (pX.sqrt_inv .= s.Q * Diagonal(1 ./ sq) * transpose(s.Q))
         else
             pX .= Symmetric(s.Q * D * transpose(s.Q))
         end
     elseif tangent_distr === :Gaussian
-        # generate ONB in TxM
-        vector_at_matrix = convert(AbstractMatrix, vector_at)
-        I = one(vector_at_matrix)
-        B = get_basis(M, vector_at, DiagonalizingOrthonormalBasis(I))
-        Ξ = get_vectors(M, vector_at, B)
-        Ξx =
-            vector_transport_to.(
-            Ref(M),
-            Ref(I),
-            Ξ,
-            Ref(vector_at_matrix),
-            Ref(ParallelTransport()),
-        )
-        pX .= sum(σ * randn(rng, length(Ξx)) .* Ξx)
+        # an orthonormal basis of the tangent space at vector_at
+        E = one(convert(AbstractMatrix, vector_at))
+        Ξ = get_vectors(M, vector_at, get_basis(M, vector_at, DiagonalizingOrthonormalBasis(E)))
+        pX .= sum(σ * randn(rng, length(Ξ)) .* Ξ)
     elseif tangent_distr === :Rician
-        C = cholesky(Hermitian(vector_at))
-        R = C.L + sqrt(σ) * triu(randn(rng, size(vector_at, 1), size(vector_at, 2)), 0)
+        C = cholesky(Hermitian(convert(AbstractMatrix, vector_at)))
+        R = C.L + sqrt(σ) * triu(randn(rng, N, N), 0)
         pX .= R * R'
     end
     return pX

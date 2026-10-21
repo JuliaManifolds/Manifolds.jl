@@ -15,9 +15,12 @@ updates:
   - package-ecosystem: "julia"
     directories: # Location of Julia projects
       - "/"
+      - "/accuracy"
+      - "/benchmark"
       - "/docs"
       - "/tutorials"
       - "/test"
+      - "/test/jet"
     schedule:
       interval: "weekly"
     groups:

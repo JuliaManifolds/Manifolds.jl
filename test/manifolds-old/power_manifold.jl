@@ -3,6 +3,8 @@ include("../header.jl")
 using HybridArrays, Random
 using StaticArrays: Dynamic
 using RecursiveArrayTools
+using FillArrays: Fill
+using NamedDims: NamedDimsArray
 
 Random.seed!(42)
 
@@ -80,10 +82,7 @@ end
             Base.get_extension(Manifolds, :ManifoldsDistributionsExt).PowerPointDistribution
 
         PowerFVectorDistribution =
-            Base.get_extension(
-            Manifolds,
-            :ManifoldsDistributionsExt,
-        ).PowerFVectorDistribution
+            Base.get_extension(Manifolds, :ManifoldsDistributionsExt).PowerFVectorDistribution
         power_s1_pt_dist = PowerPointDistribution(Ms1, sphere_dist, randn(Float64, 3, 5))
         power_s2_pt_dist = PowerPointDistribution(Ms2, sphere_dist, randn(Float64, 3, 5, 7))
         push!(point_distributions_Ms2, power_s2_pt_dist)
@@ -91,12 +90,10 @@ end
         sphere_tv_dist =
             Manifolds.normal_tvector_distribution(Ms, (@MVector [1.0, 0.0, 0.0]), 1.0)
         power_s1_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Ms1, rand(power_s1_pt_dist)),
-            sphere_tv_dist,
+            TangentSpace(Ms1, rand(power_s1_pt_dist)), sphere_tv_dist
         )
         power_s2_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Ms2, rand(power_s2_pt_dist)),
-            sphere_tv_dist,
+            TangentSpace(Ms2, rand(power_s2_pt_dist)), sphere_tv_dist
         )
         push!(tvector_distributions_Ms2, power_s2_tv_dist)
 
@@ -105,36 +102,28 @@ end
         power_r1_pt_dist =
             PowerPointDistribution(Mr1, rotations_dist, randn(Float64, 3, 3, 5))
         power_rn1_pt_dist = PowerPointDistribution(
-            Mrn1,
-            rotations_dist,
-            [randn(Float64, 3, 3) for i in 1:5],
+            Mrn1, rotations_dist, [randn(Float64, 3, 3) for i in 1:5]
         )
         push!(point_distributions_Mrn1, power_rn1_pt_dist)
         power_r2_pt_dist =
             PowerPointDistribution(Mr2, rotations_dist, randn(Float64, 3, 3, 5, 7))
         power_rn2_pt_dist = PowerPointDistribution(
-            Mrn2,
-            rotations_dist,
-            [randn(Float64, 3, 3) for i in 1:5, j in 1:7],
+            Mrn2, rotations_dist, [randn(Float64, 3, 3) for i in 1:5, j in 1:7]
         )
         push!(point_distributions_Mr2, power_r2_pt_dist)
         rotations_tv_dist = Manifolds.normal_tvector_distribution(Mr, MMatrix(id_rot), 1.0)
         power_r1_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Mr1, rand(power_r1_pt_dist)),
-            rotations_tv_dist,
+            TangentSpace(Mr1, rand(power_r1_pt_dist)), rotations_tv_dist
         )
         power_rn1_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Mrn1, rand(power_rn1_pt_dist)),
-            rotations_tv_dist,
+            TangentSpace(Mrn1, rand(power_rn1_pt_dist)), rotations_tv_dist
         )
         push!(tvector_distributions_Mrn1, power_rn1_tv_dist)
         power_r2_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Mr2, rand(power_r2_pt_dist)),
-            rotations_tv_dist,
+            TangentSpace(Mr2, rand(power_r2_pt_dist)), rotations_tv_dist
         )
         power_rn2_tv_dist = PowerFVectorDistribution(
-            TangentSpace(Mrn2, rand(power_rn2_pt_dist)),
-            rotations_tv_dist,
+            TangentSpace(Mrn2, rand(power_rn2_pt_dist)), rotations_tv_dist
         )
         push!(tvector_distributions_Mrn2, power_rn2_tv_dist)
 
@@ -163,6 +152,14 @@ end
         @test p1[Ms1, 2] ≈ 4 * p2
         @test view(p1, Ms1, 1) == p1[Ms1, 1]
         @test view(p1, Ms1, 1) isa SubArray
+        q1 = [1.0 0.0 0.0 0.6 0.0; 0.0 1.0 0.0 0.8 0.6; 0.0 0.0 1.0 0.0 0.8]
+        pv = VectorOfArray([q1[:, i] for i in 1:5])
+        @test pv[Ms1, 4] == [0.6, 0.8, 0.0]
+        @test view(pv, Ms1, 4) == [0.6, 0.8, 0.0]
+        Me5 = PowerManifold(Euclidean(), 5)
+        pvs = VectorOfArray([1.0, 2.0, 3.0, 4.0, 5.0])
+        @test pvs[Me5, 2] == 2.0
+        @test view(pvs, Me5, 2)[] == 2.0
 
         Msn1 = PowerManifold(Ms, Manifolds.NestedPowerRepresentation(), 5)
         p_n1 = [randn(3) for _ in 1:5]
@@ -189,6 +186,16 @@ end
         @test_throws ComponentManifoldError is_vector(M, p, X; error = :error)
     end
 
+    @testset "getindex and view of arrays from package extensions" begin
+        p1 = randn(3, 5)
+        v1 = p1[1, :]
+        Me5 = PowerManifold(Euclidean(), 5)
+        @test NamedDimsArray{(:a, :b)}(p1)[Ms1, 1] == p1[:, 1]
+        @test NamedDimsArray{(:a,)}(v1)[Me5, 2] == v1[2]
+        @test view(NamedDimsArray{(:a, :b)}(p1), Ms1, 1) == p1[:, 1]
+        @test view(Fill(1.0, 3, 5), Ms1, 1) == ones(3)
+    end
+
     @testset "power vector transport" begin
         m = ParallelTransport()
         p = repeat([1.0, 0.0, 0.0], 1, 5)
@@ -205,8 +212,7 @@ end
         @testset "Type $(trim(string(T)))..." begin
             pts2 = [convert(T, rand(Ms2)) for _ in 1:3]
             Manifolds.test_manifold(
-                Ms2,
-                pts2;
+                Ms2, pts2;
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
                 retraction_methods = retraction_methods,
@@ -226,8 +232,7 @@ end
         @testset "Type $(trim(string(T)))..." begin
             pts1 = [convert(T, rand(Mrn1)) for _ in 1:3]
             Manifolds.test_manifold(
-                Mrn1,
-                pts1;
+                Mrn1, pts1;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
                 retraction_methods = retraction_methods,
@@ -249,8 +254,7 @@ end
         @testset "Type $(trim(string(T)))..." begin
             pts2 = [convert(T, rand(Mr2)) for _ in 1:3]
             Manifolds.test_manifold(
-                Mr2,
-                pts2;
+                Mr2, pts2;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
                 retraction_methods = retraction_methods,
@@ -269,8 +273,7 @@ end
         @testset "Type $(trim(string(T)))..." begin
             pts2 = [convert(T, rand(Mrn2)) for _ in 1:3]
             Manifolds.test_manifold(
-                Mrn2,
-                pts2;
+                Mrn2, pts2;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
                 retraction_methods = retraction_methods,
@@ -292,8 +295,7 @@ end
         @test representation_size(MT) == (3,)
         @test pts_t[2][MT, 3] == 2.4
         Manifolds.test_manifold(
-            MT,
-            pts_t;
+            MT, pts_t;
             test_injectivity_radius = false,
             test_musical_isomorphisms = true,
             retraction_methods = retraction_methods,
@@ -412,8 +414,7 @@ end
     @testset "Hessian conversion" begin
         M = Sphere(2)
         N = PowerManifold(M, 2)
-        p = [1.0 0.0; 0.0 0.0; 1.0 0.0]
-        q = 1 / sqrt(2) * [1.0 0.0; 1.0 1.0; 0.0 1.0]
+        p = [1.0 0.0; 0.0 0.0; 0.0 1.0]
         q = 1 / sqrt(2) * [0.0 1.0; 1.0 1.0; 1.0 0.0]
         r = 1 / sqrt(3) * [1.0 1.0; 1.0 1.0; 1.0 1.0]
         X = log(M, p, q)
@@ -463,15 +464,15 @@ end
         }
 
         pse_ap = ArrayPartition(
-            SA[1.0, 2.0],
-            SA[
+            [1.0, 2.0],
+            [
                 0.5403023058681398 -0.8414709848078965
                 0.8414709848078965 0.5403023058681398
             ],
         )
         p2_ap = [pse_ap, pse_ap]
         @test allocate(PSE2, p2_ap) isa Vector{
-            ArrayPartition{Float64, Tuple{SVector{2, Float64}, SMatrix{2, 2, Float64, 4}}},
+            ArrayPartition{Float64, Tuple{Vector{Float64}, Matrix{Float64}}},
         }
     end
 
@@ -480,6 +481,9 @@ end
         p = repeat([1.0, 0.0, 0.0], 1, 5)
         X = repeat([0.0, 1.0, 0.0], 1, 5)
         @test volume_density(Ms1, p, X) ≈ volume_density(Ms, p[:, 1], X[:, 1])^5
+        Msn1 = PowerManifold(Ms, NestedPowerRepresentation(), 5)
+        @test volume_density(Msn1, [p[:, i] for i in 1:5], [X[:, i] for i in 1:5]) ≈
+            volume_density(Ms, p[:, 1], X[:, 1])^5
     end
 
     @testset "Static type parameter" begin
@@ -487,4 +491,20 @@ end
         @test sprint(show, "text/plain", Ms1s) ==
             "PowerManifold(Sphere(2), 5, parameter=:type)"
     end
+end
+
+@testset "Riemannian gradient on a power of hyperboloids" begin
+    M = PowerManifold(Hyperbolic(2), 2)
+    p = [[1.0, 1.0, sqrt(3)] [0.0, 0.0, 1.0]]
+    G = [[0.4, -0.7, 1.1] [0.2, 0.1, -0.3]]
+    Y = riemannian_gradient(M, p, G)
+    @test is_vector(M, p, Y)
+    for V in (
+            project(M, p, [[1.0, 0.0, 0.0] [0.0, 1.0, 0.0]]),
+            project(M, p, [[0.0, 1.0, 0.0] [1.0, 0.0, 0.0]]),
+        )
+        @test inner(M, p, Y, V) ≈ dot(G, V)
+    end
+    N = PowerManifold(Hyperbolic(2), NestedPowerRepresentation(), 2)
+    @test riemannian_gradient(N, [p[:, 1], p[:, 2]], [G[:, 1], G[:, 2]]) ≈ [Y[:, 1], Y[:, 2]]
 end

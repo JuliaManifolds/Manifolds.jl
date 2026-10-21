@@ -1,10 +1,9 @@
+function ManifoldsBase.allocate_coordinates(::ProductManifold, p::ArrayPartition, T, n::Int)
+    return allocate(submanifold_component(p, 1), T, n)
+end
+
 function adjoint_Jacobi_field(
-        M::ProductManifold,
-        p::ArrayPartition,
-        q::ArrayPartition,
-        t,
-        X::ArrayPartition,
-        β::Tβ,
+        M::ProductManifold, p::ArrayPartition, q::ArrayPartition, t, X::ArrayPartition, β::Tβ
     ) where {Tβ}
     return ArrayPartition(
         map(
@@ -22,12 +21,13 @@ end
 function allocate_result(M::ProductManifold, f::typeof(get_point), a::AbstractVector)
     return ArrayPartition(map(M_i -> allocate_result(M_i, f, a), M.manifolds)...)
 end
+# disambiguation
+function allocate_result(M::ProductManifold, f::typeof(get_point), a::ArrayPartition)
+    return @invoke allocate_result(M, f, a::AbstractVector)
+end
 
 function get_coordinates(
-        M::ProductManifold,
-        p,
-        X,
-        B::InducedBasis{ℝ, Manifolds.TangentSpaceType, <:ProductAtlas},
+        M::ProductManifold, p, X, B::InducedBasis{ℝ, Manifolds.TangentSpaceType, <:ProductAtlas}
     )
     subbases = map((Mj, Aj, ij) -> induced_basis(Mj, Aj, ij), M.manifolds, B.A.atlases, B.i)
     reps = map(
@@ -56,12 +56,7 @@ function get_vector(
 end
 
 function jacobi_field(
-        M::ProductManifold,
-        p::ArrayPartition,
-        q::ArrayPartition,
-        t,
-        X::ArrayPartition,
-        β::Tβ,
+        M::ProductManifold, p::ArrayPartition, q::ArrayPartition, t, X::ArrayPartition, β::Tβ
     ) where {Tβ}
     return ArrayPartition(
         map(

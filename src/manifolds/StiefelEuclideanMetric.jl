@@ -6,14 +6,14 @@ emanating from `p` in tangent direction `X`.
 
 ````math
 \exp_p X = \begin{pmatrix}
-   p\\X
+   p & X
  \end{pmatrix}
  \operatorname{Exp}
  \left(
  \begin{pmatrix} p^{\mathrm{H}}X & - X^{\mathrm{H}}X\\
- I_n & p^{\mathrm{H}}X\end{pmatrix}
+ I_k & p^{\mathrm{H}}X\end{pmatrix}
  \right)
-\begin{pmatrix}  \exp( -p^{\mathrm{H}}X) \\ 0_n\end{pmatrix},
+\begin{pmatrix}  \operatorname{Exp}( -p^{\mathrm{H}}X) \\ 0_k\end{pmatrix},
 ````
 
 where ``\operatorname{Exp}`` denotes matrix exponential,
@@ -61,9 +61,7 @@ to obtain orthonormal set of parameters.
 get_basis(M::Stiefel{ℝ}, p, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
 
 function _get_basis(
-        M::Stiefel{ℝ},
-        p,
-        B::DefaultOrthonormalBasis{ℝ, TangentSpaceType};
+        M::Stiefel{ℝ}, p, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType};
         kwargs...,
     )
     return CachedBasis(B, get_vectors(M, p, B))
@@ -79,7 +77,7 @@ function get_vector_orthonormal!(M::Stiefel{ℝ}, X, p, c, N::RealNumbers)
     V = get_vectors(M, p, DefaultOrthonormalBasis(N))
     zero_vector!(M, X, p)
     length(c) < length(V) && error(
-        "Coordinate vector too short. Expected $(length(V)), but only got $(length(c)) entries.",
+        "Coordinate vector too short. Expected $(length(V)), but only got $(length(c)) entries."
     )
     @inbounds for i in 1:length(V)
         X .+= c[i] .* V[i]

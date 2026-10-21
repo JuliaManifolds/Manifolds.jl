@@ -32,10 +32,11 @@ struct GeneralUnitaryMatrices{𝔽, T, S <: AbstractMatrixType} <: AbstractDecor
 end
 
 function GeneralUnitaryMatrices(
-        n::Int,
-        field,
-        matrix_type::Type{<:AbstractMatrixType};
+        n::Int, field, matrix_type::Type{<:AbstractMatrixType};
         parameter::Symbol = :type,
+    )
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of general unitary matrices must be nonnegative, but was $(n).")
     )
     size = wrap_type_parameter(parameter, (n,))
     return GeneralUnitaryMatrices{field, typeof(size), matrix_type}(size)
@@ -79,8 +80,7 @@ i.e. that ``p`` has a determinant of absolute value one.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(
-        M::GeneralUnitaryMatrices{𝔽, <:Any, AbsoluteDeterminantOneMatrixType},
-        p;
+        M::GeneralUnitaryMatrices{𝔽, <:Any, AbsoluteDeterminantOneMatrixType}, p;
         kwargs...,
     ) where {𝔽}
     if !isapprox(abs(det(p)), one(eltype(p)); kwargs...)
@@ -91,8 +91,7 @@ function check_point(
     end
     if !isapprox(p' * p, one(p); kwargs...)
         return DomainError(
-            norm(p' * p - one(p)),
-            "$p must be orthogonal but it's not at kwargs $kwargs",
+            norm(p' * p - one(p)), "$p must be orthogonal but it's not at kwargs $kwargs"
         )
     end
     return nothing
@@ -107,8 +106,7 @@ i.e. that ``p`` has a determinant of absolute value one, i.e. that ``p^{\mathrm{
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(
-        M::GeneralUnitaryMatrices{𝔽, <:Any, DeterminantOneMatrixType},
-        p;
+        M::GeneralUnitaryMatrices{𝔽, <:Any, DeterminantOneMatrixType}, p;
         kwargs...,
     ) where {𝔽}
     if !isapprox(det(p), one(eltype(p)); kwargs...)
@@ -116,8 +114,7 @@ function check_point(
     end
     if !isapprox(p' * p, one(p); kwargs...)
         return DomainError(
-            norm(p' * p - one(p)),
-            "$p must be orthogonal but it's not at kwargs $kwargs",
+            norm(p' * p - one(p)), "$p must be orthogonal but it's not at kwargs $kwargs"
         )
     end
     return nothing
@@ -134,8 +131,7 @@ function check_size(M::GeneralUnitaryMatrices, p)
     end
     if m != (n, n)
         return DomainError(
-            size(p),
-            "The point $p is not a matrix of size $((n, n)), but $(size(p)).",
+            size(p), "The point $p is not a matrix of size $((n, n)), but $(size(p))."
         )
     end
     return nothing
@@ -151,8 +147,7 @@ function check_size(M::GeneralUnitaryMatrices, p, X)
     end
     if m != (n, n)
         return DomainError(
-            size(X),
-            "The tangent vector $X is not a matrix of size $((n, n)), but $(size(X)).",
+            size(X), "The tangent vector $X is not a matrix of size $((n, n)), but $(size(X))."
         )
     end
     return nothing
@@ -260,18 +255,32 @@ function exp(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p::SMatrix
     return p * SA[cosθ -sinθ; sinθ cosθ]
 end
 function ManifoldsBase.exp_fused(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        p::SMatrix,
-        X::SMatrix,
-        t::Real,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p::SMatrix, X::SMatrix, t::Real
     )
     return exp(M, p, t * X)
 end
+@doc raw"""
+    exp(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p::SMatrix, X::SMatrix)
+
+Compute the exponential map on the three by three real [`GeneralUnitaryMatrices`](@ref) `M`
+for static matrices by the Rodrigues formula, Proposition 2.7 in [GallierQuaintance:2020](@cite),
+
+```math
+\exp_p X = p\mathrm{e}^X = p\bigl(I + aX + bX^2\bigr),
+\qquad a = \frac{\sin θ}{θ},
+\qquad b = \frac{1 - \cos θ}{θ^2},
+\qquad θ = \frac{\lVert X \rVert_p}{\sqrt{2}}.
+```
+
+If ``θ^2`` evaluates to zero, ``a = 1 - θ^2/6`` and ``b = 1/2 - θ^2/24`` are used instead, the
+first two terms of the series of ``a`` and ``b`` in the proof of Proposition 2.7, page 32, in
+[GallierQuaintance:2020](@cite).
+"""
 function exp(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p::SMatrix, X::SMatrix)
     θ = norm(M, p, X) / sqrt(2)
-    if θ ≈ 0
+    if iszero(θ^2)
         a = 1 - θ^2 / 6
-        b = θ / 2
+        b = 1 / 2 - θ^2 / 24
     else
         a = sin(θ) / θ
         b = (1 - cos(θ)) / θ^2
@@ -286,11 +295,7 @@ function exp!(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, q, p, X)
     return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
 end
 function ManifoldsBase.exp_fused!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        q,
-        p,
-        X,
-        t::Real,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, q, p, X, t::Real
     )
     @assert size(q) == (2, 2)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
@@ -300,17 +305,30 @@ end
 function exp!(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, q, p, X)
     return exp_fused!(M, q, p, X, one(eltype(X)))
 end
+@doc raw"""
+    exp_fused!(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, q, p, X, t::Real)
+
+Compute ``\exp_p(tX)`` on the three by three real [`GeneralUnitaryMatrices`](@ref) `M` and store
+the result in `q`, by the Rodrigues formula, Proposition 2.7 in [GallierQuaintance:2020](@cite),
+
+```math
+\exp_p(tX) = p\mathrm{e}^{tX} = p\bigl(I + a\,tX + b\,t^2X^2\bigr),
+\qquad a = \frac{\sin θ}{θ},
+\qquad b = \frac{1 - \cos θ}{θ^2},
+\qquad θ = \frac{\lvert t \rvert \lVert X \rVert_p}{\sqrt{2}}.
+```
+
+If ``θ^2`` evaluates to zero, ``a = 1 - θ^2/6`` and ``b = 1/2 - θ^2/24`` are used instead, the
+first two terms of the series of ``a`` and ``b`` in the proof of Proposition 2.7, page 32, in
+[GallierQuaintance:2020](@cite).
+"""
 function ManifoldsBase.exp_fused!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}},
-        q,
-        p,
-        X,
-        t::Real,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, q, p, X, t::Real
     )
     θ = abs(t) * norm(M, p, X) / sqrt(2)
-    if θ ≈ 0
+    if iszero(θ^2)
         a = 1 - θ^2 / 6
-        b = θ / 2
+        b = 1 / 2 - θ^2 / 24
     else
         a = sin(θ) / θ
         b = (1 - cos(θ)) / θ^2
@@ -319,11 +337,7 @@ function ManifoldsBase.exp_fused!(
     return copyto!(q, p * pinvq)
 end
 function ManifoldsBase.exp_fused!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{4}}},
-        q,
-        p,
-        X,
-        t::Real,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{4}}}, q, p, X, t::Real
     )
     return exp!(M, q, p, t * X)
 end
@@ -415,18 +429,18 @@ function get_coordinates_orthogonal(M::GeneralUnitaryMatrices{ℝ}, p, X, N)
 end
 
 function get_coordinates_orthogonal!(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{1}}}, c, p, X, ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{1}}}, c, p, X, ::RealNumbers
     )
     return c
 end
 function get_coordinates_orthogonal!(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, c, p, X, ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, c, p, X, ::RealNumbers
     )
     c[1] = X[2]
     return c
 end
 function get_coordinates_orthogonal!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{n}}}, c, p, X, ::RealNumbers,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{n}}}, c, p, X, ::RealNumbers
     ) where {n}
     @assert length(c) == manifold_dimension(M)
     @assert size(X) == (n, n)
@@ -443,8 +457,7 @@ function get_coordinates_orthogonal!(
     return c
 end
 function get_coordinates_orthogonal!(
-        M::GeneralUnitaryMatrices{ℝ, Tuple{Int}},
-        c, p, X, ::RealNumbers,
+        M::GeneralUnitaryMatrices{ℝ, Tuple{Int}}, c, p, X, ::RealNumbers
     )
     n = get_parameter(M.size)[1]
     @assert length(c) == manifold_dimension(M)
@@ -465,9 +478,7 @@ function get_coordinates_orthogonal!(
     end
     return c
 end
-function get_coordinates_orthonormal!(
-        M::GeneralUnitaryMatrices{ℝ}, c, p, X, num::RealNumbers,
-    )
+function get_coordinates_orthonormal!(M::GeneralUnitaryMatrices{ℝ}, c, p, X, num::RealNumbers)
     T = Base.promote_eltype(p, X)
     get_coordinates_orthogonal!(M, c, p, X, num)
     c .*= sqrt(T(2))
@@ -494,8 +505,7 @@ function ManifoldsBase.get_embedding_type(::GeneralUnitaryMatrices)
     return ManifoldsBase.EmbeddedManifoldType()
 end
 function ManifoldsBase.get_embedding_type(
-        ::GeneralUnitaryMatrices,
-        ::Type{<:Quaternions.Quaternion},
+        ::GeneralUnitaryMatrices, ::Type{<:Quaternions.Quaternion}
     )
     return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
@@ -516,15 +526,12 @@ function get_vector_orthogonal(M::GeneralUnitaryMatrices{ℝ}, p, c, N::RealNumb
 end
 
 function get_vector_orthogonal(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        p::SMatrix,
-        Xⁱ,
-        ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p::SMatrix, Xⁱ, ::RealNumbers
     )
     return @SMatrix [0 -Xⁱ[]; Xⁱ[] 0]
 end
 function get_vector_orthogonal(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p::SMatrix, c, ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p::SMatrix, c, ::RealNumbers
     )
     return @SMatrix [0 -c[3] c[2]; c[3] 0 -c[1]; -c[2] c[1] 0]
 end
@@ -542,8 +549,7 @@ function get_vector_orthogonal!(
     return get_vector_orthogonal!(M, X, p, c[1], N)
 end
 function get_vector_orthogonal!(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        X, p, c::Real, ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, X, p, c::Real, ::RealNumbers
     )
     @assert length(X) == 4
     @inbounds begin
@@ -584,11 +590,7 @@ function get_vector_orthogonal!(
     return X
 end
 function get_vector_orthogonal!(
-        M::GeneralUnitaryMatrices{ℝ, Tuple{Int}},
-        X,
-        p,
-        Xⁱ,
-        ::RealNumbers,
+        M::GeneralUnitaryMatrices{ℝ, Tuple{Int}}, X, p, Xⁱ, ::RealNumbers
     )
     n = get_parameter(M.size)[1]
     @assert size(X) == (n, n)
@@ -631,11 +633,7 @@ function get_vector_orthonormal(M::GeneralUnitaryMatrices{ℝ}, p, Xⁱ, N::Real
 end
 
 function get_vector_orthonormal!(
-        M::GeneralUnitaryMatrices{ℝ},
-        X,
-        p,
-        Xⁱ::AbstractVector,
-        N::RealNumbers,
+        M::GeneralUnitaryMatrices{ℝ}, X, p, Xⁱ::AbstractVector, N::RealNumbers
     )
     T = Base.promote_eltype(p, X)
     get_vector_orthogonal!(M, X, p, Xⁱ, N)
@@ -644,7 +642,7 @@ function get_vector_orthonormal!(
 end
 
 @doc raw"""
-    injectivity_radius(G::GeneraliUnitaryMatrices)
+    injectivity_radius(M::GeneralUnitaryMatrices)
 
 Return the injectivity radius for general unitary matrix manifolds, which is[^1]
 
@@ -655,13 +653,13 @@ Return the injectivity radius for general unitary matrix manifolds, which is[^1]
 injectivity_radius(::GeneralUnitaryMatrices) = π
 
 @doc raw"""
-    injectivity_radius(G::SpecialOrthogonal)
-    injectivity_radius(G::Orthogonal)
     injectivity_radius(M::Rotations)
+    injectivity_radius(M::OrthogonalMatrices)
     injectivity_radius(M::Rotations, ::ExponentialRetraction)
+    injectivity_radius(M::OrthogonalMatrices, ::ExponentialRetraction)
 
-Return the radius of injectivity on the [`Rotations`](@ref) manifold `M`, which is ``π\sqrt{2}``.
-[^1]
+Return the radius of injectivity on the [`Rotations`](@ref) and [`OrthogonalMatrices`](@ref) `M`
+of ``n×n`` matrices, which is ``π\sqrt{2}`` for ``n ≥ 2``[^1] and ``0`` for ``n = 1``.
 
 [^1]:
     > For a derivation of the injectivity radius, see [sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/](https://sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/).
@@ -687,10 +685,93 @@ end
 
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
 
+@doc raw"""
+    inverse_retract(M::Rotations, p, q, ::PolarInverseRetraction)
+    inverse_retract(M::OrthogonalMatrices, p, q, ::PolarInverseRetraction)
+
+Compute a vector `X` (as an element of the Lie algebra) from the tangent space ``T_p\mathcal M``
+of the point `p` on the real [`GeneralUnitaryMatrices`](@ref) manifold `M`. This covers the
+[`Rotations`](@ref) and the [`OrthogonalMatrices`](@ref), and with `X` the point `q` is reached by the
+[`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) from the point `p` after time 1.
+
+The formula reads
+````math
+\operatorname{retr}^{-1}_p(q)
+= -\frac{1}{2}(p^{\mathrm{T}}qs - (p^{\mathrm{T}}qs)^{\mathrm{T}})
+````
+
+where ``s`` is the solution to the Sylvester equation
+
+``p^{\mathrm{T}}qs + s(p^{\mathrm{T}}q)^{\mathrm{T}} + 2I_n = 0.``
+
+The polar retraction does not leave the connected component of `p`, since
+``\operatorname{retr}_p(X) = p (I + X)(I - X^2)^{-1/2}`` and ``\det(I + X) > 0``.
+Hence the inverse is only defined for `p` and `q` with ``\det(p^{\mathrm{T}}q) > 0``,
+and a `DomainError` is thrown otherwise.
+"""
+inverse_retract(::GeneralUnitaryMatrices{ℝ}, ::Any, ::Any, ::PolarInverseRetraction)
+
+function inverse_retract_polar!(M::GeneralUnitaryMatrices{ℝ}, X, p, q)
+    n = get_parameter(M.size)[1]
+    A = transpose(p) * q
+    typeof(M) <: OrthogonalMatrices && det(A) < 0 && throw(
+        DomainError(
+            det(A),
+            "The polar inverse retraction is not defined for $p and $q from different connected components, i.e. with a negative determinant of p'q.",
+        ),
+    )
+    Amat = A isa StaticMatrix ? A : convert(Matrix, A)
+    H = copyto!(allocate(Amat), -2I)
+    try
+        B = lyap(A, H)
+        mul!(X, A, B)
+    catch e
+        e2 = OutOfInjectivityRadiusError()
+        isa(e, LinearAlgebra.LAPACKException) ? throw(e2) : rethrow()
+    end
+    return project!(SkewSymmetricMatrices(n), X, p, X)
+end
+
+@doc raw"""
+    inverse_retract(M::Rotations, p, q, ::QRInverseRetraction)
+    inverse_retract(M::OrthogonalMatrices, p, q, ::QRInverseRetraction)
+
+Compute a vector `X` (as an element of the Lie algebra) from the tangent space ``T_p\mathcal M``
+of the point `p` on the real [`GeneralUnitaryMatrices`](@ref) manifold `M`. This covers the
+[`Rotations`](@ref) and the [`OrthogonalMatrices`](@ref), and with `X` the point `q` is reached by the
+[`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) from the point `p` after time 1.
+
+The QR retraction does not leave the connected component of `p`, since
+``\operatorname{retr}_p(X) = p \operatorname{qf}(I + X)`` and ``\det(\operatorname{qf}(I + X)) = 1``.
+Hence the inverse is only defined for `p` and `q` with ``\det(p^{\mathrm{T}}q) > 0``,
+and a `DomainError` is thrown otherwise.
+"""
+inverse_retract(::GeneralUnitaryMatrices{ℝ}, ::Any, ::Any, ::QRInverseRetraction)
+
+function inverse_retract_qr!(M::GeneralUnitaryMatrices{ℝ}, X, p, q)
+    n = get_parameter(M.size)[1]
+    A = transpose(p) * q
+    typeof(M) <: OrthogonalMatrices && det(A) < 0 && throw(
+        DomainError(
+            det(A),
+            "The QR inverse retraction is not defined for $p and $q from different connected components, i.e. with a negative determinant of p'q.",
+        ),
+    )
+    R = zero(X)
+    for i in 1:n
+        b = zeros(i)
+        b[end] = 1
+        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
+        R[1:i, i] = A[1:i, 1:i] \ b
+    end
+    mul!(X, A, R)
+    return project!(SkewSymmetricMatrices(n), X, p, X)
+end
+
 """
     is_flat(M::GeneralUnitaryMatrices)
 
-Return true if [`GeneralUnitaryMatrices`](@ref) `M` is SO(2) or U(1) and false otherwise.
+Return true if [`GeneralUnitaryMatrices`](@ref) `M` is O(2), SO(2), U(1) or SU(1) and false otherwise.
 """
 is_flat(M::GeneralUnitaryMatrices) = false
 is_flat(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}) = true
@@ -813,7 +894,156 @@ function log!(M::GeneralUnitaryMatrices{𝔽}, X, p, q) where {𝔽}
     return X
 end
 
+@doc raw"""
+    log(M::SpecialUnitaryMatrices, p, q)
+
+Compute the logarithmic map on the [`SpecialUnitaryMatrices`](@ref) `M`.
+
+Let ``p^{\mathrm{H}}q = V\operatorname{diag}(e^{\mathrm{i}θ_1}, …, e^{\mathrm{i}θ_n})V^{\mathrm{H}}``
+with ``-π < θ_1 ≤ … ≤ θ_n ≤ π``. Since ``\det(p^{\mathrm{H}}q) = 1``, the angles sum to ``2πζ``
+for an integer ``ζ``, and
+
+```math
+\log_p q = V\operatorname{diag}(\mathrm{i}φ_1, …, \mathrm{i}φ_n)V^{\mathrm{H}},
+```
+
+where ``φ_j = θ_j - 2π`` for the ``ζ`` largest angles if ``ζ > 0``, ``φ_j = θ_j + 2π`` for the
+``-ζ`` smallest angles if ``ζ < 0``, and ``φ_j = θ_j`` otherwise. This is the logarithm of
+``p^{\mathrm{H}}q`` in ``\mathfrak{su}(n)`` of minimal norm, Theorems 1 and 2 and Lemma 1 in
+[Talaganis:2026](@cite).
+"""
+log(::GeneralUnitaryMatrices{ℂ, <:Any, DeterminantOneMatrixType}, ::Any, ::Any)
+function log!(M::GeneralUnitaryMatrices{ℂ, <:Any, DeterminantOneMatrixType}, X, p, q)
+    log_safe!(X, adjoint(p) * q)
+    n = get_parameter(M.size)[1]
+    project!(SkewHermitianMatrices(n, ℂ), X, X)
+    ζ = round(Int, imag(tr(X)) / (2π))
+    ζ == 0 && return X
+    e = eigen(Hermitian(-im * X))
+    θ = collect(e.values)
+    ζ > 0 ? (θ[(end - ζ + 1):end] .-= 2π) : (θ[1:(-ζ)] .+= 2π)
+    return copyto!(X, im * e.vectors * Diagonal(θ) * e.vectors')
+end
+
 norm(::GeneralUnitaryMatrices, p, X) = norm(X)
+
+"""
+    _exp_half(::GeneralUnitaryMatrices, d)
+
+Calculate `exp(d / 2)`.
+"""
+_exp_half(::GeneralUnitaryMatrices, d) = exp(d / 2)
+"""
+    _exp_half(::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, d)
+
+Calculate `exp(d / 2)` for the three by three real matrices, that is [`Rotations`](@ref)`(3)` and
+[`OrthogonalMatrices`](@ref)`(3)`, by the Rodrigues formula, Proposition 2.7 in [GallierQuaintance:2020](@cite).
+For `d / 2` it reads `I + (a / 2) d + (b / 4) d^2` with
+`a = sin(θ) / θ`, `b = (1 - cos(θ)) / θ^2` and `θ = norm(d) / (2 * sqrt(2))`.
+If `θ^2` evaluates to zero, `a = 1 - θ^2 / 6` and `b = 1 / 2 - θ^2 / 24` are used instead, the
+first two terms of the series of `a` and `b` in the proof of Proposition 2.7, page 32, in
+[GallierQuaintance:2020](@cite).
+"""
+function _exp_half(::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, d)
+    θ = norm(d) / (2 * sqrt(2))
+    if iszero(θ^2)
+        a = 1 - θ^2 / 6
+        b = 1 / 2 - θ^2 / 24
+    else
+        a = sin(θ) / θ
+        b = (1 - cos(θ)) / θ^2
+    end
+    a /= 2
+    b /= 4
+
+    return I + a .* d .+ b .* (d^2)
+end
+
+@doc raw"""
+    parallel_transport_direction(M::GeneralUnitaryMatrices, p, X, d)
+
+Compute the parallel transport of `X` from `p` in direction `d` on the
+[`GeneralUnitaryMatrices`](@ref) `M`. This covers the [`Rotations`](@ref), the
+[`OrthogonalMatrices`](@ref), the [`UnitaryMatrices`](@ref) and the [`SpecialUnitaryMatrices`](@ref),
+with tangent vectors represented in the Lie algebra. The formula, provided in
+[Rentmeesters:2011](@cite) for the rotations, reads
+
+```math
+\mathcal P_{q\gets p}X = q^{\mathrm{H}}p \operatorname{Exp}(d/2) X \operatorname{Exp}(d/2),
+```
+
+where ``q = \exp_p d`` and ``\operatorname{Exp}`` denotes the matrix exponential.
+"""
+parallel_transport_direction(::GeneralUnitaryMatrices, p, X, d)
+function parallel_transport_direction(M::GeneralUnitaryMatrices, p, X, d)
+    expdhalf = _exp_half(M, d)
+    q = exp(M, p, d)
+    return q' * p * expdhalf * X * expdhalf
+end
+@doc raw"""
+    parallel_transport_direction(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p, X, d)
+
+Return `X`, the parallel transport of `X` from `p` in direction `d` on the two by two real
+[`GeneralUnitaryMatrices`](@ref) `M`. Two skew-symmetric two by two matrices commute, so
+``\operatorname{Exp}(-d/2) X \operatorname{Exp}(d/2) = X``.
+"""
+parallel_transport_direction(::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p, X, d) = X
+
+function parallel_transport_direction!(M::GeneralUnitaryMatrices, Y, p, X, d)
+    expdhalf = _exp_half(M, d)
+    q = exp(M, p, d)
+    return copyto!(Y, q' * p * expdhalf * X * expdhalf)
+end
+function parallel_transport_direction!(
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, Y, p, X, d
+    )
+    return copyto!(Y, X)
+end
+
+function parallel_transport_to!(M::GeneralUnitaryMatrices, Y, p, X, q)
+    d = log(M, p, q)
+    expdhalf = _exp_half(M, d)
+    return copyto!(Y, q' * p * expdhalf * X * expdhalf)
+end
+function parallel_transport_to!(
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, Y, p, X, q
+    )
+    return copyto!(Y, X)
+end
+function parallel_transport_to!(
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, Y, p, X, q
+    )
+    d = log(M, p, q)
+    expdhalf = _exp_half(M, d)
+    return copyto!(Y, q' * p * expdhalf * X * expdhalf)
+end
+@doc raw"""
+    parallel_transport_to(M::GeneralUnitaryMatrices, p, X, q)
+
+Compute the parallel transport of `X` from `p` to `q` on the [`GeneralUnitaryMatrices`](@ref)
+`M`, with tangent vectors represented in the Lie algebra. With ``d = \log_p q``, the formula
+of [Rentmeesters:2011](@cite) reads
+
+```math
+\mathcal P_{q\gets p}X = q^{\mathrm{H}}p \operatorname{Exp}(d/2) X \operatorname{Exp}(d/2),
+```
+
+where ``\operatorname{Exp}`` denotes the matrix exponential.
+"""
+parallel_transport_to(::GeneralUnitaryMatrices, p, X, q)
+function parallel_transport_to(M::GeneralUnitaryMatrices, p, X, q)
+    d = log(M, p, q)
+    expdhalf = _exp_half(M, d)
+    return q' * p * expdhalf * X * expdhalf
+end
+@doc raw"""
+    parallel_transport_to(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p, X, q)
+
+Return `X`, the parallel transport of `X` from `p` to `q` on the two by two real
+[`GeneralUnitaryMatrices`](@ref) `M`. Two skew-symmetric two by two matrices commute, so
+``\operatorname{Exp}(-d/2) X \operatorname{Exp}(d/2) = X`` for ``d = \log_p q``.
+"""
+parallel_transport_to(::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p, X, q) = X
 
 @doc raw"""
     manifold_dimension(M::Rotations)
@@ -832,76 +1062,50 @@ end
 @doc raw"""
     manifold_volume(::GeneralUnitaryMatrices{ℝ,<:Any,AbsoluteDeterminantOneMatrixType})
 
-Volume of the manifold of real orthogonal matrices of absolute determinant one. The
-formula reads [BoyaSudarshanTilma:2003](@cite):
+Volume of the manifold of real orthogonal matrices of absolute determinant one with respect
+to the metric of [`inner`](@ref), Eq. (A27) in [ZyczkowskiSommers:2003](@cite):
 
 ```math
-\begin{cases}
-\frac{2^{k}(2\pi)^{k^2}}{\prod_{s=1}^{k-1} (2s)!} & \text{ if } n = 2k \\
-
-\frac{2^{k+1}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
-\end{cases}
+2^{n(n+3)/4} \prod_{k=1}^{n} \frac{π^{k/2}}{Γ(k/2)},
 ```
+
+twice the volume of the [`Rotations`](@ref).
 """
-function manifold_volume(
-        M::GeneralUnitaryMatrices{ℝ, <:Any, AbsoluteDeterminantOneMatrixType},
-    )
+function manifold_volume(M::GeneralUnitaryMatrices{ℝ, <:Any, AbsoluteDeterminantOneMatrixType})
     n = get_parameter(M.size)[1]
     return 2 * manifold_volume(GeneralUnitaryMatrices(n, ℝ, DeterminantOneMatrixType))
 end
 @doc raw"""
     manifold_volume(::GeneralUnitaryMatrices{ℝ,<:Any,DeterminantOneMatrixType})
 
-Volume of the manifold of real orthogonal matrices of determinant one. The
-formula reads [BoyaSudarshanTilma:2003](@cite):
+Volume of the manifold of real orthogonal matrices of determinant one with respect to the
+metric of [`inner`](@ref), Eq. (A31) in [ZyczkowskiSommers:2003](@cite):
 
 ```math
-\begin{cases}
-2 & \text{ if } n = 0 \\
-\frac{2^{k-1/2}(2\pi)^{k^2}}{\prod_{s=1}^{k-1} (2s)!} & \text{ if } n = 2k+2 \\
-\frac{2^{k+1/2}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
-\end{cases}
+2^{n(n+3)/4-1} \prod_{k=1}^{n} \frac{π^{k/2}}{Γ(k/2)}.
 ```
-
-It differs from the paper by a factor of `sqrt(2)` due to a different choice of
-normalization.
 """
 function manifold_volume(M::GeneralUnitaryMatrices{ℝ, <:Any, DeterminantOneMatrixType})
     n = get_parameter(M.size)[1]
-    vol = 1.0
-    if n % 2 == 0
-        k = div(n, 2)
-        vol *= 2^(k - 1) * (2π)^(k^2)
-        for s in 1:(k - 1)
-            vol /= factorial(2 * s)
-        end
-    else
-        k = div(n - 1, 2)
-        vol *= 2^k * (2π)^(k * (k + 1))
-        for s in 1:(k - 1)
-            vol /= factorial(2 * s + 1)
-        end
-    end
-    if n > 1
-        vol *= sqrt(2)
+    vol = 2.0^(n * (n + 3) / 4 - 1)
+    for k in 1:n
+        vol *= π^(k / 2) / gamma(k / 2)
     end
     return vol
 end
 @doc raw"""
     manifold_volume(::GeneralUnitaryMatrices{ℂ,<:Any,AbsoluteDeterminantOneMatrixType})
 
-Volume of the manifold of complex general unitary matrices of absolute determinant one. The
-formula reads [BoyaSudarshanTilma:2003](@cite)
+Volume of the manifold of complex general unitary matrices of absolute determinant one with
+respect to the metric of [`inner`](@ref), Eq. (3.9) in [ZyczkowskiSommers:2003](@cite):
 
 ```math
-\sqrt{n 2^{n+1}} π^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}.
+(2π)^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}.
 ```
 """
-function manifold_volume(
-        M::GeneralUnitaryMatrices{ℂ, <:Any, AbsoluteDeterminantOneMatrixType},
-    )
+function manifold_volume(M::GeneralUnitaryMatrices{ℂ, <:Any, AbsoluteDeterminantOneMatrixType})
     n = get_parameter(M.size)[1]
-    vol = sqrt(n * 2^(n + 1)) * π^(((n + 1) * n) // 2)
+    vol = (2π)^div(n * (n + 1), 2)
     kf = 1
     for k in 1:(n - 1)
         kf *= k
@@ -940,9 +1144,7 @@ is
 project(::GeneralUnitaryMatrices{𝔽, <:Any, AbsoluteDeterminantOneMatrixType}, p) where {𝔽}
 
 function project!(
-        ::GeneralUnitaryMatrices{𝔽, <:Any, AbsoluteDeterminantOneMatrixType},
-        q,
-        p,
+        ::GeneralUnitaryMatrices{𝔽, <:Any, AbsoluteDeterminantOneMatrixType}, q, p
     ) where {𝔽}
     F = svd(p)
     mul!(q, F.U, F.Vt)
@@ -975,7 +1177,7 @@ end
     retract(M::OrthogonalMatrices, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction on the [`Rotations`](@ref) and [`OrthogonalMatrices`](@ref) `M` from `p` in direction `X`
-(as an element of the Lie group) and is a second-order approximation of the exponential map.
+(as an element of the Lie algebra) and is a second-order approximation of the exponential map.
 Let
 
 ````math
@@ -992,10 +1194,10 @@ retract(::GeneralUnitaryMatrices, ::Any, ::Any, ::PolarRetraction)
 
 @doc raw"""
     retract(M::Rotations, p, X, ::QRRetraction)
-    retract(M::OrthogonalMatrices, p. X, ::QRRetraction)
+    retract(M::OrthogonalMatrices, p, X, ::QRRetraction)
 
 Compute the QR-based retraction on the [`Rotations`](@ref) and [`OrthogonalMatrices`](@ref) `M` from `p` in direction `X`
-(as an element of the Lie group), which is a first-order approximation of the exponential map.
+(as an element of the Lie algebra), which is a first-order approximation of the exponential map.
 
 This is also the default retraction on these manifolds.
 """
@@ -1006,11 +1208,7 @@ function ManifoldsBase.retract_qr!(M::GeneralUnitaryMatrices, q, p, X)
 end
 
 function ManifoldsBase.retract_qr_fused!(
-        ::GeneralUnitaryMatrices,
-        q::AbstractArray{T},
-        p,
-        X,
-        t::Number,
+        ::GeneralUnitaryMatrices, q::AbstractArray{T}, p, X, t::Number
     ) where {T}
     A = p + p * (t * X)
     qr_decomp = qr(A)
@@ -1050,15 +1248,15 @@ function riemann_tensor!(::GeneralUnitaryMatrices, Xresult, p, X, Y, Z)
 end
 
 @doc raw"""
-    volume_density(M::GeneralUnitaryMatrices{<:Any,ℝ}, p, X)
+    volume_density(M::GeneralUnitaryMatrices{ℝ}, p, X)
 
-Compute volume density function of a sphere, i.e. determinant of the differential of
+Compute volume density function of `M`, i.e. determinant of the differential of
 exponential map `exp(M, p, X)`. It is derived from Eq. (4.1) and Corollary 4.4
 in [ChevallierLiLuDunson:2022](@cite). See also Theorem 4.1 in [FalorsideHaanDavidsonForre:2019](@cite),
 (note that it uses a different convention).
 """
 function volume_density(M::GeneralUnitaryMatrices{ℝ}, p, X)
-    dens = one(eltype(X))
+    dens = one(complex(float(eltype(X))))
     B = get_basis(M, p, DefaultOrthonormalBasis())
     Ys = get_vectors(M, p, B)
     Z = similar(X)
@@ -1070,30 +1268,26 @@ function volume_density(M::GeneralUnitaryMatrices{ℝ}, p, X)
     end
     for ev in eigvals(op_coeffs)
         if abs(ev) > eps(eltype(X))
-            cm = (1 - exp(-ev)) / ev
-            dens *= real(cm)
+            dens *= -expm1(-ev) / ev
         end
     end
 
-    return dens
+    return real(dens)
 end
 
 @doc raw"""
     volume_density(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p, X)
 
-Compute the volume density on O(3)/SO(3). The formula reads [FalorsideHaanDavidsonForre:2019](@cite)
+Compute the volume density on O(3)/SO(3). With the rotation angle
+``θ = \frac{\lVert X\rVert}{\sqrt{2}}`` it is the reciprocal of Eq. (5) in
+[FalorsideHaanDavidsonForre:2019](@cite), that is
 
 ```math
-\frac{1-1\cos(\sqrt{2}\lVert X \rVert)}{\lVert X \rVert^2}.
+\frac{2\bigl(1-\cos θ\bigr)}{θ^2} = \left(\frac{\sin\frac{θ}{2}}{\frac{θ}{2}}\right)^2.
 ```
 """
 function volume_density(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p, X)
-    nX = norm(M, p, X)
-    if nX > eps(eltype(X))
-        return (1 - 1 * cos(sqrt(2) * nX)) / nX^2
-    else
-        return one(nX)
-    end
+    return usinc(norm(M, p, X) / (2 * sqrt(2)))^2
 end
 
 @doc raw"""

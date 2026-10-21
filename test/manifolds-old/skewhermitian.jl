@@ -1,6 +1,7 @@
 include("../header.jl")
 
 @testset "SkewSymmetricMatrices" begin
+    @test_throws DomainError SkewSymmetricMatrices(-1)
     @test SkewSymmetricMatrices(3) === SkewHermitianMatrices(3)
 end
 
@@ -22,25 +23,33 @@ end
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test is_flat(M)
+        @test riemann_tensor(M, A_skewsym, A_skewsym, B_skewsym, B_skewsym) == zeros(3, 3)
+        @test sectional_curvature(M, A_skewsym, A_skewsym, B_skewsym) === 0.0
+        @test sectional_curvature(
+            M_complex, A_skewsym_complex, A_skewsym_complex, B_skewsym_complex
+        ) === 0.0
         @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{3, 3}}}
         @test check_point(M, B_skewsym) === nothing
         @test_throws DomainError is_point(M, A; error = :error)
         @test_throws ManifoldDomainError is_point(M, C; error = :error)
         @test_throws ManifoldDomainError is_point(M, D; error = :error)
         @test check_vector(M, B_skewsym, B_skewsym) === nothing
+        @test Weingarten!(M, similar(B_skewsym), B_skewsym, B_skewsym, B_skewsym) == zero(B_skewsym)
         @test_throws DomainError is_vector(M, B_skewsym, A; error = :error)
         @test_throws ManifoldDomainError is_vector(M, A, B_skewsym; error = :error)
         @test_throws ManifoldDomainError is_vector(M, B_skewsym, D; error = :error)
         @test_throws ManifoldDomainError is_vector(
-            M,
-            B_skewsym,
-            1 * im * zero_vector(M, B_skewsym);
+            M, B_skewsym, 1 * im * zero_vector(M, B_skewsym);
             error = :error,
         )
         @test manifold_dimension(M) == 3
         @test manifold_dimension(M_complex) == 9
+        @test sectional_curvature_max(M) === 0.0
+        @test sectional_curvature_min(M) === 0.0
         @test A_skewsym2 == project!(M, A_skewsym, A_skewsym)
         @test A_skewsym2 == project(M, A_skewsym, A_skewsym)
+        @test project(M, A) == [0 -1 -2; 1 0 -1; 2 1 0] # the point projection antisymmetrizes
+        @test project(M, B_skewsym, A) == [0 -1 -2; 1 0 -1; 2 1 0] # and so does the tangent one
         A_sym3 = similar(A_skewsym)
         embed!(M, A_sym3, A_skewsym)
         A_sym4 = embed(M, A_skewsym)
@@ -87,15 +96,16 @@ end
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_default_vector_transport = true,
-                basis_types_vecs = (DefaultOrthonormalBasis(ℂ),),
-                basis_types_to_from = (DefaultOrthonormalBasis(ℂ),),
+                basis_types_vecs = (DefaultOrthonormalBasis(ℝ),),
+                basis_types_to_from = (DefaultOrthonormalBasis(ℝ),),
                 is_tangent_atol_multiplier = 1,
                 test_inplace = true,
                 test_rand_point = true,
             )
             @test isapprox(
+                M_complex,
                 -pts_complex[1],
-                exp(M, pts_complex[1], log(M, pts_complex[1], -pts_complex[1])),
+                exp(M_complex, pts_complex[1], log(M_complex, pts_complex[1], -pts_complex[1])),
             )
         end # testset type $T
     end # for

@@ -22,7 +22,7 @@ end
     distance(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
 
 Compute the distance on the manifold of [`SymmetricPositiveDefinite`](@ref)
-nmatrices, i.e. between two symmetric positive definite matrices `p` and `q`
+matrices, i.e. between two symmetric positive definite matrices `p` and `q`
 with respect to the [`LogCholeskyMetric`](@ref). The formula reads
 
 ````math
@@ -32,7 +32,7 @@ d_{\mathcal P(n)}(p,q) = \sqrt{
 ````
 
 where ``x`` and ``y`` are the Cholesky factors of ``p`` and ``q``, respectively,
-``⌊⋅⌋`` denbotes the strictly lower triangular matrix of its argument,
+``⌊⋅⌋`` denotes the strictly lower triangular matrix of its argument,
 and ``\lVert⋅\rVert_{\mathrm{F}}`` the Frobenius norm.
 """
 function distance(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, p, q)
@@ -68,11 +68,7 @@ function exp!(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMet
     return copyto!(q, z * z')
 end
 function exp_fused!(
-        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
-        q,
-        p,
-        X,
-        t::Number,
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, q, p, X, t::Number
     )
     return exp!(M, q, p, t * X)
 end
@@ -102,7 +98,7 @@ function get_vector_orthonormal!(
     MC = CholeskySpace(N; parameter = get_parameter_type(M.manifold))
     y = cholesky(p).L
     get_vector_orthonormal!(MC, X, y, Xⁱ, rn)
-    tangent_cholesky_to_tangent_spd!(p, X)
+    tangent_cholesky_to_tangent_spd!(y, X)
     return X
 end
 
@@ -128,6 +124,8 @@ function inner(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMe
     (z, Yz) = spd_to_cholesky(p, z, Y)
     return inner(CholeskySpace(N; parameter = get_parameter_type(M.manifold)), z, Xz, Yz)
 end
+
+@tfvector_inner_via_get_vector MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}
 
 """
     is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric})
@@ -174,35 +172,78 @@ The parallel transport is based on the parallel transport on [`CholeskySpace`](@
 Let ``x`` and ``y`` denote the Cholesky factors of `p` and `q`, respectively and
 ``W = x(x^{-1}Xx^{-\mathrm{T}})_\frac{1}{2}``, where ``(⋅)_\frac{1}{2}`` denotes the lower
 triangular matrix with the diagonal multiplied by ``\frac{1}{2}``. With ``V`` the parallel
-transport on [`CholeskySpace`](@ref) from ``x`` to ``y``. The formula hear reads
+transport of ``W`` on [`CholeskySpace`](@ref) from ``x`` to ``y``, the formula here reads
 
 ````math
 \mathcal P_{q←p}X = yV^{\mathrm{T}} + Vy^{\mathrm{T}}.
 ````
 """
 parallel_transport_to(
-    ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
-    ::Any,
-    ::Any,
-    ::Any,
+    ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, ::Any, ::Any, ::Any
 )
 
 function parallel_transport_to!(
-        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
-        Y,
-        p,
-        X,
-        q,
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, Y, p, X, q
     )
     N = get_parameter(M.manifold.size)[1]
     y = cholesky(q).L
     (x, W) = spd_to_cholesky(p, X)
     parallel_transport_to!(
-        CholeskySpace(N; parameter = get_parameter_type(M.manifold)),
-        Y,
-        x,
-        W,
-        y,
+        CholeskySpace(N; parameter = get_parameter_type(M.manifold)), Y, x, W, y
     )
     return tangent_cholesky_to_tangent_spd!(y, Y)
+end
+
+@doc raw"""
+    riemann_tensor(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at `p` on the [`SymmetricPositiveDefinite`](@ref) matrices `M` with the [`LogCholeskyMetric`](@ref).
+Its value is always the zero tangent vector, since `M` is flat.
+"""
+riemann_tensor(
+    M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, p, X, Y, Z,
+)
+
+function riemann_tensor!(
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
+        Xresult,
+        p,
+        X,
+        Y,
+        Z,
+    )
+    return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, X, Y)
+
+Return the sectional curvature 0 of the [`SymmetricPositiveDefinite`](@ref) matrices `M` with the [`LogCholeskyMetric`](@ref), which is flat.
+"""
+function sectional_curvature(
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, p, X, Y,
+    )
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_max(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric})
+
+Return the upper bound 0 of the sectional curvature of the [`SymmetricPositiveDefinite`](@ref) matrices `M` with the [`LogCholeskyMetric`](@ref), which is flat.
+"""
+function sectional_curvature_max(
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
+    )
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric})
+
+Return the lower bound 0 of the sectional curvature of the [`SymmetricPositiveDefinite`](@ref) matrices `M` with the [`LogCholeskyMetric`](@ref), which is flat.
+"""
+function sectional_curvature_min(
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
+    )
+    return 0.0
 end

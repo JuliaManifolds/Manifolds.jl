@@ -1,9 +1,11 @@
 include("../header.jl")
+using ADTypes
 using FiniteDifferences
 using Manifolds: RiemannianProjectionBackend
 using ManifoldDiff
 
 @testset "SymplecticMatrices" begin
+    @test_throws DomainError SymplecticMatrices(-2)
     M = SymplecticMatrices(2)
     @test metric(M) == RealSymplecticMetric()
     Metr_Sp_2 = MetricManifold(M, RealSymplecticMetric())
@@ -86,6 +88,7 @@ using ManifoldDiff
         @test is_vector(M, p_2, X2; atol = 1.0e-12)
         @test is_vector(M, p_2, X1 + X2; atol = 1.0e-6)
         @test_throws DomainError is_vector(M, p_2, X1 + [0.1 0.1; -0.1 0.1]; error = :error)
+        @test inner(Metr_Sp_2, p_2, X1, X2) == inner(M, p_2, X1, X2)
     end
     @testset "Symplectic Inverse" begin
         I_2n = Array(I, 2, 2)
@@ -99,6 +102,8 @@ using ManifoldDiff
         y = similar(x)
         z = embed(M, x)
         @test z == x
+        embed!(M, y, x)
+        @test y == x
 
         Y = similar(X1)
         embed!(M, Y, p_2, X1)
@@ -169,11 +174,13 @@ using ManifoldDiff
         @test is_point(M_big, p_big; error = :error, atol = 1.0e-9)
         X_big = rand(M_big; vector_at = p_big)
         @test is_vector(M_big, p_big, X_big; error = :error, atol = 1.0e-9)
+        X_seeded = rand(MersenneTwister(7), M_big; vector_at = p_big)
+        @test X_seeded == rand(MersenneTwister(7), M_big; vector_at = p_big)
+        @test is_vector(M_big, p_big, X_seeded; error = :error, atol = 1.0e-9)
     end
     @testset "test_manifold(SymplecticMatrices(6))" begin
         Manifolds.test_manifold(
-            Sp_6,
-            cat(points, large_tr_norm_points; dims = 1);
+            Sp_6, cat(points, large_tr_norm_points; dims = 1);
             retraction_methods = [CayleyRetraction(), ExponentialRetraction()],
             default_retraction_method = CayleyRetraction(),
             default_inverse_retraction_method = CayleyInverseRetraction(),
@@ -196,8 +203,7 @@ using ManifoldDiff
         fd_diff = RiemannianProjectionBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 
         @test isapprox(
-            Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff),
-            analytical_grad_f(p_grad);
+            Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff), analytical_grad_f(p_grad);
             atol = 1.0e-9,
         )
         @test isapprox(
@@ -217,6 +223,7 @@ using ManifoldDiff
         X2 = similar(X)
         riemannian_gradient!(Sp_6, X2, p_grad, one(p_grad))
         @test isapprox(Sp_6, p_grad, X, X2)
+        @test isapprox(X, analytical_grad_f(p_grad); atol = 1.0e-9)
     end
     @testset "SymplecticElement" begin
         @test SymplecticElement() == SymplecticElement(1)
@@ -346,6 +353,8 @@ using ManifoldDiff
 
         @testset "Symplectic Inverse Ops." begin
             @test ((Q' * pQ_1' * Q) * pQ_1 - I) == zeros(eltype(pQ_1), size(pQ_1)...)
+            @test is_point(Sp_4, pQ_1)
+            @test is_point(Sp_4, pQ_2)
         end
     end
     @testset "Symplectic inverse" begin

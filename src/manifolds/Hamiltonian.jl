@@ -7,10 +7,10 @@
 A type to store a Hamiltonian matrix, that is a square matrix for which ``A^+ = -A`` where
 
 ```math
-A^+ = J_{2n}A^{\mathrm{T}}J_{2n}, \qquad J_{2n} \begin{pmatrix} 0 & I_n\\-I_n & 0 \end{pmatrix},
+A^+ = J_{2n}^{\mathrm{T}}A^{\mathrm{T}}J_{2n}, \qquad J_{2n} = \begin{pmatrix} 0 & I_n\\-I_n & 0 \end{pmatrix},
 ```
 
-and ``I_n`` denotes the ``n×n``
+and ``I_n`` denotes the ``n×n`` identity matrix.
 """
 struct Hamiltonian{T, S <: AbstractMatrix{<:T}} <: AbstractMatrix{T}
     value::S
@@ -41,22 +41,22 @@ size(A::Hamiltonian) = size(A.value)
     HamiltonianMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
-consisting of (real-valued) hamiltonian matrices of size ``n×n``, i.e. the set
+consisting of Hamiltonian matrices of size ``2n×2n``, i.e. the set
 
 ````math
-\mathfrak{sp}(2n,𝔽) = \bigl\{p  ∈ 𝔽^{2n×2n}\ \big|\ p^+ = p \bigr\},
+\mathfrak{sp}(2n,𝔽) = \bigl\{p  ∈ 𝔽^{2n×2n}\ \big|\ p^+ = -p \bigr\},
 ````
 where ``⋅^{+}`` denotes the [`symplectic_inverse`](@ref), and ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 Though it is slightly redundant, usually the matrices are stored as ``2n×2n`` arrays.
 
-The symbol ``\mathfak{sp}`` refers to the main usage within `Manifolds.jl` that is the
+The symbol ``\mathfrak{sp}`` refers to the main usage within `Manifolds.jl` that is the
 Lie algebra to the [`SymplecticMatrices`](@ref) interpreted as a Lie group with the
 matrix multiplication as group operation.
 
 # Constructor
 
-    HamiltonianMatrices(2n::Int, field::AbstractNumbers=ℝ)
+    HamiltonianMatrices(2n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of ``2n×2n`` Hamiltonian matrices.
 """
@@ -65,6 +65,11 @@ struct HamiltonianMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function HamiltonianMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(
+            n, "The matrix size 2n of Hamiltonian matrices must be nonnegative, but was $(n)."
+        ),
+    )
     n % 2 == 0 || throw(ArgumentError("The dimension of the symplectic manifold
                         embedding space must be even. Was odd, n % 2 == $(n % 2)."))
     size = wrap_type_parameter(parameter, (div(n, 2),))
@@ -143,6 +148,23 @@ Return true. [`HamiltonianMatrices`](@ref) is a flat manifold.
 is_flat(M::HamiltonianMatrices) = true
 
 @doc raw"""
+    manifold_dimension(M::HamiltonianMatrices)
+
+Return the dimension of the [`HamiltonianMatrices`](@ref) `M` over the number system `𝔽`, that is
+
+````math
+\dim \mathfrak{sp}(2n,𝔽) = (2n+1)n \dim_ℝ 𝔽,
+````
+
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of ``𝔽``.
+For ``𝔽 = ℝ`` this is the dimension of the [`SymplecticMatrices`](@ref) ``\mathrm{Sp}(2n,ℝ)``, whose Lie algebra this is.
+"""
+function manifold_dimension(M::HamiltonianMatrices{𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    return (2n + 1) * n * real_dimension(𝔽)
+end
+
+@doc raw"""
     is_hamiltonian(A::AbstractMatrix; kwargs...)
 
 Test whether a matrix `A` is hamiltonian.
@@ -162,6 +184,41 @@ end
 function is_hamiltonian(A::Hamiltonian; kwargs...)
     return isapprox((A^+).value, -A.value; kwargs...)
 end
+
+@doc raw"""
+    project(::HamiltonianMatrices, p)
+    project!(::HamiltonianMatrices, q, p)
+
+Project a matrix ``p ∈ 𝔽^{2n×2n}`` onto the [`HamiltonianMatrices`](@ref) ``\mathfrak{sp}(2n,𝔽)``
+relative to the Euclidean metric of the embedding ``𝔽^{2n×2n}``, that is
+
+````math
+    \operatorname{proj}_{\mathfrak{sp}(2n,𝔽)}(p) = \frac{1}{2}\bigl( p - p^{+} \bigr),
+````
+
+where ``p^+`` denotes the [`symplectic_inverse`](@ref) of ``p``.
+For ``𝔽 = ℝ`` this is Proposition 2 in [GaoSonAbsilStykel:2021:2](@cite) at the identity,
+whose tangent space is ``\mathfrak{sp}(2n,ℝ)`` by Corollary 3.46 in [Hall:2015](@cite).
+For ``𝔽 = ℂ`` the real and the imaginary part are projected separately, see Proposition 3.38 in [Hall:2015](@cite).
+"""
+project(::HamiltonianMatrices, ::Any)
+
+function project!(::HamiltonianMatrices, q, p)
+    q .= (p .- symplectic_inverse(p)) ./ 2
+    return q
+end
+
+@doc raw"""
+    project(::HamiltonianMatrices, p, X)
+    project!(::HamiltonianMatrices, Y, p, X)
+
+Project a matrix ``X ∈ 𝔽^{2n×2n}`` onto the tangent space ``T_p\mathfrak{sp}(2n,𝔽)`` of the
+[`HamiltonianMatrices`](@ref) at ``p``, which is ``\mathfrak{sp}(2n,𝔽)`` itself, so that
+``\operatorname{proj}_p(X) = \frac{1}{2}\bigl( X - X^{+} \bigr)`` as for points.
+"""
+project(::HamiltonianMatrices, ::Any, ::Any)
+
+project!(M::HamiltonianMatrices, Y, p, X) = project!(M, Y, X)
 
 function Base.show(io::IO, ::HamiltonianMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return print(io, "HamiltonianMatrices($(2n), $(𝔽))")
@@ -192,11 +249,8 @@ rand(M::HamiltonianMatrices; σ::Real = 1.0)
 
 @doc "$(_doc_rand_hamiltonian)"
 function rand!(
-        rng::AbstractRNG,
-        M::HamiltonianMatrices{ℝ},
-        pX;
-        σ::Real = one(real(eltype(pX))),
-        vector_at = nothing,
+        rng::AbstractRNG, M::HamiltonianMatrices{ℝ}, pX;
+        σ::Real = one(real(eltype(pX))), vector_at = nothing,
     )
     n = get_parameter(M.size)[1]
     p1 = @view(pX[1:n, 1:n])
@@ -208,7 +262,46 @@ function rand!(
     randn!(rng, p2)
     randn!(rng, p3)
     p2 .= (1 / 2) .* (p2 .+ p2')
-    p3 .= (1 / 2) .* (p2 .+ p2')
+    p3 .= (1 / 2) .* (p3 .+ p3')
     pX .*= σ
     return pX
+end
+
+@doc raw"""
+    riemann_tensor(M::HamiltonianMatrices, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`HamiltonianMatrices`](@ref) `M`.
+Its value is always the zero tangent vector, since `M` is flat.
+"""
+riemann_tensor(M::HamiltonianMatrices, p, X, Y, Z)
+
+function riemann_tensor!(::HamiltonianMatrices, Xresult, p, X, Y, Z)
+    return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(M::HamiltonianMatrices, p, X, Y)
+
+Return the sectional curvature 0 of [`HamiltonianMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature(::HamiltonianMatrices, p, X, Y)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_max(M::HamiltonianMatrices)
+
+Return the upper bound 0 of the sectional curvature of [`HamiltonianMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_max(::HamiltonianMatrices)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::HamiltonianMatrices)
+
+Return the lower bound 0 of the sectional curvature of [`HamiltonianMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_min(::HamiltonianMatrices)
+    return 0.0
 end

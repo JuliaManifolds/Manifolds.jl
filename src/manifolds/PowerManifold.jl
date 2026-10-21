@@ -20,8 +20,7 @@ tangent space of the power manifold.
 struct PowerMetric <: AbstractMetric end
 
 function ManifoldsBase.PowerManifold(
-        M::AbstractManifold{𝔽},
-        size::Integer...;
+        M::AbstractManifold{𝔽}, size::Integer...;
         parameter::Symbol = :field,
     ) where {𝔽}
     size_w = wrap_type_parameter(parameter, size)
@@ -44,11 +43,7 @@ for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
         end
         function allocate_result(M::$PowerRepr, f::typeof(get_parameters), p)
             return invoke(
-                allocate_result,
-                Tuple{AbstractManifold, typeof(get_parameters), Any},
-                M,
-                f,
-                p,
+                allocate_result, Tuple{AbstractManifold, typeof(get_parameters), Any}, M, f, p
             )
         end
     end
@@ -78,16 +73,12 @@ function flat!(M::AbstractPowerManifold, ξ::RieszRepresenterCotangentVector, p,
 end
 
 Base.@propagate_inbounds function Base.getindex(
-        p::AbstractArray,
-        M::PowerManifoldMultidimensional,
-        I::Integer...,
+        p::AbstractArray, M::PowerManifoldMultidimensional, I::Integer...
     )
     return collect(get_component(M, p, I...))
 end
 Base.@propagate_inbounds function Base.getindex(
-        p::AbstractArray{T, N},
-        M::PowerManifoldMultidimensional,
-        I::Vararg{Integer, N},
+        p::AbstractArray{T, N}, M::PowerManifoldMultidimensional, I::Vararg{Integer, N}
     ) where {T, N}
     return get_component(M, p, I...)
 end
@@ -103,18 +94,12 @@ function manifold_volume(M::PowerManifold)
 end
 
 Base.@propagate_inbounds @inline function _read(
-        ::PowerManifoldMultidimensional,
-        rep_size::Tuple,
-        x::AbstractArray,
-        i::Tuple,
+        ::PowerManifoldMultidimensional, rep_size::Tuple, x::AbstractArray, i::Tuple
     )
     return view(x, rep_size_to_colons(rep_size)..., i...)
 end
 Base.@propagate_inbounds @inline function _read(
-        ::PowerManifoldMultidimensional,
-        rep_size::Tuple{},
-        x::AbstractArray,
-        i::NTuple{N, Int},
+        ::PowerManifoldMultidimensional, rep_size::Tuple{}, x::AbstractArray, i::NTuple{N, Int}
     ) where {N}
     return x[i...]
 end
@@ -160,6 +145,30 @@ function riemannian_Hessian!(M::AbstractPowerManifold, Y, p, G, H, X)
 end
 
 @doc raw"""
+    riemannian_gradient(M::PowerManifold, p, G; kwargs...)
+    riemannian_gradient!(M::PowerManifold, X, p, G; kwargs...)
+
+Compute the Riemannian gradient from the Euclidean gradient `G` of the representation in the
+embedding. For the array and the nested power representation it decouples: for every index ``i``
+the element ``X_i`` is the Riemannian gradient on the factor manifold at ``p_i`` computed from ``G_i``.
+"""
+riemannian_gradient(M::PowerManifold, p, G)
+
+function riemannian_gradient!(
+        M::PowerManifold{𝔽, TM, TSize, <:Union{ArrayPowerRepresentation, NestedPowerRepresentation}},
+        X, p, G; kwargs...,
+    ) where {𝔽, TM, TSize}
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        riemannian_gradient!(
+            M.manifold, _write(M, rep_size, X, i), _read(M, rep_size, p, i),
+            _read(M, rep_size, G, i); kwargs...,
+        )
+    end
+    return X
+end
+
+@doc raw"""
     sharp(M::AbstractPowerManifold, p, ξ::RieszRepresenterCotangentVector)
 
 Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
@@ -183,17 +192,14 @@ function sharp!(M::AbstractPowerManifold, X, p, ξ::RieszRepresenterCotangentVec
 end
 
 function Base.show(
-        io::IO,
-        M::PowerManifold{𝔽, TM, TypeParameter{TSize}, ArrayPowerRepresentation},
+        io::IO, M::PowerManifold{𝔽, TM, TypeParameter{TSize}, ArrayPowerRepresentation}
     ) where {𝔽, TM <: AbstractManifold{𝔽}, TSize}
     return print(
-        io,
-        "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")), parameter=:type)",
+        io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")), parameter=:type)"
     )
 end
 function Base.show(
-        io::IO,
-        M::PowerManifold{𝔽, TM, <:Tuple, ArrayPowerRepresentation},
+        io::IO, M::PowerManifold{𝔽, TM, <:Tuple, ArrayPowerRepresentation}
     ) where {𝔽, TM <: AbstractManifold{𝔽}}
     size = get_parameter(M.size)
     return print(io, "PowerManifold($(M.manifold), $(join(size, ", ")))")
@@ -206,7 +212,7 @@ Return volume density on the [`PowerManifold`](@extref `ManifoldsBase.PowerManif
 volume densities.
 """
 function volume_density(M::PowerManifold, p, X)
-    density = one(float(eltype(X)))
+    density = one(float(number_eltype(X)))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         p_i = _read(M, rep_size, p, i)
@@ -217,10 +223,7 @@ function volume_density(M::PowerManifold, p, X)
 end
 
 @inline function _write(
-        ::PowerManifoldMultidimensional,
-        rep_size::Tuple,
-        x::AbstractArray,
-        i::Tuple,
+        ::PowerManifoldMultidimensional, rep_size::Tuple, x::AbstractArray, i::Tuple
     )
     return view(x, rep_size_to_colons(rep_size)..., i...)
 end
@@ -304,11 +307,7 @@ function get_point!(M::PowerManifoldNestedReplacing, p, A::PowerAtlas, i, a)
 end
 
 function get_coordinates_induced_basis!(
-        M::AbstractPowerManifold,
-        c,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+        M::AbstractPowerManifold, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
     )
     rep_size = representation_size(M.manifold)
     dim, offset = manifold_dimension(M.manifold), 0
@@ -326,11 +325,7 @@ function get_coordinates_induced_basis!(
 end
 
 function get_vector_induced_basis!(
-        M::AbstractPowerManifold,
-        Y,
-        p,
-        c,
-        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+        M::AbstractPowerManifold, Y, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
     )
     rep_size = representation_size(M.manifold)
     dim, offset = manifold_dimension(M.manifold), 0
@@ -362,37 +357,23 @@ function get_vector_induced_basis!(M::PowerManifoldNestedReplacing, Y, p, c, B::
     return Y
 end
 function get_coordinates(
-        M::AbstractPowerManifold,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+        M::AbstractPowerManifold, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
     )
     return get_coordinates_induced_basis(M, p, X, B)
 end
 function get_coordinates!(
-        M::AbstractPowerManifold,
-        c,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+        M::AbstractPowerManifold, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
     )
     return get_coordinates_induced_basis!(M, c, p, X, B)
 end
 
 function get_vector(
-        M::AbstractPowerManifold,
-        p,
-        c,
-        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+        M::AbstractPowerManifold, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
     )
     return get_vector_induced_basis(M, p, c, B)
 end
 function get_vector!(
-        M::AbstractPowerManifold,
-        Y,
-        p,
-        c,
-        B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas},
+        M::AbstractPowerManifold, Y, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
     )
     return get_vector_induced_basis!(M, Y, p, c, B)
 end

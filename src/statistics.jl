@@ -12,7 +12,9 @@ end
         tangent_space_covariance_estimator::CovarianceEstimator=SimpleCovariance(;
             corrected=true,
         ),
-        mean_estimation_method::AbstractApproximationMethod=GradientDescentEstimation(),
+        mean_estimation_method::AbstractApproximationMethod=default_approximation_method(
+            M, cov,
+        ),
         inverse_retraction_method::AbstractInverseRetractionMethod=default_inverse_retraction_method(
             M, eltype(x),
         ),
@@ -23,7 +25,7 @@ on a manifold is a rank 2 tensor, the function returns its coefficients in basis
 the given tangent space basis. See Section 5 of [Pennec:2006](@cite) for details.
 
 The mean is calculated using the specified `mean_estimation_method` using
-[mean](@ref Statistics.mean(::AbstractManifold, ::AbstractVector, ::AbstractApproximationMethod),
+[`mean`](@ref mean(::AbstractManifold, args...)),
 and tangent vectors at this mean are calculated using the provided `inverse_retraction_method`.
 Finally, the covariance matrix in the tangent plane is estimated using the Euclidean space
  estimator `tangent_space_covariance_estimator`. The type `CovarianceEstimator` is defined
@@ -39,29 +41,23 @@ function Statistics.cov(
             corrected = true,
         ),
         mean_estimation_method::AbstractApproximationMethod = default_approximation_method(
-            M,
-            cov,
+            M, cov
         ),
         inverse_retraction_method::AbstractInverseRetractionMethod = default_inverse_retraction_method(
-            M,
-            eltype(x),
+            M, eltype(x)
         ),
     )
     μ = mean(M, x, mean_estimation_method)
     Xs_at_μ = map(p -> inverse_retract(M, μ, p, inverse_retraction_method), x)
     Xcs = map(X -> get_coordinates(M, μ, X, basis), Xs_at_μ)
     return cov(
-        tangent_space_covariance_estimator,
-        reduce(hcat, Xcs);
-        mean = zero(Xcs[1]),
-        dims = 2,
+        tangent_space_covariance_estimator, reduce(hcat, Xcs);
+        mean = zero(Xcs[1]), dims = 2,
     )
 end
 
 function default_approximation_method(
-        ::StopForwardingType,
-        ::AbstractDecoratorManifold,
-        ::typeof(cov),
+        ::StopForwardingType, ::AbstractDecoratorManifold, ::typeof(cov)
     )
     return GradientDescentEstimation()
 end
@@ -81,6 +77,7 @@ as the point that satisfies the minimizer
 where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 
 In the general case, the [`GradientDescentEstimation`](@extref `ManifoldsBase.GradientDescentEstimation`) is used to compute the mean.
+
     mean(
         M::AbstractManifold,
         x::AbstractVector,
@@ -98,8 +95,10 @@ Compute the mean using the specified `method`.
         method::GradientDescentEstimation;
         p0=x[1],
         stop_iter=100,
-        retraction::AbstractRetractionMethod = default_retraction_method(M),
-        inverse_retraction::AbstractInverseRetractionMethod = default_retraction_method(M, eltype(x)),
+        retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
+        inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(
+            M, eltype(x),
+        ),
         kwargs...,
     )
 
@@ -116,28 +115,21 @@ the (inverse) retraction.
 
 The Theory stems from [Karcher:1977](@cite) and is also described in [PennecArsigny:2012](@cite)
 as the exponential barycenter.
-The algorithm is further described in[AfsariTronVidal:2013](@cite).
+The algorithm is further described in [AfsariTronVidal:2013](@cite).
 """
 mean(::AbstractManifold, ::Any...)
 
 #
 # dispatch on method first to allow Euclidean defaults to hit
-function Statistics.mean(M::AbstractManifold, x::AbstractVector, kwargs...)
+function Statistics.mean(M::AbstractManifold, x::AbstractVector; kwargs...)
     return mean(M, x, default_approximation_method(M, mean, eltype(x)); kwargs...)
 end
-function Statistics.mean(
-        M::AbstractManifold,
-        x::AbstractVector,
-        w::AbstractVector,
-        kwargs...,
-    )
+function Statistics.mean(M::AbstractManifold, x::AbstractVector, w::AbstractVector; kwargs...)
     return mean(M, x, w, default_approximation_method(M, mean, eltype(x)); kwargs...)
 end
 
 function Statistics.mean(
-        M::AbstractManifold,
-        x::AbstractVector,
-        method::AbstractApproximationMethod;
+        M::AbstractManifold, x::AbstractVector, method::AbstractApproximationMethod;
         kwargs...,
     )
     y = allocate_result(M, mean, x[1])
@@ -173,7 +165,7 @@ function Statistics.mean!(
         M::AbstractManifold,
         y,
         x::AbstractVector,
-        method::AbstractApproximationMethod = default_approximation_method(M, mean);
+        method::AbstractApproximationMethod = default_approximation_method(M, mean, eltype(x));
         kwargs...,
     )
     w = _unit_weights(length(x))
@@ -189,8 +181,7 @@ function Statistics.mean!(
         stop_iter = 100,
         retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
         inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(
-            M,
-            eltype(x),
+            M, eltype(x)
         ),
         kwargs...,
     )
@@ -255,8 +246,7 @@ function Statistics.mean!(
         shuffle_rng::Union{AbstractRNG, Nothing} = nothing,
         retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
         inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(
-            M,
-            eltype(x),
+            M, eltype(x)
         ),
         kwargs...,
     )
@@ -275,8 +265,8 @@ function Statistics.mean!(
     v = zero_vector(M, q)
     ytmp = allocate_result(M, mean, q)
     @inbounds for i in 2:n
-        iszero(w[i]) && continue
         j = order[i]
+        iszero(w[j]) && continue
         s += w[j]
         t = w[j] / s
         inverse_retract!(M, v, q, x[j], inverse_retraction)
@@ -302,10 +292,7 @@ See [`mean`](@ref mean(::AbstractManifold, ::AbstractVector, ::AbstractVector, :
 for a description of `kwargs`.
 """
 Statistics.mean(
-    ::AbstractManifold,
-    ::AbstractVector,
-    ::AbstractVector,
-    ::GeodesicInterpolationWithinRadius,
+    ::AbstractManifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolationWithinRadius
 )
 
 function Statistics.mean!(
@@ -337,8 +324,7 @@ function Statistics.mean!(
         stop_iter = 1000000,
         retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
         inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(
-            M,
-            eltype(x),
+            M, eltype(x)
         ),
         kwargs...,
     )
@@ -385,19 +371,10 @@ the result back.
 See [`mean`](@ref mean(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
 for a description of the remaining `kwargs`.
 """
-Statistics.mean(
-    ::AbstractManifold,
-    ::AbstractVector,
-    ::AbstractVector,
-    ::ExtrinsicEstimation,
-)
+Statistics.mean(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::ExtrinsicEstimation)
 
 function Statistics.mean!(
-        M::AbstractManifold,
-        y,
-        x::AbstractVector{P},
-        w::AbstractVector,
-        e::ExtrinsicEstimation;
+        M::AbstractManifold, y, x::AbstractVector{P}, w::AbstractVector, e::ExtrinsicEstimation;
         kwargs...,
     ) where {P}
     embedded_x = map(p -> embed(M, p), x)
@@ -406,11 +383,7 @@ function Statistics.mean!(
     return y
 end
 
-function default_approximation_method(
-        ::StopForwardingType,
-        ::AbstractManifold,
-        ::typeof(mean),
-    )
+function default_approximation_method(::StopForwardingType, ::AbstractManifold, ::typeof(mean))
     return GradientDescentEstimation()
 end;
 function default_approximation_method(::AbstractManifold, ::typeof(mean))
@@ -443,9 +416,7 @@ Compute the median using the specified `method`.
 Statistics.median(::AbstractManifold, ::Any...)
 
 function default_approximation_method(
-        ::StopForwardingType,
-        ::AbstractDecoratorManifold,
-        ::typeof(median),
+        ::StopForwardingType, ::AbstractDecoratorManifold, ::typeof(median)
     )
     return CyclicProximalPointEstimation()
 end
@@ -482,10 +453,7 @@ The algorithm is further described in [Bacak:2014](@cite).
 
 """
 Statistics.median(
-    ::AbstractManifold,
-    ::AbstractVector,
-    ::AbstractVector,
-    ::CyclicProximalPointEstimation,
+    ::AbstractManifold, ::AbstractVector, ::AbstractVector, ::CyclicProximalPointEstimation
 )
 
 """
@@ -503,12 +471,7 @@ in the embedding and projecting the result back.
 See [`median`](@ref median(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::CyclicProximalPointEstimation))
 for a description of `kwargs`.
 """
-Statistics.median(
-    ::AbstractManifold,
-    ::AbstractVector,
-    ::AbstractVector,
-    ::ExtrinsicEstimation,
-)
+Statistics.median(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::ExtrinsicEstimation)
 
 @doc raw"""
     median(
@@ -559,31 +522,19 @@ Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction, which by default use the exponential and logarithmic map,
 respectively.
 """
-Statistics.median(
-    ::AbstractManifold,
-    ::AbstractVector,
-    ::AbstractVector,
-    ::WeiszfeldEstimation,
-)
+Statistics.median(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::WeiszfeldEstimation)
 
 #
 # dispatch on the method first before allocating to allow Euclidean defaults to hit
 function Statistics.median(M::AbstractManifold, x::AbstractVector; kwargs...)
-    return median(M, x, default_approximation_method(M, median, eltype(x)))
+    return median(M, x, default_approximation_method(M, median, eltype(x)); kwargs...)
 end
-function Statistics.median(
-        M::AbstractManifold,
-        x::AbstractVector,
-        w::AbstractVector;
-        kwargs...,
-    )
-    return median(M, x, w, default_approximation_method(M, median, eltype(x)))
+function Statistics.median(M::AbstractManifold, x::AbstractVector, w::AbstractVector; kwargs...)
+    return median(M, x, w, default_approximation_method(M, median, eltype(x)); kwargs...)
 end
 
 function Statistics.median(
-        M::AbstractManifold,
-        x::AbstractVector,
-        method::AbstractApproximationMethod;
+        M::AbstractManifold, x::AbstractVector, method::AbstractApproximationMethod;
         kwargs...,
     )
     y = allocate_result(M, median, x[1])
@@ -634,8 +585,7 @@ function Statistics.median!(
         stop_iter = 1000000,
         retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
         inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(
-            M,
-            eltype(x),
+            M, eltype(x)
         ),
         kwargs...,
     )
@@ -667,11 +617,7 @@ function Statistics.median!(
 end
 
 function Statistics.median!(
-        M::AbstractManifold,
-        y,
-        x::AbstractVector{P},
-        w::AbstractVector,
-        e::ExtrinsicEstimation;
+        M::AbstractManifold, y, x::AbstractVector{P}, w::AbstractVector, e::ExtrinsicEstimation;
         kwargs...,
     ) where {P}
     embedded_x = map(p -> embed(M, p), x)
@@ -691,8 +637,7 @@ function Statistics.median!(
         α = 1.0,
         retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
         inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(
-            M,
-            eltype(x),
+            M, eltype(x)
         ),
         kwargs...,
     )
@@ -714,6 +659,7 @@ function Statistics.median!(
         d .= [distance(M, q, xi) for xi in x] # compute distances
         # compute new weights / exclude points xi=q
         d .= [di > 0 ? wi / di : zero(typeof(wi / di)) for (di, wi) in zip(d, w)]
+        iszero(sum(d)) && break # no point with positive weight differs from the iterate
         copyto!(yold, q)
         zero_vector!(M, v, q)
         for j in 1:n
@@ -744,10 +690,7 @@ to the computation of the mean (if that is not provided).
 """
 var(::AbstractManifold, ::Any)
 function Statistics.var(
-        M::AbstractManifold,
-        x::AbstractVector,
-        w::AbstractWeights,
-        m;
+        M::AbstractManifold, x::AbstractVector, w::AbstractWeights, m;
         corrected::Bool = false,
     )
     wv = convert(AbstractVector, w)
@@ -762,12 +705,7 @@ function Statistics.var(M::AbstractManifold, x::AbstractVector, m; corrected::Bo
     w = _unit_weights(n)
     return var(M, x, w, m; corrected = corrected)
 end
-function Statistics.var(
-        M::AbstractManifold,
-        x::AbstractVector,
-        w::AbstractWeights;
-        kwargs...,
-    )
+function Statistics.var(M::AbstractManifold, x::AbstractVector, w::AbstractWeights; kwargs...)
     return mean_and_var(M, x, w; kwargs...)[2]
 end
 function Statistics.var(M::AbstractManifold, x::AbstractVector; kwargs...)
@@ -792,10 +730,17 @@ can be activated by setting `corrected=true`.
 Statistics.std(M::AbstractManifold, args...; kwargs...) = sqrt(var(M, args...; kwargs...))
 
 @doc raw"""
-    mean_and_var(M::AbstractManifold, x::AbstractVector[, w::AbstractWeights]; kwargs...) -> (mean, var)
+    mean_and_var(
+        M::AbstractManifold, x::AbstractVector; corrected=true, kwargs...
+    ) -> (mean, var)
+    mean_and_var(
+        M::AbstractManifold, x::AbstractVector, w::AbstractWeights; corrected=false, kwargs...
+    ) -> (mean, var)
 
 Compute the [`mean`](@ref mean(::AbstractManifold, args...)) and the [`var`](@ref)iance
 simultaneously. See those functions for a description of the arguments.
+The corrected variance is activated by setting `corrected=true`; it is on by default
+without weights and off with weights.
 
     mean_and_var(
         M::AbstractManifold,
@@ -826,9 +771,7 @@ function StatsBase.mean_and_var(
         M::AbstractManifold,
         x::AbstractVector,
         method::AbstractApproximationMethod = default_approximation_method(
-            M,
-            mean_and_var,
-            eltype(x),
+            M, mean_and_var, eltype(x)
         );
         corrected = true,
         kwargs...,
@@ -838,9 +781,7 @@ function StatsBase.mean_and_var(
     return mean_and_var(M, x, w, method; corrected = corrected, kwargs...)
 end
 function default_approximation_method(
-        ::StopForwardingType,
-        M::AbstractDecoratorManifold,
-        ::typeof(mean_and_var),
+        ::StopForwardingType, M::AbstractDecoratorManifold, ::typeof(mean_and_var)
     )
     return default_approximation_method(M, mean)
 end
@@ -866,6 +807,8 @@ Simultaneously, use a Welford-like recursion to estimate the variance.
 If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered. Optionally, pass `retraction` and `inverse_retraction`
 method types to specify the (inverse) retraction.
+The corrected variance is activated by setting `corrected=true`; it is on by default
+without weights and off with weights.
 
 See [`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`) for details on the geodesic
 interpolation method.
@@ -883,8 +826,7 @@ function StatsBase.mean_and_var(
         corrected = false,
         retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
         inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(
-            M,
-            eltype(x),
+            M, eltype(x)
         ),
         kwargs...,
     )
@@ -907,6 +849,7 @@ function StatsBase.mean_and_var(
     ytmp = allocate_result(M, mean, y)
     @inbounds for i in 2:n
         j = order[i]
+        iszero(w[j]) && continue
         snew = s + w[j]
         t = w[j] / snew
         inverse_retract!(M, v, y, x[j], inverse_retraction)
@@ -947,13 +890,8 @@ function StatsBase.mean_and_var(
         kwargs...,
     )
     y, v = mean_and_var(
-        M,
-        x,
-        w,
-        GeodesicInterpolation();
-        shuffle_rng = shuffle_rng,
-        corrected = corrected,
-        kwargs...,
+        M, x, w, GeodesicInterpolation();
+        shuffle_rng = shuffle_rng, corrected = corrected, kwargs...,
     )
     radius = method.radius
     injectivity_radius(M, y) ≤ radius && return y, v
@@ -975,11 +913,11 @@ Compute the [`mean`](@ref mean(::AbstractManifold, args...)) and the standard de
 
     mean_and_std(
         M::AbstractManifold,
-        x::AbstractVector
+        x::AbstractVector,
         [w::AbstractWeights,]
         method::AbstractApproximationMethod;
         kwargs...,
-    ) -> (mean, var)
+    ) -> (mean, std)
 
 Use the `method` for simultaneously computing the mean and standard deviation.
 To use a mean-specific method, call [`mean`](@ref mean(::AbstractManifold, args...)) and
@@ -1001,11 +939,7 @@ provide weights `w` and/or a precomputed
 [`mean`](@ref mean(::AbstractManifold, args...)).
 """
 function StatsBase.moment(
-        M::AbstractManifold,
-        x::AbstractVector,
-        k::Int,
-        w::AbstractWeights,
-        m = mean(M, x, w),
+        M::AbstractManifold, x::AbstractVector, k::Int, w::AbstractWeights, m = mean(M, x, w)
     )
     s = sum(eachindex(x, w)) do i
         return @inbounds w[i] * distance(M, m, x[i])^k
@@ -1018,15 +952,14 @@ function StatsBase.moment(M::AbstractManifold, x::AbstractVector, k::Int, m = me
 end
 
 """
-    skewness(M::AbstractManifold, x::AbstractVector, k::Int[, w::AbstractWeights], m=mean(M, x[, w]))
+    skewness(M::AbstractManifold, x::AbstractVector[, w::AbstractWeights], m=mean(M, x[, w]))
 
 Compute the standardized skewness of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed
 [`mean`](@ref mean(::AbstractManifold, args...)) `m`.
 """
 function StatsBase.skewness(M::AbstractManifold, x::AbstractVector, w::AbstractWeights)
-    m, s = mean_and_std(M, x, w; corrected = false)
-    return moment(M, x, 3, w, m) / s^3
+    return skewness(M, x, w, mean(M, x, w))
 end
 function StatsBase.skewness(M::AbstractManifold, x::AbstractVector, w::AbstractWeights, m)
     return moment(M, x, 3, w, m) / std(M, x, w, m; corrected = false)^3
@@ -1037,15 +970,14 @@ function StatsBase.skewness(M::AbstractManifold, x::AbstractVector, args...)
 end
 
 """
-    kurtosis(M::AbstractManifold, x::AbstractVector, k::Int[, w::AbstractWeights], m=mean(M, x[, w]))
+    kurtosis(M::AbstractManifold, x::AbstractVector[, w::AbstractWeights], m=mean(M, x[, w]))
 
 Compute the excess kurtosis of points in `x` on manifold `M`. Optionally
 provide weights `w` and/or a precomputed
 [`mean`](@ref mean(::AbstractManifold, args...)) `m`.
 """
 function StatsBase.kurtosis(M::AbstractManifold, x::AbstractVector, w::AbstractWeights)
-    m, v = mean_and_var(M, x, w; corrected = false)
-    return moment(M, x, 4, w, m) / v^2 - 3
+    return kurtosis(M, x, w, mean(M, x, w))
 end
 function StatsBase.kurtosis(M::AbstractManifold, x::AbstractVector, w::AbstractWeights, m)
     return moment(M, x, 4, w, m) / var(M, x, w, m; corrected = false)^2 - 3
@@ -1057,8 +989,7 @@ end
 
 for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
     @eval @trait_function default_approximation_method(
-        M::AbstractDecoratorManifold,
-        f::typeof($mf),
+        M::AbstractDecoratorManifold, f::typeof($mf)
     )
     eval(
         quote
@@ -1082,4 +1013,4 @@ end
 # decorate default method for a few functions
 # TODO: Check how to “ask” the embedding for default approx methods, when it exists,
 # for the functions [mean, median, cov, var, mean_and_std, mean_and_var]
-@trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector)
+@trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector; kwargs...)

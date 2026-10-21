@@ -13,16 +13,9 @@ struct ProjectedPointDistribution{TResult, TM <: AbstractManifold, TD <: Distrib
 end
 
 function ProjectedPointDistribution(
-        M::AbstractManifold,
-        d::Distribution,
-        proj!,
-        ::TResult,
+        M::AbstractManifold, d::Distribution, proj!, ::TResult
     ) where {TResult}
-    return ProjectedPointDistribution{TResult, typeof(M), typeof(d), typeof(proj!)}(
-        M,
-        d,
-        proj!,
-    )
+    return ProjectedPointDistribution{TResult, typeof(M), typeof(d), typeof(proj!)}(M, d, proj!)
 end
 
 """
@@ -35,18 +28,13 @@ function projected_distribution(M::AbstractManifold, d, p = rand(d))
     return ProjectedPointDistribution(M, d, project!, p)
 end
 
-function Random.rand(
-        rng::AbstractRNG,
-        d::ProjectedPointDistribution{TResult},
-    ) where {TResult}
+function Random.rand(rng::AbstractRNG, d::ProjectedPointDistribution{TResult}) where {TResult}
     p = convert(TResult, rand(rng, d.distribution))
     return d.proj!(d.manifold, p, p)
 end
 
 function Random.rand(
-        rng::AbstractRNG,
-        d::ProjectedPointDistribution{TResult},
-        n::Int,
+        rng::AbstractRNG, d::ProjectedPointDistribution{TResult}, n::Int
     ) where {TResult}
     ps = [convert(TResult, rand(rng, d.distribution)) for _ in 1:n]
     map(p -> d.proj!(d.manifold, p, p), ps)
@@ -54,9 +42,7 @@ function Random.rand(
 end
 
 function Distributions._rand!(
-        rng::AbstractRNG,
-        d::ProjectedPointDistribution,
-        p::AbstractArray{<:Number},
+        rng::AbstractRNG, d::ProjectedPointDistribution, p::AbstractArray{<:Number}
     )
     Distributions._rand!(rng, d.distribution, p)
     return d.proj!(d.manifold, p, p)
@@ -84,30 +70,20 @@ struct ProjectedFVectorDistribution{
 end
 
 function ProjectedFVectorDistribution(
-        type::VectorSpaceFiber,
-        d::Distribution,
-        project!,
-        ::TResult,
+        type::VectorSpaceFiber, d::Distribution, project!, ::TResult
     ) where {TResult}
     return ProjectedFVectorDistribution{TResult, typeof(type), typeof(d), typeof(project!)}(
-        type,
-        d,
-        project!,
+        type, d, project!
     )
 end
 
-function Random.rand(
-        rng::AbstractRNG,
-        d::ProjectedFVectorDistribution{TResult},
-    ) where {TResult}
+function Random.rand(rng::AbstractRNG, d::ProjectedFVectorDistribution{TResult}) where {TResult}
     X = convert(TResult, reshape(rand(rng, d.distribution), size(d.type.point)))
     return d.project!(d.type.manifold, X, d.type.point, X)
 end
 
 function Distributions._rand!(
-        rng::AbstractRNG,
-        d::ProjectedFVectorDistribution,
-        X::AbstractArray{<:Number},
+        rng::AbstractRNG, d::ProjectedFVectorDistribution, X::AbstractArray{<:Number}
     )
     # calling _rand!(rng, d.d, v) doesn't work for all arrays types
     return copyto!(X, rand(rng, d))

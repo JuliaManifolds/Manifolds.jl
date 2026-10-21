@@ -1,6 +1,7 @@
 using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
 @testset "Segre Manifold" begin
+    @test_throws DomainError Segre(2, 0)
     # Manifolds to test
     Ms = [
         Segre(10),
@@ -110,16 +111,8 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
             @testset "is_point" begin
                 @test is_point(M, p)
                 @test is_point(M, q)
-                @test_throws DomainError is_point(
-                    M,
-                    [[1.0, 0.0], p[2:end]...];
-                    error = :error,
-                )
-                @test_throws DomainError is_point(
-                    M,
-                    [p[1], [1.0], p[3:end]...];
-                    error = :error,
-                )
+                @test_throws DomainError is_point(M, [[1.0, 0.0], p[2:end]...]; error = :error)
+                @test_throws DomainError is_point(M, [p[1], [1.0], p[3:end]...]; error = :error)
                 @test_throws DomainError is_point(M, [[-1.0], p[2:end]...]; error = :error)
                 @test_throws DomainError is_point(M, [p[1], 2 * p[2:end]...]; error = :error)
             end
@@ -127,20 +120,8 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
             @testset "is_vector" begin
                 @test is_vector(M, p, X; error = :error)
                 @test is_vector(M, p, Y; error = :error)
-                @test_throws DomainError is_vector(
-                    M,
-                    [[1.0, 0.0], p[2:end]...],
-                    X,
-                    false,
-                    true,
-                )
-                @test_throws DomainError is_vector(
-                    M,
-                    p,
-                    [[1.0, 0.0], X[2:end]...],
-                    false,
-                    true,
-                )
+                @test_throws DomainError is_vector(M, [[1.0, 0.0], p[2:end]...], X, false, true)
+                @test_throws DomainError is_vector(M, p, [[1.0, 0.0], X[2:end]...], false, true)
                 @test_throws DomainError is_vector(M, p, p, false, true)
             end
 
@@ -152,6 +133,9 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
             @testset "rand" begin
                 @test is_point(M, rand(M))
                 @test is_vector(M, p, rand(M, vector_at = p))
+                @test is_point(M, rand(MersenneTwister(42), M))
+                @test rand(MersenneTwister(42), M) == rand(MersenneTwister(42), M)
+                @test is_vector(M, p, rand(MersenneTwister(42), M; vector_at = p))
             end
 
             @testset "get_embedding" begin
@@ -172,6 +156,13 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 X_ = zeros(prod(V))
                 embed!(M, X_, p, X)
                 @test is_vector(get_embedding(M), p_, X_)
+                @test isapprox(
+                    X_,
+                    sum(
+                        kron([i == j ? X[j] : p[j] for j in 1:(length(V) + 1)]...) for
+                            i in 1:(length(V) + 1)
+                    ),
+                )
             end
 
             @testset "vector_transport_to" begin
@@ -186,16 +177,26 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 Z_inplace = zero_vector(N, q)
                 vector_transport_to!(N, Z_inplace, p, X, q, ProjectionTransport())
                 @test isapprox(Z_inplace, Z; atol = 1.0e-10)
+                # the projection transport does not depend on the warping
+                ZM = vector_transport_to(M, p, X, q, ProjectionTransport())
+                @test isapprox(ZM, Z; atol = 1.0e-10)
+                @test is_vector(M, q, ZM)
+
+                Z_alias = deepcopy(X)
+                vector_transport_to!(N, Z_alias, p, Z_alias, q, ProjectionTransport())
+                @test isapprox(Z_alias, Z; atol = 1.0e-10)
             end
 
             @testset "get_coordinates" begin
                 @test isapprox(X, get_vector(M, p, get_coordinates(M, p, X)))
                 @test isapprox(c, get_coordinates(M, p, get_vector(M, p, c)))
+                c_ = fill(NaN, manifold_dimension(M))
+                get_coordinates!(M, c_, p, X, DefaultOrthonormalBasis())
+                @test isapprox(c_, get_coordinates(M, p, X))
 
                 # Coordinates are ON
                 @test isapprox(
-                    dot(c, get_coordinates(M, p, X)),
-                    inner(M, p, X, get_vector(M, p, c)),
+                    dot(c, get_coordinates(M, p, X)), inner(M, p, X, get_vector(M, p, c))
                 )
             end
 
@@ -205,6 +206,14 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 @test is_point(M, p_)
                 @test isapprox(p, p_; atol = 1.0e-5)
 
+                # the result may be the starting point itself
+                p_alias = deepcopy(p)
+                exp!(M, p_alias, p_alias, X)
+                @test isapprox(p_alias, exp(M, p, X))
+                p_alias = deepcopy(p)
+                mid_point!(M, p_alias, p_alias, q)
+                @test isapprox(p_alias, mid_point(M, p, q))
+
                 # Tangent vector in the scaling direction
                 p_ = exp(M, p, [X[1], zeros.(size.(X[2:end]))...])
                 @test is_point(M, p_)
@@ -212,7 +221,7 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
                 # Generic tangent vector
                 p_ = exp(M, p, X)
-                @test is_point(M, p)
+                @test is_point(M, p_)
 
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * X)), -1.0)
@@ -344,6 +353,17 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         @test is_vector(M, p, log(M, p, q_))
     end
 
+    # The warping factor scales the spherical angle sum in connected_by_geodesic
+    @testset "connected_by_geodesic with a warped metric" begin
+        p = [[1.0], [1.0, 0.0, 0.0], [1.0, 0.0]]
+        M = MetricManifold(Segre(3, 2), WarpedMetric(2.0))
+        @test connected_by_geodesic(M, p, [[1.0], [cos(1.4), sin(1.4), 0.0], [1.0, 0.0]])
+        @test !connected_by_geodesic(M, p, [[1.0], [cos(1.8), sin(1.8), 0.0], [1.0, 0.0]])
+        M = MetricManifold(Segre(2, 2, 2, 2, 2), WarpedMetric(0.5))
+        p = [[1.0], [[1.0, 0.0] for _ in 1:5]...]
+        @test connected_by_geodesic(M, p, [[1.0], [[cos(1.5), sin(1.5)] for _ in 1:5]...])
+    end
+
     # Test the formulas for sectional curvature stated in the docs
     @testset "sectional_curvature" begin
         M = Segre(3, 3)
@@ -355,10 +375,28 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         @test isapprox(0.0, sectional_curvature(M, p, X, Y))
         @test isapprox(-1 / p[1][1]^2, sectional_curvature(M, p, X, Z))
         @test isapprox(0.0, sectional_curvature(M, p, X, V))
+        # the estimate needs unit vectors, and X and Z have norm p[1][1]
+        K = Manifolds.estimated_sectional_curvature(M, p, X ./ p[1][1], Z ./ p[1][1])
+        @test isapprox(K, -1 / p[1][1]^2; atol = 0.15)
 
-        M = MetricManifold(Segre(3, 3, 3), WarpedMetric(1.23))
+        M = MetricManifold(Segre(3, 3), WarpedMetric(1.23))
         @test isapprox((1.23^(-2) - 1) / p[1][1]^2, sectional_curvature(M, p, X, Y))
         @test isapprox(-1 / p[1][1]^2, sectional_curvature(M, p, X, Z))
         @test isapprox(0.0, sectional_curvature(M, p, X, V))
+    end
+
+    # distance, log and connected_by_geodesic leave the second point unchanged
+    @testset "The second point is not modified" begin
+        p = [[2.0], [1.0, 0.0, 0.0], [1.0, 0.0]]
+        q = [[3.0], [-1.0, 0.0, 0.0], [-1.0, 0.0]]
+        for M in [Segre(3, 2), MetricManifold(Segre(3, 2), WarpedMetric(1.2))]
+            q1, q2, q3 = deepcopy(q), deepcopy(q), deepcopy(q)
+            @test isapprox(distance(M, p, q1), 1.0)
+            @test q1 == q
+            @test isapprox(log(M, p, q2), [[1.0], zeros(3), zeros(2)])
+            @test q2 == q
+            @test connected_by_geodesic(M, p, q3)
+            @test q3 == q
+        end
     end
 end

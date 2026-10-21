@@ -4,6 +4,26 @@ using DiffEqCallbacks, OrdinaryDiffEq, RecursiveArrayTools
 
 using LinearAlgebra
 
+# chart of the plane that asks for a switch beyond a[1] = 0.5 and keeps its index
+struct TestPinnedChartAtlas <: Manifolds.AbstractAtlas{ℝ} end
+
+function Manifolds.affine_connection!(::Euclidean, Zc, ::TestPinnedChartAtlas, i, a, Xc, Yc)
+    return fill!(Zc, 0)
+end
+function Manifolds.check_chart_switch(::Euclidean, ::TestPinnedChartAtlas, i, a)
+    return a[1] > 0.5
+end
+function Manifolds.get_chart_index(::Euclidean, ::TestPinnedChartAtlas, i, a)
+    return i
+end
+function Manifolds.get_parameters!(::Euclidean, a, ::TestPinnedChartAtlas, i, p)
+    return copyto!(a, p)
+end
+function Manifolds.get_point!(::Euclidean, p, ::TestPinnedChartAtlas, i, a)
+    return copyto!(p, a)
+end
+
+
 @testset "Atlases" begin
     M = Sphere(2)
     A = Manifolds.StereographicAtlas()
@@ -11,6 +31,13 @@ using LinearAlgebra
     i = :north
     p = get_point(M, A, i, a)
     B = induced_basis(M, A, i)
+
+    @test local_metric(M, A, i, a) isa Diagonal
+    @test inverse_local_metric(M, A, i, a) ≈ inv(local_metric(M, A, i, a))
+    @test ricci_curvature(M, A, i, a) ≈ 2
+    @test gaussian_curvature(M, A, i, a) ≈ 1
+    @test ricci_curvature(Sphere(3), A, :south, [0.1, 0.4, -0.3]) ≈ 6
+
     for (Xc, Yc) in [([0.8, 0.9], [-0.8, 0.25]), ([0.3, 0.2], [-0.2, 0.25])]
         # tests with & without chart switching
         X = get_vector(M, p, Xc, B)
@@ -20,37 +47,27 @@ using LinearAlgebra
             volume_density(M, p, X) atol = 1.0e-8
 
         solution = Manifolds.solve_chart_differential_exp_basepoint(
-            M, a, Xc, A, i, Yc; final_time = 1.0
+            M, a, Xc, A, i, Yc;
+            final_time = 1.0,
         )
         p_final, _, Y_final, _ = solution(1.0)
 
         expected = zero_vector(M, p_final)
         ManifoldDiff.jacobi_field!(
-            M,
-            expected,
-            p,
-            exp(M, p, X),
-            1.0,
-            Y,
-            ManifoldDiff.βdifferential_exp_basepoint,
+            M, expected, p, exp(M, p, X), 1.0, Y, ManifoldDiff.βdifferential_exp_basepoint
         )
         @test isapprox(p_final, exp(M, p, X); atol = 1.0e-6)
         @test isapprox(Y_final, expected; atol = 1.0e-5)
 
         solution = Manifolds.solve_chart_differential_exp_argument(
-            M, a, Xc, A, i, Yc; final_time = 1.0
+            M, a, Xc, A, i, Yc;
+            final_time = 1.0,
         )
         p_final, _, Y_final, _ = solution(1.0)
 
         expected = zero_vector(M, p_final)
         ManifoldDiff.jacobi_field!(
-            M,
-            expected,
-            p,
-            exp(M, p, X),
-            1.0,
-            Y,
-            ManifoldDiff.βdifferential_exp_argument,
+            M, expected, p, exp(M, p, X), 1.0, Y, ManifoldDiff.βdifferential_exp_argument
         )
         @test isapprox(M, p_final, exp(M, p, X); atol = 1.0e-7)
         @test isapprox(M, p_final, Y_final, expected; atol = 1.0e-6)
@@ -61,19 +78,14 @@ using LinearAlgebra
     Y = get_vector(M, p, Yc, B)
 
     solution = Manifolds.solve_chart_differential_log_basepoint(
-        M, a, Xc, A, i, Yc; final_time = 1.0
+        M, a, Xc, A, i, Yc;
+        final_time = 1.0,
     )
     _, _, _, dY_initial = solution(0.0)
 
     expected = zero_vector(M, p)
     ManifoldDiff.jacobi_field!(
-        M,
-        expected,
-        p,
-        exp(M, p, X),
-        0.0,
-        Y,
-        ManifoldDiff.βdifferential_log_basepoint,
+        M, expected, p, exp(M, p, X), 0.0, Y, ManifoldDiff.βdifferential_log_basepoint
     )
     @test isapprox(M, p, dY_initial, expected; atol = 1.0e-7)
 
@@ -81,7 +93,8 @@ using LinearAlgebra
     Bq = induced_basis(M, A, i)
     Yq = get_vector(M, q, Yc, Bq)
     solution = Manifolds.solve_chart_differential_log_argument(
-        M, a, Xc, A, i, Yc; final_time = 1.0
+        M, a, Xc, A, i, Yc;
+        final_time = 1.0,
     )
     _, _, _, dY_initial = solution(0.0)
 
@@ -90,13 +103,7 @@ using LinearAlgebra
 
     expected = zero_vector(M, p)
     ManifoldDiff.jacobi_field!(
-        M,
-        expected,
-        q,
-        p,
-        1.0,
-        Yq,
-        ManifoldDiff.βdifferential_log_argument,
+        M, expected, q, p, 1.0, Yq, ManifoldDiff.βdifferential_log_argument
     )
     @test isapprox(M, p, dY_initial, expected; atol = 1.0e-8)
 
@@ -131,4 +138,21 @@ using LinearAlgebra
     @test a_jeam ≈ a
 
     @test_throws ArgumentError Manifolds._jacobi_exp_matrix(M, a, Xc, A, i; wrt = :teapot, final_time = -1.0)
+
+    @testset "Chart solvers continue in a chart that is kept" begin
+        M = Euclidean(2)
+        A = TestPinnedChartAtlas()
+        a, Xc, Yc, dYc = [0.0, 0.0], [1.0, 2.0], [0.5, -1.0], [1.0, 0.5]
+        # Tsit5 compiles fast; the step bound stops the integration before the final time
+        kwargs = (; solver = Tsit5(), dtmax = 0.25)
+        exp_solution = Manifolds.solve_chart_exp_ode(M, a, Xc, A, 1; kwargs...)
+        @test length(exp_solution.sols) > 1
+        @test exp_solution(1.0)[1] ≈ a + Xc
+        jacobi_solution = Manifolds.solve_chart_jacobi_field(M, a, Xc, A, 1, Yc, dYc; kwargs...)
+        @test length(jacobi_solution.sols) > 1
+        @test jacobi_solution(1.0)[3] ≈ Yc + dYc
+        E, _, a_final = Manifolds._jacobi_exp_matrix(M, a, Xc, A, 1; wrt = :argument, kwargs...)
+        @test E ≈ I
+        @test a_final ≈ a + Xc
+    end
 end

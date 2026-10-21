@@ -1,6 +1,7 @@
 using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
 
 @testset "Unitary Matrices" begin
+    @test_throws DomainError UnitaryMatrices(-1)
     M = UnitaryMatrices(2)
     p1 = [1im 0.0; 0.0 1im]
     X1 = [0.0 1.0; -1.0 0.0]
@@ -13,15 +14,16 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
             :Functions => [
                 default_vector_transport_method,
                 get_embedding,
-                is_flat,
+                injectivity_radius, is_flat,
+                manifold_dimension,
                 project,
                 rand, repr,
-                # Weingarten, # TODO: V is not normal?!
+                Weingarten,
                 riemannian_Hessian,
             ],
             :EmbeddedPoints => [ones(2, 2), 1im .* ones(2, 2), [2im 0.0; 0.0 2im]],
             :EmbeddedVectors => [[2im 0.0; 1.0 2im]],
-            :NormalVectors => [[1.0 0.0; 1.0 0.0]],
+            :NormalVectors => [[1im 0.0; 0.0 2im]],
             :Points => [p1],
             :Vectors => [X1],
             :Bases => [DefaultOrthonormalBasis()],
@@ -92,11 +94,13 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
     @testset "Riemannian Hessian" begin
         p = Matrix{Float64}(I, 2, 2)
         X = [0.0 3.0; -3.0 0.0]
-        V = [1.0 0.0; 1.0 0.0]
-        @test Weingarten(M, p, X, V) == -1 / 2 * p * (V' * X - X' * V)
+        q = [0.0 1im; 1im 0.0]
+        @test Weingarten(M, q, X, q * [1.0 0.0; 0.0 2.0]) == [0.0 -4.5; 4.5 0.0]
         G = [0.0 1.0; 0.0 0.0]
         H = [0.0 0.0; 2.0 0.0]
         @test riemannian_Hessian(M, p, G, H, X) == [0.0 -1.0; 1.0 0.0]
+        p2 = [0.0 1.0; -1.0 0.0]
+        @test riemannian_Hessian(M, p2, G, H, X) == [0.0 -1.5; 1.5 0.0]
     end
 
     @test is_flat(UnitaryMatrices(1))
@@ -104,9 +108,9 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
 
     @testset "manifold_volume" begin
         @test manifold_volume(UnitaryMatrices(1)) ≈ 2 * π
-        @test manifold_volume(UnitaryMatrices(2)) ≈ 4 * π^3
-        @test manifold_volume(UnitaryMatrices(3)) ≈ sqrt(3) * 2 * π^6
-        @test manifold_volume(UnitaryMatrices(4)) ≈ sqrt(2) * 8 * π^10 / 12
+        @test manifold_volume(UnitaryMatrices(2)) ≈ 8 * π^3
+        @test manifold_volume(UnitaryMatrices(3)) ≈ 32 * π^6
+        @test manifold_volume(UnitaryMatrices(4)) ≈ 256 * π^10 / 3
     end
 
     @testset "Polar retraction" begin
@@ -139,6 +143,7 @@ end
                 get_embedding,
                 injectivity_radius, is_flat,
                 log,
+                manifold_dimension,
                 project,
                 rand, repr,
             ],
@@ -180,28 +185,27 @@ end
 
     @testset "Matrix point" begin
         p = QuaternionF64(
-            0.4815296357756736,
-            0.6041613272484806,
-            -0.2322369798903669,
-            0.5909181717450419,
+            0.4815296357756736, 0.6041613272484806, -0.2322369798903669, 0.5909181717450419
         )
 
         @test is_point(MH, fill(p, 1, 1))
         @test is_point(MH, p)
     end
 
+    @testset "Projection and embedding use the Lie algebra" begin
+        p = QuaternionF64(0.0, 1.0, 0.0, 0.0)
+        X = QuaternionF64(1.0, 0.0, 0.0, 0.0) # tangent at p in the embedding
+        @test project(MH, p, X) == QuaternionF64(0.0, -1.0, 0.0, 0.0)
+        @test embed(MH, p, project(MH, p, X))[] == X
+        @test is_point(MH, exp(MH, p, project(MH, p, X)))
+    end
+
     @testset "Functions with specific expectation" begin
         p = QuaternionF64(
-            0.4815296357756736,
-            0.6041613272484806,
-            -0.2322369798903669,
-            0.5909181717450419,
+            0.4815296357756736, 0.6041613272484806, -0.2322369798903669, 0.5909181717450419
         )
         pu = QuaternionF64(
-            -0.2178344173900564,
-            -0.4072721993877449,
-            -2.2484219560115712,
-            -0.4718862793239344,
+            -0.2178344173900564, -0.4072721993877449, -2.2484219560115712, -0.4718862793239344
         )
         q = project(MH, pu)
         @test is_point(MH, q)

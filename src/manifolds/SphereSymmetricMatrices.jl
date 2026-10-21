@@ -1,5 +1,5 @@
 @doc raw"""
-    SphereSymmetricMatrices{𝔽, T} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
+    SphereSymmetricMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  consisting of the ``n×n`` symmetric matrices
 of unit Frobenius norm, i.e.
@@ -10,7 +10,7 @@ where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpo
 and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 # Constructor
-    SphereSymmetricMatrices(n[, field=ℝ])
+    SphereSymmetricMatrices(n[, field=ℝ]; parameter::Symbol=:type)
 
 Generate the manifold of `n`-by-`n` symmetric matrices of unit Frobenius norm.
 """
@@ -19,6 +19,12 @@ struct SphereSymmetricMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SphereSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 1 && throw(
+        DomainError(
+            n,
+            "The matrix size n of symmetric matrices of unit norm must be positive, but was $(n).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n,))
     return SphereSymmetricMatrices{field, typeof(size)}(size)
 end
@@ -32,15 +38,13 @@ i.e. is an `n`-by-`n` symmetric matrix of unit Frobenius norm.
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_point(
-        M::SphereSymmetricMatrices,
-        p::T;
+        M::SphereSymmetricMatrices, p::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
     ) where {T}
     if !isapprox(norm(p - p'), 0; atol = atol, kwargs...)
         return DomainError(
-            norm(p - p'),
-            "The point $(p) does not lie on $M, since it is not symmetric.",
+            norm(p - p'), "The point $(p) does not lie on $M, since it is not symmetric."
         )
     end
     return nothing
@@ -50,15 +54,13 @@ end
     check_vector(M::SphereSymmetricMatrices, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`SphereSymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
-of unit Frobenius norm.
+[`SphereSymmetricMatrices`](@ref) `M`. That is, `X` has to be a symmetric matrix of size `(n,n)`
+that is orthogonal to `p` with respect to the Frobenius inner product.
 
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(
-        M::SphereSymmetricMatrices,
-        p,
-        X::T;
+        M::SphereSymmetricMatrices, p, X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
     ) where {T}
@@ -94,7 +96,7 @@ Return false. [`SphereSymmetricMatrices`](@ref) is not a flat manifold.
 is_flat(M::SphereSymmetricMatrices) = false
 
 @doc raw"""
-    manifold_dimension(M::SphereSymmetricMatrices{<:Any,𝔽})
+    manifold_dimension(M::SphereSymmetricMatrices{𝔽})
 
 Return the manifold dimension of the [`SphereSymmetricMatrices`](@ref) `n`-by-`n` symmetric matrix `M` of unit
 Frobenius norm over the number system `𝔽`, i.e.
@@ -117,9 +119,11 @@ end
 Projects `p` from the embedding onto the [`SphereSymmetricMatrices`](@ref) `M`, i.e.
 
 ````math
-\operatorname{proj}_{\mathcal{S}_{\text{sym}}}(p) = \frac{1}{2} \bigl( p + p^{\mathrm{H}} \bigr),
+\operatorname{proj}_{\mathcal{S}_{\text{sym}}}(p) = \frac{s}{\lVert s \rVert},
+\qquad\text{where } s = \frac{1}{2} \bigl( p + p^{\mathrm{H}} \bigr),
 ````
-where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed,
+and ``\lVert ⋅ \rVert`` denotes the Frobenius norm.
 """
 project(::SphereSymmetricMatrices, ::Any)
 
@@ -141,6 +145,19 @@ project(::SphereSymmetricMatrices, ::Any, ::Any)
 
 function project!(M::SphereSymmetricMatrices, Y, p, X)
     return project!(get_embedding(M), Y, p, (X .+ X') ./ 2)
+end
+
+function Random.rand!(
+        rng::AbstractRNG, M::SphereSymmetricMatrices, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
+    )
+    if vector_at === nothing
+        project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
+    else
+        n = σ * randn(rng, eltype(pX), size(pX)) # Gaussian in the embedding
+        project!(M, pX, vector_at, n) # project to TpM (keeps Gaussianness)
+    end
+    return pX
 end
 
 function representation_size(M::SphereSymmetricMatrices)

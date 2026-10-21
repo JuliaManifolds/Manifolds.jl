@@ -29,4 +29,11 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test embed(t_p, X) == X
         @test embed(t_p, X, X) == X
     end
+    @testset "fiber of a further vector space type" begin
+        p = [1.0, 0.0, 0.0]
+        f_p = Fiber(M, p, TestVectorSpaceType())
+        @test base_manifold(f_p) == M
+        @test f_p.point == p
+        @test f_p.fiber_type == TestVectorSpaceType()
+    end
 end

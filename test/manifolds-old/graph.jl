@@ -11,6 +11,12 @@ include("../header.jl")
         add_edge!(G, 2, 3)
         N = GraphManifold(G, M, VertexManifold())
         @test manifold_dimension(N) == manifold_dimension(M) * nv(G)
+        @test N == GraphManifold(copy(G), M, VertexManifold())
+        @test hash(N) == hash(GraphManifold(copy(G), M, VertexManifold()))
+        @test N != GraphManifold(G, M, EdgeManifold())
+        S1 = GraphManifold(G, GeneralizedStiefel(2, 1, [1.0 0.0; 0.0 1.0]), VertexManifold())
+        S2 = GraphManifold(G, GeneralizedStiefel(2, 1, [1.0 -0.0; 0.0 1.0]), VertexManifold())
+        @test !isequal(S1, S2)
         @test manifold_dimension(GraphManifold(G, M, EdgeManifold())) ==
             manifold_dimension(M) * ne(G)
         @test is_point(N, x)
@@ -22,9 +28,12 @@ include("../header.jl")
         @test !is_vector(N, x[1:2], log(N, x, y)[1:2])
         @test_throws DomainError is_vector(N, x, log(N, x, y)[1:2]; error = :error)
         @test incident_log(N, x) == [x[2] - x[1], x[1] - x[2] + x[3] - x[2], x[2] - x[3]]
+        X = log(N, x, y)
+        @test Manifolds.incident_log!(N, X, x) === X
+        @test X == incident_log(N, x)
 
         pts = [x, y, z]
-        Manifolds.test_manifold(N, pts; test_representation_size = false)
+        Manifolds.test_manifold(N, pts; test_representation_size = false, test_inplace = true)
         @test sprint(show, "text/plain", N) == """
             GraphManifold
             Graph:
@@ -39,14 +48,12 @@ include("../header.jl")
         @test is_vector(NE, x[1:2], log(N, x, y)[1:2])
         @test !is_vector(NE, x, log(N, x, y))
         @test_throws DomainError is_vector(NE, x, log(N, x, y); error = :error)
-        @test !is_vector(N, x[1:2], log(N, x, y))
+        @test !is_vector(NE, x[1:2], log(N, x, y))
         @test_throws DomainError is_vector(NE, x[1:2], log(N, x, y); error = :error)
 
         Manifolds.test_manifold(
-            NE,
-            [x[1:2], y[1:2], z[1:2]];
-            test_representation_size = false,
-            test_inplace = true,
+            NE, [x[1:2], y[1:2], z[1:2]];
+            test_representation_size = false, test_inplace = true,
         )
         @test sprint(show, "text/plain", NE) == """
             GraphManifold
@@ -66,10 +73,15 @@ include("../header.jl")
         add_edge!(G3, 1, 2, 1.5)
         add_edge!(G3, 2, 3, 0.5)
         N3 = GraphManifold(G3, M, VertexManifold())
+        @test N3 == GraphManifold(copy(G3), M, VertexManifold())
+        @test hash(N3) == hash(GraphManifold(copy(G3), M, VertexManifold()))
         @test incident_log(N3, x) == [
             1.5 * (x[2] - x[1]),
             1.5 * (x[1] - x[2]) + 0.5 * (x[3] - x[2]),
             0.5 * (x[2] - x[3]),
         ]
+        X3 = log(N3, x, y)
+        @test Manifolds.incident_log!(N3, X3, x) === X3
+        @test X3 == incident_log(N3, x)
     end
 end

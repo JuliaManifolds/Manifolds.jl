@@ -4,8 +4,8 @@
 The essential manifold is the space of the essential matrices which is represented as
 a quotient space of the [`Rotations`](@ref) manifold product ``\mathrm{SO}(3)^2``.
 
-Let ``R_x(θ), R_y(θ), R_x(θ) \in ℝ^{x×3}`` denote the rotation around the ``z``,
-``y``, and ``x`` axis in ``ℝ^3``, respectively, and further the groups
+Let ``R_x(θ), R_y(θ), R_z(θ) \in ℝ^{3×3}`` denote the rotation around the ``x``,
+``y``, and ``z`` axis in ``ℝ^3``, respectively, and further the groups
 
 ```math
 H_z = \bigl\{(R_z(θ),R_z(θ))\ \big|\ θ ∈ [-π,π) \bigr\}
@@ -65,11 +65,7 @@ Check whether the matrix is a valid point on the [`EssentialManifold`](@ref) `M`
 i.e. a 2-element array containing SO(3) matrices.
 """
 function check_point(M::EssentialManifold, p; kwargs...)
-    return check_point(
-        PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
-        p;
-        kwargs...,
-    )
+    return check_point(PowerManifold(M.manifold, NestedPowerRepresentation(), 2), p; kwargs...)
 end
 
 """
@@ -80,9 +76,7 @@ i.e. `X` has to be a 2-element array of `3`-by-`3` skew-symmetric matrices.
 """
 function check_vector(M::EssentialManifold, p, X; kwargs...)
     return check_vector(
-        PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
-        p,
-        X;
+        PowerManifold(M.manifold, NestedPowerRepresentation(), 2), p, X;
         kwargs...,
     )
 end
@@ -124,11 +118,19 @@ exp(::EssentialManifold, ::Any...)
 
 get_iterator(::EssentialManifold) = Base.OneTo(2)
 
+@doc raw"""
+    isapprox(M::EssentialManifold, p, q; kwargs...)
+
+Test whether two points `p`, `q` on the [`EssentialManifold`](@ref) `M` are (approximately) the same.
+Since this is a quotient manifold, the test is performed by checking their distance, that is
+``d_{\mathcal M}(p,q) \approx 0`` with the classical `isapprox`. The `kwargs...` are passed on
+to this; `atol` defaults to 18 times the machine epsilon of the entries of `q`.
+"""
+isapprox(::EssentialManifold, ::Any, ::Any)
+
 function _isapprox(
-        M::EssentialManifold,
-        p,
-        q::T;
-        atol::Real = eps(real(float(number_eltype(number_eltype(T))))),
+        M::EssentialManifold, p, q::T;
+        atol::Real = 2 * prod(representation_size(M.manifold)) * eps(real(float(number_eltype(number_eltype(T))))),
         kwargs...,
     ) where {T}
     return isapprox(distance(M, p, q), 0.0; atol = atol, kwargs...)
@@ -184,6 +186,7 @@ function log!(M::EssentialManifold, X, p, q)
         q2min = copy(M, q)
         for k in 1:4
             #flip sign in q to get another member of its equivalence class
+            q2 = copy(M, q)
             if k == 2
                 q2[1][2:3, :] = -q[1][2:3, :]
                 q2[2][[1 3], :] = -q[2][[1 3], :]
@@ -205,7 +208,6 @@ function log!(M::EssentialManifold, X, p, q)
         t, _ = dist_min_angle_pair(p, q2)
     end
     Rz = [cos(t) -sin(t) 0; sin(t) cos(t) 0; 0 0 1]
-    representative_q = zeros(size(q2))
     representative_q = [Rz * q2[1], Rz * q2[2]]
 
     # use the logarithmic map in SO(3)^2 and the corresponding geodesic between p and representative_q to compute the solution
@@ -239,11 +241,14 @@ function dist_min_angle_pair(p, q)
     tol_break = sqrt(eps(eltype(q211)))
     if (abs(m1) < tol_m_zero) && (abs(m2) < tol_m_zero)
         t_min = 0
-        f_min = 2 * pi^2
+        f_min = pi^2
     else
         if abs(mod(t_break1 - t_break2 + pi, 2 * pi) - pi) < tol_break
             t_min = t_break1 + pi
-            f_min = 0
+            # the cost at t_min, as at the end of the Newton search
+            θ1 = acos(clamp((m1 * sin(t_min + Φ1) + c1 - 1) / 2, -1, 1))
+            θ2 = acos(clamp((m2 * sin(t_min + Φ2) + c2 - 1) / 2, -1, 1))
+            f_min = (θ1^2 + θ2^2) / 2
         else
             t_search1 = t_break1
             t_search2 = t_break2
@@ -256,10 +261,13 @@ function dist_min_angle_pair(p, q)
             df2_break2 = dist_min_angle_pair_compute_df_break(t_break2, q212)
 
             #compute derivative of each term at other's discontinuity
+            # sin(θ) vanishes only at θ = 0, where the limit of the derivative is 0
             θ1_break2 = acos(clamp((m1 * sin(t_break2 + Φ1) + c1 - 1) / 2, -1.0, 1.0))
-            df1_break2 = -θ1_break2 * (m1 * cos(t_break2 + Φ1)) / (2 * sin(θ1_break2))
+            s1_break2 = 2 * sin(θ1_break2)
+            df1_break2 = iszero(s1_break2) ? zero(θ1_break2) : -θ1_break2 * (m1 * cos(t_break2 + Φ1)) / s1_break2
             θ2_break1 = acos(clamp((m2 * sin(t_break1 + Φ2) + c2 - 1) / 2, -1.0, 1.0))
-            df2_break1 = -θ2_break1 * (m2 * cos(t_break1 + Φ2)) / (2 * sin(θ2_break1))
+            s2_break1 = 2 * sin(θ2_break1)
+            df2_break1 = iszero(s2_break1) ? zero(θ2_break1) : -θ2_break1 * (m2 * cos(t_break1 + Φ2)) / s2_break1
 
             #compute left and right derivatives of sum of the two terms
             df_break1n = df1_break1 + df2_break1
@@ -267,6 +275,8 @@ function dist_min_angle_pair(p, q)
             df_break2n = df2_break2 + df1_break2
             df_break2p = -df2_break2 + df1_break2
 
+            # no minimum found yet
+            t_min = t_break1
             f_min = Inf
             if sign(df_break1p) != sign(df_break2n)
                 #parabolic prediction of min
@@ -275,15 +285,7 @@ function dist_min_angle_pair(p, q)
                     df_break1p * (t_search2 - t_search1) / (df_break2n - df_break1p)
                 #use Newton's search to find t_min
                 t_min, f_min = dist_min_angle_pair_df_newton(
-                    m1,
-                    Φ1,
-                    c1,
-                    m2,
-                    Φ2,
-                    c2,
-                    t_min0,
-                    t_search1,
-                    t_search2,
+                    m1, Φ1, c1, m2, Φ2, c2, t_min0, t_search1, t_search2
                 )
             end
             t_search1 = t_search1 + 2 * pi
@@ -294,15 +296,7 @@ function dist_min_angle_pair(p, q)
                     df_break2p * (t_search1 - t_search2) / (df_break1n - df_break2p)
                 #use Newton's search to find t_min
                 t_min2, f_min2 = dist_min_angle_pair_df_newton(
-                    m1,
-                    Φ1,
-                    c1,
-                    m2,
-                    Φ2,
-                    c2,
-                    t_min0,
-                    t_search2,
-                    t_search1,
+                    m1, Φ1, c1, m2, Φ2, c2, t_min0, t_search2, t_search1
                 )
                 #choose t with lower function values
                 if f_min2 < f_min
@@ -375,17 +369,19 @@ function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t
         θ2 = acos(clamp(((m2 * sin(t_min + Φ2) + c2 - 1) / 2), -1, 1))
 
         #compute the first derivatives di, i=1,2
+        # sin(θi) vanishes only at θi = 0, where also mci = 0 and the limit is 0
         s1 = 2 * sin(θ1)
         s2 = 2 * sin(θ2)
-        d1 = (-θ1 * mc1) / s1
-        d2 = (-θ2 * mc2) / s2
+        d1 = iszero(s1) ? zero(θ1) : (-θ1 * mc1) / s1
+        d2 = iszero(s2) ? zero(θ2) : (-θ2 * mc2) / s2
         d = d1 + d2
 
         #compute the second derivatives ddi, i=1,2
-        eztuSq1 = (mc1 / s1)^2
-        eztuSq2 = (mc2 / s2)^2
-        dd1 = eztuSq1 + θ1 / 2 * cot(θ1 / 2) * (1 - eztuSq1)
-        dd2 = eztuSq2 + θ2 / 2 * cot(θ2 / 2) * (1 - eztuSq2)
+        # at θi = 0 the limit of the second derivative is 1
+        eztuSq1 = iszero(s1) ? one(θ1) : (mc1 / s1)^2
+        eztuSq2 = iszero(s2) ? one(θ2) : (mc2 / s2)^2
+        dd1 = iszero(s1) ? one(θ1) : eztuSq1 + θ1 / 2 * cot(θ1 / 2) * (1 - eztuSq1)
+        dd2 = iszero(s2) ? one(θ2) : eztuSq2 + θ2 / 2 * cot(θ2 / 2) * (1 - eztuSq2)
         dd = dd1 + dd2
 
         #compute the new t_min
@@ -395,12 +391,12 @@ function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t
             break
         end
     end
-    f_min = θ1^2 + θ2^2
+    f_min = (θ1^2 + θ2^2) / 2
     return t_min, f_min
 end
 
 @doc raw"""
-    manifold_dimension(M::EssentialManifold{is_signed, ℝ})
+    manifold_dimension(M::EssentialManifold)
 
 Return the manifold dimension of the [`EssentialManifold`](@ref), which is `5`[TronDaniilidis:2017](@cite).
 """
@@ -445,6 +441,75 @@ function project!(M::EssentialManifold, Y, p, X)
     return Y
 end
 
+@doc raw"""
+    get_coordinates(M::EssentialManifold, p, X, ::DefaultOrthonormalBasis)
+    get_coordinates!(M::EssentialManifold, c, p, X, ::DefaultOrthonormalBasis)
+
+Compute the five coordinates of the horizontal tangent vector `X` at `p` ``= (R_1, R_2)`` in an
+orthonormal basis of the horizontal space.
+
+The vertical space is spanned by the velocity of the action of ``H_z`` at ``θ = 0``, which in the
+coordinates of the two rotations reads ``(R_1^{\mathrm{T}}e_z, R_2^{\mathrm{T}}e_z)``, see
+[`vert_proj`](@ref) and [TronDaniilidis:2017](@cite). The Householder reflection that maps this
+direction to the last of the six coordinates maps the first five coordinate directions to an
+orthonormal basis of its orthogonal complement, the horizontal space.
+"""
+function get_coordinates(M::EssentialManifold, p, X, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    return get_coordinates!(M, allocate_result(M, get_coordinates, p, X, B), p, X, B)
+end
+function get_coordinates!(M::EssentialManifold, c, p, X, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    d = vcat(get_coordinates(M.manifold, p[1], X[1], B), get_coordinates(M.manifold, p[2], X[2], B))
+    return c .= view(_horizontal_reflection(p) * d, 1:5)
+end
+
+@doc raw"""
+    get_vector(M::EssentialManifold, p, c, ::DefaultOrthonormalBasis)
+    get_vector!(M::EssentialManifold, Y, p, c, ::DefaultOrthonormalBasis)
+
+Compute the horizontal tangent vector at `p` with the five coordinates `c` in the basis that
+`get_coordinates` on the [`EssentialManifold`](@ref) uses.
+"""
+function get_vector(M::EssentialManifold, p, c, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    return get_vector!(M, allocate_result(M, get_vector, p, c), p, c, B)
+end
+function get_vector!(M::EssentialManifold, Y, p, c, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    d = _horizontal_reflection(p) * vcat(c, 0)
+    get_vector!(M.manifold, Y[1], p[1], view(d, 1:3), B)
+    get_vector!(M.manifold, Y[2], p[2], view(d, 4:6), B)
+    return Y
+end
+
+@doc raw"""
+    get_basis(M::EssentialManifold, p, ::DefaultOrthonormalBasis)
+
+Return the five orthonormal basis vectors of the horizontal space at `p` that `get_coordinates`
+on the [`EssentialManifold`](@ref) uses.
+"""
+function get_basis(M::EssentialManifold, p, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
+    return CachedBasis(B, [get_vector(M, p, e, B) for e in eachcol(Matrix{eltype(p[1])}(I, 5, 5))])
+end
+
+const _EssentialCachedBasis = CachedBasis{ℝ, <:DefaultOrthonormalBasis{ℝ, TangentSpaceType}, <:AbstractVector}
+
+function get_coordinates(M::EssentialManifold, p, X, B::_EssentialCachedBasis)
+    return [inner(M, p, X, V) for V in B.data]
+end
+function get_coordinates!(M::EssentialManifold, c, p, X, B::_EssentialCachedBasis)
+    return map!(V -> inner(M, p, X, V), c, B.data)
+end
+function get_vector(M::EssentialManifold, p, c, B::_EssentialCachedBasis)
+    return get_vector!(M, allocate_result(M, get_vector, p, c), p, c, B)
+end
+function get_vector!(M::EssentialManifold, Y, p, c, B::_EssentialCachedBasis)
+    return copyto!(Y, sum(c .* B.data))
+end
+
+function _horizontal_reflection(p)
+    w = vcat(p[1][3, :], p[2][3, :]) ./ sqrt(2) # the vertical direction, of unit length
+    w[end] += w[end] < 0 ? -1 : 1
+    return I - 2 * w * w' / dot(w, w)
+end
+
 function Base.show(io::IO, M::EssentialManifold)
     return print(io, "EssentialManifold($(M.is_signed))")
 end
@@ -476,6 +541,39 @@ function parallel_transport_to!(::EssentialManifold, Y, p, X, q)
     copyto!(Y, [pqe * Xe * pqe' for (pqe, Xe) in zip(pq, X)])
     return Y
 end
+
+@doc raw"""
+    rand(M::EssentialManifold; vector_at = nothing, σ::Real = 1.0)
+
+When `vector_at` is `nothing`, return a random point on the [`EssentialManifold`](@ref) `M`,
+a random point on each of the two [`Rotations`](@ref).
+
+When `vector_at` is a point ``p = (R_1, R_2)``, draw a random tangent vector ``X_i`` at ``R_i`` on
+the [`Rotations`](@ref) with standard deviation `σ` for ``i = 1, 2`` and return the projection
+[`project`](@ref project(::EssentialManifold, ::Any, ::Any))`(M, p, (R_1X_1, R_2X_2))` of
+``X = (X_1, X_2)`` onto the horizontal space,
+````math
+X - \frac{\text{vert\_proj}_p(X)}{2} \begin{bmatrix} R_1^T e_z \\ R_2^T e_z \end{bmatrix}.
+````
+"""
+rand(::EssentialManifold; σ::Real = 1.0)
+
+function Random.rand!(M::EssentialManifold, pX; kwargs...)
+    return rand!(Random.default_rng(), M, pX; kwargs...)
+end
+function Random.rand!(
+        rng::AbstractRNG, M::EssentialManifold, pX;
+        vector_at = nothing, σ::Real = 1.0,
+    )
+    N = PowerManifold(M.manifold, NestedPowerRepresentation(), 2)
+    rand!(rng, N, pX; vector_at = vector_at, σ = σ)
+    # project takes the tangent vectors in the embedding, p * X
+    if vector_at !== nothing
+        project!(M, pX, vector_at, map((vi, pXi) -> embed(M.manifold, vi, pXi), vector_at, pX))
+    end
+    return pX
+end
+
 
 @doc raw"""
     vert_proj(M::EssentialManifold, p, X)

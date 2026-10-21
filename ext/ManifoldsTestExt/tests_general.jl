@@ -46,12 +46,17 @@ that lie on it (contained in `pts`).
 - `is_mutating = true`: whether mutating variants of functions should be tested.
 - `is_point_atol_multiplier = 0`: determines atol of `is_point` checks.
 - `is_tangent_atol_multiplier = 0`: determines atol of `is_vector` checks.
-- `has_get_embedding = false`: whether the manifold has a specialized
-    [`get_embedding`](@ref)`(M, p)` method (to test mutating `embed!`). This is experimental.
 - `mid_point12 = test_exp_log ? shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing`: if not `nothing`, then check
     that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`. This is
     by default set to `nothing` if `text_exp_log` is set to false.
+- `musical_isomorphism_bases = []`: bases used in the musical isomorphism test.
+- `parallel_transport = false`: whether to run the parallel transport test set.
+- `parallel_transport_direction = parallel_transport`: whether the parallel transport test set
+   checks the `direction` variant.
+- `parallel_transport_to = parallel_transport`: whether the parallel transport test set checks
+   the `to` variant.
 - `point_distributions = []` : point distributions to test.
+- `projection_atol_multiplier = 0`: determines atol of the projection tests.
 - `rand_tvector_atol_multiplier = 0` : change absolute tolerance in testing random vectors
     (0 use default, i.e. deactivate atol and use rtol) random tangent vectors are tangent
     vectors.
@@ -60,10 +65,10 @@ that lie on it (contained in `pts`).
 - `retraction_rtol_multiplier = 1`: change the relative tolerance of (inverse) retraction
     tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `retraction_methods = []`: retraction methods that will be tested.
-- `test_atlases = []`: Vector or tuple of atlases that should be tested.
 - `test_exp_log = true`: if true, check that [`exp`](@ref) is the inverse of [`log`](@extref `Base.log-Tuple{AbstractManifold, Any, Any}`).
 - `test_injectivity_radius = true`: whether implementation of [`injectivity_radius`](@ref)
     should be tested.
+- `test_inner = true`: whether to check the inner product in the `log`/`exp` test set.
 - `test_inplace = false` : if true check if inplace variants work if they are activated,
    e.g. check that `exp!(M, p, p, X)` work if `test_exp_log = true`.
    This in general requires `is_mutating` to be true.
@@ -71,9 +76,14 @@ that lie on it (contained in `pts`).
     actually returns valid tangent vectors.
 - `test_musical_isomorphisms = false` : test musical isomorphisms.
 - `test_mutating_rand = false` : test the mutating random function for points on manifolds.
+- `test_norm = true`: whether to check the norm in the `log`/`exp` test set.
 - `test_project_point = false`: test projections onto the manifold.
 - `test_project_tangent = false` : test projections on tangent spaces.
+- `test_rand_point = false`: test `rand(M)` for points on the manifold.
+- `test_rand_tvector = false`: test `rand(M; vector_at = p)` for tangent vectors.
 - `test_representation_size = true` : test representation size of points/tvectprs.
+- `test_riesz_representer = false`: test the Riesz representer of a cotangent vector, in the
+   dual of the first basis in `basis_types_to_from`.
 - `test_tangent_vector_broadcasting = true` : test broadcasting operators on TangentSpace.
 - `test_vector_spaces = true` : test Vector bundle of this manifold.
 - `test_default_vector_transport = false` : test the default vector transport (usually
@@ -82,9 +92,11 @@ that lie on it (contained in `pts`).
 - `vector_transport_methods = []`: vector transport methods that should be tested.
 - `vector_transport_inverse_retractions = [default_inverse_retraction_method for _ in 1:length(vector_transport_methods)]``
   inverse retractions to use with the vector transport method (especially the differentiated ones)
-- `vector_transport_to = [ true for _ in 1:length(vector_transport_methods)]`: whether
+- `vector_transport_retractions = [default_retraction_method for _ in 1:length(vector_transport_methods)]`:
+  retractions to use with the vector transport method
+- `test_vector_transport_to = [ true for _ in 1:length(vector_transport_methods)]`: whether
    to check the `to` variant of vector transport
-- `vector_transport_direction = [ true for _ in 1:length(vector_transport_methods)]`: whether
+- `test_vector_transport_direction = [ true for _ in 1:length(vector_transport_methods)]`: whether
    to check the `direction` variant of vector transport
 
 !!! note
@@ -111,12 +123,10 @@ function Manifolds.test_manifold(
         retraction_atol_multiplier = 0,
         retraction_methods = [],
         retraction_rtol_multiplier = 1,
-        test_atlases = (),
         test_exp_log = true,
         test_is_tangent = true,
         test_injectivity_radius = true,
         test_inplace = false,
-        has_get_embedding = false,
         test_musical_isomorphisms = false,
         test_mutating_rand = false,
         parallel_transport = false,
@@ -214,11 +224,11 @@ function Manifolds.test_manifold(
         Test.@test isapprox(M, pts[2], exp(M, pts[1], X1); atol = atolp1p2, rtol = rtolp1p2)
         Test.@test isapprox(
             M, pts[1], Manifolds.exp_fused(M, pts[1], X1, 0);
-            atol = atolp1p2, rtol = rtolp1p2
+            atol = atolp1p2, rtol = rtolp1p2,
         )
         Test.@test isapprox(
             M, pts[2], Manifolds.exp_fused(M, pts[1], X1, 1);
-            atol = atolp1p2, rtol = rtolp1p2
+            atol = atolp1p2, rtol = rtolp1p2,
         )
         if is_mutating
             q2 = allocate(pts[1])
@@ -230,14 +240,14 @@ function Manifolds.test_manifold(
         Test.@test is_point(M, exp(M, pts[1], X1); atol = atolp1p2, rtol = rtolp1p2)
         Test.@test isapprox(
             M, pts[1], Manifolds.exp_fused(M, pts[1], X1, 0);
-            atol = atolp1p2, rtol = rtolp1p2
+            atol = atolp1p2, rtol = rtolp1p2,
         )
         for p in pts
             epsx = Manifolds.find_eps(p)
             Test.@test isapprox(
                 M, p, zero_vector(M, p), log(M, p, p);
                 atol = epsx * exp_log_atol_multiplier,
-                rtol = exp_log_atol_multiplier == 0.0 ? sqrt(epsx) * exp_log_rtol_multiplier : 0
+                rtol = exp_log_atol_multiplier == 0.0 ? sqrt(epsx) * exp_log_rtol_multiplier : 0,
             )
             Test.@test isapprox(
                 M, p, zero_vector(M, p), inverse_retract(M, p, p);
@@ -289,7 +299,9 @@ function Manifolds.test_manifold(
 
     parallel_transport && Manifolds.test_parallel_transport(
         M, pts;
-        to = parallel_transport_to, direction = parallel_transport_direction, mutating = is_mutating,
+        to = parallel_transport_to,
+        direction = parallel_transport_direction,
+        mutating = is_mutating,
     )
 
     Test.@testset "(inverse &) retraction tests" begin # COV_EXCL_LINE
@@ -301,7 +313,7 @@ function Manifolds.test_manifold(
                 Test.@test isapprox(
                     M, p, Manifolds.retract_fused(M, p, X, 0, retr_method);
                     atol = epsx * retraction_atol_multiplier,
-                    rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0
+                    rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0,
                 )
                 if is_mutating
                     new_pt = allocate(p)
@@ -330,7 +342,7 @@ function Manifolds.test_manifold(
                 Test.@test isapprox(
                     M, p, zero_vector(M, p), X;
                     atol = epsx * retraction_atol_multiplier,
-                    rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0
+                    rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0,
                 )
                 if (test_inplace && is_mutating)
                     Y = copy(M, p, X)
@@ -338,7 +350,7 @@ function Manifolds.test_manifold(
                     Test.@test isapprox(
                         M, p, zero_vector(M, p), Y;
                         atol = epsx * retraction_atol_multiplier,
-                        rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0
+                        rtol = retraction_atol_multiplier == 0 ? sqrt(epsx) * retraction_rtol_multiplier : 0,
                     )
                 end
             end
@@ -397,7 +409,6 @@ function Manifolds.test_manifold(
         for (p, X) in zip(pts, tv)
             atol = Manifolds.find_eps(p) * projection_atol_multiplier
             X_emb = embed(M, p, X)
-            p_emb = embed(M, p)
             Test.@test isapprox(M, p, X, project(M, p, X_emb); atol = atol)
             if is_mutating
                 X2 = allocate(X)
@@ -417,6 +428,8 @@ function Manifolds.test_manifold(
             if is_mutating
                 p2 = allocate(p)
                 project!(M, p2, p_emb)
+            else
+                p2 = project(M, p_emb)
             end
             Test.@test isapprox(M, p2, p; atol = atol)
         end
@@ -468,7 +481,7 @@ function Manifolds.test_manifold(
                     Test.@test is_vector(M, pts32, v1t2; atol = tvatol, error = :warn)
                 test_to && Test.@test isapprox(
                     M, pts[1], vector_transport_to(M, pts[1], X1, pts[1], vtm), X1;
-                    atol = tvatol
+                    atol = tvatol,
                 )
                 test_dir && Test.@test isapprox(
                     M, pts[1], vector_transport_direction(M, pts[1], X1, zero_vector(M, pts[1]), vtm), X1;
@@ -524,13 +537,10 @@ function Manifolds.test_manifold(
                 end
             end
             if isa(btype, ProjectedOrthonormalBasis)
-                # check projection idempotency
+                # check that the basis vectors are tangent vectors
+                atol = sqrt(Manifolds.find_eps(p))
                 for i in 1:N
-                    Test.@test norm(M, p, bvectors[i]) ≈ 1
-                    for j in (i + 1):N
-                        Test.@test real(inner(M, p, bvectors[i], bvectors[j])) ≈ 0 atol =
-                            sqrt(Manifolds.find_eps(p))
-                    end
+                    Test.@test is_vector(M, p, bvectors[i]; atol = atol)
                 end
                 # check projection idempotency
                 for i in 1:N
@@ -545,9 +555,7 @@ function Manifolds.test_manifold(
                 Xb = get_coordinates(M, p, X1, btype)
 
                 Test.@test get_coordinates(M, p, X1, b) ≈ Xb
-                Test.@test isapprox(
-                    M, p, get_vector(M, p, Xb, b), get_vector(M, p, Xb, btype)
-                )
+                Test.@test isapprox(M, p, get_vector(M, p, Xb, b), get_vector(M, p, Xb, btype))
             end
         end
     end
@@ -645,8 +653,8 @@ function Manifolds.test_manifold(
     Test.@testset "number_eltype" begin # COV_EXCL_LINE
         for (p, X) in zip(pts, tv)
             Test.@test number_eltype(X) == number_eltype(p)
-            p = retract(M, p, X, default_retraction_method)
-            Test.@test number_eltype(p) == number_eltype(p)
+            q = retract(M, p, X, default_retraction_method)
+            Test.@test number_eltype(q) == number_eltype(p)
         end
     end
 
@@ -738,7 +746,7 @@ function Manifolds.test_manifold(
             Test.@test is_vector(M, p, X, true; atol = atol)
             X = allocate(tv[1])
             rand!(rng_a, M, X; vector_at = p)
-            Test.@test is_point(M, p; error = :error)
+            Test.@test is_vector(M, p, X; error = :error, atol = atol)
             # ensure that the RNG source is actually used
             Y = allocate(tv[1])
             rand!(rng_b, M, Y; vector_at = p)
@@ -765,12 +773,16 @@ function Manifolds.test_manifold(
 end
 
 """
-    Manifolds.test_parallel_transport(M,P; to=true, direction=true)
+    Manifolds.test_parallel_transport(M, P[, Ξ]; to=true, direction=true, mutating=true)
 
-Generic tests for parallel transport on `M`given at least two pointsin `P`.
+Generic tests for parallel transport on `M` given at least two points in `P`.
+The tangent vectors `Ξ`, with `Ξ[i]` at `P[i]`, default to
+`Ξ[i] = inverse_retract(M, P[i], P[i+1], default_inverse_retraction_method(M))`.
 
 The single functions to transport `to` (a point) or (in a) `direction`
-are sub-tests that can be activated by the keywords arguments
+are sub-tests that can be activated by the keyword arguments of the same name,
+and `mutating` adds the checks of the mutating variants `parallel_transport_to!` and
+`parallel_transport_direction!`.
 
 !!! note
     This function is soon deprecated and will be replaced by a more systematic way in `Manifolds.Test`
@@ -800,11 +812,13 @@ function Manifolds.test_parallel_transport(
                         Test.@test isapprox(M, q, Y1, Y2)
                         parallel_transport_to!(M, Y2, q, Y1, p)
                         # Test that transporting there and back again yields the identity
-                        Test.@test isapprox(M, q, X, Y2)
+                        Test.@test isapprox(M, p, X, Y2)
                         parallel_transport_to!(M, Y1, q, Y1, p)
                         # Test that inplace does not have side effects
+                    else
+                        Y1 = parallel_transport_to(M, q, Y1, p)
                     end
-                    Test.@test isapprox(M, q, X, Y1)
+                    Test.@test isapprox(M, p, X, Y1)
                 end
             end
         end
@@ -822,7 +836,7 @@ function Manifolds.test_parallel_transport(
                         Test.@test isapprox(M, q, Y1, Y2)
                     end
                     # Test that Y is a tangent vector at q
-                    Test.@test is_vector(M, p, Y1; error = :error)
+                    Test.@test is_vector(M, q, Y1; error = :error)
                 end
             end
         end

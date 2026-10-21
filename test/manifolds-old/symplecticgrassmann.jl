@@ -1,6 +1,9 @@
 include("../header.jl")
 
 @testset "Symplectic Grassmann" begin
+    @test_throws DomainError SymplecticGrassmann(2, 4)
+    @test_throws ArgumentError SymplecticGrassmann(5, 2)
+    @test_throws ArgumentError SymplecticGrassmann(6, 3)
     M = SymplecticGrassmann(6, 4)
     Mf = SymplecticGrassmann(6, 4; parameter = :field)
     p = [
@@ -36,14 +39,24 @@ include("../header.jl")
         -0.02823014 0.00029946 -0.04196034 -0.04145413
     ]
     @testset "Basics" begin
+        @test_throws ArgumentError SymplecticGrassmann(5, 4)
+        @test_throws ArgumentError SymplecticGrassmann(6, 3)
         @test repr(M) == "SymplecticGrassmann(6, 4)"
         @test repr(Mf) == "SymplecticGrassmann(6, 4; parameter=:field)"
         @test manifold_dimension(M) == 4 * (6 - 4)
         for _M in [M, Mf]
-            @test is_point(M, p)
+            @test is_point(_M, p)
             @test is_vector(_M, p, X)
+            @test !is_flat(_M)
         end
+        @test is_flat(SymplecticGrassmann(4, 4))
         @test get_embedding(M) == SymplecticStiefel(6, 4)
+    end
+    @testset "Random points" begin
+        for _M in [M, Mf]
+            @test is_point(_M, rand(MersenneTwister(3), _M))
+            @test_throws ArgumentError rand(MersenneTwister(4), _M; vector_at = p)
+        end
     end
     @testset "Embedding / Total Space" begin
         @test get_embedding(M) == SymplecticStiefel(6, 4)
@@ -82,8 +95,10 @@ include("../header.jl")
         Z2 = similar(Z)
         riemannian_gradient!(M, Z2, p, A)
         @test isapprox(M, Z2, Z)
-        # How can we better test that this is a correct gradient?
-        # Or what can we further test here?
+        @test is_vector(M, p, Z)
+        # Z represents the differential along directions V with p^+V = 0
+        Xh = X - p * (symplectic_inverse(p) * X)
+        @test inner(M, p, Z, Xh) ≈ dot(A, Xh)
     end
     @testset "Projector representation" begin
         # cf. Propo 4.3 BendokatZimmermann, φ and

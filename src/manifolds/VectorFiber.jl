@@ -12,10 +12,7 @@ TensorProductType(spaces::VectorSpaceType...) = TensorProductType{typeof(spaces)
 
 function inner(B::CotangentSpace, p, X, Y)
     return inner(
-        B.manifold,
-        B.point,
-        sharp(B.manifold, B.point, X),
-        sharp(B.manifold, B.point, Y),
+        B.manifold, B.point, sharp(B.manifold, B.point, X), sharp(B.manifold, B.point, Y)
     )
 end
 

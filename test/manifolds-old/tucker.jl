@@ -2,6 +2,8 @@ using ManifoldsBase: LinearAlgebra
 include("../header.jl")
 
 @testset "Tucker" begin
+    @test_throws DomainError Tucker((2, 3), (3, 3))
+    @test_throws DomainError Tucker((4, 5, 6), (1, 2, 3))
     n⃗ = (4, 5, 6)
     r⃗ = (2, 3, 4)
     r⃗_small = (2, 3, 3)
@@ -100,6 +102,10 @@ include("../header.jl")
             u = allocate(v)
             copyto!(u, v)
             @test u == v
+            pc = copy(p)
+            @test pc == p
+            @test pc.hosvd.U[1] !== p.hosvd.U[1]
+            @test is_point(M, pc)
 
             # broadcasting
             @test axes(v) === ()
@@ -119,10 +125,12 @@ include("../header.jl")
             @test is_vector(M, p, v)
             @test !is_vector(M, p_small, v)
             @test !is_vector(
-                M,
-                p,
-                TuckerTangentVector(ones(T, r⃗), map(u⊥ -> u⊥[:, 1:(end - 1)], U⊥)),
+                M, p, TuckerTangentVector(ones(T, r⃗), map(u⊥ -> u⊥[:, 1:(end - 1)], U⊥))
             )
+            # factors of a tangent vector are orthogonal to those of the point
+            v_parallel = TuckerTangentVector(copy(v.Ċ), map(copy, p.hosvd.U))
+            @test !is_vector(M, p, v_parallel)
+            @test !is_vector(M, p, v_parallel; atol = 1.0e-10)
 
             ℬ = get_basis(M, p, DefaultOrthonormalBasis())
             J = convert(Matrix, ℬ)
@@ -130,10 +138,17 @@ include("../header.jl")
             vectors = get_vectors(M, p, DefaultOrthonormalBasis())
             vectors_mtx = hcat(map(ξ -> vec(embed(M, p, ξ)), vectors)...)
             @test J ≈ vectors_mtx
+            c = get_coordinates(M, p, v, DefaultOrthonormalBasis())
+            c2 = get_coordinates!(M, similar(c), p, v, DefaultOrthonormalBasis())
+            @test c2 == c
+            @test get_coordinates!(M, similar(c), p, v, ℬ) == c
+            @test get_coordinates!(M, similar(c), p, v) == c
+            @test isapprox(M, p, get_vector(M, p, c2, DefaultOrthonormalBasis()), v)
 
             shiftprint(x) = replace(sprint(show, "text/plain", x), "\n" => "\n ")
 
             @test sprint(show, "text/plain", M) == "Tucker((4, 5, 6), (2, 3, 4), ℝ)"
+            @test repr(M) == "Tucker((4, 5, 6), (2, 3, 4), ℝ)"
             @test sprint(show, "text/plain", p) == """
                 $(summary(p))
                 U factor 1:
@@ -184,6 +199,7 @@ include("../header.jl")
                 test_rand_point = true,
                 test_rand_tvector = true,
                 test_mutating_rand = true,
+                is_tangent_atol_multiplier = 5,
                 projection_atol_multiplier = 15,
                 retraction_methods = [PolarRetraction()],
                 inverse_retraction_methods = [ProjectionInverseRetraction()],
@@ -195,6 +211,7 @@ include("../header.jl")
         M = Tucker(n⃗, r⃗; parameter = :field)
         @test sprint(show, "text/plain", M) ==
             "Tucker((4, 5, 6), (2, 3, 4), ℝ; parameter=:field)"
+        @test repr(M) == "Tucker((4, 5, 6), (2, 3, 4), ℝ; parameter=:field)"
     end
 
     @testset "projection transport" begin
@@ -301,6 +318,9 @@ include("../header.jl")
         Y_manual = project!(M, Y_manual, q, embed(M, p, X))
         Y = vector_transport_to!(M, Y, p, X, q, ProjectionTransport())
         @test isapprox(M, q, Y_manual, Y, atol = atol, rtol = rtol)
+        # the allocating projection agrees with the in-place one
+        Y_alloc = project(M, q, embed(M, p, X))
+        @test isapprox(M, q, Y_manual, Y_alloc, atol = atol, rtol = rtol)
 
         # test transport for in-place update
         p = allocate(p̃)
@@ -315,15 +335,38 @@ include("../header.jl")
         @test isapprox(M, q, Y_manual, X, atol = atol, rtol = rtol)
     end
 
+    @testset "projection transport on complex tensors" begin
+        M = Tucker((4, 5, 6), (2, 3, 4), ℂ)
+        A = reshape([complex(mod(17k, 23) / 23, mod(11k, 19) / 19) for k in 1:120], 4, 5, 6)
+        B = reshape([complex(mod(13k, 29) / 29, mod(7k, 31) / 31) for k in 1:120], 4, 5, 6)
+        p = TuckerPoint(A, (2, 3, 4))
+        q = TuckerPoint(B, (2, 3, 4))
+        U̇ = map(p.hosvd.U) do U
+            n = size(U, 1)
+            Z = reshape([complex(mod(3k, 7) / 7, mod(2k, 5) / 5) for k in 1:(n^2)], n, n)
+            return Z * U - U * (U' * Z * U)
+        end
+        X = TuckerTangentVector((0.5 + 0.25im) * p.hosvd.core, U̇)
+        Y = vector_transport_to(M, p, X, q, ProjectionTransport())
+        # the columns of J are an orthonormal basis of the complex tangent space at q
+        J = convert(Matrix, get_basis(M, q, DefaultOrthonormalBasis()))
+        @test vec(embed(M, q, Y)) ≈ J * (J' * vec(embed(M, p, X)))
+    end
+
     @testset "product of Tucker manifolds" begin
-        M = ProductManifold(
-            Tucker((18, 16, 14), (4, 3, 3)),
-            Tucker((18, 16, 14), (4, 3, 3)),
-        )
+        M = ProductManifold(Tucker((18, 16, 14), (4, 3, 3)), Tucker((18, 16, 14), (4, 3, 3)))
         p0 = rand(M)
         X = rand(M; vector_at = p0)
         Y = copy(M, X)
         Y .*= 2
         @test isapprox(M, p0, X + X, Y)
+    end
+    @testset "coordinates in the orthogonal and the default basis" begin
+        M = Tucker((4, 5, 6), (2, 3, 4))
+        p = TuckerPoint(reshape([mod(17k, 23) / 23 for k in 1:120], 4, 5, 6), (2, 3, 4))
+        X = get_vector(M, p, collect(1.0:42), DefaultOrthonormalBasis())
+        c = get_coordinates(M, p, X, DefaultOrthonormalBasis())
+        @test get_coordinates(M, p, X, DefaultOrthogonalBasis()) ≈ c
+        @test get_coordinates(M, p, X, DefaultBasis()) ≈ c
     end
 end

@@ -16,8 +16,8 @@ include("../header.jl")
         @test vector_transport_to(M, 1.0, 3.0, 2.0, ParallelTransport()) == 6.0
         @test retract(M, 1.0, 1.0) == exp(M, 1.0, 1.0)
         @test isinf(injectivity_radius(M))
-        @test isinf(injectivity_radius(M, -2.0))
-        @test isinf(injectivity_radius(M, -2.0, ExponentialRetraction()))
+        @test isinf(injectivity_radius(M, 2.0))
+        @test isinf(injectivity_radius(M, 2.0, ExponentialRetraction()))
         @test isinf(injectivity_radius(M, ExponentialRetraction()))
         @test project(M, 1.5, 1.0) == 1.0
         @test embed(M, 1.0) == 1.0
@@ -31,8 +31,8 @@ include("../header.jl")
         @test change_metric(M, EuclideanMetric(), 2, 3) == 3 * 2
         @test change_representer(M, EuclideanMetric(), 2, 3) == 3 * 2^2
         N = PositiveVectors(2)
-        @test change_metric(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2]
-        @test change_representer(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2^2]
+        @test change_metric(N, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2]
+        @test change_representer(N, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2^2]
         @test get_coordinates(N, [2.0, 4.0], [1.0, 10.0], DefaultOrthonormalBasis()) ==
             [0.5, 2.5]
         @test get_vector(N, [2.0, 4.0], [0.5, 2.5], DefaultOrthonormalBasis()) ==
@@ -74,14 +74,19 @@ include("../header.jl")
             )
         end
     end
-    @testset "Weingarten & Hessian" begin
+    @testset "Riemannian gradient and Hessian" begin
         M = PositiveNumbers()
         p = 1.0
         G = 2.0
         H = 3.0
         X = 4.0
+        @test riemannian_gradient(M, 2.0, 3.0) == 12.0
         rH = riemannian_Hessian(M, p, G, H, X)
         @test rH == p * H * p + X * G * p
+        M2 = PositiveVectors(3)
+        p2 = [1.0, 2.0, 3.0]
+        @test riemannian_Hessian(M2, p2, fill(G, 3), fill(H, 3), fill(X, 3)) ≈
+            p2 .* H .* p2 .+ X .* G .* p2
     end
 
     @testset "Manifold volume" begin

@@ -18,28 +18,6 @@ Pages = ["metric.md"]
 Depth = 2
 ```
 
-## Deprecated methods, to be replaced by chart-based variants
-
-Chart-based variants of deprecated functions are discussed in [the section about atlases](@ref atlases_and_charts).
-
-```@docs
-einstein_tensor(::AbstractManifold, ::Any, ::AbstractBasis)
-ricci_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
-local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
-local_metric_jacobian(::AbstractManifold, ::Any, ::AbstractBasis)
-inverse_local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
-log_local_metric_density(::AbstractManifold, ::Any, ::AbstractBasis)
-det_local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
-```
-
-## Types
-
-```@autodocs
-Modules = [Manifolds, ManifoldsBase]
-Pages = ["manifolds/MetricManifold.jl"]
-Order = [:type]
-```
-
 ## Implement Different Metrics on the same Manifold
 
 In order to distinguish different metrics on one manifold, one can introduce two [`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`)s and use this type to dispatch on the metric, see [`SymmetricPositiveDefinite`](@ref).
@@ -56,6 +34,13 @@ For the case that a [`local_metric`](@ref) is implemented as a bilinear form tha
 Modules = [Manifolds, ManifoldsBase]
 Pages = ["manifolds/MetricManifold.jl"]
 Order = [:function]
+```
+
+If a metric provides a closed-form `inner` for arbitrary tangent vectors, the following macros define `inner` and `norm` for tangent vectors given as coefficients in a basis.
+
+```@docs
+Manifolds.@tfvector_inner_via_get_vector
+Manifolds.@tfvector_norm_via_get_vector
 ```
 
 ## Metrics, charts and bases of vector spaces

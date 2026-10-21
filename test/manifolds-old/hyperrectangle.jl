@@ -3,6 +3,10 @@ include("../header.jl")
 @testset "Hyperrectangle" begin
     M = Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 9.0])
     @test repr(M) == "Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 9.0])"
+    @test M == Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 9.0])
+    @test hash(M) == hash(Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 9.0]))
+    @test M != Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 10.0])
+    @test !isequal(Hyperrectangle([-0.0], [1.0]), Hyperrectangle([0.0], [1.0]))
 
     @test_throws ArgumentError Hyperrectangle([1.0, 2.0], [-1.0, 5.0])
 
@@ -21,6 +25,7 @@ include("../header.jl")
     @test_throws DomainError is_point(M, [1.0im, 0.0, 0.0]; error = :error)
     @test_throws DomainError is_point(M, [NaN, 3.0, 0.0]; error = :error)
     @test_throws DomainError is_point(M, [10.0, 3.0, 0.0]; error = :error)
+    @test_throws DomainError is_point(M, [10.0, 3.0, 0.0]; atol = 1.0e-5, error = :error)
     @test_throws DomainError is_vector(M, [1.0, 2.0, 0.0], [1.0im, 0.0, 0.0]; error = :error)
     @test_throws DomainError is_vector(M, [1], [1.0, 1.0, 0.0]; error = :error)
     @test_throws DomainError is_vector(M, [0.0, 0.0, 0.0], [1.0]; error = :error)
@@ -29,6 +34,7 @@ include("../header.jl")
     @testset "projections" begin
         @test project(M, [4.0, -2.0, 3.0]) ≈ [1.0, 2.0, 3.0]
         @test project(M, [1.0, 2.0, 3.0], [2.0, -0.5, -10.0]) ≈ [0.0, 0.0, -10.0]
+        @test retract(M, [0.0, 3.0, 0.0], [10.0, 10.0, 10.0]) == [1.0, 4.0, 9.0]
     end
 
     @testset "injectivity_radius" begin
@@ -110,7 +116,7 @@ include("../header.jl")
     @testset "Volume" begin
         M = Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 4.0, 9.0])
         @test manifold_volume(M) == 48.0
-        p = zeros(3)
+        p = [0.0, 3.0, 0.0]
         X = zeros(3)
         @test volume_density(M, p, X) == 1.0
     end
@@ -125,13 +131,9 @@ include("../header.jl")
 
     @testset "Euclidean metric tests" begin
         @test riemann_tensor(
-            M,
-            pts[1],
-            pts[2] - pts[1],
-            pts[3] - pts[1],
-            (pts[3] - pts[1]) / 2,
+            M, pts[1], pts[2] - pts[1], pts[3] - pts[1], (pts[3] - pts[1]) / 2
         ) == [0.0, 0.0, 0.0]
-        @test sectional_curvature(M, p, [1.0, 0.0], [0.0, 1.0]) == 0.0
+        @test sectional_curvature(M, pts[2], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]) == 0.0
         @test sectional_curvature_max(M) == 0.0
         @test sectional_curvature_min(M) == 0.0
     end

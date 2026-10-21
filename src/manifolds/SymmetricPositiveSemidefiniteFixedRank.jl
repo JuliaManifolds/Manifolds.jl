@@ -12,8 +12,8 @@ apa^{\mathrm{H}} \geq 0 \text{ for all } a ∈ 𝔽
 ````
 where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
 and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
-We sometimes ``\operatorname{SPS}_{k,𝔽}(n)``, when distinguishing the real- and complex-valued
-manifold is important.
+We sometimes write ``\operatorname{SPS}_{k,𝔽}(n)`` when distinguishing the real- and
+complex-valued manifold is important.
 
 An element is represented by ``q ∈ 𝔽^{n×k}`` from the factorization ``p = qq^{\mathrm{H}}``.
 Note that since for any unitary (orthogonal) ``A ∈ 𝔽^{n×n}`` we have
@@ -45,10 +45,14 @@ struct SymmetricPositiveSemidefiniteFixedRank{T, 𝔽} <: AbstractDecoratorManif
 end
 
 function SymmetricPositiveSemidefiniteFixedRank(
-        n::Int,
-        k::Int,
-        field::AbstractNumbers = ℝ;
+        n::Int, k::Int, field::AbstractNumbers = ℝ;
         parameter::Symbol = :type,
+    )
+    0 <= k <= n || throw(
+        DomainError(
+            (n, k),
+            "The rank k of symmetric positive semidefinite matrices of fixed rank must satisfy 0 ≤ k ≤ n, but n and k were $(n) and $(k).",
+        ),
     )
     size = wrap_type_parameter(parameter, (n, k))
     return SymmetricPositiveSemidefiniteFixedRank{typeof(size), field}(size)
@@ -61,16 +65,15 @@ Check whether `q` is a valid manifold point on the [`SymmetricPositiveSemidefini
 whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corresponding
 [`AbstractNumbers`](@extref ManifoldsBase number-system) `𝔽`.
 The symmetry of `p` is not explicitly checked since by using `q` p is symmetric by construction.
-The tolerance for the symmetry of `p` can and the rank of `q*q'` be set using `kwargs...`.
+The tolerance for the rank of `q*q'` can be set using `kwargs...`.
 """
 function check_point(M::SymmetricPositiveSemidefiniteFixedRank, q; kwargs...)
     n, k = get_parameter(M.size)
     p = q * q'
-    r = rank(p * p'; kwargs...)
+    r = rank(p; kwargs...)
     if r < k
         return DomainError(
-            r,
-            "The point $(p) does not lie on $M, since its rank is less than $(k).",
+            r, "The point $(p) does not lie on $M, since its rank is less than $(k)."
         )
     end
     return nothing
@@ -89,13 +92,11 @@ Due to the reduced representation this is fulfilled as soon as the matrix is of 
 check_vector(M::SymmetricPositiveSemidefiniteFixedRank, q, Y; kwargs...)
 
 function get_embedding(
-        ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n, k}}, 𝔽},
+        ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n, k}}, 𝔽}
     ) where {n, k, 𝔽}
     return Euclidean(n, k; field = 𝔽)
 end
-function get_embedding(
-        M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int, Int}, 𝔽},
-    ) where {𝔽}
+function get_embedding(M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int, Int}, 𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(n, k; field = 𝔽, parameter = :field)
 end
@@ -103,6 +104,8 @@ end
 function ManifoldsBase.get_embedding_type(::SymmetricPositiveSemidefiniteFixedRank)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
+
+metric(::SymmetricPositiveSemidefiniteFixedRank) = EuclideanMetric()
 
 @doc raw"""
     distance(M::SymmetricPositiveSemidefiniteFixedRank, p, q)
@@ -141,7 +144,10 @@ function exp!(::SymmetricPositiveSemidefiniteFixedRank, q2, q, Y)
 end
 
 @doc raw"""
-    isapprox(M::SymmetricPositiveSemidefiniteFixedRank, p, q; kwargs...)
+    isapprox(
+        M::SymmetricPositiveSemidefiniteFixedRank, p, q;
+        atol=sqrt(prod(representation_size(M)))*eps(real(float(number_eltype(p)))), kwargs...
+    )
 
 test, whether two points `p`, `q` are (approximately) nearly the same.
 Since this is a quotient manifold in the embedding, the test is performed by checking
@@ -150,9 +156,7 @@ the comparison is performed with the classical `isapprox`.
 The `kwargs...` are passed on to this accordingly.
 """
 function _isapprox(
-        M::SymmetricPositiveSemidefiniteFixedRank,
-        p::T,
-        q;
+        M::SymmetricPositiveSemidefiniteFixedRank, p::T, q;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
     ) where {T}
@@ -223,19 +227,16 @@ function project!(::SymmetricPositiveSemidefiniteFixedRank, Z, q, Y)
 end
 
 function Base.show(
-        io::IO,
-        ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n, k}}, 𝔽},
+        io::IO, ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n, k}}, 𝔽}
     ) where {n, k, 𝔽}
     return print(io, "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽))")
 end
 function Base.show(
-        io::IO,
-        M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int, Int}, 𝔽},
+        io::IO, M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int, Int}, 𝔽}
     ) where {𝔽}
     n, k = get_parameter(M.size)
     return print(
-        io,
-        "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽); parameter=:field)",
+        io, "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽); parameter=:field)"
     )
 end
 
@@ -246,11 +247,7 @@ Transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent
 at `q`.
 """
 vector_transport_to(
-    ::SymmetricPositiveSemidefiniteFixedRank,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::ProjectionTransport,
+    ::SymmetricPositiveSemidefiniteFixedRank, ::Any, ::Any, ::Any, ::ProjectionTransport
 )
 
 function vector_transport_to_project!(M::SymmetricPositiveSemidefiniteFixedRank, Y, p, X, q)

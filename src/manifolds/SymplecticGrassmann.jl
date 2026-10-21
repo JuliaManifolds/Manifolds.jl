@@ -62,7 +62,7 @@ The manifold was first introduced in [BendokatZimmermann:2021](@cite)
 
 # Constructor
 
-    SymplecticGrassmann(2n::Int, 2k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+    SymplecticGrassmann(2n::Int, 2k::Int; parameter::Symbol=:type)
 
 Generate the (real-valued) symplectic Grassmann manifold.
 of  ``2k`` dimensional symplectic subspace of ``ℝ^{2n}``.
@@ -73,12 +73,38 @@ struct SymplecticGrassmann{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SymplecticGrassmann(two_n::Int, two_k::Int; parameter::Symbol = :type)
+    two_n % 2 == 0 || throw(
+        ArgumentError(
+            "The first matrix size of the symplectic Grassmann manifold must be even, but was $(two_n).",
+        ),
+    )
+    two_k % 2 == 0 || throw(
+        ArgumentError(
+            "The second matrix size of the symplectic Grassmann manifold must be even, but was $(two_k).",
+        ),
+    )
+    0 <= two_k <= two_n || throw(
+        DomainError(
+            (two_n, two_k),
+            "The matrix sizes `2n` and `2k` of the symplectic Grassmann manifold must satisfy 0 ≤ 2k ≤ 2n, but they were $(two_n) and $(two_k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (div(two_n, 2), div(two_k, 2)))
     return SymplecticGrassmann{ℝ, typeof(size)}(size)
 end
 
 # Define Stiefel as the array fallback
 ManifoldsBase.@default_manifold_fallbacks SymplecticGrassmann StiefelPoint StiefelTangentVector value value
+
+"""
+    is_flat(::SymplecticGrassmann)
+
+Return true if the [`SymplecticGrassmann`](@ref) degenerates to a point, false otherwise.
+"""
+function is_flat(M::SymplecticGrassmann)
+    n, k = get_parameter(M.size)
+    return n == k
+end
 
 @doc raw"""
     manifold_dimension(::SymplecticGrassmann)

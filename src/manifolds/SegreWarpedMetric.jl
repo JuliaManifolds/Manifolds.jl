@@ -28,17 +28,15 @@ function WarpedMetric(A::Real)
 end
 
 function connected_by_geodesic(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        p,
-        q,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, q
     ) where {V, A}
-    return connected_by_geodesic(M.manifold, p, q)
+    q = copy(M, q)
+    closest_representative!(M, q, p)
+    return A * spherical_angle_sum(M, p, q) < pi
 end
 
 function closest_representative!(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        q,
-        p,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, q, p
     ) where {V, A}
     return closest_representative!(M.manifold, q, p)
 end
@@ -61,9 +59,10 @@ and assume ``(μ, y_1,…, y_d)`` is the representation of ``q`` that minimizes 
 ````
 """
 function distance(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, q) where {V, A}
-    closest_representative!(M, q, p)
-    m = spherical_angle_sum(M, p, q)
-    return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(A * m / 2)^2)
+    qc = copy(M, q)
+    closest_representative!(M, qc, p)
+    m = spherical_angle_sum(M, p, qc)
+    return sqrt((p[1][1] - qc[1][1])^2 + 4 * p[1][1] * qc[1][1] * sin(A * m / 2)^2)
     # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(A * m)) but more stable for small m
 end
 
@@ -94,7 +93,7 @@ where
     \end{aligned}
 ````
 
-If ``m = 0`` and ``-λ < ν``, then ``\operatorname{exp}_p(v) = p + X``.
+If ``m = 0`` and ``-λ < ν``, then ``\operatorname{exp}_p(X) = p + X``.
 
 The formula is derived in proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2026](@cite).
 """
@@ -109,9 +108,10 @@ function exp!(::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, q, p, X) wh
         ),
     )
 
+    f = pi / 2 - atan((p[1][1] + X[1][1]) / (p[1][1] * A * m))
+
     q[1][1] = sqrt((p[1][1] + X[1][1])^2 + (p[1][1] * A * m)^2)
 
-    f = pi / 2 - atan((p[1][1] + X[1][1]) / (p[1][1] * A * m))
     if m == 0
         for (x, y) in zip(p[2:end], q[2:end])
             y .= x
@@ -129,68 +129,49 @@ function exp!(::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, q, p, X) wh
 end
 
 @doc raw"""
-    get_coordinates(M::Segre{𝔽, V}, p, v, ::DefaultOrthonormalBasis; kwargs...)
+    get_coordinates(
+        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, X, ::DefaultOrthonormalBasis
+    )
 
 Get coordinates of `X` in the tangent space ``T_{(λ, x_1,…, x_d)} \mathcal{S}_A = \mathbb{R} × T_{x_1} \mathbb{S}^{n_1 - 1} ×⋯× T_{x_d} \mathbb{S}^{n_d - 1}`` using a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) on each factor.
 """
 get_coordinates(
-    M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}},
-    p,
-    X,
-    ::DefaultOrthonormalBasis;
-    kwargs...,
+    M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, X, ::DefaultOrthonormalBasis
 ) where {𝔽, V, A}
 
 function get_coordinates_orthonormal!(
-        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}},
-        c,
-        p,
-        X,
-        ::RealNumbers;
-        kwargs...,
+        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, c, p, X, ::RealNumbers
     ) where {𝔽, V, A}
-    return c = vcat(
+    return c .= vcat(
         X[1],
         A *
             p[1][1] *
             [
-            get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis(); kwargs...) for (n, x, xdot) in zip(V, p[2:end], X[2:end])
+            get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis()) for (n, x, xdot) in zip(V, p[2:end], X[2:end])
         ]...,
     )
 end
 
 @doc raw"""
-    get_vector(M::Segre{𝔽, V}, p, c, ::DefaultOrthonormalBasis; kwargs...)
+    get_vector(
+        M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, c, ::DefaultOrthonormalBasis
+    )
 
 Get tangent vector `X` from coordinates in the tangent space ``T_{(λ, x_1,…, x_d)} \mathcal{S}_A = \mathbb{R} × T_{x_1} \mathbb{S}^{n_1 - 1} ×⋯× T_{x_d} \mathbb{S}^{n_d - 1}`` using a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) on each factor.
 """
 get_vector(
-    M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}},
-    p,
-    c,
-    ::DefaultOrthonormalBasis;
-    kwargs...,
+    M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, c, ::DefaultOrthonormalBasis
 ) where {V, A, 𝔽}
 
 function get_vector_orthonormal!(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        X,
-        p,
-        c,
-        ::RealNumbers;
-        kwargs...,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, X, p, c, ::RealNumbers
     ) where {V, A}
     c_ = deepcopy(c)
     X[1] = [c_[1]]
     c_ = c_[2:end]
     for (i, n) in enumerate(V)
-        X[i + 1] =
-            get_vector(
-            Sphere(n - 1),
-            p[i + 1],
-            c_[1:(n - 1)],
-            DefaultOrthonormalBasis();
-            kwargs...,
+        X[i + 1] = get_vector(
+            Sphere(n - 1), p[i + 1], c_[1:(n - 1)], DefaultOrthonormalBasis()
         ) / (A * p[1][1])
         c_ = c_[n:end]
     end
@@ -211,6 +192,8 @@ function inner(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, X, Y) 
     return X[1][1] * Y[1][1] + (A * p[1][1])^2 * dot(X[2:end], Y[2:end])
 end
 
+@tfvector_inner_via_get_vector (MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}} where {V, A})
+
 @doc raw"""
     log(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, q)
 
@@ -229,7 +212,7 @@ and assume ``(μ, y_1,…, y_d)`` is the representative of ``q`` that minimizes 
 ````math
     \operatorname{log}_p(q) =
     \left(
-        \mu \cos{m} - \lambda,
+        \mu \cos(A m) - \lambda,
         (y_1 - ⟨x_1, y_1⟩ x_1) \frac{\mu \sphericalangle(x_1, y_1) \sin(A m)}{\lambda A m \sin{\sphericalangle(x_1, y_1)}},
         \dots,
         (y_d - ⟨x_d, y_d⟩ x_d) \frac{\mu \sphericalangle(x_d, y_d) \sin(A m)}{\lambda A m \sin{\sphericalangle(x_d, y_d)}}
@@ -241,20 +224,21 @@ The formula is derived in theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenh
 log(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, q) where {V, A}
 
 function log!(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, X, p, q) where {V, A}
-    closest_representative!(M, q, p)
-    m = spherical_angle_sum(M, p, q)
+    qc = copy(M, q)
+    closest_representative!(M, qc, p)
+    m = spherical_angle_sum(M, p, qc)
 
-    X[1][1] = q[1][1] * cos(A * m) - p[1][1]
-    for (n, xdot, x, y) in zip(V, X[2:end], p[2:end], q[2:end])
+    X[1][1] = qc[1][1] * cos(A * m) - p[1][1]
+    for (n, xdot, x, y) in zip(V, X[2:end], p[2:end], qc[2:end])
         a = distance(Sphere(n - 1), x, y)
-        xdot .= (y - dot(x, y) * x) * (q[1][1] / p[1][1]) * sinc(A * m / pi) / sinc(a / pi)
+        xdot .= (y - dot(x, y) * x) * (qc[1][1] / p[1][1]) * sinc(A * m / pi) / sinc(a / pi)
     end
 
     return X
 end
 
 @doc raw"""
-    riemann_tensor(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, X, Y)
+    riemann_tensor(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, X, Y, Z)
 
 Riemann tensor of the warped Segre manifold at ``p``.
 
@@ -265,22 +249,19 @@ Riemann tensor of the warped Segre manifold at ``p``.
 ``R_{\mathcal{S}_A}`` is zero in the remaining (orthogonal) directions.
 """
 function riemann_tensor(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        p,
-        X,
-        Y,
-        Z,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, X, Y, Z
     ) where {V, A}
+    z = zero(p[1][1])
     return [
-        [0.0],
+        [z],
         [
             riemann_tensor(Sphere(n - 1), x, xdot1, xdot2, xdot3) for
                 (n, x, xdot1, xdot2, xdot3) in zip(V, p[2:end], X[2:end], Y[2:end], Z[2:end])
         ]...,
     ] +
         (1 / p[1][1]^2) * (
-        inner(M, p, [[0.0], X[2:end]...], [[0.0], Z[2:end]...]) * [[0.0], Y[2:end]...] -
-            inner(M, p, [[0.0], Y[2:end]...], [[0.0], Z[2:end]...]) * [[0.0], X[2:end]...]
+        inner(M, p, [[z], X[2:end]...], [[z], Z[2:end]...]) * [[z], Y[2:end]...] -
+            inner(M, p, [[z], Y[2:end]...], [[z], Z[2:end]...]) * [[z], X[2:end]...]
     )
 end
 
@@ -297,10 +278,7 @@ If ``p = (λ, x_1,…, x_d) ∈ \mathcal{S}``, ``u_i ∈ T_{x_i} \mathbb{S}^{n_i
 ``K_{\mathcal{S}_A}`` is zero in the remaining (orthogonal) directions.
 """
 function sectional_curvature(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        p,
-        X,
-        Y,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, X, Y
     ) where {V, A}
     return inner(M, p, riemann_tensor(M, p, X, Y, Y), X) /
         (inner(M, p, X, X) * inner(M, p, Y, Y) - inner(M, p, X, Y)^2)
@@ -311,9 +289,13 @@ function show(io::IO, ::WarpedMetric{A}) where {A}
 end
 
 function spherical_angle_sum(
-        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}},
-        p,
-        q,
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, q
     ) where {V, A}
     return spherical_angle_sum(M.manifold, p, q)
+end
+
+function vector_transport_to_project!(
+        M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, Y, p, X, q
+    ) where {V, A}
+    return vector_transport_to_project!(M.manifold, Y, p, X, q)
 end

@@ -4,6 +4,17 @@ using RecursiveArrayTools
 
 struct TestVectorSpaceType <: VectorSpaceType end
 
+
+# a fiber element holds two tangent vectors, each moved by the transport of the base manifold
+function Manifolds.bundle_transport_tangent_direction!(
+        B::FiberBundle{<:Any, TestVectorSpaceType}, Y, p, pf, X, d, m
+    )
+    for i in 1:2
+        vector_transport_direction!(B.manifold, Y.x[i], p, X.x[i], d, m)
+    end
+    return Y
+end
+
 @testset "Vector bundle" begin
     M = Sphere(2)
     TB = TangentBundle(M)
@@ -95,6 +106,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_representation_size = false,
                 test_rand_point = true,
                 test_rand_tvector = true,
+                is_point_atol_multiplier = 1,
             )
 
             Xir = allocate(pts_tb[1])
@@ -115,8 +127,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
             # tangent space at point
             pts_TpM = map(
-                p -> convert(T, p),
-                [[0.0, 0.0, 1.0], [0.0, 2.0, 0.0], [0.0, -1.0, 1.0]],
+                p -> convert(T, p), [[0.0, 0.0, 1.0], [0.0, 2.0, 0.0], [0.0, -1.0, 1.0]]
             )
             basis_types = (
                 DefaultOrthonormalBasis(),
@@ -139,10 +150,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
             )
 
             @test Manifolds.bundle_transport_to(
-                TB,
-                p,
-                convert(T, [0.0, -1.0, -1.0]),
-                convert(T, [0.0, 1.0, 0.0]),
+                TB, p, convert(T, [0.0, -1.0, -1.0]), convert(T, [0.0, 1.0, 0.0])
             ) ≈ convert(T, [1.0, 0.0, -1.0])
         end
     end
@@ -171,6 +179,20 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test_throws MethodError vector_space_dimension(vbf)
     end
 
+    @testset "in-place vector transport in a direction uses the fiber transport" begin
+        B = FiberBundle(TestVectorSpaceType(), Sphere(2))
+        p = ArrayPartition(
+            [1.0, 0.0, 0.0], ArrayPartition([0.0, -1.0, -1.0], [0.0, -1.0, -1.0])
+        )
+        X = ArrayPartition([0.0, 1.0, 0.5], ArrayPartition([0.0, 0.0, 1.0], [0.0, 2.0, 0.0]))
+        d = ArrayPartition([0.0, π / 2, 0.0], ArrayPartition(zeros(3), zeros(3)))
+        Z = ArrayPartition([-1.0, 0.0, 0.5], ArrayPartition([0.0, 0.0, 1.0], [-2.0, 0.0, 0.0]))
+        @test isapprox(vector_transport_direction(B, p, X, d), Z)
+        Y = zero(X)
+        @test vector_transport_direction!(B, Y, p, X, d) === Y
+        @test isapprox(Y, Z)
+    end
+
     @testset "product retraction and inverse retraction on tangent bundle for power and product manifolds" begin
         M = PowerManifold(Circle(ℝ), 2)
         N = TangentBundle(M)
@@ -189,12 +211,10 @@ struct TestVectorSpaceType <: VectorSpaceType end
         M2 = ProductManifold(Circle(ℝ), Euclidean(2))
         N2 = TangentBundle(M2)
         p1_2 = ArrayPartition(
-            ArrayPartition([0.0], [0.0, 0.0]),
-            ArrayPartition([0.0], [0.0, 0.0]),
+            ArrayPartition([0.0], [0.0, 0.0]), ArrayPartition([0.0], [0.0, 0.0])
         )
         p2_2 = ArrayPartition(
-            ArrayPartition([-1.047], [1.0, 0.0]),
-            ArrayPartition([-1.047], [0.0, 1.0]),
+            ArrayPartition([-1.047], [1.0, 0.0]), ArrayPartition([-1.047], [0.0, 1.0])
         )
         @test isapprox(
             N2,
@@ -206,12 +226,37 @@ struct TestVectorSpaceType <: VectorSpaceType end
         tbvt = Manifolds.FiberBundleProductVectorTransport(ppt, ppt)
         @test TangentBundle(M, tbvt).vector_transport === tbvt
         @test CotangentBundle(M, tbvt).vector_transport === tbvt
-        @test TangentBundle(M, tbvt).vector_transport === tbvt
+        @test TangentBundle(M, tbvt) isa TangentBundle
+        @test CotangentBundle(M, tbvt) isa CotangentBundle
     end
 
     @testset "Extended flatness tests" begin
         M = TangentBundle(Euclidean(3))
         @test is_flat(M)
         @test injectivity_radius(M) == Inf
+    end
+
+    @testset "product retraction transports the fiber part with the vertical method" begin
+        M = Sphere(2)
+        ppt, prt = ParallelTransport(), ProjectionTransport()
+        B1 = TangentBundle(M, Manifolds.FiberBundleProductVectorTransport(ppt, prt))
+        B2 = TangentBundle(M, Manifolds.FiberBundleProductVectorTransport(prt, ppt))
+        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
+        X = ArrayPartition([0.0, 0.3, 0.0], [0.0, 0.0, 0.5])
+        xq = exp(M, p.x[1], X.x[1])
+        q1 = retract(B1, p, X, m_prod_retr)
+        @test isapprox(M, xq, q1.x[2], project(M, xq, [0.0, 1.0, 0.5]))
+        q2 = retract(B2, p, X, m_prod_retr)
+        @test isapprox(B2, p, inverse_retract(B2, p, q2, m_prod_invretr), X)
+    end
+
+    @testset "cotangent basis on a tangent bundle" begin
+        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])
+        c = [1.0, 2.0, 3.0, 4.0]
+        Bc = DefaultOrthonormalBasis(ℝ, CotangentSpaceType())
+        ξ = get_vector(TB, p, c, Bc)
+        @test ξ isa Manifolds.RieszRepresenterCotangentVector
+        @test ξ.X ≈ get_vector(TB, p, c, DefaultOrthonormalBasis())
+        @test get_coordinates(TB, p, ξ, Bc) ≈ c
     end
 end

@@ -1,6 +1,8 @@
 include("../header.jl")
 
 @testset "KendallsPreShapeSpace" begin
+    @test_throws DomainError KendallsPreShapeSpace(2, 1)
+    @test_throws DomainError KendallsShapeSpace(0, 3)
     M = KendallsPreShapeSpace(2, 3)
     @test repr(M) == "KendallsPreShapeSpace(2, 3)"
     @test representation_size(M) === (2, 3)
@@ -21,14 +23,11 @@ include("../header.jl")
     ]
     @test_throws DomainError is_point(M, [1 0 1; 1 -1 0] / 2; error = :error)
     @test_throws DomainError is_vector(
-        M,
-        [-1 0 1.0; 0 0 0] / sqrt(2),
-        [1.0 0 1; 1 -1 0];
+        M, [-1 0 1.0; 0 0 0] / sqrt(2), [1.0 0 1; 1 -1 0];
         error = :error,
     )
     Manifolds.test_manifold(
-        M,
-        [p1, p2, p3];
+        M, [p1, p2, p3];
         is_point_atol_multiplier = 1,
         is_tangent_atol_multiplier = 1,
         exp_log_atol_multiplier = 5,
@@ -38,10 +37,36 @@ include("../header.jl")
         test_rand_tvector = true,
         rand_tvector_atol_multiplier = 5,
     )
+    X = project(M, p1, [1.0 0.2 -0.3; 0.5 0.8 -0.1])
+    V = 2 * p1 + [1.0 1.0 1.0; -0.5 -0.5 -0.5] # normal vector at p1
+    @test Weingarten(M, p1, X, V) ≈ -2 * X
+    @testset "random points and vectors use the element type of the array" begin
+        p = rand!(MersenneTwister(42), M, zeros(BigFloat, 2, 3))
+        @test p == project(M, randn(MersenneTwister(42), BigFloat, 2, 3))
+        @test is_point(M, p; error = :error)
+        X = rand!(MersenneTwister(7), M, zeros(BigFloat, 2, 3); vector_at = p)
+        @test X == project(M, p, randn(MersenneTwister(7), BigFloat, 2, 3))
+    end
     @testset "field parameter" begin
         M = KendallsPreShapeSpace(2, 3; parameter = :field)
         @test repr(M) == "KendallsPreShapeSpace(2, 3; parameter=:field)"
         @test get_embedding(M) === ArraySphere(2, 3; field = ℝ, parameter = :field)
+    end
+    @testset "coordinates in an orthonormal basis" begin
+        B = DefaultOrthonormalBasis()
+        M2, M3 = KendallsPreShapeSpace(2, 3), KendallsPreShapeSpace(3, 4)
+        q = project(M3, [1.0 2.0 -0.5 0.3; -1.0 0.4 0.8 2.0; 0.2 -0.7 1.5 -1.1])
+        X2 = project(M2, p1, [0.3 -0.2 0.5; 0.1 0.4 -0.6])
+        Y2 = project(M2, p1, [-0.4 0.9 0.2; 0.7 -0.1 0.3])
+        X3 = project(M3, q, [0.5 -0.3 0.2 0.1; 0.0 0.7 -0.4 0.6; -0.8 0.1 0.9 -0.2])
+        Y3 = project(M3, q, [0.2 0.6 -0.1 -0.9; 0.4 -0.5 0.3 0.8; 0.1 0.2 -0.7 0.5])
+        for (N, p, X, Y) in [(M2, p1, X2, Y2), (M3, q, X3, Y3)]
+            c = get_coordinates(N, p, X, B)
+            @test length(c) == manifold_dimension(N)
+            @test isapprox(N, p, get_vector(N, p, c, B), X)
+            @test is_vector(N, p, get_vector(N, p, c, B))
+            @test dot(c, get_coordinates(N, p, Y, B)) ≈ inner(N, p, X, Y)
+        end
     end
 end
 
@@ -76,26 +101,37 @@ end
         0.09985503059767825 -0.156617363846023 0.05676233324834479
     ]
     @testset "tangent vector components" begin
-        @test isapprox(M, p1, horizontal_component(M, p1, X1), X1h)
-        @test isapprox(M, p1, vertical_component(M, p1, X1), X1v)
+        @test horizontal_component(M, p1, X1) ≈ X1h
+        @test vertical_component(M, p1, X1) ≈ X1v
         Y = similar(X1)
         vertical_component!(M, Y, p1, X1)
-        @test isapprox(M, p1, Y, X1v)
+        @test Y ≈ X1v
         @test norm(M, p1, X1v) < 1.0e-16
         @test abs(norm(M, p1, X1) - norm(M, p1, X1h)) < 1.0e-16
     end
 
     @test_throws ManifoldDomainError is_point(M, [1 0 1; 1 -1 0]; error = :error)
     @test_throws ManifoldDomainError is_vector(M, p1, [1 0 1; 1 -1 0]; error = :error)
+    @test metric(M) == EuclideanMetric()
+    Yamb = [0.3 -0.2 0.5; 0.1 0.4 -0.6]
+    @test riemannian_gradient(M, p1, Yamb) == project(M, p1, Yamb)
 
     @testset "exp/distance/norm" begin
         q1 = exp(M, p1, X1)
         @test distance(M, p1, q1) ≈ norm(M, p1, X1)
     end
 
+    @testset "project, rand and the projected basis give horizontal vectors" begin
+        Y = project(M, p1, [1.0 0.0 -1.0; 0.0 1.0 -1.0])
+        @test norm(M, p1, Y) ≈ norm(get_embedding(M), p1, Y)
+        Z = rand(MersenneTwister(44), M; vector_at = p1)
+        @test norm(M, p1, Z) ≈ norm(get_embedding(M), p1, Z)
+        V = get_vectors(M, p1, get_basis(M, p1, ProjectedOrthonormalBasis(:svd)))
+        @test [inner(M, p1, v, w) for v in V, w in V] ≈ I
+    end
+
     Manifolds.test_manifold(
-        M,
-        [p1, p2, p3];
+        M, [p1, p2, p3];
         is_point_atol_multiplier = 1,
         is_tangent_atol_multiplier = 1,
         exp_log_atol_multiplier = 2.0e8,
@@ -109,9 +145,23 @@ end
     )
     @testset "degenerate cases" begin
         Md3_2 = KendallsShapeSpace(3, 2)
-        Md2_1 = KendallsShapeSpace(2, 1)
         @test manifold_dimension(Md3_2) == 0
-        @test manifold_dimension(Md2_1) == 0
+        @test_throws DomainError KendallsShapeSpace(2, 1)
+    end
+    @testset "collinear landmarks and a triangle in space" begin
+        p = [1.0 -1.0 0.0; 0.0 0.0 0.0] ./ sqrt(2)
+        X = [0.0 0.0 0.0; 1.0 -0.5 -0.5]
+        @test horizontal_component(M, p, X) ≈ [0.0 0.0 0.0; 0.25 0.25 -0.5]
+        @test norm(M, p, X) ≈ sqrt(0.375)
+        @test distance(M, p, exp(M, p, X)) ≈ sqrt(0.375)
+        q = [0.5 -0.5 0.0; 0.5 -0.5 0.0]
+        Xq = [-0.375 0.375 0.0; 0.625 -0.125 -0.5]
+        @test horizontal_component(M, q, Xq) ≈ [0.0 0.0 0.0; 0.25 0.25 -0.5]
+        M3 = KendallsShapeSpace(3, 3)
+        p3 = [0.5 -0.5 0.0; 0.0 0.5 -0.5; 0.0 0.0 0.0]
+        X3 = [0.0 0.0 0.0; 1.0 -0.5 -0.5; 0.0 0.0 0.0]
+        Y3 = [0.0 0.375 -0.375; 0.625 -0.125 -0.5; 0.0 0.0 0.0]
+        @test horizontal_component(M3, p3, X3) ≈ Y3
     end
     @testset "field parameter" begin
         M = KendallsShapeSpace(2, 3; parameter = :field)

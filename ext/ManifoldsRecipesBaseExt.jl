@@ -31,7 +31,7 @@ SURFACE_RESOLUTION_DEFAULT = 32
         x, y
     end
     show_axis --> false
-    framestyle -> :none
+    framestyle --> :none
     axis --> false
     xlims --> (-1.01, 1.01)
     ylims --> (-1.01, 1.01)
@@ -157,7 +157,7 @@ end
         end
     end
     show_axis --> false
-    framestyle -> :none
+    framestyle --> :none
     axis --> false
     xlims --> (min(px...), max(px...))
     ylims --> (min(py...), max(py...))
@@ -245,7 +245,7 @@ end
         v = range(0, π, length = surface_resolution_lat + 1)
         x = cos.(u) * sin.(v)'
         y = sin.(u) * sin.(v)'
-        z = repeat(cos.(v)', outer = [wires_lon + 1, 1])
+        z = repeat(cos.(v)', outer = [surface_resolution_lon + 1, 1])
         @series begin
             seriestype := :surface
             seriescolor := surface_color
@@ -253,7 +253,7 @@ end
         end
     end
     show_axis --> false
-    framestyle -> :none
+    framestyle --> :none
     axis --> false
     xlims --> (-1.05, 1.05)
     ylims --> (-1.05, 1.05)

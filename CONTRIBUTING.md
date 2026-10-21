@@ -7,16 +7,17 @@ The following is a set of guidelines to [`Manifolds.jl`](https://juliamanifolds.
 
 #### Table of contents
 
-* [Contributing to `Manifolds.jl`](#contributing-to-manifoldsjl)
-  * [Table of Contents](#table-of-contents)
-  * [How to ask a question](#how-to-ask-a-question)
-  * [How to file an issue](#How-to-file-an-issue)
-  * [How to contribute](#How-to-contribute)
-    * [Add a missing method](#add-a-missing-method)
-    * [Provide a new manifold](#provide-a-new-manifold)
-  * [Code style](#Code-style)
-  * [Spell checking](#Spell-checking)
-  * [On the use of AI](#On-the-use-of-AI)
+- [Contributing to `Manifolds.jl`](#contributing-to-manifoldsjl)
+      - [Table of contents](#table-of-contents)
+  - [How to ask a question](#how-to-ask-a-question)
+  - [How to file an issue](#how-to-file-an-issue)
+  - [How to contribute](#how-to-contribute)
+    - [Overview of resources](#overview-of-resources)
+    - [Add a missing method](#add-a-missing-method)
+    - [Provide a new manifold](#provide-a-new-manifold)
+  - [Code style](#code-style)
+  - [Spell checking](#spell-checking)
+  - [On the use of AI](#on-the-use-of-ai)
 
 ## How to ask a question
 
@@ -34,8 +35,8 @@ If you found a bug or want to propose a feature, issues are tracked within the [
 
 * [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/) documents the [main design principles](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/design/) for Riemannian manifolds in the [`JuliaManifolds`](https://github.com/JuliaManifolds) ecosystem
 * The [main set of functions](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/) serves as a guide, showing which functions the Library of manifolds in `Manifolds.jl` provides.
-* A [tutorial on how to define a manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/tutorials/define-a-manifold/) serves as a starting point on how to introduce a new manifold
-* The [changelog](https://juliamanifolds.github.io/Manifolds.jl/stable/misc/NEWS.html) documents all additions and changes. The corresponding file to edit is the [NEWS.md](https://github.com/JuliaManifolds/Manifolds.jl/blob/master/NEWS.md)
+* A [tutorial on how to define a manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/tutorials/implement-a-manifold/) serves as a starting point on how to introduce a new manifold
+* The [changelog](https://juliamanifolds.github.io/Manifolds.jl/stable/misc/NEWS/) documents all additions and changes. The corresponding file to edit is the [NEWS.md](https://github.com/JuliaManifolds/Manifolds.jl/blob/master/NEWS.md)
 * This file `CONTRIBUTING.md`  provides a technical introduction to contributing to `Manifolds.jl`
 
 ### Add a missing method
@@ -49,20 +50,20 @@ Even just the smallest function is a good contribution.
 
 A main contribution you can provide is another manifold that is not yet included in the
 package.
-A manifold is a concrete subtype of [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold) from [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#The-Manifold-interface).
+A manifold is a concrete subtype of [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types/#ManifoldsBase.AbstractManifold) from [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types/#The-Manifold-interface).
 A [tutorial on how to define a manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/tutorials/implement-a-manifold/) helps to get started on a new manifold.
 Every new manifold is welcome, even if you only add a few functions,
 for example when your use case for now does not require more features.
 
 One important detail is that the interface provides an in-place as well as a non-mutating variant
-See for example [exp!](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.exp!-Tuple{AbstractManifold, Any, Any, Any}) and [exp](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.exp-Tuple{AbstractManifold, Any, Any}).
+See for example [exp!](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.exp!-Tuple{AbstractManifold,%20Any,%20Any,%20Any}) and [exp](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#Base.exp-Tuple{AbstractManifold,%20Any,%20Any}).
 The non-mutating one, `exp`, always falls back to allocating the according memory,
 here a point on the manifold, to then call the in-place variant.
 This way it suffices to provide the in-place variant, `exp!`.
 The allocating variant only needs to defined if a more efficient version
 than the default is available.
 
-Note that since the first argument is _always_ the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold), the mutated argument is always the second one in the signature.
+Note that since the first argument is _always_ the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types/#ManifoldsBase.AbstractManifold), the mutated argument is always the second one in the signature.
 In the example there are `exp(M, p, X)` for the exponential map that allocates
 its result `q`, and `exp!(M, q, p, X)` for the in-place one, which computes and returns the `q`.
 
@@ -72,7 +73,7 @@ possible function signatures including the mutating one.
 You can best achieve this by adding a documentation string to the method with a general signature with the first argument being your manifold:
 
 ```julia
-struct MyManifold <: AbstractManifold end
+struct MyManifold <: AbstractManifold{ℝ} end
 
 @doc """
     exp(M::MyManifold, p, X)

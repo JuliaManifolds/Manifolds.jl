@@ -4,7 +4,7 @@ The [`SymplecticMatrices`](@ref) manifold, denoted ``\operatorname{Sp}(2n, 𝔽)
 ``𝔽^{2n×2n}`` that represents transformations into symplectic subspaces which keep the
 canonical symplectic form over ``𝔽^{2n×2n}`` invariant under the standard embedding inner product.
 The canonical symplectic form is a non-degenerate bilinear and skew symmetric map
-``\omega\colon 𝔽 𝔽^{2n}×𝔽^{2n}
+``\omega\colon 𝔽^{2n}×𝔽^{2n}
 → 𝔽``, given by
 ``\omega(x, y) = x^T Q_{2n} y`` for elements ``x, y \in 𝔽^{2n}``, with
 ````math

@@ -1,5 +1,14 @@
 include("../header.jl")
 
+@testset "tangent vectors of the elliptope of any length" begin
+    @test_throws DomainError Elliptope(2, 3)
+    @test_throws DomainError Elliptope(2, 0)
+    M = Elliptope(3, 2)
+    q = [1.0 0.0; 0.0 1.0; 1 / sqrt(2) 1 / sqrt(2)]
+    @test is_vector(M, q, project(M, q, [100.0 -50.0; 30.0 20.0; -10.0 5.0]))
+    @test !is_vector(M, q, project(M, q, [1.0 -0.5; 0.3 0.2; -0.1 0.4]) .+ 1.0e-6 .* q)
+end
+
 @testset "Elliptope" begin
     M = Elliptope(4, 2)
     @test repr(M) == "Elliptope(4, 2)"
@@ -24,11 +33,15 @@ include("../header.jl")
     q2 = [4.0 / 5 3.0 / 5; 3.0 / 5.0 -4.0 / 5.0; 1.0 0.0; 0.0 1.0]
     q3 = [12.0 / 13.0 5.0 / 13.0; 1.0 0.0; -12.0 / 13.0 5.0 / 13.0; 0.0 1.0]
     @test is_vector(
-        M,
-        q2,
-        vector_transport_to(M, q, Y, q2, ProjectionTransport());
+        M, q2, vector_transport_to(M, q, Y, q2, ProjectionTransport());
         atol = 10^-15,
     )
+    Yamb = [0.3 -0.2; 0.1 0.4; -0.5 0.2; 0.25 -0.15]
+    Z = project(M, q, Yamb)
+    @test isapprox(Z, project(M, q, Z); atol = 1.0e-14) # the projection is idempotent
+    @test isapprox(q' * Z, (q' * Z)'; atol = 1.0e-14) # and lands in the horizontal space
+    @test metric(M) == EuclideanMetric()
+    @test riemannian_gradient(M, q, Yamb) == Z
 
     types = [Matrix{Float64}]
 
@@ -53,5 +66,11 @@ include("../header.jl")
         M = Elliptope(4, 2; parameter = :field)
         @test repr(M) == "Elliptope(4, 2; parameter=:field)"
         @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
+    end
+    @testset "random points and tangent vectors" begin
+        M = Elliptope(4, 2)
+        p = rand(MersenneTwister(42), M)
+        @test is_point(M, p)
+        @test is_vector(M, p, rand(MersenneTwister(44), M; vector_at = p))
     end
 end

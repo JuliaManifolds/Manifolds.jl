@@ -21,6 +21,8 @@ using LinearAlgebra
     @test p ≈ [1.7230709564189848, -4.431999755591838, 0.958851077208406]
     i_p0x = Manifolds.get_chart_index(M, A, p)
     @test [i_p0x...] ≈ p0x
+    @test Manifolds.get_parameters(M, A, i_p0x, p) ≈ [0.0, 0.0]
+    @test Manifolds.get_point(M, A, i_p0x, p0x) ≈ [Manifolds._torus_param(M, (2 .* p0x)...)...]
     B = induced_basis(M, A, i_p0x)
     X = get_vector(M, p, X_p0x, B)
     Y = get_vector(M, p, Y_p0x, B)
@@ -51,7 +53,8 @@ using LinearAlgebra
     @test ricci_curvature(M, A, i_p0x, p0x) ≈ sum(inverse_local_metric(M, A, i_p0x, p0x) .* Ric)
     a_p = get_parameters(M, A, i_p0x, p)
     @test ricci_curvature(M, A, i_p0x, a_p) / 2 ≈ gaussian_curvature(M, p)
-    @test Manifolds.kretschmann_scalar(M, A, i_p0x, p0x) ≈ 0.0005794816008357242
+    @test gaussian_curvature(M, A, i_p0x, a_p) ≈ gaussian_curvature(M, p)
+    @test Manifolds.kretschmann_scalar(M, A, i_p0x, p0x) ≈ 0.017531723390651732
 
     einstein_tensor_ref = ricci_tensor(M, A, i_p0x, p0x) - local_metric(M, A, i_p0x, p0x) * ricci_curvature(M, A, i_p0x, p0x) / 2
     @test einstein_tensor(M, A, i_p0x, p0x) ≈ einstein_tensor_ref
@@ -90,28 +93,20 @@ using LinearAlgebra
         [0.3179988464944819, -0.8179412488450798, 0.479425538604203]
 
     p_exp = Manifolds.solve_chart_parallel_transport_ode(
-        M,
-        [0.0, 0.0],
-        X_p0x,
-        A,
-        i_p0x,
-        [1.0, 2.0];
+        M, [0.0, 0.0], X_p0x, A, i_p0x, [1.0, 2.0];
         final_time = 3.0,
     )
     pexp_3 = p_exp(3.0)
     @test isapprox(
-        pexp_3[1],
-        [2.701765894057119, 2.668437820810143, -1.8341712552932237];
+        pexp_3[1], [2.701765894057119, 2.668437820810143, -1.8341712552932237];
         atol = 2.0e-5,
     )
     @test isapprox(
-        pexp_3[2],
-        [-0.41778834843865575, 2.935021992911625, 0.7673987137187901];
+        pexp_3[2], [-0.41778834843865575, 2.935021992911625, 0.7673987137187901];
         atol = 2.0e-5,
     )
     @test isapprox(
-        pexp_3[3],
-        [7.661627684089519, 4.629037950515605, 3.7839234533367194];
+        pexp_3[3], [7.661627684089519, 4.629037950515605, 3.7839234533367194];
         atol = 1.0e-4,
     )
     @test_throws DomainError p_exp(10.0)
@@ -121,26 +116,17 @@ using LinearAlgebra
     p_exp = Manifolds.solve_chart_exp_ode(M, [0.0, 0.0], X_p0x, A, i_p0x; final_time = 3.0)
     pexp_3 = p_exp(3.0)
     @test isapprox(
-        pexp_3[1],
-        [2.701765894057119, 2.668437820810143, -1.8341712552932237],
-        rtol = 1.0e-5,
+        pexp_3[1], [2.701765894057119, 2.668437820810143, -1.8341712552932237], rtol = 1.0e-5
     )
     @test isapprox(
-        pexp_3[2],
-        [-0.41778834843865575, 2.935021992911625, 0.7673987137187901],
-        rtol = 1.0e-5,
+        pexp_3[2], [-0.41778834843865575, 2.935021992911625, 0.7673987137187901], rtol = 1.0e-5
     )
     @test_throws DomainError p_exp(10.0)
     @test_throws DomainError p_exp(-1.0)
 
     p_exp_switch = Manifolds.solve_chart_exp_ode(
-        M,
-        [0.0, 0.0],
-        X_p0x,
-        A,
-        i_p0x;
-        final_time = 3.0,
-        check_chart_switch_kwargs = (; ϵ = 0.3),
+        M, [0.0, 0.0], X_p0x, A, i_p0x;
+        final_time = 3.0, check_chart_switch_kwargs = (; ϵ = 1.5),
     )
     p_exp_switch_3 = p_exp_switch(3.0)
     @test isapprox(
@@ -148,7 +134,7 @@ using LinearAlgebra
         [2.701765894057119, 2.668437820810143, -1.8341712552932237],
         rtol = 1.0e-5,
     )
-    @test length(p_exp_switch.sols) < length(p_exp.sols)
+    @test length(p_exp_switch.sols) > length(p_exp.sols)
 
     i_to = (-1.0, -0.3)
     @test transition_map_diff(M, A, i_p0x, [0.0, 0.0], X_p0x, i_to) ≈ X_p0x
