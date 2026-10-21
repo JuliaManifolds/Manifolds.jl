@@ -30,8 +30,8 @@ SimpleWeightedGraphs = "47aef6b3-ad0c-573a-a1e2-d07658019622"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+TensorOperations = "6aa20fa7-93e2-5fca-9bc0-fbd0db3c71a2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-Tullio = "bc48ee85-29a4-5162-ae0b-a64e1601d4bc"
 
 [sources]
 Manifolds = {path = ".."}
@@ -68,6 +68,6 @@ SimpleWeightedGraphs = "1.5.1"
 StaticArrays = "1.9.18"
 Statistics = "1.10"
 StatsBase = "0.34.10"
+TensorOperations = "5.8"
 Test = "1.10"
-Tullio = "0.3.9"
 julia = "1.10"

@@ -1089,7 +1089,8 @@ function compute_projection_summand!(
     _contract_core_with_ginv!(E, T1, q.hosvd.core, Σ⁻¹, Val(i))
     mul!(U, Uᵢ, E)
     V .= U
-    @tullio V[n, r] += (-1) * U[j, r] * conj(q.hosvd.U[$i][j, k]) * q.hosvd.U[$i][n, k]
+    Qᵢ = q.hosvd.U[i]
+    @tensor V[n, r] -= U[j, r] * conj(Qᵢ[j, k]) * Qᵢ[n, k]
     if add_to_result
         result .+= V
     else
@@ -1178,7 +1179,9 @@ for d in 2:16
         """
         ex = quote
             function _contract_core_with_ginv!(result::Matrix{T}, core1::Array{T, $(d)}, core2::Array{T, $(d)}, Σ⁻¹::Vector{T}, ::Val{$J}) where {T}
-                return @tullio result[n, r] = core1[$(N...)] * conj(core2[$(R...)]) * Σ⁻¹[r]
+                @tensor result[n, r] = core1[$(N...)] * conj(core2[$(R...)])
+                result .*= transpose(Σ⁻¹)
+                return result
             end
         end
         eval(ex)
@@ -1196,7 +1199,7 @@ for d in 2:16
         """
         ex = quote
             function _contract_with_factor!(result::Array{T, $(d)}, core::Array{T, $(d)}, F::Matrix{T}, ::Val{$J}) where {T}
-                return @tullio result[$(N...)] = core[$(R...)] * F[r, n]
+                return @tensor result[$(N...)] = core[$(R...)] * F[r, n]
             end
         end
         eval(ex)
