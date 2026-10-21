@@ -235,6 +235,8 @@ function christoffel_symbols_second(
     Ginv = inverse_local_metric(M, p, B)
     Γ₁ = christoffel_symbols_first(M, p, B; backend = backend)
     Γ₂ = allocate(Γ₁)
+    # TensorOperations.jl only supports `Diagonal` matrices with strided storage
+    Ginv isa Diagonal && (Ginv = Diagonal(collect(Ginv.diag)))
     @tensor Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
 end
@@ -356,7 +358,7 @@ function riemann_tensor(
     )
     n = size(p, 1)
     Γ = christoffel_symbols_second(M, p, B; backend = backend)
-    ∂Γ = christoffel_symbols_second_jacobian(M, p, B; backend = backend) ./ n
+    ∂Γ = christoffel_symbols_second_jacobian(M, p, B; backend = backend)
     R = allocate(∂Γ, Size(n, n, n, n))
     @tensor R[l, i, j, k] =
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]
