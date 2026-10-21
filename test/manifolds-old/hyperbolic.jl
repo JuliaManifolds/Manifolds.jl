@@ -463,4 +463,13 @@ end
             @test get_embedding(M, typeof(p)) === Euclidean(2; parameter = :field)
         end
     end
+    @testset "Project an Hyperboloid point inplace" begin
+        p = [0.0, 0.0, 1.1]
+        pH = HyperboloidPoint(p)
+        M = Hyperbolic(2)
+        qH = HyperboloidPoint([0.0, 0.0, 0.0])
+        project!(M, qH, pH)
+        @test is_point(M, qH; error = :error)
+        @test qH.value == [0.0, 0.0, 1.0]
+    end
 end
