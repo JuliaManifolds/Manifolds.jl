@@ -218,7 +218,6 @@ The hope is, that now the package is more consistent and has less bugs we do hop
 * `Manifolds.Test.test_manifold` compares the expected sectional curvature and its expected minimum and maximum when they are given.
 * The `:Seed` property of `Manifolds.Test.test_manifold` and the `seed` keyword of `Manifolds.Test.test_rand` seed the random number generator before sampling.
 * `Manifolds.Test.test_mid_point`, and with it `Manifolds.Test.test_manifold`, compare the mid-points of both argument orders by default and skip this comparison for `test_symmetry = false` or the property `:TestMidpointSymmetry => false`.
-* `Manifolds.Test.test_mid_point`, and with it `Manifolds.Test.test_manifold`, compare the mid-points of both argument orders by default and skip this comparison for `test_symmetry = false` or the property `:TestMidpointSymmetry => false`.
 * `Manifolds.Test.test_parallel_transport` and `Manifolds.Test.test_vector_transport` compare the transported vector in the tangent space at the point it is transported to.
 * `Manifolds.Test.test_retract`, `test_sectional_curvature`, `test_sharp`, `test_shortest_geodesic` and `test_vector_transport` compare their result with a supplied expected value.
 * `mean!(M, y, x)` uses the default estimation method for the type of the points, as `mean(M, x)` does.
