@@ -195,7 +195,7 @@ function christoffel_symbols_first(
     ∂g = local_metric_jacobian(M, p, B; backend = backend)
     n = size(∂g, 1)
     Γ = allocate(∂g, Size(n, n, n))
-    @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
+    @tensor Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
     return Γ
 end
 @trait_function christoffel_symbols_first(
@@ -235,7 +235,9 @@ function christoffel_symbols_second(
     Ginv = inverse_local_metric(M, p, B)
     Γ₁ = christoffel_symbols_first(M, p, B; backend = backend)
     Γ₂ = allocate(Γ₁)
-    @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
+    # TensorOperations.jl only supports `Diagonal` matrices with strided storage
+    Ginv isa Diagonal && (Ginv = Diagonal(collect(Ginv.diag)))
+    @tensor Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
 end
 
@@ -325,7 +327,7 @@ function ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
     R = riemann_tensor(M, p, B; kwargs...)
     n = size(R, 1)
     Ric = allocate(R, Size(n, n))
-    @einsum Ric[i, j] = R[l, i, l, j]
+    @tensor Ric[i, j] = R[l, i, l, j]
     return Ric
 end
 @trait_function ricci_tensor(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
@@ -356,9 +358,9 @@ function riemann_tensor(
     )
     n = size(p, 1)
     Γ = christoffel_symbols_second(M, p, B; backend = backend)
-    ∂Γ = christoffel_symbols_second_jacobian(M, p, B; backend = backend) ./ n
+    ∂Γ = christoffel_symbols_second_jacobian(M, p, B; backend = backend)
     R = allocate(∂Γ, Size(n, n, n, n))
-    @einsum R[l, i, j, k] =
+    @tensor R[l, i, j, k] =
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]
     return R
 end

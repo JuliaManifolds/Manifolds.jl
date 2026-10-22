@@ -23,7 +23,7 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-Tullio = "bc48ee85-29a4-5162-ae0b-a64e1601d4bc"
+TensorOperations = "6aa20fa7-93e2-5fca-9bc0-fbd0db3c71a2"
 
 [weakdeps]
 BoundaryValueDiffEqMIRK = "1a22d4ce-7765-49ea-b6f2-13c8438986a6"
@@ -96,8 +96,8 @@ SpecialFunctions = "0.8, 0.9, 0.10, 1.0, 2"
 StaticArrays = "1.4.3"
 Statistics = "1.6"
 StatsBase = "0.32, 0.33, 0.34"
+TensorOperations = "5"
 Test = "1.10"
-Tullio = "0.3.8"
 julia = "1.10"
 
 [extras]

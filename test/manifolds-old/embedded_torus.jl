@@ -6,7 +6,7 @@ using Test
 using Manifolds: TFVector
 using RecursiveArrayTools
 using BoundaryValueDiffEq
-using Tullio: @einsum
+using TensorOperations: @tensor
 using LinearAlgebra
 
 @testset "Torus in ℝ³" begin
@@ -37,18 +37,18 @@ using LinearAlgebra
     css_ref = [0.0 0.0; 0.0 -0.41242466000637795;;; 0.0 1.7168551906246856; -0.41242466000637795 0.0]
     @test christoffel_symbols_second(M, A, i_p0x, p0x) ≈ css_ref
     g_i = local_metric(M, A, i_p0x, p0x)
-    @einsum csf_ref[ii, j, k] := g_i[k, l] * css_ref[l, ii, j]
+    @tensor csf_ref[ii, j, k] := g_i[k, l] * css_ref[l, ii, j]
     @test christoffel_symbols_first(M, A, i_p0x, p0x) ≈ csf_ref
 
     RR = [0.0 0.0; 0.0 0.2648148288193222;;; 0.0 0.0; -0.2648148288193222 0.0;;;; 0.0 -1.1023800405286386; 0.0 0.0;;; 1.1023800405286386 0.0; 0.0 0.0]
     @test riemann_tensor(M, A, i_p0x, p0x) ≈ RR
     W_p0x = similar(X_p0x)
-    @einsum W_p0x[i] = RR[i, j, k, l] * X_p0x[j] * Y_p0x[k] * X_p0x[l]
+    @tensor W_p0x[i] = RR[i, j, k, l] * X_p0x[j] * Y_p0x[k] * X_p0x[l]
     @test riemann_tensor(M, A, i_p0x, p0x, X_p0x, Y_p0x, X_p0x) ≈ W_p0x
 
     Ric = ricci_tensor(M, A, i_p0x, p0x)
     Ric_ref = zeros(2, 2)
-    @einsum Ric_ref[i, j] = RR[k, k, i, j]
+    @tensor Ric_ref[i, j] = RR[k, k, i, j]
     @test Ric ≈ Ric_ref
     @test ricci_curvature(M, A, i_p0x, p0x) ≈ sum(inverse_local_metric(M, A, i_p0x, p0x) .* Ric)
     a_p = get_parameters(M, A, i_p0x, p)

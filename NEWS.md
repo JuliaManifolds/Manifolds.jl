@@ -5,6 +5,12 @@ All notable changes to `Manifolds.jl` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.34] 2026-10-22
+
+### Changed
+
+* Tensor contractions are now computed using `TensorOperations.jl` instead of `Tullio.jl` to support `CUDA.jl` v6.0.
+
 ## [0.11.33] 2026-10-21
 
 This release is based on an LLM based report, that was then carefully reviewed, refined and eventually applied to fix inconsistencies, typos, a few missing functions and bugs.
