@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Tangent vectors on the `Veronese` manifold are now represented by the new `VeroneseTangentVector` type instead of tuples, which supports vector arithmetic and broadcasting.
+* Points and tangent vectors on the `Veronese` manifold are now represented by the new `VeronesePoint` and `VeroneseTangentVector` types instead of tuples. `VeroneseTangentVector` supports vector arithmetic and broadcasting, and both support `p[1]`/`p[2]` indexing of the radial and spherical components for compatibility with the tuple representation.
 
 ### Fixed
 

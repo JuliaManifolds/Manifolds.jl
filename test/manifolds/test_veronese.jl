@@ -23,14 +23,18 @@ using LinearAlgebra, Manifolds, Random, Test
     for parameter in (:type, :field), d in 1:3
         M = Veronese(n, d; parameter)
 
-        p = ([-0.7], x)
-        q = ([iseven(d) ? -0.9 : 0.9], z)
+        p = VeronesePoint([-0.7], x)
+        q = VeronesePoint([iseven(d) ? -0.9 : 0.9], z)
         X = VeroneseTangentVector([0.2], u)
         Y = VeroneseTangentVector([-0.3], v)
         Z = VeroneseTangentVector([0.1], w)
 
         invalid_points = [
-            ([1.0, 2.0], x), ([0.0], x), ([Inf], x), ([1.0], x[1:3]), ([1.0], 2 .* x),
+            VeronesePoint([1.0, 2.0], x),
+            VeronesePoint([0.0], x),
+            VeronesePoint([Inf], x),
+            VeronesePoint([1.0], x[1:3]),
+            VeronesePoint([1.0], 2 .* x),
         ]
         invalid_vectors = [
             VeroneseTangentVector([0.2, 0.1], u), VeroneseTangentVector([0.2], x),
@@ -86,11 +90,12 @@ using LinearAlgebra, Manifolds, Random, Test
         @test Manifolds.get_parameter_type(M) === parameter
 
         p_random = rand(Random.Xoshiro(41), M)
-        @test p_random isa Tuple
+        @test p_random isa VeronesePoint
         @test is_point(M, p_random)
 
-        p_list = [[p[1][1]], copy(p[2])]
+        p_list = [[p.radial[1]], copy(p.spherical)]
         @test Manifolds.check_size(M, p_list) isa DomainError
+        @test Manifolds.check_size(M, (p.radial, p.spherical)) isa DomainError
 
         @test Manifolds.check_size(M, invalid_points[1], X) isa DomainError
         @test_throws DomainError is_vector(M, invalid_points[1], X; error = :error)
@@ -98,10 +103,10 @@ using LinearAlgebra, Manifolds, Random, Test
         @testset "Equivalent representatives" begin
             p_embedded = embed(M, p)
 
-            p_equivalent = ([(-1)^d * p[1][1]], -x)
+            p_equivalent = VeronesePoint([(-1)^d * p.radial[1]], -x)
             @test embed(M, p_equivalent) ≈ p_embedded
 
-            p_flipped = ([p[1][1]], -x)
+            p_flipped = VeronesePoint([p.radial[1]], -x)
             @test embed(M, p_flipped) ≈ (-1)^d .* p_embedded
         end
 
@@ -143,7 +148,9 @@ using LinearAlgebra, Manifolds, Random, Test
         @testset "Zero tangent vector" begin
             p_copy = copy(M, p)
             X_copy = copy(M, p, X)
-            @test all(p_copy[i] !== p[i] for i in eachindex(p))
+            @test p_copy == p
+            @test p_copy.radial !== p.radial
+            @test p_copy.spherical !== p.spherical
             @test X_copy isa VeroneseTangentVector
             @test X_copy == X
             @test X_copy.radial !== X.radial
@@ -171,16 +178,16 @@ using LinearAlgebra, Manifolds, Random, Test
             X_log = log(M, p, q)
             @test X_log isa VeroneseTangentVector
             q_recovered = exp(M, p, X_log)
-            @test q_recovered isa Tuple
-            @test q_recovered[1] ≈ q_closest[1]
-            @test q_recovered[2] ≈ q_closest[2]
+            @test q_recovered isa VeronesePoint
+            @test q_recovered.radial ≈ q_closest.radial
+            @test q_recovered.spherical ≈ q_closest.spherical
             q_inplace = copy(M, p)
             @test exp!(M, q_inplace, p, X_log) === q_inplace
             @test isapprox(M, q_inplace, q_recovered)
             q_aliased = copy(M, p)
             @test exp!(M, q_aliased, q_aliased, X_log) === q_aliased
             @test isapprox(M, q_aliased, q_recovered)
-            p_equivalent = ([(-1)^d * p[1][1]], -p[2])
+            p_equivalent = VeronesePoint([(-1)^d * p.radial[1]], -p.spherical)
             X_log_equivalent =
                 VeroneseTangentVector([(-1)^d * X_log.radial[1]], -X_log.spherical)
             @test embed(M, exp(M, p_equivalent, X_log_equivalent)) ≈
@@ -190,8 +197,8 @@ using LinearAlgebra, Manifolds, Random, Test
             @test q == q_original
 
             q_at_zero = Manifolds.exp_fused(M, p, X, 0.0)
-            @test q_at_zero[1] ≈ p[1]
-            @test q_at_zero[2] ≈ p[2]
+            @test q_at_zero.radial ≈ p.radial
+            @test q_at_zero.spherical ≈ p.spherical
             t = 0.25
             q_fused = Manifolds.exp_fused(M, p, X, t)
             tX = t .* X
@@ -207,7 +214,7 @@ using LinearAlgebra, Manifolds, Random, Test
             @test norm(M, p, log(M, p, p_equivalent)) ≈ 0 atol = 1.0e-12
             @test isapprox(M, p, p_equivalent)
 
-            p_near = ([p[1][1] + 1.0e-10], copy(p[2]))
+            p_near = VeronesePoint([p.radial[1] + 1.0e-10], copy(p.spherical))
             @test isapprox(M, p, p_near)
             @test !isapprox(M, p, p_near; atol = 1.0e-12)
 
@@ -215,12 +222,12 @@ using LinearAlgebra, Manifolds, Random, Test
             @test isapprox(M, invalid_points[1], invalid_p_copy)
 
             if iseven(d)
-                q_disconnected = ([-p[1][1]], q[2])
+                q_disconnected = VeronesePoint([-p.radial[1]], q.spherical)
                 @test !connected_by_geodesic(M, p, q_disconnected)
                 @test isinf(distance(M, p, q_disconnected))
                 @test_throws DomainError log(M, p, q_disconnected)
             end
-            radial_to_zero = VeroneseTangentVector([-p[1][1]], zeros(n))
+            radial_to_zero = VeroneseTangentVector([-p.radial[1]], zeros(n))
             @test_throws DomainError exp(M, p, radial_to_zero)
 
             t_derivative = 1.0e-7
@@ -270,7 +277,7 @@ using LinearAlgebra, Manifolds, Random, Test
             @test transported_inplace.radial ≈ transported.radial
             @test transported_inplace.spherical ≈ transported.spherical
 
-            q_equivalent = ([(-1)^d * q[1][1]], -q[2])
+            q_equivalent = VeronesePoint([(-1)^d * q.radial[1]], -q.spherical)
             transported_equivalent =
                 vector_transport_to(M, p, X, q_equivalent, ProjectionTransport())
             @test embed(M, q_equivalent, transported_equivalent) ≈
@@ -283,11 +290,34 @@ using LinearAlgebra, Manifolds, Random, Test
 
             t = 1.0e-7
             x_t = exp(Sphere(n - 1), x, t .* u)
-            p_t = ([p[1][1] + t * X.radial[1]], x_t)
+            p_t = VeronesePoint([p.radial[1] + t * X.radial[1]], x_t)
             embedding_difference = (embed(M, p_t) - p_embedded) ./ t
 
             @test embedding_difference ≈ X_embedded rtol = 1.0e-6 atol = 1.0e-7
         end
+    end
+
+    @testset "VeronesePoint" begin
+        p = VeronesePoint([0.5], [0.0, 1.0, 0.0])
+        @test p isa VeronesePoint{Float64}
+        @test Manifolds.number_eltype(p) === Float64
+        @test p[1] === p.radial
+        @test p[2] === p.spherical
+        @test_throws BoundsError p[3]
+
+        p_copy = copy(p)
+        @test p_copy == p
+        @test p_copy.radial !== p.radial
+        p_copy[1] = [2.0]
+        p_copy[2] = [1.0, 0.0, 0.0]
+        @test p_copy == VeronesePoint([2.0], [1.0, 0.0, 0.0])
+        @test copyto!(p_copy, p) === p_copy
+        @test p_copy == p
+        @test_throws BoundsError (p_copy[0] = [1.0])
+
+        p_mixed = VeronesePoint(Float32[1], [0.0, 1.0])
+        @test p_mixed isa VeronesePoint{Float64}
+        @test Manifolds.allocate(p_mixed, Float32) isa VeronesePoint{Float32}
     end
 
     @testset "VeroneseTangentVector" begin
@@ -318,8 +348,8 @@ using LinearAlgebra, Manifolds, Random, Test
 
     @testset "Geodesic obstruction at the cone apex" begin
         M = Veronese(2, 5)
-        p = ([1.0], [1.0, 0.0])
-        q = ([1.0], [0.0, 1.0])
+        p = VeronesePoint([1.0], [1.0, 0.0])
+        q = VeronesePoint([1.0], [0.0, 1.0])
 
         @test !connected_by_geodesic(M, p, q)
         @test distance(M, p, q) ≈ 2.0
@@ -329,8 +359,8 @@ using LinearAlgebra, Manifolds, Random, Test
     @testset "Exact geodesic cutoff" begin
         for T in (Float32, Float64)
             cutoff_cases = (
-                (Veronese(2, 1), (T[1], T[1, 0]), (T[1], T[-1, 0])),
-                (Veronese(2, 4), (T[1], T[1, 0]), (T[1], T[0, 1])),
+                (Veronese(2, 1), VeronesePoint(T[1], T[1, 0]), VeronesePoint(T[1], T[-1, 0])),
+                (Veronese(2, 4), VeronesePoint(T[1], T[1, 0]), VeronesePoint(T[1], T[0, 1])),
             )
             for (M, p, q) in cutoff_cases
                 @test !connected_by_geodesic(M, p, q)
@@ -339,8 +369,8 @@ using LinearAlgebra, Manifolds, Random, Test
             end
 
             M = Veronese(1, 1)
-            p = (T[1], T[1])
-            q = (T[-1], T[1])
+            p = VeronesePoint(T[1], T[1])
+            q = VeronesePoint(T[-1], T[1])
             @test !connected_by_geodesic(M, p, q)
             @test isinf(distance(M, p, q))
             @test_throws DomainError log(M, p, q)
@@ -350,14 +380,14 @@ using LinearAlgebra, Manifolds, Random, Test
     @testset "Float32 rand" begin
         for parameter in (:type, :field)
             M = Veronese(3, 2; parameter)
-            p = (Float32[-0.5], normalize(Float32[1, 2, 3]))
+            p = VeronesePoint(Float32[-0.5], normalize(Float32[1, 2, 3]))
             X = rand(Random.Xoshiro(12), M; vector_at = p)
 
             A = randn(Random.Xoshiro(13), Float32, 9)
             P = project(M, p, A)
             c = get_coordinates(M, p, X, DefaultOrthonormalBasis())
             X_roundtrip = get_vector(M, p, c, DefaultOrthonormalBasis())
-            q = (Float32[-0.8], normalize(Float32[-1, 1, 2]))
+            q = VeronesePoint(Float32[-0.8], normalize(Float32[-1, 1, 2]))
             Y = vector_transport_to(M, p, X, q)
             X_zero = zero_vector(M, p)
             X_log = log(M, p, q)
@@ -370,10 +400,11 @@ using LinearAlgebra, Manifolds, Random, Test
                 @test eltype(V.spherical) === Float32
             end
             @test eltype(c) === Float32
-            @test all(eltype(qᵢ) === Float32 for qᵢ in q_exp)
-            @test all(eltype(qᵢ) === Float32 for qᵢ in q_fused)
-            @test q_exp[1] ≈ q[1]
-            @test q_exp[2] ≈ q[2]
+            @test q_exp isa VeronesePoint{Float32}
+            @test q_fused isa VeronesePoint{Float32}
+            @test rand(Random.Xoshiro(14), M) isa VeronesePoint
+            @test q_exp.radial ≈ q.radial
+            @test q_exp.spherical ≈ q.spherical
         end
     end
 end

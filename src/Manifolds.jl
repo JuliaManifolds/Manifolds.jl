@@ -704,6 +704,7 @@ export HyperboloidTangentVector,
     PoincareHalfSpaceTangentVector,
     TuckerTangentVector,
     UMVTangentVector,
+    VeronesePoint,
     VeroneseTangentVector,
     ProjectorTangentVector,
     StiefelTangentVector
