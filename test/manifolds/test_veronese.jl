@@ -1,4 +1,4 @@
-using LinearAlgebra, Manifolds, Random, Test
+using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
 
 @testset "Veronese Manifold" begin
     @test Veronese(4, 3) == Veronese(4, 3; parameter = :type)
@@ -318,6 +318,13 @@ using LinearAlgebra, Manifolds, Random, Test
         p_mixed = VeronesePoint(Float32[1], [0.0, 1.0])
         @test p_mixed isa VeronesePoint{Float64}
         @test Manifolds.allocate(p_mixed, Float32) isa VeronesePoint{Float32}
+
+        p_alloc = Manifolds.allocate(p)
+        @test p_alloc isa VeronesePoint{Float64}
+        @test size(p_alloc.radial) == (1,)
+        @test size(p_alloc.spherical) == (3,)
+        @test p_alloc.radial !== p.radial
+        @test p_alloc.spherical !== p.spherical
     end
 
     @testset "VeroneseTangentVector" begin
@@ -344,6 +351,33 @@ using LinearAlgebra, Manifolds, Random, Test
         X32 = VeroneseTangentVector(Float32[1], Float32[0, 1])
         @test 2 .* X32 isa VeroneseTangentVector{Float32}
         @test 2.0 .* X32 isa VeroneseTangentVector{Float64}
+
+        X_alloc = Manifolds.allocate(X)
+        @test X_alloc isa VeroneseTangentVector{Float64}
+        @test size(X_alloc.radial) == (1,)
+        @test size(X_alloc.spherical) == (3,)
+        @test X_alloc.radial !== X.radial
+        @test X_alloc.spherical !== X.spherical
+
+        X_copy = copy(X)
+        @test X_copy isa VeroneseTangentVector{Float64}
+        @test X_copy == X
+        @test X_copy.radial !== X.radial
+        @test X_copy.spherical !== X.spherical
+        X_copy[1][1] = 0.0
+        @test X.radial == [0.7]
+    end
+
+    @testset "allocate_result for inverse_retract" begin
+        M = Veronese(3, 2)
+        p = VeronesePoint(Float32[0.5], Float32[0, 1, 0])
+        q = VeronesePoint([0.7], [1.0, 0.0, 0.0])
+        Y = ManifoldsBase.allocate_result(M, inverse_retract, p, q)
+        @test Y isa VeroneseTangentVector{Float64}
+        @test size(Y.radial) == (1,)
+        @test size(Y.spherical) == (3,)
+        Y32 = ManifoldsBase.allocate_result(M, inverse_retract, p, p)
+        @test Y32 isa VeroneseTangentVector{Float32}
     end
 
     @testset "Geodesic obstruction at the cone apex" begin

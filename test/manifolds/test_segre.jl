@@ -370,6 +370,22 @@ using FiniteDifferences, LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     end
 
     # distance, log and connected_by_geodesic leave the second point unchanged
+    @testset "check_size" begin
+        M = Segre(3, 2)
+        p = [[1.0], [1.0, 0.0, 0.0], [1.0, 0.0]]
+        X = [[0.0], [0.0, 1.0, 0.0], [0.0, 1.0]]
+        @test Manifolds.check_size(M, p) === nothing
+        @test Manifolds.check_size(M, p, X) === nothing
+        for p_wrong in ([[1.0, 2.0], p[2], p[3]], [p[1], [1.0, 0.0], p[3]], [p[1], p[2]])
+            @test Manifolds.check_size(M, p_wrong) isa DomainError
+            @test Manifolds.check_size(M, p_wrong, X) isa DomainError
+            @test_throws DomainError is_point(M, p_wrong; error = :error)
+        end
+        X_wrong = [X[1], [0.0, 1.0], X[3]]
+        @test Manifolds.check_size(M, p, X_wrong) isa DomainError
+        @test_throws DomainError is_vector(M, p, X_wrong; error = :error)
+    end
+
     @testset "The second point is not modified" begin
         p = [[2.0], [1.0, 0.0, 0.0], [1.0, 0.0]]
         q = [[3.0], [-1.0, 0.0, 0.0], [-1.0, 0.0]]

@@ -174,6 +174,13 @@ end
             @test XC.value == X.value # another check
             @test zero_vector(M, p) isa T
             @test zero_vector!(M, XC, p) === XC
+            # random points and tangent vectors written into the wrapped representations
+            pR = allocate(p)
+            @test rand!(MersenneTwister(42), M, pR) === pR
+            @test is_point(M, pR; error = :error)
+            XR = allocate(X)
+            @test rand!(MersenneTwister(42), M, XR; vector_at = p) === XR
+            @test is_vector(M, p, XR; error = :error)
         end
     end
     @testset "Hyperbolic Representation Conversion I" begin
