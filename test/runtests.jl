@@ -37,6 +37,7 @@ end
         include_test("manifolds/test_elliptope.jl")
         include_test("manifolds/test_fixed_rank.jl")
         include_test("manifolds/test_flag.jl")
+        include_test("manifolds/test_generalized_grassmann.jl")
         include_test("manifolds/test_cholesky_space.jl")
         include_test("manifolds/test_circle.jl")
         include_test("manifolds/test_parametric_surface.jl")
@@ -52,7 +53,6 @@ end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
         include_test("manifolds-old/euclidean.jl")
-        include_test("manifolds-old/generalized_grassmann.jl")
         include_test("manifolds-old/generalized_stiefel.jl")
         include_test("manifolds-old/hamiltonian.jl")
         include_test("manifolds-old/hyperbolic.jl")
