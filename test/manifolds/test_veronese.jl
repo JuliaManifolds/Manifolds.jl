@@ -25,15 +25,15 @@ using LinearAlgebra, Manifolds, Random, Test
 
         p = ([-0.7], x)
         q = ([iseven(d) ? -0.9 : 0.9], z)
-        X = ([0.2], u)
-        Y = ([-0.3], v)
-        Z = ([0.1], w)
+        X = VeroneseTangentVector([0.2], u)
+        Y = VeroneseTangentVector([-0.3], v)
+        Z = VeroneseTangentVector([0.1], w)
 
         invalid_points = [
             ([1.0, 2.0], x), ([0.0], x), ([Inf], x), ([1.0], x[1:3]), ([1.0], 2 .* x),
         ]
         invalid_vectors = [
-            ([0.2, 0.1], u), ([0.2], x),
+            VeroneseTangentVector([0.2, 0.1], u), VeroneseTangentVector([0.2], x),
         ]
 
         Manifolds.Test.test_manifold(
@@ -66,8 +66,7 @@ using LinearAlgebra, Manifolds, Random, Test
                 :RetractionMethods => [ExponentialRetraction()],
                 :Rng => Random.Xoshiro(42),
                 :SecondVector => Y,
-                # tangent vectors are tuples, which do not support arithmetic
-                :TestVectorArithmetic => false,
+                :TestVectorArithmetic => true,
                 :VectorTransportMethods => [ProjectionTransport()],
                 :Vectors => [X, Z],
             ),
@@ -117,26 +116,26 @@ using LinearAlgebra, Manifolds, Random, Test
             A = randn(Random.Xoshiro(100 + d), n^d)
             P = project(M, p, A)
 
-            @test P isa Tuple
+            @test P isa VeroneseTangentVector
             @test is_vector(M, p, P)
-            tangent_spanning_set = [([1.0], zeros(n))]
+            tangent_spanning_set = [VeroneseTangentVector([1.0], zeros(n))]
             for i in 1:n
                 eᵢ = zeros(n)
                 eᵢ[i] = 1
-                push!(tangent_spanning_set, ([0.0], eᵢ - dot(x, eᵢ) .* x))
+                push!(tangent_spanning_set, VeroneseTangentVector([0.0], eᵢ - dot(x, eᵢ) .* x))
             end
             for W in tangent_spanning_set
                 @test inner(M, p, P, W) ≈ dot(A, embed(M, p, W))
             end
 
-            P_inplace = (fill(NaN, 1), fill(NaN, n))
+            P_inplace = VeroneseTangentVector(fill(NaN, 1), fill(NaN, n))
             @test project!(M, P_inplace, p, A) === P_inplace
-            @test P_inplace[1] ≈ P[1]
-            @test P_inplace[2] ≈ P[2]
+            @test P_inplace.radial ≈ P.radial
+            @test P_inplace.spherical ≈ P.spherical
 
             X_projected = project(M, p, embed(M, p, X))
-            @test X_projected[1] ≈ X[1]
-            @test X_projected[2] ≈ X[2]
+            @test X_projected.radial ≈ X.radial
+            @test X_projected.spherical ≈ X.spherical
 
             d == 1 && @test embed(M, p, P) ≈ A
         end
@@ -145,18 +144,21 @@ using LinearAlgebra, Manifolds, Random, Test
             p_copy = copy(M, p)
             X_copy = copy(M, p, X)
             @test all(p_copy[i] !== p[i] for i in eachindex(p))
-            @test all(X_copy[i] !== X[i] for i in eachindex(X))
+            @test X_copy isa VeroneseTangentVector
+            @test X_copy == X
+            @test X_copy.radial !== X.radial
+            @test X_copy.spherical !== X.spherical
 
             X_zero = zero_vector(M, p)
-            @test X_zero isa Tuple
+            @test X_zero isa VeroneseTangentVector
             @test is_vector(M, p, X_zero)
-            @test all(iszero, X_zero[1])
-            @test all(iszero, X_zero[2])
+            @test all(iszero, X_zero.radial)
+            @test all(iszero, X_zero.spherical)
 
             X_inplace = deepcopy(X)
             @test zero_vector!(M, X_inplace, p) === X_inplace
-            @test all(iszero, X_inplace[1])
-            @test all(iszero, X_inplace[2])
+            @test all(iszero, X_inplace.radial)
+            @test all(iszero, X_inplace.spherical)
         end
 
         @testset "Representatives and distance" begin
@@ -167,6 +169,7 @@ using LinearAlgebra, Manifolds, Random, Test
             @test connected_by_geodesic(M, p, q)
 
             X_log = log(M, p, q)
+            @test X_log isa VeroneseTangentVector
             q_recovered = exp(M, p, X_log)
             @test q_recovered isa Tuple
             @test q_recovered[1] ≈ q_closest[1]
@@ -178,7 +181,8 @@ using LinearAlgebra, Manifolds, Random, Test
             @test exp!(M, q_aliased, q_aliased, X_log) === q_aliased
             @test isapprox(M, q_aliased, q_recovered)
             p_equivalent = ([(-1)^d * p[1][1]], -p[2])
-            X_log_equivalent = ([(-1)^d * X_log[1][1]], -X_log[2])
+            X_log_equivalent =
+                VeroneseTangentVector([(-1)^d * X_log.radial[1]], -X_log.spherical)
             @test embed(M, exp(M, p_equivalent, X_log_equivalent)) ≈
                 embed(M, q_recovered)
             @test norm(M, p, X_log) ≈ distance(M, p, q)
@@ -190,7 +194,7 @@ using LinearAlgebra, Manifolds, Random, Test
             @test q_at_zero[2] ≈ p[2]
             t = 0.25
             q_fused = Manifolds.exp_fused(M, p, X, t)
-            tX = (t .* X[1], t .* X[2])
+            tX = t .* X
             @test isapprox(M, q_fused, exp(M, p, tX))
             q_fused_inplace = copy(M, p)
             @test Manifolds.exp_fused!(M, q_fused_inplace, p, X, t) === q_fused_inplace
@@ -216,7 +220,7 @@ using LinearAlgebra, Manifolds, Random, Test
                 @test isinf(distance(M, p, q_disconnected))
                 @test_throws DomainError log(M, p, q_disconnected)
             end
-            radial_to_zero = ([-p[1][1]], zeros(n))
+            radial_to_zero = VeroneseTangentVector([-p[1][1]], zeros(n))
             @test_throws DomainError exp(M, p, radial_to_zero)
 
             t_derivative = 1.0e-7
@@ -235,36 +239,36 @@ using LinearAlgebra, Manifolds, Random, Test
             @test norm(cX)^2 ≈ inner(M, p, X, X)
 
             X_roundtrip = get_vector(M, p, cX, basis)
-            @test X_roundtrip isa Tuple
-            @test X_roundtrip[1] ≈ X[1]
-            @test X_roundtrip[2] ≈ X[2]
+            @test X_roundtrip isa VeroneseTangentVector
+            @test X_roundtrip.radial ≈ X.radial
+            @test X_roundtrip.spherical ≈ X.spherical
 
             cX_inplace = fill(NaN, n)
             @test get_coordinates!(M, cX_inplace, p, X, basis) === cX_inplace
             @test cX_inplace ≈ cX
 
-            X_inplace = (fill(NaN, 1), fill(NaN, n))
+            X_inplace = VeroneseTangentVector(fill(NaN, 1), fill(NaN, n))
             @test get_vector!(M, X_inplace, p, cX, basis) === X_inplace
-            @test X_inplace[1] ≈ X[1]
-            @test X_inplace[2] ≈ X[2]
+            @test X_inplace.radial ≈ X.radial
+            @test X_inplace.spherical ≈ X.spherical
         end
 
         @testset "Projection vector transport" begin
             transported = vector_transport_to(M, p, X, q, ProjectionTransport())
             transported_reference = project(M, q, embed(M, p, X))
 
-            @test transported isa Tuple
+            @test transported isa VeroneseTangentVector
             @test is_vector(M, q, transported)
-            @test transported[1] ≈ transported_reference[1]
-            @test transported[2] ≈ transported_reference[2]
+            @test transported.radial ≈ transported_reference.radial
+            @test transported.spherical ≈ transported_reference.spherical
             @test default_vector_transport_method(M) == ProjectionTransport()
 
-            transported_inplace = (fill(NaN, 1), fill(NaN, n))
+            transported_inplace = VeroneseTangentVector(fill(NaN, 1), fill(NaN, n))
             @test vector_transport_to!(
                 M, transported_inplace, p, X, q, ProjectionTransport()
             ) === transported_inplace
-            @test transported_inplace[1] ≈ transported[1]
-            @test transported_inplace[2] ≈ transported[2]
+            @test transported_inplace.radial ≈ transported.radial
+            @test transported_inplace.spherical ≈ transported.spherical
 
             q_equivalent = ([(-1)^d * q[1][1]], -q[2])
             transported_equivalent =
@@ -279,11 +283,37 @@ using LinearAlgebra, Manifolds, Random, Test
 
             t = 1.0e-7
             x_t = exp(Sphere(n - 1), x, t .* u)
-            p_t = ([p[1][1] + t * X[1][1]], x_t)
+            p_t = ([p[1][1] + t * X.radial[1]], x_t)
             embedding_difference = (embed(M, p_t) - p_embedded) ./ t
 
             @test embedding_difference ≈ X_embedded rtol = 1.0e-6 atol = 1.0e-7
         end
+    end
+
+    @testset "VeroneseTangentVector" begin
+        X = VeroneseTangentVector([0.2], [0.0, 1.0, 0.0])
+        @test X isa VeroneseTangentVector{Float64}
+        @test Manifolds.number_eltype(X) === Float64
+        @test X[1] === X.radial
+        @test X[2] === X.spherical
+        @test_throws BoundsError X[3]
+        @test_throws BoundsError X[0]
+
+        X[1] = [0.5]
+        X[2] = [1.0, 0.0, -1.0]
+        @test X.radial == [0.5]
+        @test X.spherical == [1.0, 0.0, -1.0]
+        X[1][1] = 0.7
+        @test X.radial == [0.7]
+        @test_throws BoundsError (X[3] = [1.0])
+
+        X_mixed = VeroneseTangentVector(Float32[1], [0.0, 1.0])
+        @test X_mixed isa VeroneseTangentVector{Float64}
+        @test eltype(X_mixed.radial) === Float64
+
+        X32 = VeroneseTangentVector(Float32[1], Float32[0, 1])
+        @test 2 .* X32 isa VeroneseTangentVector{Float32}
+        @test 2.0 .* X32 isa VeroneseTangentVector{Float64}
     end
 
     @testset "Geodesic obstruction at the cone apex" begin
@@ -334,17 +364,12 @@ using LinearAlgebra, Manifolds, Random, Test
             q_exp = exp(M, p, X_log)
             q_fused = Manifolds.exp_fused(M, p, X, 0.25)
 
-            @test X isa Tuple
-            @test P isa Tuple
-            @test X_roundtrip isa Tuple
-            @test X_zero isa Tuple
-            @test all(eltype(Xᵢ) === Float32 for Xᵢ in X)
-            @test all(eltype(Pᵢ) === Float32 for Pᵢ in P)
+            for V in (X, P, X_roundtrip, Y, X_zero, X_log)
+                @test V isa VeroneseTangentVector
+                @test eltype(V.radial) === Float32
+                @test eltype(V.spherical) === Float32
+            end
             @test eltype(c) === Float32
-            @test all(eltype(Xᵢ) === Float32 for Xᵢ in X_roundtrip)
-            @test all(eltype(Yᵢ) === Float32 for Yᵢ in Y)
-            @test all(eltype(Xᵢ) === Float32 for Xᵢ in X_zero)
-            @test all(eltype(Xᵢ) === Float32 for Xᵢ in X_log)
             @test all(eltype(qᵢ) === Float32 for qᵢ in q_exp)
             @test all(eltype(qᵢ) === Float32 for qᵢ in q_fused)
             @test q_exp[1] ≈ q[1]

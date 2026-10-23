@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.35] unreleased
 
+### Changed
+
+* Tangent vectors on the `Veronese` manifold are now represented by the new `VeroneseTangentVector` type instead of tuples, which supports vector arithmetic and broadcasting.
+
 ### Fixed
 
 * `default_retraction_method` on the `Elliptope` is now `ProjectionRetraction`; it was `ExponentialRetraction`, but the exponential map is not implemented on the `Elliptope`.

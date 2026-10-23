@@ -61,7 +61,7 @@ p\leftrightarrow(λ,x),
 ````
 
 The chosen pair is stored as `p = ([λ], x)`. A tangent vector is
-stored analogously as `X = ([ν], u)`, where
+stored analogously as a [`VeroneseTangentVector`](@ref) `X = VeroneseTangentVector([ν], u)`, where
 
 ````math
 u\in T_x\mathbb S^{N-1}=x^⊥.
@@ -114,7 +114,157 @@ function Veronese(n::Int, d::Int; parameter::Symbol = :type)
     return Veronese{typeof(size)}(size)
 end
 
-function allocate_coordinates(::Veronese, p::Tuple, T, n::Int)
+@doc raw"""
+    VeroneseTangentVector{T} <: AbstractTangentVector
+
+A tangent vector ``X ≐ (ν,u)`` on the [`Veronese`](@ref) manifold at a point
+``p ≐ (λ,x)``. The field `radial` stores the radial component `[ν]` as a
+one-element vector and the field `spherical` stores the spherical component
+``u ∈ T_x\mathbb S^{N-1}``. Both components share the scalar element type `T`.
+
+For compatibility with the tuple representation `([ν], u)`, `X[1]` and `X[2]` access the
+radial and spherical component, respectively, and `X[i] = Y` copies `Y` into the
+corresponding component.
+
+# Constructor
+
+    VeroneseTangentVector(radial::AbstractVector, spherical::AbstractVector)
+
+The components are converted to their promoted element type if necessary.
+"""
+struct VeroneseTangentVector{T, TR <: AbstractVector{T}, TS <: AbstractVector{T}} <:
+    AbstractTangentVector
+    radial::TR
+    spherical::TS
+end
+
+function VeroneseTangentVector(radial::AbstractVector, spherical::AbstractVector)
+    T = promote_type(eltype(radial), eltype(spherical))
+    radial_T = convert(AbstractVector{T}, radial)
+    spherical_T = convert(AbstractVector{T}, spherical)
+    return VeroneseTangentVector{T, typeof(radial_T), typeof(spherical_T)}(
+        radial_T, spherical_T
+    )
+end
+
+Base.@propagate_inbounds function Base.getindex(X::VeroneseTangentVector, i::Integer)
+    i == 1 && return X.radial
+    i == 2 && return X.spherical
+    throw(BoundsError(X, i))
+end
+
+Base.@propagate_inbounds function Base.setindex!(X::VeroneseTangentVector, Y, i::Integer)
+    if i == 1
+        copyto!(X.radial, Y)
+    elseif i == 2
+        copyto!(X.spherical, Y)
+    else
+        throw(BoundsError(X, i))
+    end
+    return X
+end
+
+function Base.:*(X::VeroneseTangentVector, s::Number)
+    return VeroneseTangentVector(X.radial * s, X.spherical * s)
+end
+function Base.:*(s::Number, X::VeroneseTangentVector)
+    return VeroneseTangentVector(s * X.radial, s * X.spherical)
+end
+function Base.:/(X::VeroneseTangentVector, s::Number)
+    return VeroneseTangentVector(X.radial / s, X.spherical / s)
+end
+function Base.:\(s::Number, X::VeroneseTangentVector)
+    return VeroneseTangentVector(s \ X.radial, s \ X.spherical)
+end
+function Base.:+(X::VeroneseTangentVector, Y::VeroneseTangentVector)
+    return VeroneseTangentVector(X.radial + Y.radial, X.spherical + Y.spherical)
+end
+function Base.:-(X::VeroneseTangentVector, Y::VeroneseTangentVector)
+    return VeroneseTangentVector(X.radial - Y.radial, X.spherical - Y.spherical)
+end
+Base.:-(X::VeroneseTangentVector) = VeroneseTangentVector(-X.radial, -X.spherical)
+Base.:+(X::VeroneseTangentVector) = VeroneseTangentVector(X.radial, X.spherical)
+function Base.:(==)(X::VeroneseTangentVector, Y::VeroneseTangentVector)
+    return (X.radial == Y.radial) && (X.spherical == Y.spherical)
+end
+
+function allocate(X::VeroneseTangentVector)
+    return VeroneseTangentVector(allocate(X.radial), allocate(X.spherical))
+end
+function allocate(X::VeroneseTangentVector, ::Type{T}) where {T}
+    return VeroneseTangentVector(allocate(X.radial, T), allocate(X.spherical, T))
+end
+
+function Base.copy(X::VeroneseTangentVector)
+    return VeroneseTangentVector(copy(X.radial), copy(X.spherical))
+end
+
+function Base.copyto!(X::VeroneseTangentVector, Y::VeroneseTangentVector)
+    copyto!(X.radial, Y.radial)
+    copyto!(X.spherical, Y.spherical)
+    return X
+end
+
+number_eltype(::VeroneseTangentVector{T}) where {T} = T
+
+# Tuple-like broadcasting of VeroneseTangentVector
+
+function Broadcast.BroadcastStyle(::Type{<:VeroneseTangentVector})
+    return Broadcast.Style{VeroneseTangentVector}()
+end
+function Broadcast.BroadcastStyle(
+        ::Broadcast.AbstractArrayStyle{0}, b::Broadcast.Style{VeroneseTangentVector}
+    )
+    return b
+end
+
+function Broadcast.instantiate(
+        bc::Broadcast.Broadcasted{Broadcast.Style{VeroneseTangentVector}, Nothing}
+    )
+    return bc
+end
+function Broadcast.instantiate(
+        bc::Broadcast.Broadcasted{Broadcast.Style{VeroneseTangentVector}}
+    )
+    Broadcast.check_broadcast_axes(bc.axes, bc.args...)
+    return bc
+end
+
+Broadcast.broadcastable(X::VeroneseTangentVector) = X
+
+@inline function Base.copy(
+        bc::Broadcast.Broadcasted{Broadcast.Style{VeroneseTangentVector}}
+    )
+    return VeroneseTangentVector(
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:radial))),             # COV_EXCL_LINE
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:spherical))),          # COV_EXCL_LINE
+    )
+end
+
+Base.@propagate_inbounds function Broadcast._broadcast_getindex(
+        X::VeroneseTangentVector, ::Val{I}
+    ) where {I}
+    return getfield(X, I)
+end
+
+Base.axes(::VeroneseTangentVector) = ()
+
+@inline function Base.copyto!(
+        dest::VeroneseTangentVector,
+        bc::Broadcast.Broadcasted{Broadcast.Style{VeroneseTangentVector}},
+    )
+    # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
+    if bc.f === identity && bc.args isa Tuple{VeroneseTangentVector} # only a single input argument to broadcast!
+        A = bc.args[1]
+        return copyto!(dest, A)
+    end
+    bc′ = Broadcast.preprocess(dest, bc)
+    copyto!(dest.radial, Broadcast._broadcast_getindex(bc′, Val(:radial)))
+    copyto!(dest.spherical, Broadcast._broadcast_getindex(bc′, Val(:spherical)))
+    return dest
+end
+
+function allocate_coordinates(::Veronese, p::Union{Tuple, VeroneseTangentVector}, T, n::Int)
     return zeros(T, n)
 end
 
@@ -127,10 +277,29 @@ function ManifoldsBase.allocate_result(M::Veronese, ::typeof(rand))
     return (zeros(1), zeros(n))
 end
 
-function ManifoldsBase.allocate_result(M::Veronese, ::typeof(zero_vector), p)
+function _allocate_tangent(M::Veronese, T)
     n, _ = get_parameter(M.size)
-    T = number_eltype(p)
-    return (zeros(T, 1), zeros(T, n))
+    return VeroneseTangentVector(zeros(T, 1), zeros(T, n))
+end
+
+function ManifoldsBase.allocate_result(M::Veronese, ::typeof(zero_vector), p)
+    return _allocate_tangent(M, number_eltype(p))
+end
+
+function ManifoldsBase.allocate_result(M::Veronese, ::typeof(rand), p)
+    return _allocate_tangent(M, number_eltype(p))
+end
+
+function ManifoldsBase.allocate_result(M::Veronese, ::typeof(log), p, q)
+    return _allocate_tangent(M, promote_type(number_eltype(p), number_eltype(q)))
+end
+
+function ManifoldsBase.allocate_result(M::Veronese, ::typeof(inverse_retract), p, q)
+    return _allocate_tangent(M, promote_type(number_eltype(p), number_eltype(q)))
+end
+
+function ManifoldsBase.allocate_result(M::Veronese, ::typeof(get_vector), p, c)
+    return _allocate_tangent(M, promote_type(number_eltype(p), eltype(c)))
 end
 
 function ManifoldsBase.allocate_result_embedding(M::Veronese, ::typeof(embed), p)
@@ -144,8 +313,8 @@ function ManifoldsBase.allocate_result_embedding(M::Veronese, ::typeof(embed), X
     return zeros(T, n^d)
 end
 
-function ManifoldsBase.allocate_result_embedding(::Veronese, ::typeof(project), A, p)
-    return (similar(p[1]), similar(p[2]))
+function ManifoldsBase.allocate_result_embedding(M::Veronese, ::typeof(project), A, p)
+    return _allocate_tangent(M, promote_type(number_eltype(p), number_eltype(A)))
 end
 
 @doc raw"""
@@ -191,13 +360,13 @@ end
 @doc raw"""
     check_size(M::Veronese, p, X)
 
-For `M = Veronese(N, D)`, check the sizes of a stored point `p = ([λ], x)` and of a tangent
-vector `X = ([ν], u)` at `p`. Both are two-component tuples with component sizes `(1,)` and
-`(N,)` for their radial and spherical parts.
+For `M = Veronese(N, D)`, check the sizes of a stored point `p = ([λ], x)` and of a
+[`VeroneseTangentVector`](@ref) `X = VeroneseTangentVector([ν], u)` at `p`. Their radial and
+spherical components must have sizes `(1,)` and `(N,)`, respectively.
 """
-function check_size(M::Veronese, p, X)
+function check_size(M::Veronese, p, X::VeroneseTangentVector)
     p_size = only.(size.(p))
-    X_size = only.(size.(X))
+    X_size = (only(size(X.radial)), only(size(X.spherical)))
     n, _ = get_parameter(M.size)
     M_size = (1, n)
 
@@ -221,7 +390,7 @@ end
 @doc raw"""
     check_vector(M::Veronese, p, X; kwargs...)
 
-Check whether `X = ([ν], u)` is tangent at `p = ([λ], x)` on
+Check whether the [`VeroneseTangentVector`](@ref) `X = VeroneseTangentVector([ν], u)` is tangent at `p = ([λ], x)` on
 [`Veronese`](@ref) `M`. The tangent space is
 
 ````math
@@ -231,11 +400,11 @@ T_pM\simeq\mathbb R\times T_x\mathbb S^{N-1}.
 Thus ``ν∈ℝ`` is arbitrary and ``u`` must satisfy
 ``u∈T_x\mathbb S^{N-1}=x^⊥``, equivalently ``⟨x,u⟩=0``.
 """
-function check_vector(M::Veronese, p, X; kwargs...)
+function check_vector(M::Veronese, p, X::VeroneseTangentVector; kwargs...)
     e = check_size(M, p, X)
     isnothing(e) || return e
     n, _ = get_parameter(M.size)
-    return check_vector(Sphere(n - 1; parameter = get_parameter_type(M)), p[2], X[2]; kwargs...)
+    return check_vector(Sphere(n - 1; parameter = get_parameter_type(M)), p[2], X.spherical; kwargs...)
 end
 
 @doc raw"""
@@ -299,8 +468,7 @@ function copyto!(::Veronese, q, p)
 end
 
 function copyto!(::Veronese, Y, p, X)
-    copyto!(Y[1], X[1])
-    copyto!(Y[2], X[2])
+    copyto!(Y, X)
     return Y
 end
 
@@ -392,7 +560,7 @@ end
     embed!(M::Veronese, Y, p, X)
 
 Let `p = ([λ], x)` be the stored representative of the point, and let
-`X = ([ν], u)` represent a tangent vector at `p`. Embed `X` by applying the
+`X = VeroneseTangentVector([ν], u)` represent a tangent vector at `p`. Embed `X` by applying the
 differential of the Veronese parametrization,
 
 ````math
@@ -414,8 +582,8 @@ function embed!(M::Veronese, Y, p, X)
     _, d = get_parameter(M.size)
     λ = p[1][1]
     x = p[2]
-    ν = X[1][1]
-    u = X[2]
+    ν = X.radial[1]
+    u = X.spherical
 
     if d == 1
         Y .= ν .* x .+ λ .* u
@@ -435,7 +603,7 @@ end
 
 Exponential map on [`Veronese`](@ref).
 
-Let ``p ≐ (λ,x)`` and ``X = ([ν],u) ∈ T_pM``. Writing
+Let ``p ≐ (λ,x)`` and ``X ≐ (ν,u) ∈ T_pM``. Writing
 
 ````math
 r = |λ|,
@@ -510,8 +678,8 @@ function exp_fused!(M::Veronese, q, p, X, t::Number)
     λ = p[1][1]
     scale_sign = sign(λ)
     r = abs(λ)
-    radial_endpoint = r + scale_sign * t_point * X[1][1]
-    angular_speed = sqrt(d * one(λ)) * norm(X[2])
+    radial_endpoint = r + scale_sign * t_point * X.radial[1]
+    angular_speed = sqrt(d * one(λ)) * norm(X.spherical)
     m = abs(t_point) * angular_speed
 
     if iszero(m)
@@ -528,7 +696,7 @@ function exp_fused!(M::Veronese, q, p, X, t::Number)
     radial_angular = r * m
     f = atan(radial_angular, radial_endpoint)
     q[1][1] = scale_sign * hypot(radial_endpoint, radial_angular)
-    exp_fused!(sphere, q[2], p[2], X[2], t_point * f / m)
+    exp_fused!(sphere, q[2], p[2], X.spherical, t_point * f / m)
     return q
 end
 
@@ -556,8 +724,8 @@ get_coordinates(M::Veronese, p, X, ::DefaultOrthonormalBasis; kwargs...)
 function get_coordinates_orthonormal!(M::Veronese, c, p, X, ::RealNumbers; kwargs...)
     n, d = get_parameter(M.size)
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
-    c[1] = X[1][1]
-    get_coordinates_orthonormal!(sphere, view(c, 2:n), p[2], X[2], ℝ; kwargs...)
+    c[1] = X.radial[1]
+    get_coordinates_orthonormal!(sphere, view(c, 2:n), p[2], X.spherical, ℝ; kwargs...)
     c[2:n] .*= sqrt(d * one(p[1][1])) * abs(p[1][1])
     return c
 end
@@ -592,9 +760,9 @@ get_vector(M::Veronese, p, c, ::DefaultOrthonormalBasis; kwargs...)
 function get_vector_orthonormal!(M::Veronese, X, p, c, ::RealNumbers; kwargs...)
     n, d = get_parameter(M.size)
     sphere = Sphere(n - 1; parameter = get_parameter_type(M))
-    X[1][1] = c[1]
-    get_vector_orthonormal!(sphere, X[2], p[2], view(c, 2:n), ℝ; kwargs...)
-    X[2] ./= sqrt(d * one(p[1][1])) * abs(p[1][1])
+    X.radial[1] = c[1]
+    get_vector_orthonormal!(sphere, X.spherical, p[2], view(c, 2:n), ℝ; kwargs...)
+    X.spherical ./= sqrt(d * one(p[1][1])) * abs(p[1][1])
     return X
 end
 
@@ -614,7 +782,7 @@ Here ``ν,ξ∈ℝ`` and ``u,v∈T_x\mathbb S^{N-1}=x^⊥``.
 """
 function inner(M::Veronese, p, X, Y)
     _, d = get_parameter(M.size)
-    return X[1][1] * Y[1][1] + d * p[1][1]^2 * dot(X[2], Y[2])
+    return X.radial[1] * Y.radial[1] + d * p[1][1]^2 * dot(X.spherical, Y.spherical)
 end
 
 @doc raw"""
@@ -632,7 +800,8 @@ isapprox(::Veronese, ::Any, ::Any)
 
 Test whether two tangent vectors `X`, `Y` at `p` on the [`Veronese`](@ref) manifold `M` are (approximately)
 the same, that is whether their components agree with the classical `isapprox`. The `kwargs...` are
-passed on to this; `atol` defaults to `sqrt(max_eps(X[1], X[2], Y[1], Y[2]))`.
+passed on to this; `atol` defaults to
+`sqrt(max_eps(X.radial, X.spherical, Y.radial, Y.spherical))`.
 """
 isapprox(::Veronese, ::Any, ::Any, ::Any)
 
@@ -644,9 +813,12 @@ function _isapprox(M::Veronese, p, q; atol = sqrt(max_eps(p[1], p[2], q[1], q[2]
         all(isapprox(pi, qi; atol = atol, kwargs...) for (pi, qi) in zip(p, q))
 end
 
-function _isapprox(::Veronese, p, X, Y; atol = sqrt(max_eps(X[1], X[2], Y[1], Y[2])), kwargs...)
-    return length(X) == length(Y) &&
-        all(isapprox(Xi, Yi; atol = atol, kwargs...) for (Xi, Yi) in zip(X, Y))
+function _isapprox(
+        ::Veronese, p, X, Y;
+        atol = sqrt(max_eps(X.radial, X.spherical, Y.radial, Y.spherical)), kwargs...,
+    )
+    return isapprox(X.radial, Y.radial; atol = atol, kwargs...) &&
+        isapprox(X.spherical, Y.spherical; atol = atol, kwargs...)
 end
 
 @doc raw"""
@@ -677,7 +849,7 @@ A minimizing logarithm exists when `p` and `q` lie in the same connected
 component and ``m < π``. It is given by
 
 ````math
-\operatorname{log}_p(q) ≐ ([ν],u),
+\operatorname{log}_p(q) ≐ (ν,u),
 ````
 
 with radial component
@@ -722,13 +894,13 @@ function log!(M::Veronese, X, p, q)
     r = abs(p[1][1])
     s = abs(q_closest[1][1])
 
-    X[1][1] = sign(p[1][1]) * (s * cos(m) - r)
+    X.radial[1] = sign(p[1][1]) * (s * cos(m) - r)
     cos_a = clamp(dot(p[2], q_closest[2]), -one(r), one(r))
     πT = oftype(m, π)
-    X[2] .=
+    X.spherical .=
         (q_closest[2] .- cos_a .* p[2]) .* (s / r) .* sinc(m / πT) ./
         sinc(a / πT)
-    X[2] .-= dot(p[2], X[2]) .* p[2]
+    X.spherical .-= dot(p[2], X.spherical) .* p[2]
     return X
 end
 
@@ -751,7 +923,7 @@ manifold_dimension(M::Veronese) = get_parameter(M.size)[1]
 Let `p = ([λ], x)` be the stored representative of a point on
 [`Veronese`](@ref). Orthogonally project an ambient tensor `A` onto the tangent
 space at `p`. The ambient tensor is stored as a vector of length ``N^D`` and
-the result `Y = ([ν], u)` represents a tangent vector with ``u⊥ x``.
+the result `Y = VeroneseTangentVector([ν], u)` represents a tangent vector with ``u⊥ x``.
 
 For each mode ``j=1,\ldots,D``, let ``c_j\in\mathbb R^N`` be the contraction of
 `A` with ``x`` in every mode except mode ``j``. In coordinates,
@@ -819,9 +991,9 @@ function project!(M::Veronese, Y, p, A)
         end
     end
 
-    Y[1][1] = ν
-    Y[2] .= (c .- d .* ν .* x) ./ (d * λ)
-    Y[2] .-= dot(x, Y[2]) .* x
+    Y.radial[1] = ν
+    Y.spherical .= (c .- d .* ν .* x) ./ (d * λ)
+    Y.spherical .-= dot(x, Y.spherical) .* x
     return Y
 end
 
@@ -830,7 +1002,7 @@ end
 
 Generate a random point on [`Veronese`](@ref) `M`, stored as `p = ([λ], x)`. If
 `vector_at` is provided, generate a random tangent vector there, stored as
-`X = ([ν], u)`. For a random point, draw ``λ`` from a standard normal
+`X = VeroneseTangentVector([ν], u)`. For a random point, draw ``λ`` from a standard normal
 distribution (replacing an exactly zero draw by one) and independently draw
 ``x`` uniformly on the unit sphere by normalizing a standard Gaussian vector.
 The keyword `σ` does not affect random points.
@@ -856,9 +1028,9 @@ function Random.rand!(rng::AbstractRNG, M::Veronese, pX; vector_at = nothing, σ
         pX[1][1] += iszero(pX[1][1])
         rand!(rng, sphere, pX[2])
     else
-        randn!(rng, pX[1])
-        pX[1] .*= σ
-        rand!(rng, sphere, pX[2]; vector_at = vector_at[2], σ)
+        randn!(rng, pX.radial)
+        pX.radial .*= σ
+        rand!(rng, sphere, pX.spherical; vector_at = vector_at[2], σ)
     end
     return pX
 end
@@ -876,7 +1048,7 @@ Transport a tangent vector by orthogonally projecting its ambient embedding
 onto the tangent space at the destination point.
 
 For ``M=\mathcal V_{N,D}``, let `p = ([λ], x)` and `q = ([μ], y)` be stored
-point representatives, and let `X = ([ν], u)` represent a tangent vector at
+point representatives, and let `X = VeroneseTangentVector([ν], u)` represent a tangent vector at
 `p`. Its ambient embedding is
 
 ````math
@@ -890,7 +1062,7 @@ DΦ_{(λ,x)}(ν,u)
  x^{⊗(j-1)}⊗ u⊗ x^{⊗(D-j)}.
 ````
 
-Projection transport returns `Y = ([ξ], v)` at `q` such that
+Projection transport returns `Y = VeroneseTangentVector([ξ], v)` at `q` such that
 ``DΦ_{(μ,y)}(ξ,v)`` is the orthogonal projection of `A` onto the
 embedded tangent space at ``Φ(μ,y)``. Set
 
@@ -938,24 +1110,24 @@ function vector_transport_to_project!(M::Veronese, Y, p, X, q)
     x = p[2]
     μ = q[1][1]
     y = q[2]
-    ν = X[1][1]
-    u = X[2]
+    ν = X.radial[1]
+    u = X.spherical
 
     xy = dot(x, y)
     uy = dot(u, y)
     xy_dm1 = xy^(d - 1)
 
     ξ = ν * xy^d + d * λ * uy * xy_dm1
-    Y[1][1] = ξ
+    Y.radial[1] = ξ
 
     x_coefficient = d * ν * xy_dm1
     if d > 1
         x_coefficient += d * (d - 1) * λ * uy * xy^(d - 2)
     end
     u_coefficient = d * λ * xy_dm1
-    Y[2] .=
+    Y.spherical .=
         (x_coefficient .* x .+ u_coefficient .* u .- d .* ξ .* y) ./ (d * μ)
-    Y[2] .-= dot(y, Y[2]) .* y
+    Y.spherical .-= dot(y, Y.spherical) .* y
     return Y
 end
 
@@ -965,7 +1137,7 @@ end
 Set `X` to the zero tangent vector at `p` on [`Veronese`](@ref).
 """
 function zero_vector!(::Veronese, X, p)
-    fill!(X[1], zero(eltype(X[1])))
-    fill!(X[2], zero(eltype(X[2])))
+    fill!(X.radial, zero(eltype(X.radial)))
+    fill!(X.spherical, zero(eltype(X.spherical)))
     return X
 end
