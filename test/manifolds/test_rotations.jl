@@ -136,12 +136,14 @@ using RecursiveArrayTools, StaticArrays, Test
     @testset "SO($n)" for n in (3, 4, 5)
         M = Rotations(n)
         rng = MersenneTwister(42)
+        # random directions with fixed lengths, so that the points and vectors stay well within
+        # the injectivity radius of the polar and QR retractions for any random number stream
+        rand_vector(p, l) = (V = rand(rng, M; vector_at = p); l / norm(M, p, V) .* V)
         p1 = rand(rng, M)
-        # points close enough to p1 for the polar and QR inverse retractions
-        pts = [p1, [exp(M, p1, 0.5 .* rand(rng, M; vector_at = p1)) for _ in 1:2]...]
-        X = 0.5 .* rand(rng, M; vector_at = pts[1])
-        Y = rand(rng, M; vector_at = pts[1])
-        Xs = [X, rand(rng, M; vector_at = pts[2]), rand(rng, M; vector_at = pts[3])]
+        pts = [p1, exp(M, p1, rand_vector(p1, 0.5)), exp(M, p1, rand_vector(p1, 0.7))]
+        X = rand_vector(pts[1], 0.6)
+        Y = rand_vector(pts[1], 1.0)
+        Xs = [X, rand_vector(pts[2], 1.0), rand_vector(pts[3], 1.0)]
         d = manifold_dimension(M)
         diag_basis_1 = DiagonalizingOrthonormalBasis(Y)
         diag_basis_2 = DiagonalizingOrthonormalBasis(hat(M, pts[1], [1.0, zeros(d - 1)...]))
@@ -215,10 +217,8 @@ using RecursiveArrayTools, StaticArrays, Test
             V = get_vectors(M, p, b)
             @test length(V) == d
             @test [inner(M, p, v, w) for v in V, w in V] ≈ I(d) atol = 1.0e-12
-            # ManifoldsBase builds this basis from the rows instead of the columns of the
-            # projected ambient basis, which only agree for symmetric projections
-            @test_broken all(is_vector(M, p, v) for v in V)
-            @test_broken isapprox(M, p, get_vector(M, p, get_coordinates(M, p, X, b), b), X)
+            @test all(is_vector(M, p, v) for v in V)
+            @test isapprox(M, p, get_vector(M, p, get_coordinates(M, p, X, b), b), X)
         end
 
         @testset "distributions" begin
