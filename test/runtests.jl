@@ -50,6 +50,7 @@ end
         include_test("manifolds/test_grassmann.jl")
         include_test("manifolds/test_heisenberg_matrices.jl")
         include_test("manifolds/test_hyperbolic.jl")
+        include_test("manifolds/test_hyperrectangle.jl")
         include_test("manifolds/test_stiefel.jl")
         include_test("manifolds/test_unitary_matrices.jl")
     end
@@ -58,7 +59,6 @@ end
         include_test("manifolds-old/euclidean.jl")
         include_test("manifolds-old/generalized_stiefel.jl")
         include_test("manifolds-old/hamiltonian.jl")
-        include_test("manifolds-old/hyperrectangle.jl")
         include_test("manifolds-old/invertible_matrices.jl")
         include_test("manifolds-old/lorentz.jl")
         include_test("manifolds-old/multinomial_doubly_stochastic.jl")

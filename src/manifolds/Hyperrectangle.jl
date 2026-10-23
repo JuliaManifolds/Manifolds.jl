@@ -125,6 +125,14 @@ Embed the tangent vector `X` at point `p` in `M`. Equivalent to an identity map.
 """
 embed(::Hyperrectangle, p, X) = X
 
+"""
+    get_embedding(M::Hyperrectangle)
+
+Return the [`Euclidean`](@ref) space of the same size as the bounds of `M`, in which `M` is embedded.
+The size is stored in a field of the embedding, see the `parameter` keyword of [`Euclidean`](@ref).
+"""
+get_embedding(M::Hyperrectangle) = Euclidean(size(M.lb)...; parameter = :field)
+
 @doc raw"""
     exp(M::Hyperrectangle, p, X)
 

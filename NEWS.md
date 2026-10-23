@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* `get_embedding` for the `Hyperrectangle`, which returns the `Euclidean` space of the same size, with the size stored in a field.
 * `zero_vector` and `zero_vector!` for points of the `Flag` manifold in the `OrthogonalPoint` representation.
 
 ### Changed
