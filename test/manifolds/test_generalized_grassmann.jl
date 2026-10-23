@@ -33,8 +33,8 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
                     rand, repr, representation_size, retract, shortest_geodesic,
                     vector_transport_direction, vector_transport_to, zero_vector,
                 ],
-                :InvalidPoints => [pf1, pf2, pf3],
-                :InvalidVectors => [Xf1, Xf2, Xf3],
+                :InvalidPoints => Matrix[pf1, pf2, pf3], # Matrix avoids promotion to complex
+                :InvalidVectors => Matrix[Xf1, Xf2, Xf3],
                 :InverseRetractionMethods => [
                     LogarithmicInverseRetraction(), PolarInverseRetraction(), missing,
                 ],
@@ -190,7 +190,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
                     inner, is_flat, is_point, is_vector, log, manifold_dimension, norm,
                     project, rand, repr, representation_size, zero_vector,
                 ],
-                :InvalidPoints => [2 * p1, [1.0, 0.0, 0.0, 0.0]],
+                :InvalidPoints => Matrix[2 * p1, [1.0, 0.0, 0.0, 0.0]],
                 :InvalidVectors => [[0.0, 0.0, 1.0, 0.0]],
                 :Points => [p1, p2, p3],
                 :SecondVector => X2,

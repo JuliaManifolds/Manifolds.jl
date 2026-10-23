@@ -35,7 +35,7 @@ using Manifolds, Test, LinearAlgebra
             :Points => [p1, p2, p3],
             :Vectors => [X1, X2],
             :SecondVector => X2,
-            :InvalidPoints => [q1, q2, q3],
+            :InvalidPoints => Matrix[q1, q2, q3],
             :InvalidVectors => [Y],
             :VectorTransportMethods => [
                 ParallelTransport(),

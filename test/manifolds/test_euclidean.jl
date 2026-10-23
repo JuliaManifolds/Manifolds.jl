@@ -151,8 +151,8 @@ end
         X = [-1.0, 1.0, 0.5]
         Y = [0.0, 2.0, 1.0]
         D = DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0])
-        invalid_points = [[1.0, 1.0im, 0.0], [1.0]]
-        invalid_vectors = [[1.0], [1.0, 0.0, 1.0im]]
+        invalid_points = Vector[[1.0, 1.0im, 0.0], [1.0]] # Vector avoids promotion to complex
+        invalid_vectors = Vector[[1.0], [1.0, 0.0, 1.0im]]
         flat_space_expectations = Dict(
             manifold_volume => Inf,
             sectional_curvature => 0.0,

@@ -53,6 +53,7 @@ end
         include_test("manifolds/test_hyperbolic.jl")
         include_test("manifolds/test_hyperrectangle.jl")
         include_test("manifolds/test_stiefel.jl")
+        include_test("manifolds/test_symmetric.jl")
         include_test("manifolds/test_unitary_matrices.jl")
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
@@ -71,7 +72,6 @@ end
         include_test("manifolds-old/skewhermitian.jl")
         include_test("manifolds-old/spectrahedron.jl")
         include_test("manifolds-old/sphere_symmetric_matrices.jl")
-        include_test("manifolds-old/symmetric.jl")
         include_test("manifolds-old/symmetric_positive_definite.jl")
         include_test("manifolds-old/spd_fixed_determinant.jl")
         include_test("manifolds-old/symmetric_positive_semidefinite_fixed_rank.jl")

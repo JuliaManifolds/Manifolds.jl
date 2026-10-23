@@ -46,8 +46,8 @@ using DiffEqCallbacks, OrdinaryDiffEq
                     representation_size, retract, shortest_geodesic,
                     vector_transport_direction, vector_transport_to, zero_vector,
                 ],
-                :InvalidPoints => [pf1, pf2, pf3],
-                :InvalidVectors => [Xf1, Xf2, Xf3],
+                :InvalidPoints => Matrix[pf1, pf2, pf3],
+                :InvalidVectors => Matrix[Xf1, Xf2, Xf3],
                 :InverseRetractionMethods => [
                     LogarithmicInverseRetraction(), PolarInverseRetraction(), QRInverseRetraction(),
                 ],
@@ -175,8 +175,8 @@ using DiffEqCallbacks, OrdinaryDiffEq
                     manifold_dimension, mid_point, norm, project, rand, repr,
                     representation_size, retract, shortest_geodesic, zero_vector,
                 ],
-                :InvalidPoints => [[2.0 0.0; 0.0 1.0; 0.0 0.0], [1.0, 0.0, 0.0, 0.0]],
-                :InvalidVectors => [ones(3, 2), [0.0, 0.0, 1.0, 0.0]],
+                :InvalidPoints => Array[[2.0 0.0; 0.0 1.0; 0.0 0.0], [1.0, 0.0, 0.0, 0.0]],
+                :InvalidVectors => Array[ones(3, 2), [0.0, 0.0, 1.0, 0.0]],
                 :InverseRetractionMethods => [
                     LogarithmicInverseRetraction(), PolarInverseRetraction(), QRInverseRetraction(),
                 ],
