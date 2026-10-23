@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `copy` and `copyto!` on the `Segre` manifold now copy the factors of points and tangent vectors; previously the copy shared the factor arrays with the original, so mutating functions applied to a copy also changed the original.
 * `copyto!` on a `MetricManifold` now forwards to the underlying manifold, so representation-specific copying (for example on the `Segre` manifold with a `WarpedMetric`) is used.
 * The `embed` test in `Manifolds.Test` used the embedded point instead of the manifold point when checking aliased tangent vector embedding; it now only checks aliasing when the tangent vector and its embedding have the same type.
+* The `embed` test in `Manifolds.Test` now checks embedded points and vectors on `get_embedding(M, typeof(p))` instead of `get_embedding(M)`, and uses the point `p` instead of its embedding when projecting the embedded vector back.
 * `embed!` for tangent vectors on `Rotations`, `OrthogonalMatrices` and `UnitaryMatrices` now works when the output is aliased with the input tangent vector.
 * `isapprox` on the `Flag` manifold now supports the `error=` keyword; the methods are now implemented as `_isapprox`.
 * `default_retraction_method` on the `Elliptope` is now `ProjectionRetraction`; it was `ExponentialRetraction`, but the exponential map is not implemented on the `Elliptope`.

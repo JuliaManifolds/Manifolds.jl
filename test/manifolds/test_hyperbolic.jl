@@ -1,4 +1,4 @@
-include("../header.jl")
+using LinearAlgebra, ManifoldDiff, Manifolds, ManifoldsBase, Random, StaticArrays, StatsBase, Test
 
 @testset "tangent vectors of the hyperbolic space far from the apex" begin
     @test_throws DomainError Hyperbolic(-1)
@@ -15,6 +15,9 @@ end
     @test is_vector(M, p, X)
     @test norm(M, p, X) ≈ 0.5 * norm(randn(MersenneTwister(42), 3)[1:2])
     @test rand(MersenneTwister(42), M; vector_at = SVector{3}(p), σ = 0.5) ≈ X
+    # the default σ is 1 / sqrt(manifold_dimension(M)), so compare two explicit values
+    Y = rand(MersenneTwister(42), M; vector_at = p, σ = 1.0)
+    @test rand(MersenneTwister(42), M; vector_at = p, σ = 2.0) ≈ 2 .* Y
 end
 
 @testset "distance of single precision points on the hyperboloid" begin
@@ -26,36 +29,124 @@ end
     @test distance(M, p, q) ≈ distance(M, Float64.(p), Float64.(q))
 end
 
-@testset "Hyperbolic Space" begin
+@testset "The hyperbolic space" begin
     M = Hyperbolic(2)
-    @testset "Hyperbolic Basics" begin
-        @test repr(M) == "Hyperbolic(2)"
-        @test base_manifold(M) == M
-        @test manifold_dimension(M) == 2
-        @test typeof(get_embedding(M)) == MetricManifold{ℝ, Euclidean{ℝ, TypeParameter{Tuple{3}}}, MinkowskiMetric}
-        @test representation_size(M) == (3,)
-        @test !is_flat(M)
-        @test isinf(injectivity_radius(M))
-        @test isinf(injectivity_radius(M, ExponentialRetraction()))
-        @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0]))
-        @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0], ExponentialRetraction()))
-        @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
-        @test !is_point(M, [0.0, 0.0, -1.0])
-        @test !is_vector(M, [0.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0])
-        @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error = :error)
-        @test !is_point(M, [2.0, 0.0, 0.0])
-        @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-        @test_throws ManifoldDomainError is_vector( # p is not a valid point
-            M,
-            [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0];
-            error = :error,
-        )
-        @test !is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0])
-        @test_throws DomainError is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0]; error = :error)
-        @test is_default_metric(M, MinkowskiMetric())
-        @test manifold_dimension(M) == 2
 
+    p1, p2, p3 = [0.0, 0.0, 1.0], [1.0, 0.0, sqrt(2.0)], [0.0, 1.0, sqrt(2.0)]
+    a = asinh(1.0) # the distance from p1 to p2 and p3
+    X = [a, 0.0, 0.0] # log(M, p1, p2)
+    Y = [0.0, 1.0, 0.0]
+    vector_types = Dict(
+        HyperboloidPoint => HyperboloidTangentVector,
+        PoincareBallPoint => PoincareBallTangentVector,
+        PoincareHalfSpacePoint => PoincareHalfSpaceTangentVector,
+    )
+    @testset "Points of type $P" for P in [
+            Vector{Float64}, SizedVector{3, Float64},
+            HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint,
+        ]
+        is_plain_array = !haskey(vector_types, P)
+        is_poincare = P <: Union{PoincareBallPoint, PoincareHalfSpacePoint}
+        T = get(vector_types, P, P)
+        cp(p) = convert(P, p)
+        cv(p, X) = is_plain_array ? convert(P, X) : convert(T, p, X)
+        pts = cp.([p1, p2, p3])
+        default_retraction = is_poincare ? ExponentialRetraction() :
+            StabilizedRetraction(ExponentialRetraction())
+        functions = [
+            copy, copyto!, default_inverse_retraction_method, default_vector_transport_method, distance, embed, exp, geodesic,
+            injectivity_radius, inner, inverse_retract, is_flat, is_point, is_vector, log,
+            manifold_dimension, manifold_volume, mid_point, norm, parallel_transport_direction,
+            parallel_transport_to, rand, repr, representation_size, retract,
+            sectional_curvature, shortest_geodesic, vector_transport_direction,
+            vector_transport_to, volume_density, zero_vector,
+        ]
+        # the default retraction on M differs from the one for Poincaré points, see below
+        is_poincare || append!(
+            functions,
+            [default_retraction_method, get_coordinates, get_embedding, get_vector, project],
+        )
+        is_plain_array && append!(functions, [flat, get_basis, get_vectors, sharp])
+        invalid_points = Dict(
+            HyperboloidPoint => [HyperboloidPoint([2.0, 0.0, 0.0])],
+            PoincareBallPoint => [PoincareBallPoint([1.1, 0.0]), PoincareBallPoint([0.9, 0.0, 0.0])],
+            PoincareHalfSpacePoint => [
+                PoincareHalfSpacePoint([0.0, -1.0]), PoincareHalfSpacePoint([0.0, 0.0, 1.0]),
+            ],
+        )
+        invalid_vectors = Dict(
+            HyperboloidPoint => [HyperboloidTangentVector([1.0, 0.0, 1.0])],
+            PoincareBallPoint => [PoincareBallTangentVector([2.0, 2.0, 3.0])],
+            PoincareHalfSpacePoint => [PoincareHalfSpaceTangentVector(zeros(3))],
+        )
+        properties = Dict(
+            :Functions => functions,
+            :InvalidPoints => get(invalid_points, P, [[2.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0], [0.0, 0.0, -1.0]]),
+            :InvalidVectors => get(invalid_vectors, P, [[1.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0]]),
+            :InverseRetractionMethods => [LogarithmicInverseRetraction(), LogarithmicInverseRetraction()],
+            :Points => pts,
+            :RetractionMethods => [ExponentialRetraction(), default_retraction],
+            :SecondVector => cv(p1, Y),
+            :Vectors => [cv(p1, X), cv(p2, log(M, p2, p3)), cv(p3, log(M, p3, p1))],
+            :VectorTransportMethods => [
+                ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport(),
+            ],
+            :Seed => 42,
+        )
+        if !is_poincare
+            properties[:Bases] = [DefaultOrthonormalBasis()]
+            properties[:Coordinates] = [[1.0, 0.5]]
+            properties[:EmbeddedPoints] = [[0.0, 0.0, 2.0]]
+            properties[:EmbeddedVectors] = [[1.0, 1.0, 1.0]]
+        end
+        is_plain_array && (properties[:Covectors] = [flat(M, pts[1], cv(p1, X))])
+        expectations = Dict(
+            :atol => 1.0e-13,
+            # distances in the Poincaré models are less accurate
+            :atols => Dict(geodesic => 1.0e-11, shortest_geodesic => 1.0e-11),
+            default_inverse_retraction_method => LogarithmicInverseRetraction(),
+            default_retraction_method => default_retraction,
+            default_vector_transport_method => ParallelTransport(),
+            distance => a,
+            exp => pts[2],
+            get_embedding => Lorentz(3, MinkowskiMetric()),
+            (get_coordinates, DefaultOrthonormalBasis()) => [a, 0.0],
+            (get_vectors, DefaultOrthonormalBasis()) => :Orthonormal,
+            injectivity_radius => Inf,
+            (injectivity_radius, ExponentialRetraction()) => Inf,
+            inner => 0.0,
+            is_flat => false,
+            log => cv(p1, X),
+            manifold_dimension => 2,
+            manifold_volume => Inf,
+            mid_point => cp([sinh(a / 2), 0.0, cosh(a / 2)]),
+            norm => a,
+            parallel_transport_to => cv(p2, -log(M, p2, p1)),
+            (project, :Point) => p1,
+            (project, :Vector) => [1.0, 1.0, 0.0],
+            repr => "Hyperbolic(2)",
+            representation_size => (3,),
+            sectional_curvature => -1.0,
+            sectional_curvature_max => -1.0,
+            sectional_curvature_min => -1.0,
+            sharp => cv(p1, X),
+            (vector_transport_to, ParallelTransport()) => cv(p2, -log(M, p2, p1)),
+            volume_density => 1 / a,
+            # inputs of a wrong size are reported by the embedding
+            :IsPointErrors => is_plain_array ? [DomainError, ManifoldDomainError, DomainError] :
+                fill(DomainError, length(properties[:InvalidPoints])),
+            :IsVectorErrors => is_plain_array ? [DomainError, ManifoldDomainError] : [DomainError],
+        )
+        is_plain_array && (expectations[:IsVectorBasepointError] = ManifoldDomainError)
+        Manifolds.Test.test_manifold(M, properties, expectations)
+        @test default_retraction_method(M, P) == default_retraction
+    end
+
+    @testset "Hyperbolic Basics" begin
+        @test base_manifold(M) == M
+        @test typeof(get_embedding(M)) ==
+            MetricManifold{ℝ, Euclidean{ℝ, ManifoldsBase.TypeParameter{Tuple{3}}}, MinkowskiMetric}
+        @test is_default_metric(M, MinkowskiMetric())
         for (P, T) in zip(
                 [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
                 [
@@ -193,45 +284,6 @@ end
         end
     end
 
-    types = [
-        Vector{Float64},
-        SizedVector{3, Float64},
-        HyperboloidPoint,
-        PoincareBallPoint,
-        PoincareHalfSpacePoint,
-    ]
-    for T in types
-        @testset "Type $T" begin
-            is_plain_array =
-                T ∉ [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint]
-            pts = [
-                convert(T, [0.0, 0.0, 1.0]),
-                convert(T, [1.0, 0.0, sqrt(2.0)]),
-                convert(T, [0.0, 1.0, sqrt(2.0)]),
-            ]
-            Manifolds.test_manifold(
-                M,
-                pts,
-                test_project_point = is_plain_array || T == HyperboloidPoint,
-                test_project_tangent = is_plain_array || T == HyperboloidPoint,
-                test_musical_isomorphisms = is_plain_array,
-                test_default_vector_transport = true,
-                vector_transport_methods = [
-                    ParallelTransport(),
-                    SchildsLadderTransport(),
-                    PoleLadderTransport(),
-                ],
-                is_tangent_atol_multiplier = 10.0,
-                exp_log_atol_multiplier = 10.0,
-                retraction_methods = (ExponentialRetraction(),),
-                test_tangent_vector_broadcasting = is_plain_array,
-                test_vector_spaces = is_plain_array,
-                test_inplace = true,
-                test_rand_point = true,
-                test_rand_tvector = true,
-            )
-        end
-    end
     @testset "Embedding test" begin
         p = [0.0, 0.0, 1.0]
         X = [1.0, 1.0, 0.0]
@@ -400,9 +452,6 @@ end
         @test riemann_tensor!(M, Xout, p, X, Y, Z) === Xout
         @test Xout == [0.5, -0.5, 0.0]
 
-        @test sectional_curvature(M, p, X, Y) == -1.0
-        @test sectional_curvature_max(M) == -1.0
-        @test sectional_curvature_min(M) == -1.0
         M1 = Hyperbolic(1)
         p1 = [0.0, 1.0]
         X1 = [1.0, 0.0]
@@ -447,7 +496,6 @@ end
     end
     @testset "Manifold volume" begin
         M = Hyperbolic(2)
-        @test manifold_volume(M) == Inf
         p = [1.0, 1.0, sqrt(3)]
         X = [1.0, 2.0, sqrt(3)]
         @test volume_density(M, p, X) ≈ 1.368298872008591

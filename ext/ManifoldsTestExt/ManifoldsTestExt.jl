@@ -843,7 +843,7 @@ function Manifolds.Test.test_embed(
         kwargs...,
     )
     Test.@testset "$(name)" begin
-        E = get_embedding(M) isa AbstractManifold ? get_embedding(M) : missing
+        E = get_embedding(M, typeof(p)) isa AbstractManifold ? get_embedding(M, typeof(p)) : missing
         # Test point embedding
         q = embed(M, p)
         if !ismissing(E)
@@ -876,7 +876,7 @@ function Manifolds.Test.test_embed(
                 Test.@test is_vector(E, q, Y; error = :error, kwargs...)
                 !isexpected(expected_vector) || Test.@test isapprox(E, q, Y, expect(expected_vector); error = :error, kwargs...)
                 if project in available_functions
-                    X2 = project(M, q, Y)
+                    X2 = project(M, p, Y)
                     Test.@test isapprox(M, p, X, X2; error = :error, kwargs...)
                 end
                 if test_mutating
@@ -890,7 +890,7 @@ function Manifolds.Test.test_embed(
                     end
                     if project in available_functions
                         X3 = copy(M, p, X)
-                        project!(M, X3, q, Y2)
+                        project!(M, X3, p, Y2)
                         Test.@test isapprox(M, p, X, X3; error = :error, kwargs...)
                     end
                 end
