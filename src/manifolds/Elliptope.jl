@@ -108,6 +108,14 @@ function check_vector(
     return nothing
 end
 
+"""
+    default_retraction_method(M::Elliptope)
+
+Return [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) as the default retraction for the
+[`Elliptope`](@ref) manifold.
+"""
+default_retraction_method(::Elliptope) = ProjectionRetraction()
+
 function get_embedding(::Elliptope{TypeParameter{Tuple{n, k}}}) where {n, k}
     return Euclidean(n, k)
 end
