@@ -221,6 +221,8 @@ X_{\text{embedded}} = p * X
 embed(::GeneralUnitaryMatrices, p, X)
 
 function embed!(::GeneralUnitaryMatrices, Y, p, X)
+    # mul! does not support an output aliased with an input
+    Y === X && return copyto!(Y, p * X)
     return mul!(Y, p, X)
 end
 
