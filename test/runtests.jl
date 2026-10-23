@@ -56,6 +56,7 @@ end
         include_test("manifolds/test_hyperrectangle.jl")
         include_test("manifolds/test_invertible_matrices.jl")
         include_test("manifolds/test_multinomial_doubly_stochastic.jl")
+        include_test("manifolds/test_multinomial_matrices.jl")
         include_test("manifolds/test_oblique.jl")
         include_test("manifolds/test_stiefel.jl")
         include_test("manifolds/test_symmetric.jl")
@@ -84,7 +85,6 @@ end
         include_test("manifolds-old/unitary_matrices.jl")
 
         include_test("manifolds-old/essential_manifold.jl")
-        include_test("manifolds-old/multinomial_matrices.jl")
         include_test("manifolds-old/torus.jl")
 
         #meta manifolds
