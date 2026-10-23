@@ -639,11 +639,12 @@ function Manifolds.Test.test_copy(
         q = copy(M, p)
         Test.@test is_point(M, q; error = :error, kwargs...)
         Test.@test q == p
-        Test.@test q !== p
+        # immutable values like numbers can not be distinguished from their copies
+        ismutable(p) && Test.@test q !== p
         Y = copy(M, p, X)
         Test.@test is_vector(M, p, Y; error = :error, kwargs...)
         Test.@test Y == X
-        Test.@test Y !== X
+        ismutable(X) && Test.@test Y !== X
 
     end
     return nothing
@@ -1159,8 +1160,8 @@ function Manifolds.Test.test_get_coordinates(
     )
     Test.@testset "$(name)" begin
         c = get_coordinates(M, p, X, B)
-        # TODO: Improve for complex manifolds and check for real of complex coordinates
-        Test.@test length(c) == manifold_dimension(M)
+        # on a complex manifold, a basis over ℂ has half as many coordinates as one over ℝ
+        Test.@test length(c) == number_of_coordinates(M, B)
         !isexpected(expected_value) || Test.@test isapprox(c, expect(expected_value); kwargs...)
         if test_mutating
             c2 = similar(c)
@@ -1306,14 +1307,15 @@ function Manifolds.Test.test_get_vectors(
         Vs = get_vectors(M, p, b)
         n = length(Vs)
         if manifold_dimension in available_functions
-            md = manifold_dimension(M)
-            Test.@test n == md
+            Test.@test n == number_of_coordinates(M, b)
         end
         for i in 1:n
             Test.@test is_vector(M, p, Vs[i]; error = :error, kwargs...)
             if test_orthogonality
                 for j in (i + 1):n
                     ip = inner(M, p, Vs[i], Vs[j])
+                    # for a basis over ℝ of a complex manifold, orthogonality refers to the real part
+                    number_system(b) === ℝ && (ip = real(ip))
                     Test.@test isapprox(ip, 0.0; kwargs...)
                 end
             end

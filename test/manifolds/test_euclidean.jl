@@ -1,11 +1,78 @@
-include("../header.jl")
-
+using Distributions, FiniteDifferences, LinearAlgebra, ManifoldDiff, Manifolds, ManifoldsBase
+using Random, RecursiveArrayTools, StaticArrays, Test
 using Manifolds: induced_basis
-using FiniteDifferences
+
+# a test suite run on a flat space; the expected values follow from the points and vectors
+function test_euclidean(
+        M, pts, X, Y;
+        bases = [DefaultOrthonormalBasis()], coordinates = [], mutating = true,
+        extra_functions = [], extra_expectations = Dict(), invalid_points = [],
+        invalid_vectors = [], errors_points = [], errors_vectors = [],
+    )
+    p1, p2 = pts[1], pts[2]
+    functions = [
+        copy, default_inverse_retraction_method, default_retraction_method,
+        default_vector_transport_method, distance, exp, flat, geodesic, get_basis,
+        get_coordinates, get_vector, get_vectors, injectivity_radius, inner, inverse_retract,
+        is_flat, is_point, is_vector, log, manifold_dimension, mid_point, norm,
+        parallel_transport_direction, parallel_transport_to, project, rand, repr,
+        representation_size, retract, sharp, shortest_geodesic, vector_transport_direction,
+        vector_transport_to, zero_vector, extra_functions...,
+    ]
+    mutating && push!(functions, copyto!)
+    properties = Dict(
+        :Bases => bases,
+        :Coordinates => coordinates,
+        :Covectors => [flat(M, p1, X)],
+        :EmbeddedPoints => [p1],
+        :EmbeddedVectors => [X],
+        :Functions => functions,
+        :InvalidPoints => invalid_points,
+        :InvalidVectors => invalid_vectors,
+        :InverseRetractionMethods => [LogarithmicInverseRetraction()],
+        :Mutating => mutating,
+        :Points => pts,
+        :RetractionMethods => [ExponentialRetraction()],
+        :SecondVector => Y,
+        :Vectors => [X, X, X],
+        :VectorTransportMethods => [
+            ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport(),
+        ],
+        :Seed => 42,
+    )
+    expectations = Dict(
+        :atol => 1.0e-12,
+        default_inverse_retraction_method => LogarithmicInverseRetraction(),
+        default_retraction_method => ExponentialRetraction(),
+        default_vector_transport_method => ParallelTransport(),
+        distance => norm(p2 - p1),
+        exp => p1 + X,
+        injectivity_radius => Inf,
+        (injectivity_radius, ExponentialRetraction()) => Inf,
+        inner => dot(X, Y),
+        is_flat => true,
+        log => p2 - p1,
+        mid_point => (p1 + p2) / 2,
+        norm => norm(X),
+        parallel_transport_direction => X,
+        parallel_transport_to => X,
+        (project, :Point) => p1,
+        (project, :Vector) => X,
+        representation_size => size(p1),
+        sharp => X,
+        (vector_transport_to, ParallelTransport()) => X,
+        :IsPointErrors => errors_points,
+        :IsVectorErrors => errors_vectors,
+    )
+    for B in bases
+        expectations[(get_vectors, B)] = :Orthonormal
+    end
+    return Manifolds.Test.test_manifold(M, properties, merge(expectations, extra_expectations))
+end
 
 @testset "Euclidean" begin
     @test_throws DomainError Euclidean(2, -1)
-    for param in [:field, :type]
+    @testset "parameter = $param" for param in [:field, :type]
         E = Euclidean(3, parameter = param)
         Ec = Euclidean(3; field = ℂ, parameter = param)
         EM = Manifolds.MetricManifold(E, Manifolds.EuclideanMetric())
@@ -80,115 +147,142 @@ using FiniteDifferences
         @test E^(2,) === Euclidean(3, 2, parameter = param)
         @test Ec^(4, 5) === Euclidean(3, 4, 5; field = ℂ, parameter = param)
 
-        manifolds = [E, EM, Ec]
-        types = [Vector{Float64}]
-
-        types_complex = [Vector{ComplexF64}]
-
-        for M in manifolds
-            basis_types = if M == E
-                (
-                    DefaultOrthonormalBasis(),
-                    ProjectedOrthonormalBasis(:svd),
-                    DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]),
-                )
-            elseif M == Ec
-                (
-                    DefaultOrthonormalBasis(),
-                    DefaultOrthonormalBasis(ℂ),
-                    DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]),
-                    DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0], ℂ),
-                )
-            else
-                ()
-            end
-            for T in types
-                @testset "$M Type $T" begin
-                    pts = [
-                        convert(T, [1.0, 0.0, 0.0]),
-                        convert(T, [0.0, 1.0, 0.0]),
-                        convert(T, [0.0, 0.0, 1.0]),
-                    ]
-                    Manifolds.test_manifold(
-                        M,
-                        pts,
-                        test_project_point = true,
-                        test_project_tangent = true,
-                        test_musical_isomorphisms = true,
-                        test_default_vector_transport = true,
-                        vector_transport_methods = [
-                            ParallelTransport(),
-                            SchildsLadderTransport(),
-                            PoleLadderTransport(),
-                        ],
-                        test_mutating_rand = T <: Vector,
-                        point_distributions = [
-                            Manifolds.projected_distribution(
-                                M, Distributions.MvNormal(zero(pts[1]), 1.0 * I)
-                            ),
-                        ],
-                        tvector_distributions = [
-                            Manifolds.normal_tvector_distribution(M, pts[1], 1.0 * I),
-                        ],
-                        basis_types_vecs = basis_types,
-                        basis_types_to_from = basis_types,
-                        basis_has_specialized_diagonalizing_get = true,
-                        test_inplace = true,
-                        test_rand_point = M === E,
-                        test_rand_tvector = M === E,
-                    )
-                end
-            end
+        pts = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        X = [-1.0, 1.0, 0.5]
+        Y = [0.0, 2.0, 1.0]
+        D = DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0])
+        invalid_points = [[1.0, 1.0im, 0.0], [1.0]]
+        invalid_vectors = [[1.0], [1.0, 0.0, 1.0im]]
+        flat_space_expectations = Dict(
+            manifold_volume => Inf,
+            sectional_curvature => 0.0,
+            sectional_curvature_max => 0.0,
+            sectional_curvature_min => 0.0,
+            volume_density => 1.0,
+        )
+        @testset "real Euclidean space $M" for M in [E, EM]
+            test_euclidean(
+                M, pts, X, Y;
+                bases = [DefaultOrthonormalBasis(), D],
+                coordinates = [[1.0, 2.0, 3.0], [1.0, 2.0, 3.0]],
+                extra_functions = M === E ?
+                    [manifold_volume, sectional_curvature, volume_density] : [],
+                extra_expectations = merge(
+                    Dict(
+                        (get_coordinates, DefaultOrthonormalBasis()) => X,
+                        (get_vector, [1.0, 2.0, 3.0], DefaultOrthonormalBasis()) => [1.0, 2.0, 3.0],
+                        manifold_dimension => 3,
+                        repr => repr(M),
+                    ),
+                    M === E ? flat_space_expectations : Dict(),
+                ),
+                invalid_points = invalid_points,
+                invalid_vectors = invalid_vectors,
+                errors_points = [DomainError, DomainError],
+                errors_vectors = [DomainError, DomainError],
+            )
         end
-        for T in types_complex
-            @testset "Complex Euclidean, type $T" begin
-                pts = [
-                    convert(T, [1.0im, -1.0im, 1.0]),
-                    convert(T, [0.0, 1.0, 1.0im]),
-                    convert(T, [0.0, 0.0, 1.0]),
-                ]
-                Manifolds.test_manifold(
-                    Ec,
-                    pts,
-                    test_project_tangent = true,
-                    test_musical_isomorphisms = true,
-                    test_default_vector_transport = true,
-                    test_rand_point = true,
-                    test_rand_tvector = true,
-                    parallel_transport = true,
-                )
+        bases_c = [
+            DefaultOrthonormalBasis(), DefaultOrthonormalBasis(ℂ),
+            D, DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0], ℂ),
+        ]
+        coordinates_c = [
+            collect(1.0:6.0), [1.0, 2.0im, 3.0], collect(1.0:6.0), [1.0, 2.0im, 3.0],
+        ]
+        complex_expectations = merge(
+            flat_space_expectations,
+            Dict(
+                (get_coordinates, DefaultOrthonormalBasis(ℂ)) => X,
+                manifold_dimension => 6,
+                repr => repr(Ec),
+            ),
+        )
+        @testset "complex Euclidean space with real points" begin
+            test_euclidean(
+                Ec, pts, X, Y;
+                bases = bases_c, coordinates = coordinates_c,
+                extra_functions = [manifold_volume, sectional_curvature, volume_density],
+                extra_expectations = complex_expectations,
+                invalid_points = [[:a, :b, :b], [1.0]],
+                invalid_vectors = [[:a, :b, :c], [1.0]],
+                errors_points = [DomainError, DomainError],
+                errors_vectors = [DomainError, DomainError],
+            )
+        end
+        @testset "complex Euclidean space with complex points" begin
+            pts_c = [[1.0im, -1.0im, 1.0], [0.0, 1.0, 1.0im], [0.0, 0.0, 1.0]]
+            test_euclidean(
+                Ec, pts_c, [1.0im, 0.5, -1.0], [2.0, 1.0im, 0.0];
+                bases = bases_c, coordinates = coordinates_c,
+                extra_functions = [manifold_volume, sectional_curvature, volume_density],
+                extra_expectations = merge(
+                    delete!(copy(complex_expectations), (get_coordinates, DefaultOrthonormalBasis(ℂ))),
+                    Dict((number_eltype, rand) => ComplexF64),
+                ),
+                invalid_points = [[:a, :b, :b], [1.0]],
+                invalid_vectors = [[:a, :b, :c], [1.0]],
+                errors_points = [DomainError, DomainError],
+                errors_vectors = [DomainError, DomainError],
+            )
+        end
+
+        @testset "ProjectedOrthonormalBasis" begin
+            p = pts[1]
+            b = get_basis(E, p, ProjectedOrthonormalBasis(:svd))
+            V = get_vectors(E, p, b)
+            @test length(V) == 3
+            @test [inner(E, p, v, w) for v in V, w in V] ≈ I(3)
+            @test get_vector(E, p, get_coordinates(E, p, X, b), b) ≈ X
+        end
+
+        @testset "distributions" begin
+            for M in [E, EM, Ec]
+                pd = Manifolds.projected_distribution(M, Distributions.MvNormal(zeros(3), 1.0 * I))
+                q = rand(pd)
+                @test is_point(M, q)
+                rand!(pd, q)
+                @test is_point(M, q)
+                tvd = Manifolds.normal_tvector_distribution(M, pts[1], 1.0 * I)
+                Z = rand(tvd)
+                @test is_vector(M, pts[1], Z)
+                rand!(tvd, Z)
+                @test is_vector(M, pts[1], Z)
             end
         end
     end
     E = Euclidean(3)
     Ec = Euclidean(3; field = ℂ)
 
-    number_types = [Float64, ComplexF64]
-    @testset "(Nonmutating) Real and Complex Numbers" begin
-        RM = Euclidean()
-        CM = Euclidean(; field = ℂ)
-        for T in number_types
-            @testset "Type $T" begin
-                M = (T <: Complex) ? CM : RM
-                pts = convert.(Ref(T), [1.0, 4.0, 2.0])
-                @test embed(M, pts[1]) == pts[1]
-                @test project(M, pts[1]) == pts[1]
-                @test retract(M, pts[1], pts[2]) == exp(M, pts[1], pts[2])
-                Manifolds.test_manifold(
-                    M, pts;
-                    parallel_transport = true,
-                    test_vector_spaces = false,
-                    test_project_tangent = true,
-                    test_musical_isomorphisms = true,
-                    test_default_vector_transport = true,
-                    test_project_point = true,
-                    test_rand_point = true,
-                    test_rand_tvector = true,
-                    is_mutating = false,
-                )
-                @test rand(MersenneTwister(4711), M; vector_at = pts[1]) isa T
-            end
-        end
+    @testset "(Nonmutating) Real and Complex Numbers, type $T" for T in [Float64, ComplexF64]
+        M = (T <: Complex) ? Euclidean(; field = ℂ) : Euclidean()
+        pts = convert.(Ref(T), [1.0, 4.0, 2.0])
+        @test embed(M, pts[1]) == pts[1]
+        @test project(M, pts[1]) == pts[1]
+        @test retract(M, pts[1], pts[2]) == exp(M, pts[1], pts[2])
+        test_euclidean(
+            M, pts, convert(T, 2.0), convert(T, -0.5);
+            # coordinates of numbers are tested separately below
+            bases = [],
+            mutating = false,
+            invalid_points = [[1.0, 2.0]],
+            invalid_vectors = [[1.0, 2.0]],
+            errors_points = [DomainError],
+            errors_vectors = [DomainError],
+            extra_functions = [manifold_volume, sectional_curvature, volume_density],
+            extra_expectations = merge(
+                Dict(
+                    manifold_volume => Inf, volume_density => 1.0,
+                    sectional_curvature => 0.0, sectional_curvature_max => 0.0,
+                    sectional_curvature_min => 0.0,
+                ),
+                Dict(
+                    manifold_dimension => (T <: Complex ? 2 : 1),
+                    (number_eltype, rand) => T,
+                    repr => repr(M),
+                ),
+            ),
+        )
+        @test rand(MersenneTwister(4711), M; vector_at = pts[1]) isa T
     end
 
     @testset "Coordinates of the number valued Euclidean space" begin
@@ -306,9 +400,6 @@ using FiniteDifferences
         @test !Manifolds.check_chart_switch(M, A, i, p)
 
         @test riemann_tensor(M, p, [1, 2], [1, 3], [1, 4]) == [0, 0]
-        @test sectional_curvature(M, p, [1.0, 0.0], [0.0, 1.0]) == 0.0
-        @test sectional_curvature_max(M) == 0.0
-        @test sectional_curvature_min(M) == 0.0
     end
     @testset "Induced Basis and local metric for EuclideanMetric" begin
         struct DefaultManifold <: AbstractManifold{ℝ} end
@@ -409,14 +500,6 @@ using FiniteDifferences
         rH = riemannian_Hessian(M, p, G, H, X)
         @test rH == H
     end
-    @testset "Volume" begin
-        E = Euclidean(3)
-        @test manifold_volume(E) == Inf
-        p = zeros(3)
-        X = zeros(3)
-        @test volume_density(E, p, X) == 1.0
-    end
-
     @testset "field parameter" begin
         Ms = Euclidean(1; parameter = :field)
         M0s = Euclidean(; parameter = :field)

@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* The `copy`, `get_coordinates` and `get_vectors` tests in `Manifolds.Test` now support numbers as points and tangent vectors and bases over ℂ of complex manifolds:
+  a copy of an immutable value is not required to be a different object, the number of coordinates and basis vectors is compared to `number_of_coordinates`,
+  and orthogonality of a basis over ℝ of a complex manifold refers to the real part of the inner product.
 * `copy` and `copyto!` on the `Segre` manifold now copy the factors of points and tangent vectors; previously the copy shared the factor arrays with the original, so mutating functions applied to a copy also changed the original.
 * `copyto!` on a `MetricManifold` now forwards to the underlying manifold, so representation-specific copying (for example on the `Segre` manifold with a `WarpedMetric`) is used.
 * The `embed` test in `Manifolds.Test` used the embedded point instead of the manifold point when checking aliased tangent vector embedding; it now only checks aliasing when the tangent vector and its embedding have the same type.
