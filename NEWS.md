@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.35] unreleased
 
+### Added
+
+* `zero_vector` and `zero_vector!` for points of the `Flag` manifold in the `OrthogonalPoint` representation.
+
 ### Changed
 
 * Tangent vectors on the `Veronese` manifold are now represented by the new `VeroneseTangentVector` type instead of tuples, which supports vector arithmetic and broadcasting.
 
 ### Fixed
 
+* `isapprox` on the `Flag` manifold now supports the `error=` keyword; the methods are now implemented as `_isapprox`.
 * `default_retraction_method` on the `Elliptope` is now `ProjectionRetraction`; it was `ExponentialRetraction`, but the exponential map is not implemented on the `Elliptope`.
 
 ## [0.11.34] 2026-10-22
