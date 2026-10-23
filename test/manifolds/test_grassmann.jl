@@ -46,8 +46,8 @@ using DiffEqCallbacks, OrdinaryDiffEq
                     representation_size, retract, shortest_geodesic,
                     vector_transport_direction, vector_transport_to, zero_vector,
                 ],
-                :InvalidPoints => Matrix[pf1, pf2, pf3],
-                :InvalidVectors => Matrix[Xf1, Xf2, Xf3],
+                :InvalidPoints => Array[pf1, pf2, pf3],
+                :InvalidVectors => Array[Xf1, Xf2, Xf3],
                 :InverseRetractionMethods => [
                     LogarithmicInverseRetraction(), PolarInverseRetraction(), QRInverseRetraction(),
                 ],
