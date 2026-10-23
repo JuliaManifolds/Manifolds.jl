@@ -660,7 +660,7 @@ function Manifolds.Test.test_copyto(
         q2 = copyto!(M, q, p)
         Test.@test q == p
         Test.@test q2 === q
-        Y = allocate_result(M, exp, p, X)
+        Y = allocate(X)
         Y2 = copyto!(M, Y, p, X)
         Test.@test Y == X
         Test.@test Y2 === Y
@@ -2417,7 +2417,7 @@ function Manifolds.Test.test_zero_vector(
             Test.@test isapprox(n, 0.0; kwargs...)
         end
         if test_mutating
-            Z2 = copy(M, p)
+            Z2 = allocate(Z)
             zero_vector!(M, Z2, p)
             Test.@test isapprox(M, p, Z2, Z; error = :error, kwargs...)
         end
