@@ -53,6 +53,7 @@ Possible properties are
 * `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entries in `:Points`
 * `:SecondVector` is a single second vector in the tangent space of the first entry of `:Points`, for example to test [`inner`](@extref `ManifoldsBase.inner-Tuple{AbstractManifold, Any, Any, Any}`)
 * `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
+* `:TestVectorArithmetic` is a boolean (`true` by default) whether to test basic arithmetic and broadcasting of the first two `:Vectors` (or the first one and `:SecondVector`), if at least one tangent vector is provided
 * `:TestRandScaling` is a boolean (`false` by default) whether to test that random tangent vectors scale linearly with the keyword `σ` of `rand`
 * `:TestMidpointSymmetry` is a boolean (`true` by default) whether to test the symmetry property of the midpoint function
 * `:TestInfo` is a boolean (`true` by default) whether to test that whether `error=:info` in verification functions issues info messages.
@@ -559,6 +560,13 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 expected_value = expected_geod,
                 N = get(properties, :GeodesicSamples, 100),
                 name = "shortest_geodesic(M, p, X, $t)", # shorten name within large suite
+            )
+        end
+        if get(properties, :TestVectorArithmetic, true) && n_vectors ≥ 1
+            Manifolds.Test.test_vector_arithmetic(
+                M, points[1], vectors[1], ismissing(vector) ? vectors[1] : vector;
+                name = "Tangent vector arithmetic",
+                atol = atol,
             )
         end
         if (vector_transport_to in functions)
@@ -2267,6 +2275,58 @@ function Manifolds.Test.test_shortest_geodesic(
     end
     return nothing
 end # Manifolds.Test.test_shortest_geodesic
+
+"""
+    Manifolds.Test.test_vector_arithmetic(
+        M, p, X, Y;
+        name = "Tangent vector arithmetic on \$M at point \$(typeof(p))",
+        test_inplace = !(X isa Number),
+        kwargs...
+    )
+
+Test that tangent vectors `X` and `Y` at `p` on `M` support the basic arithmetic of a vector space.
+
+* that `X + Y`, `X - Y`, `2 * X`, `X * 2`, `X / 2`, `2 \\ X`, `+X` and `-X` are tangent vectors
+  and consistent with each other
+* that broadcasting, e.g. `2 .* X .+ Y`, agrees with the non-broadcasting operations
+  and returns the same type as `X` (unless `X` is a zero-dimensional array)
+* that in-place broadcasting, e.g. `Z .= 2 .* X .+ Y`, works (if activated)
+"""
+function Manifolds.Test.test_vector_arithmetic(
+        M::AbstractManifold, p, X, Y;
+        name = "Tangent vector arithmetic on $M at point $(typeof(p))",
+        test_inplace = !(X isa Number),
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        for Z in (X + Y, X - Y, 2 * X, -X)
+            Test.@test is_vector(M, p, Z; error = :error, kwargs...)
+        end
+        Test.@test isapprox(M, p, (X + Y) - Y, X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, X - Y, X + (-Y); error = :error, kwargs...)
+        Test.@test isapprox(M, p, 2 * X, X + X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, X * 2, 2 * X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, X / 2 + X / 2, X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, 2 \ X, X / 2; error = :error, kwargs...)
+        Test.@test isapprox(M, p, +X, X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, -X, (-1) * X; error = :error, kwargs...)
+        # broadcasting
+        Z = 2 .* X .+ Y
+        # broadcasting over zero-dimensional arrays returns a scalar in Julia
+        (X isa AbstractArray && ndims(X) == 0) || Test.@test Z isa typeof(X)
+        Test.@test isapprox(M, p, Z, 2 * X + Y; error = :error, kwargs...)
+        Test.@test isapprox(M, p, X .- 2 .* X, -X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, .-X, -X; error = :error, kwargs...)
+        if test_inplace
+            Z2 = copy(M, p, X)
+            Z2 .= 2 .* X .+ Y
+            Test.@test isapprox(M, p, Z2, 2 * X + Y; error = :error, kwargs...)
+            Z2 .= X
+            Test.@test isapprox(M, p, Z2, X; error = :error, kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_vector_arithmetic
 
 """
     Manifolds.Test.test_vector_transport(

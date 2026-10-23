@@ -267,40 +267,18 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         @test oneP == one(p)
     end
 
+    # arithmetic, broadcasting, copy and copyto! are covered by the test suite above
     @testset "UMVTangentVector Basics" begin
         @test X == UMVTangentVector(X.U, X.M, X.Vt)
-        w = UMVTangentVector(X.U, 2 * X.M, X.Vt)
-        @test X + w == UMVTangentVector(2 * X.U, 3 * X.M, 2 * X.Vt)
-        @test X - w == UMVTangentVector(0 * X.U, -X.M, 0 * X.Vt)
-        @test 2 * X == UMVTangentVector(2 * X.U, 2 * X.M, 2 * X.Vt)
-        @test X * 2 == UMVTangentVector(X.U * 2, X.M * 2, X.Vt * 2)
-        @test 2 \ X == UMVTangentVector(2 \ X.U, 2 \ X.M, 2 \ X.Vt)
-        @test X / 2 == UMVTangentVector(X.U / 2, X.M / 2, X.Vt / 2)
-        @test +X == X
-        @test -X == UMVTangentVector(-X.U, -X.M, -X.Vt)
         w = allocate(X, number_eltype(X))
+        @test number_eltype(w) === Float64
         zero_vector!(M, w, p)
         @test w == zero_vector(M, p)
-        # copyto
-        w2 = allocate(w)
-        copyto!(M, w2, p, w)
-        @test w.U == w2.U
-        @test w.M == w2.M
-        @test w.Vt == w2.Vt
-        # broadcasting
         @test axes(w) === ()
+        # the copy is equal to the original, but its factors are new arrays
         wc = copy(w)
-        # test that the copy is equal to the original, but represented by
-        # a new array
         @test wc.U !== w.U
         @test wc.U == w.U
-        wb = w .+ X .* 2
-        @test wb isa UMVTangentVector
-        @test wb == w + X * 2
-        @test (wb .= 2 .* w .+ X) == 2 * w + X
-        @test wb == 2 * w + X
-        wb .= w
-        @test wb == w
     end
 
     @testset "Riemannian Hessian" begin

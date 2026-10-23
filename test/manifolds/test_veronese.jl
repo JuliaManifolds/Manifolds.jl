@@ -66,6 +66,8 @@ using LinearAlgebra, Manifolds, Random, Test
                 :RetractionMethods => [ExponentialRetraction()],
                 :Rng => Random.Xoshiro(42),
                 :SecondVector => Y,
+                # tangent vectors are tuples, which do not support arithmetic
+                :TestVectorArithmetic => false,
                 :VectorTransportMethods => [ProjectionTransport()],
                 :Vectors => [X, Z],
             ),

@@ -169,6 +169,7 @@ function test_rand end
 function test_repr end
 function test_representation_size end
 function test_retract end
+function test_vector_arithmetic end
 function test_vector_transport end
 function test_volume_density end
 function test_Weingarten end
