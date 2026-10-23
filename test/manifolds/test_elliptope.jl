@@ -31,6 +31,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             :InverseRetractionMethods => [missing],
             :RetractionMethods => [ProjectionRetraction()],
             :Seed => 42,
+            :TestRandScaling => true,
         ),
         # Expectations
         Dict(
@@ -90,10 +91,4 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             repr => "Elliptope(4, 2; parameter=:field)",
         ),
     )
-
-    @testset "random points and tangent vectors" begin
-        pr = rand(MersenneTwister(42), M)
-        @test is_point(M, pr)
-        @test is_vector(M, pr, rand(MersenneTwister(44), M; vector_at = pr))
-    end
 end

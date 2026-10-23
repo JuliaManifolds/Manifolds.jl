@@ -1,123 +1,116 @@
-include("../header.jl")
+using Distributions, LinearAlgebra, Manifolds, ManifoldsBase, Quaternions, Random, StaticArrays, Test
 using DiffEqCallbacks, OrdinaryDiffEq
-using ForwardDiff
 
-@testset "Grassmann distance at a right and at a small angle" begin
+@testset "The Grassmann manifolds" begin
     @test_throws DomainError Grassmann(2, 3)
-    M = Grassmann(4, 2)
-    p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
-    q = [0.0 0.0; 0.0 1.0; 1.0 0.0; 0.0 0.0]
-    @test distance(M, p, q) ≈ π / 2
-    t = 1.0e-10
-    @test distance(M, p, [cos(t) 0.0; 0.0 1.0; sin(t) 0.0; 0.0 0.0]) ≈ t
-end
 
-@testset "Grassmann" begin
+    @testset "distance at a right and at a small angle" begin
+        M = Grassmann(4, 2)
+        p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+        q = [0.0 0.0; 0.0 1.0; 1.0 0.0; 0.0 0.0]
+        @test distance(M, p, q) ≈ π / 2
+        t = 1.0e-10
+        @test distance(M, p, [cos(t) 0.0; 0.0 1.0; sin(t) 0.0; 0.0 0.0]) ≈ t
+    end
+
     @testset "Real" begin
         M = Grassmann(3, 2)
-        @testset "Basics" begin
-            @test repr(M) == "Grassmann(3, 2, ℝ)"
-            @test representation_size(M) == (3, 2)
-            @test manifold_dimension(M) == 2
-            @test get_total_space(M) == Stiefel(3, 2)
-            @test !is_flat(M)
-            @test is_flat(Grassmann(2, 1))
-            @test default_retraction_method(M) == ExponentialRetraction()
-            @test default_retraction_method(M, typeof(zeros(3, 2))) ==
-                ExponentialRetraction()
-            @test default_retraction_method(M, ProjectorPoint) == ExponentialRetraction()
-            @test default_vector_transport_method(M) == ParallelTransport()
-            @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
-            @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
-            @test_throws ManifoldDomainError is_point(
-                M, [2.0 0.0; 0.0 1.0; 0.0 0.0];
-                error = :error,
-            )
-            @test_throws ManifoldDomainError is_vector(
-                M, [2.0 0.0; 0.0 1.0; 0.0 0.0], zeros(3, 2);
-                error = :error,
-            )
-            @test_throws ManifoldDomainError is_vector(
-                M, [1.0 0.0; 0.0 1.0; 0.0 0.0], ones(3, 2);
-                error = :error,
-            )
-            @test is_point(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]; error = :error)
-            @test_throws ManifoldDomainError is_point(
-                M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0];
-                error = :error,
-            )
-            @test is_vector(
-                M, [1.0 0.0; 0.0 1.0; 0.0 0.0], zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]);
-                error = :error,
-            )
-            @test_throws ManifoldDomainError is_vector(
-                M,
-                [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                1im * zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]);
-                error = :error,
-            )
-            @test injectivity_radius(M) == π / 2
-            @test injectivity_radius(M, ExponentialRetraction()) == π / 2
-            @test injectivity_radius(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]) == π / 2
-            @test injectivity_radius(
-                M, [1.0 0.0; 0.0 1.0; 0.0 0.0], ExponentialRetraction()
-            ) == π / 2
-        end
-        types = [Matrix{Float64}]
-        basis_types = (ProjectedOrthonormalBasis(:gram_schmidt),)
-        @testset "Type $T" for T in types
-            p1 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            X = [0.0 0.0; 0.0 0.0; 0.0 1.0]
-            p2 = exp(M, p1, X)
-            Y = [0.0 1.0; -1.0 0.0; 1.0 0.0]
-            p3 = exp(M, p1, Y)
-            pts = convert.(T, [p1, p2, p3])
-            Manifolds.test_manifold(
-                M,
-                pts,
-                test_exp_log = true,
-                test_injectivity_radius = false,
-                test_project_tangent = true,
-                test_project_point = true,
-                test_default_vector_transport = true,
-                vector_transport_methods = [ParallelTransport(), ProjectionTransport()],
-                point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
-                test_rand_point = true,
-                test_rand_tvector = true,
-                retraction_methods = [PolarRetraction(), QRRetraction()],
-                inverse_retraction_methods = [
-                    PolarInverseRetraction(),
-                    QRInverseRetraction(),
+        p1 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        X = [0.0 0.0; 0.0 0.0; 0.0 1.0]
+        X2 = [0.0 0.0; 0.0 0.0; 1.0 0.0]
+        p2 = exp(M, p1, X)
+        Y = [0.0 1.0; -1.0 0.0; 1.0 0.0]
+        p3 = exp(M, p1, Y)
+        # Invalids
+        pf1 = [2.0 0.0; 0.0 1.0; 0.0 0.0]
+        pf2 = [1.0, 0.0, 0.0, 0.0]
+        pf3 = 1im * p1
+        Xf1 = ones(3, 2)
+        Xf2 = [0.0, 0.0, 1.0, 0.0]
+        Xf3 = 1im * zero_vector(M, p1)
+
+        Manifolds.Test.test_manifold(
+            M,
+            Dict(
+                :Bases => [DefaultOrthonormalBasis()],
+                :Coordinates => [[0.0, 1.0]],
+                :EmbeddedPoints => [[1.0 0.0; 0.0 2.0; 0.0 0.0]],
+                :EmbeddedVectors => [Y],
+                :Functions => [
+                    copy, copyto!, default_inverse_retraction_method, default_retraction_method,
+                    default_vector_transport_method, distance, embed, exp, geodesic,
+                    get_basis, get_coordinates, get_embedding, get_vector, get_vectors,
+                    injectivity_radius, inner, inverse_retract, is_flat,
+                    is_point, is_vector, log, manifold_dimension, mid_point, norm,
+                    parallel_transport_direction, parallel_transport_to, project, rand, repr,
+                    representation_size, retract, shortest_geodesic,
+                    vector_transport_direction, vector_transport_to, zero_vector,
                 ],
-                #basis_types_vecs = basis_types,
-                # investigate why this is so large on dev
-                exp_log_atol_multiplier = 1.0,
-                is_tangent_atol_multiplier = 20.0,
-                is_point_atol_multiplier = 10.0,
-                projection_atol_multiplier = 10.0,
-                retraction_atol_multiplier = 10.0,
-                test_inplace = true,
-            )
+                :InvalidPoints => [pf1, pf2, pf3],
+                :InvalidVectors => [Xf1, Xf2, Xf3],
+                :InverseRetractionMethods => [
+                    LogarithmicInverseRetraction(), PolarInverseRetraction(), QRInverseRetraction(),
+                ],
+                :Points => [p1, p2, p3],
+                :RetractionMethods => [ExponentialRetraction(), PolarRetraction(), QRRetraction()],
+                :SecondVector => X2,
+                :Vectors => [X, project(M, p2, X2), project(M, p3, X)],
+                :VectorTransportMethods => [ParallelTransport(), ProjectionTransport()],
+                :Seed => 42,
+                :TestRandScaling => true,
+            ),
+            # Expectations
+            Dict(
+                :atol => 1.0e-13,
+                default_inverse_retraction_method => LogarithmicInverseRetraction(),
+                default_retraction_method => ExponentialRetraction(),
+                default_vector_transport_method => ParallelTransport(),
+                distance => 1.0,
+                exp => p2,
+                get_embedding => Stiefel(3, 2),
+                (get_vectors, DefaultOrthonormalBasis()) => :Orthonormal,
+                injectivity_radius => π / 2,
+                (injectivity_radius, ExponentialRetraction()) => π / 2,
+                inner => 0.0,
+                is_flat => false,
+                log => X,
+                manifold_dimension => 2,
+                norm => 1.0,
+                (project, :Point) => p1,
+                (project, :Vector) => project(M, p1, Y),
+                repr => "Grassmann(3, 2, ℝ)",
+                representation_size => (3, 2),
+                (vector_transport_to, ProjectionTransport()) => project(M, p2, X),
+                :IsPointErrors => [ManifoldDomainError, missing, ManifoldDomainError],
+                :IsVectorErrors => [ManifoldDomainError, missing, ManifoldDomainError],
+                :IsVectorBasepointError => ManifoldDomainError,
+            ),
+        )
 
-            @testset "inner/norm" begin
-                X1 = inverse_retract(M, pts[1], pts[2], PolarInverseRetraction())
-                X2 = inverse_retract(M, pts[1], pts[3], PolarInverseRetraction())
+        @testset "Basics" begin
+            @test get_total_space(M) == Stiefel(3, 2)
+            @test is_flat(Grassmann(2, 1))
+            @test default_retraction_method(M, ProjectorPoint) == ExponentialRetraction()
+            @test default_vector_transport_method(M, typeof(StiefelPoint(p1))) == ParallelTransport()
+            @test is_point(M, rand(Manifolds.uniform_distribution(M, p1)))
+        end
 
-                @test real(inner(M, pts[1], X1, X2)) ≈ real(inner(M, pts[1], X2, X1))
-                @test imag(inner(M, pts[1], X1, X2)) ≈ -imag(inner(M, pts[1], X2, X1))
-                @test imag(inner(M, pts[1], X1, X1)) ≈ 0
+        @testset "inner/norm" begin
+            X1 = inverse_retract(M, p1, p2, PolarInverseRetraction())
+            X2 = inverse_retract(M, p1, p3, PolarInverseRetraction())
 
-                @test norm(M, pts[1], X1) isa Real
-                @test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
-            end
-            @test riemann_tensor(M, p1, X, Y, 2 * X + Y) ≈ [-2 -2; 0 -1; -2 2]
-            @test sectional_curvature(M, p1, X, [0.0 0.0; 0.0 0.0; 1.0 0.0]) ≈ 1.0
-            @testset "gradient and metric conversion" begin
-                Y = change_metric(M, EuclideanMetric(), p1, X)
-                @test Y == X
-                Z = change_representer(M, EuclideanMetric(), p1, X)
-                @test Z == X
-            end
+            @test real(inner(M, p1, X1, X2)) ≈ real(inner(M, p1, X2, X1))
+            @test imag(inner(M, p1, X1, X2)) ≈ -imag(inner(M, p1, X2, X1))
+            @test imag(inner(M, p1, X1, X1)) ≈ 0
+
+            @test norm(M, p1, X1) isa Real
+            @test norm(M, p1, X1) ≈ sqrt(inner(M, p1, X1, X1))
+        end
+        @test riemann_tensor(M, p1, X, Y, 2 * X + Y) ≈ [-2 -2; 0 -1; -2 2]
+        @test sectional_curvature(M, p1, X, X2) ≈ 1.0
+        @testset "gradient and metric conversion" begin
+            @test change_metric(M, EuclideanMetric(), p1, X) == X
+            @test change_representer(M, EuclideanMetric(), p1, X) == X
         end
 
         @testset "Distribution tests" begin
@@ -131,24 +124,6 @@ end
             @test isa(rand(ugd_mmatrix), MMatrix)
         end
 
-        @testset "vector transport" begin
-            p1 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            X = [0.0 0.0; 0.0 0.0; 0.0 1.0]
-            p2 = exp(M, p1, X)
-            @test vector_transport_to(M, p1, X, p2, ProjectionTransport()) ==
-                project(M, p2, X)
-            @test is_vector(
-                M, p2, vector_transport_to(M, p1, X, p2, ProjectionTransport());
-                error = :error, atol = 10^-15,
-            )
-        end
-
-        @testset "default_* functions" begin
-            p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            pS = StiefelPoint(p)
-            @test default_vector_transport_method(M, typeof(p)) == ParallelTransport()
-            @test default_vector_transport_method(M, typeof(pS)) == ParallelTransport()
-        end
         @testset "Grassmann and Stiefel in the StiefelPoint representation" begin
             for M2 in [Grassmann(4, 2), Stiefel(4, 2)]
                 p2 = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
@@ -178,80 +153,79 @@ end
             get_vector!(M, XS, StiefelPoint(p), c, B)
             @test XS.value == X
         end
-
     end
 
     @testset "Complex" begin
         M = Grassmann(3, 2, ℂ)
-        @testset "Basics" begin
-            @test repr(M) == "Grassmann(3, 2, ℂ)"
-            @test representation_size(M) == (3, 2)
-            @test manifold_dimension(M) == 4
-            @test !is_flat(M)
-            @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
-            @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
-            @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
-            @test_throws ManifoldDomainError is_point(
-                M, [2.0 0.0; 0.0 1.0; 0.0 0.0];
-                error = :error,
-            )
-            @test_throws ManifoldDomainError is_vector(
-                M, [2.0 0.0; 0.0 1.0; 0.0 0.0], zeros(3, 2);
-                error = :error,
-            )
-            @test_throws ManifoldDomainError is_vector(
-                M, [1.0 0.0; 0.0 1.0; 0.0 0.0], ones(3, 2);
-                error = :error,
-            )
-            @test is_vector(
-                M,
-                [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                1im * zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]),
-            )
-            @test is_point(M, [1.0 0.0; 0.0 1.0; 0.0 0.0])
-            @test injectivity_radius(M) == π / 2
-        end
-        types = [Matrix{ComplexF64}]
-        @testset "Type $T" for T in types
-            p1 = [0.5 + 0.5im 0.5 + 0.5im; 0.5 + 0.5im -0.5 - 0.5im; 0.0 0.0]
-            X = [0.0 0.0; 0.0 0.0; 0.0 1.0]
-            p2 = exp(M, p1, X)
-            Y = [0.0 1.0; -1.0 0.0; 1.0 0.0]
-            p3 = exp(M, p1, Y)
-            pts = convert.(T, [p1, p2, p3])
-            Manifolds.test_manifold(
-                M,
-                pts,
-                test_exp_log = true,
-                test_injectivity_radius = false,
-                test_project_tangent = true,
-                test_project_point = true,
-                test_default_vector_transport = false,
-                retraction_methods = [PolarRetraction(), QRRetraction()],
-                inverse_retraction_methods = [
-                    PolarInverseRetraction(),
-                    QRInverseRetraction(),
+        p1 = [0.5 + 0.5im 0.5 + 0.5im; 0.5 + 0.5im -0.5 - 0.5im; 0.0 0.0]
+        X = [0.0 0.0; 0.0 0.0; 0.0 1.0]
+        X2 = [0.0 0.0; 0.0 0.0; 1.0im 0.0]
+        p2 = exp(M, p1, X)
+        Y = [0.0 1.0; -1.0 0.0; 1.0 0.0]
+        p3 = exp(M, p1, Y)
+        pe = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        Manifolds.Test.test_manifold(
+            M,
+            Dict(
+                :EmbeddedPoints => [2 .* p1],
+                :EmbeddedVectors => [Y],
+                :Functions => [
+                    copy, copyto!, distance, embed, exp, get_embedding, injectivity_radius,
+                    inner, inverse_retract, is_flat, is_point, is_vector, log,
+                    manifold_dimension, mid_point, norm, project, rand, repr,
+                    representation_size, retract, shortest_geodesic, zero_vector,
                 ],
-                exp_log_atol_multiplier = 10.0^4,
-                is_point_atol_multiplier = 20.0,
-                is_tangent_atol_multiplier = 20.0,
-                projection_atol_multiplier = 10.0,
-                retraction_atol_multiplier = 10.0,
-                test_inplace = true,
-                test_rand_point = true,
+                :InvalidPoints => [[2.0 0.0; 0.0 1.0; 0.0 0.0], [1.0, 0.0, 0.0, 0.0]],
+                :InvalidVectors => [ones(3, 2), [0.0, 0.0, 1.0, 0.0]],
+                :InverseRetractionMethods => [
+                    LogarithmicInverseRetraction(), PolarInverseRetraction(), QRInverseRetraction(),
+                ],
+                :Points => [p1, p2, p3],
+                :RetractionMethods => [ExponentialRetraction(), PolarRetraction(), QRRetraction()],
+                :SecondVector => X2,
+                :Vectors => [X, project(M, p2, X2), project(M, p3, X)],
+                :Seed => 42,
+            ),
+            # Expectations
+            Dict(
+                :atol => 1.0e-13,
+                distance => 1.0,
+                exp => p2,
+                get_embedding => Stiefel(3, 2, ℂ),
+                injectivity_radius => π / 2,
+                is_flat => false,
+                log => X,
+                manifold_dimension => 4,
+                norm => 1.0,
+                (number_eltype, rand) => ComplexF64,
+                (project, :Point) => p1,
+                repr => "Grassmann(3, 2, ℂ)",
+                representation_size => (3, 2),
+                :IsPointErrors => [ManifoldDomainError, missing],
+                :IsVectorErrors => [ManifoldDomainError, missing],
+                :IsVectorBasepointError => ManifoldDomainError,
+            ),
+        )
+
+        @testset "Basics" begin
+            @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
+            @test is_point(M, pe)
+            @test is_vector(M, pe, 1im * zero_vector(M, pe))
+            @test_throws ManifoldDomainError is_vector(
+                M, [2.0 0.0; 0.0 1.0; 0.0 0.0], zeros(3, 2); error = :error,
             )
+        end
 
-            @testset "inner/norm" begin
-                X1 = inverse_retract(M, pts[1], pts[2], PolarInverseRetraction())
-                X2 = inverse_retract(M, pts[1], pts[3], PolarInverseRetraction())
+        @testset "inner/norm" begin
+            X1 = inverse_retract(M, p1, p2, PolarInverseRetraction())
+            X2 = inverse_retract(M, p1, p3, PolarInverseRetraction())
 
-                @test real(inner(M, pts[1], X1, X2)) ≈ real(inner(M, pts[1], X2, X1))
-                @test imag(inner(M, pts[1], X1, X2)) ≈ -imag(inner(M, pts[1], X2, X1))
-                @test isapprox(imag(inner(M, pts[1], X1, X1)), 0; atol = 1.0e-30)
+            @test real(inner(M, p1, X1, X2)) ≈ real(inner(M, p1, X2, X1))
+            @test imag(inner(M, p1, X1, X2)) ≈ -imag(inner(M, p1, X2, X1))
+            @test isapprox(imag(inner(M, p1, X1, X1)), 0; atol = 1.0e-30)
 
-                @test norm(M, pts[1], X1) isa Real
-                @test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
-            end
+            @test norm(M, p1, X1) isa Real
+            @test norm(M, p1, X1) ≈ sqrt(inner(M, p1, X1, X1))
         end
     end
 
@@ -268,8 +242,17 @@ end
     @testset "Quaternionic" begin
         G = Grassmann(3, 2, ℍ)
         p = rand(MersenneTwister(42), G)
-        @test is_point(G, p; error = :error)
-        @test !is_point(G, 2 .* p)
+        Manifolds.Test.test_manifold(
+            G,
+            Dict(
+                :Functions => [is_point, rand],
+                :Points => [p],
+                :InvalidPoints => [2 .* p],
+                :Seed => 42,
+            ),
+            # Expectations
+            Dict(:atol => 1.0e-14, (number_eltype, rand) => Quaternion{Float64}),
+        )
     end
 
     @testset "Projector representation" begin
@@ -534,13 +517,4 @@ end
             @test isapprox(M, q_chart, q; atol = 1.0e-8)
         end
     end
-end
-
-@testset "random tangent vectors scale with σ" begin
-    M = Grassmann(4, 2)
-    p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
-    X = rand(MersenneTwister(42), M; vector_at = p)
-    Y = rand(MersenneTwister(42), M; vector_at = p, σ = 2.0)
-    @test is_vector(M, p, Y)
-    @test Y == 2 .* X
 end

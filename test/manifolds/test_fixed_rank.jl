@@ -38,6 +38,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             :RetractionMethods => [PolarRetraction(), OrthographicRetraction()],
             :InverseRetractionMethods => [missing, OrthographicInverseRetraction()],
             :Seed => 42,
+            :TestRandScaling => true,
         ),
         # Expectations
         Dict(
@@ -198,16 +199,18 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             Mc,
             Dict(
                 :Functions => [
-                    get_embedding, is_flat, is_point, manifold_dimension, repr,
+                    get_embedding, is_flat, is_point, manifold_dimension, rand, repr,
                     representation_size,
                 ],
                 :Points => [pc],
+                :Seed => 42,
             ),
             # Expectations
             Dict(
                 get_embedding => Euclidean(3, 2; field = ℂ),
                 is_flat => false,
                 manifold_dimension => 12,
+                (number_eltype, rand) => ComplexF64,
                 repr => "FixedRankMatrices(3, 2, 2, ℂ)",
                 representation_size => (3, 2),
             ),
@@ -324,15 +327,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         @test Y3.Vt ≈ [0.0 0.0 1.5; 0.0 0.0 1.0]
     end
 
-    @testset "random points and tangent vectors" begin
-        Mc = FixedRankMatrices(3, 2, 2, ℂ)
-        pc = rand(MersenneTwister(42), Mc)
-        @test number_eltype(pc) === ComplexF64
-        @test is_point(Mc, pc)
-        @test number_eltype(rand(MersenneTwister(43), Mc; vector_at = pc)) === ComplexF64
-        X1 = rand(MersenneTwister(43), M; vector_at = p)
-        X2 = rand(MersenneTwister(43), M; vector_at = p, σ = 2.0)
-        @test isapprox(M, p, 2 * X1, X2)
+    @testset "singular values of random points scale with σ" begin
         @test rand(MersenneTwister(44), M; σ = 3.0).S == 3 * rand(MersenneTwister(44), M).S
     end
 
