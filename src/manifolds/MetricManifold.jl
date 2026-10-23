@@ -22,6 +22,10 @@ function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     return get_vector!(M, Y, p, z, B)
 end
 
+# the metric does not change the representation of points and tangent vectors
+copyto!(M::MetricManifold, q, p) = copyto!(M.manifold, q, p)
+copyto!(M::MetricManifold, Y, p, X) = copyto!(M.manifold, Y, p, X)
+
 @doc raw"""
     flat(N::MetricManifold{M,G}, p, X::TFVector)
 

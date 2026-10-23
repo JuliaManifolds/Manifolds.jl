@@ -883,9 +883,9 @@ function Manifolds.Test.test_embed(
                     Y2 = copy(E, q, Y)
                     embed!(M, Y2, p, X)
                     Test.@test isapprox(E, q, Y2, Y; error = :error, kwargs...)
-                    if test_aliased
-                        Y3 = copy(E, q, Y)
-                        embed!(M, Y3, q, Y3)  # aliased
+                    if test_aliased && (typeof(X) == typeof(Y))
+                        Y3 = copy(M, p, X)
+                        embed!(M, Y3, p, Y3)  # aliased
                         Test.@test isapprox(E, q, Y3, Y; error = :error, kwargs...)
                     end
                     if project in available_functions

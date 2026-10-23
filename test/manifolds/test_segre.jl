@@ -1,6 +1,6 @@
-using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
+using FiniteDifferences, LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
 
-@testset "Segre Manifold" begin
+@testset "The Segre manifold" begin
     @test_throws DomainError Segre(2, 0)
     # Manifolds to test
     Ms = [
@@ -97,6 +97,43 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
     for (M, V, p, q, X, Y, c, dc) in zip(Ms, Vs, ps, qs, Xs, Ys, cs, dcs)
         @testset "Manifold $M" begin
+            Manifolds.Test.test_manifold(
+                M,
+                Dict(
+                    :Bases => [DefaultOrthonormalBasis()],
+                    :Coordinates => [c],
+                    :Functions => [
+                        copy, copyto!, distance, embed, exp, geodesic, get_basis,
+                        get_coordinates, get_embedding, get_vector, get_vectors, inner,
+                        is_point, is_vector, log, manifold_dimension, mid_point, norm, rand,
+                        repr, shortest_geodesic, vector_transport_to, zero_vector,
+                    ],
+                    :InvalidPoints => [
+                        [[1.0, 0.0], p[2:end]...],
+                        [p[1], [1.0], p[3:end]...],
+                        [[-1.0], p[2:end]...],
+                        [p[1], 2 * p[2:end]...],
+                    ],
+                    :InvalidVectors => [[[1.0, 0.0], X[2:end]...], p],
+                    :Points => [p, q],
+                    :SecondVector => Y,
+                    :Vectors => [X],
+                    :VectorTransportMethods => [ProjectionTransport()],
+                    :Seed => 42,
+                ),
+                # Expectations
+                Dict(
+                    :atol => 1.0e-10,
+                    get_embedding => Euclidean(prod(V)),
+                    (get_vectors, DefaultOrthonormalBasis()) => :Orthonormal,
+                    manifold_dimension => 1 + sum(V .- 1),
+                    repr => repr(M),
+                    :IsPointErrors => [DomainError, DomainError, DomainError, DomainError],
+                    :IsVectorErrors => [DomainError, DomainError],
+                    :IsVectorBasepointError => DomainError,
+                ),
+            )
+
             @testset "Segre" begin
                 get_manifold(::Segre{ℝ, V}) where {V} = Segre{ℝ, V}()
                 get_manifold(::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}) where {V, A} =
@@ -104,42 +141,12 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 @test Segre(V...) == get_manifold(M)
             end
 
-            @testset "manifold_dimension" begin
-                @test manifold_dimension(M) == 1 + sum(V .- 1)
-            end
-
-            @testset "is_point" begin
-                @test is_point(M, p)
-                @test is_point(M, q)
-                @test_throws DomainError is_point(M, [[1.0, 0.0], p[2:end]...]; error = :error)
-                @test_throws DomainError is_point(M, [p[1], [1.0], p[3:end]...]; error = :error)
-                @test_throws DomainError is_point(M, [[-1.0], p[2:end]...]; error = :error)
-                @test_throws DomainError is_point(M, [p[1], 2 * p[2:end]...]; error = :error)
-            end
-
-            @testset "is_vector" begin
-                @test is_vector(M, p, X; error = :error)
-                @test is_vector(M, p, Y; error = :error)
-                @test_throws DomainError is_vector(M, [[1.0, 0.0], p[2:end]...], X, false, true)
-                @test_throws DomainError is_vector(M, p, [[1.0, 0.0], X[2:end]...], false, true)
-                @test_throws DomainError is_vector(M, p, p, false, true)
-            end
-
             @testset "connected_by_geodesic" begin
                 @test connected_by_geodesic(M, p, q)
             end
 
-            Random.seed!(1)
-            @testset "rand" begin
-                @test is_point(M, rand(M))
-                @test is_vector(M, p, rand(M, vector_at = p))
-                @test is_point(M, rand(MersenneTwister(42), M))
+            @testset "rand is reproducible" begin
                 @test rand(MersenneTwister(42), M) == rand(MersenneTwister(42), M)
-                @test is_vector(M, p, rand(MersenneTwister(42), M; vector_at = p))
-            end
-
-            @testset "get_embedding" begin
-                @test get_embedding(M) == Euclidean(prod(V))
             end
 
             @testset "embed!" begin
@@ -174,27 +181,12 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 Z_same = vector_transport_to(N, p, X, p, ProjectionTransport())
                 @test isapprox(Z_same, X; atol = 1.0e-10)
 
-                Z_inplace = zero_vector(N, q)
-                vector_transport_to!(N, Z_inplace, p, X, q, ProjectionTransport())
-                @test isapprox(Z_inplace, Z; atol = 1.0e-10)
                 # the projection transport does not depend on the warping
                 ZM = vector_transport_to(M, p, X, q, ProjectionTransport())
                 @test isapprox(ZM, Z; atol = 1.0e-10)
-                @test is_vector(M, q, ZM)
-
-                Z_alias = deepcopy(X)
-                vector_transport_to!(N, Z_alias, p, Z_alias, q, ProjectionTransport())
-                @test isapprox(Z_alias, Z; atol = 1.0e-10)
             end
 
-            @testset "get_coordinates" begin
-                @test isapprox(X, get_vector(M, p, get_coordinates(M, p, X)))
-                @test isapprox(c, get_coordinates(M, p, get_vector(M, p, c)))
-                c_ = fill(NaN, manifold_dimension(M))
-                get_coordinates!(M, c_, p, X, DefaultOrthonormalBasis())
-                @test isapprox(c_, get_coordinates(M, p, X))
-
-                # Coordinates are ON
+            @testset "coordinates are orthonormal" begin
                 @test isapprox(
                     dot(c, get_coordinates(M, p, X)), inner(M, p, X, get_vector(M, p, c))
                 )
@@ -205,14 +197,6 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 p_ = exp(M, p, zeros.(size.(X)))
                 @test is_point(M, p_)
                 @test isapprox(p, p_; atol = 1.0e-5)
-
-                # the result may be the starting point itself
-                p_alias = deepcopy(p)
-                exp!(M, p_alias, p_alias, X)
-                @test isapprox(p_alias, exp(M, p, X))
-                p_alias = deepcopy(p)
-                mid_point!(M, p_alias, p_alias, q)
-                @test isapprox(p_alias, mid_point(M, p, q))
 
                 # Tangent vector in the scaling direction
                 p_ = exp(M, p, [X[1], zeros.(size.(X[2:end]))...])
