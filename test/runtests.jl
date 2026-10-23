@@ -55,6 +55,7 @@ end
         include_test("manifolds/test_hyperbolic.jl")
         include_test("manifolds/test_hyperrectangle.jl")
         include_test("manifolds/test_invertible_matrices.jl")
+        include_test("manifolds/test_multinomial_doubly_stochastic.jl")
         include_test("manifolds/test_oblique.jl")
         include_test("manifolds/test_stiefel.jl")
         include_test("manifolds/test_symmetric.jl")
@@ -65,7 +66,6 @@ end
         # starting with tests of simple manifolds
         include_test("manifolds-old/hamiltonian.jl")
         include_test("manifolds-old/lorentz.jl")
-        include_test("manifolds-old/multinomial_doubly_stochastic.jl")
         include_test("manifolds-old/multinomial_symmetric.jl")
         include_test("manifolds-old/multinomial_spd.jl")
         include_test("manifolds-old/positive_numbers.jl")
