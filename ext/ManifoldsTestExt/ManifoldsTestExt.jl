@@ -54,6 +54,7 @@ Possible properties are
 * `:SecondVector` is a single second vector in the tangent space of the first entry of `:Points`, for example to test [`inner`](@extref `ManifoldsBase.inner-Tuple{AbstractManifold, Any, Any, Any}`)
 * `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
 * `:TestVectorArithmetic` is a boolean (`true` by default) whether to test basic arithmetic and broadcasting of the first two `:Vectors` (or the first one and `:SecondVector`), if at least one tangent vector is provided
+* `:TestRandReproducibility` is a boolean (by default the value of `:Mutating`, or `true` if `rand!` is among the `:Functions`) whether to test that `rand` and `rand!` draw the same points and tangent vectors from copies of a random number generator
 * `:TestRandScaling` is a boolean (`false` by default) whether to test that random tangent vectors scale linearly with the keyword `σ` of `rand`
 * `:TestMidpointSymmetry` is a boolean (`true` by default) whether to test the symmetry property of the midpoint function
 * `:TestInfo` is a boolean (`true` by default) whether to test that whether `error=:info` in verification functions issues info messages.
@@ -492,6 +493,9 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 vector_at = points[1],
                 expected_eltype = get_expectation(expectations, (number_eltype, rand)),
                 test_mutating = (rand! in functions) ? true : mutating,
+                test_reproducibility = get(
+                    properties, :TestRandReproducibility, (rand! in functions) ? true : mutating
+                ),
                 test_scaling = get(properties, :TestRandScaling, false),
                 name = "rand(M)",
                 atol = get(function_atols, rand, atol),
@@ -1974,6 +1978,7 @@ end # Manifolds.Test.test_repr
         expected_eltype = NoExpectation(),
         seed = missing,
         test_mutating = true,
+        test_reproducibility = test_mutating,
         test_scaling = false,
         rng = missing,
         name = "Random sampling on \$M",
@@ -1988,6 +1993,8 @@ the point drawn by `rand(M)` unless the keyword `vector_at` provides one.
 * that the mutating versions `rand!` match the non-mutating versions (if activated)
 * that the four mentioned functions also work with a seed upfront.
 * that both the point and the tangent vector have the number type `expected_eltype` (if provided)
+* that `rand` and `rand!` draw the same point and the same tangent vector from copies of
+  the random number generator `rng`, or of the default one (if `test_reproducibility` is activated)
 * that `rand(M; vector_at=p, σ=2)` is twice the tangent vector drawn with the default `σ`
   from the same random number generator state (if `test_scaling` is activated)
 """
@@ -1997,6 +2004,7 @@ function Manifolds.Test.test_rand(
         expected_eltype = NoExpectation(),
         seed = missing,
         test_mutating = true,
+        test_reproducibility = test_mutating,
         test_scaling = false,
         rng = missing,
         name = "Random sampling on $M $(ismissing(vector_at) ? "" : "at points of type $(typeof(vector_at))")",
@@ -2024,6 +2032,18 @@ function Manifolds.Test.test_rand(
         if isexpected(expected_eltype)
             Test.@test number_eltype(p) === expect(expected_eltype)
             Test.@test number_eltype(X) === expect(expected_eltype)
+        end
+        if test_reproducibility
+            rng1 = copy(ismissing(rng) ? Random.default_rng() : rng)
+            rng2 = copy(rng1)
+            p3 = rand(rng1, M)
+            p4 = copy(M, p3)
+            rand!(rng2, M, p4)
+            Test.@test isapprox(M, p3, p4; error = :error, kwargs...)
+            X3 = rand(rng1, M; vector_at = q)
+            X4 = copy(M, q, X3)
+            rand!(rng2, M, X4; vector_at = q)
+            Test.@test isapprox(M, q, X3, X4; error = :error, kwargs...)
         end
         if test_scaling
             rng1 = copy(ismissing(rng) ? Random.default_rng() : rng)

@@ -145,10 +145,6 @@ using FiniteDifferences, LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
                 @test connected_by_geodesic(M, p, q)
             end
 
-            @testset "rand is reproducible" begin
-                @test rand(MersenneTwister(42), M) == rand(MersenneTwister(42), M)
-            end
-
             @testset "embed!" begin
                 # points
                 # see bug #862 -- p_ and p__ need to be initially different for this test
