@@ -18,6 +18,7 @@ end
         include_test("test_ambiguities.jl")
         include_test("test_deprecated.jl")
         include_test("test_differentiation.jl")
+        include_test("test_equality.jl")
         include_test("test_notation.jl")
         include_test("test_utils.jl")
         include_test("test_metric.jl")
@@ -79,6 +80,7 @@ end
         include_test("manifolds/test_symplectic_grassmann.jl")
         include_test("manifolds/test_symplectic_stiefel.jl")
         include_test("manifolds/test_unitary_matrices.jl")
+        include_test("manifolds/test_vector_bundle.jl")
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
@@ -91,7 +93,6 @@ end
         #meta manifolds
         include_test("manifolds-old/fiber.jl")
         include_test("manifolds-old/fiber_bundle.jl")
-        include_test("manifolds-old/vector_bundle.jl")
         include_test("manifolds-old/graph.jl")
     end
     #

@@ -84,7 +84,6 @@ SVDMPoint(S::SVD) = SVDMPoint(S.U, S.S, S.Vt)
 SVDMPoint(A::Matrix, k::Int) = SVDMPoint(svd(A), k)
 SVDMPoint(S::SVD, k::Int) = SVDMPoint(S.U, S.S, S.Vt, k)
 SVDMPoint(U, S, Vt, k::Int) = SVDMPoint(U[:, 1:k], S[1:k], Vt[1:k, :])
-Base.:(==)(x::SVDMPoint, y::SVDMPoint) = (x.U == y.U) && (x.S == y.S) && (x.Vt == y.Vt)
 Base.eltype(p::SVDMPoint) = Base.eltype(p.S)
 
 @doc raw"""
@@ -123,9 +122,6 @@ function Base.:-(v::UMVTangentVector, w::UMVTangentVector)
 end
 Base.:-(v::UMVTangentVector) = UMVTangentVector(-v.U, -v.M, -v.Vt)
 Base.:+(v::UMVTangentVector) = UMVTangentVector(v.U, v.M, v.Vt)
-function Base.:(==)(v::UMVTangentVector, w::UMVTangentVector)
-    return (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
-end
 
 # Move to Base when name is established – i.e. used in more than one manifold
 # |/---

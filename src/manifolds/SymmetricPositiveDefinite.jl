@@ -94,9 +94,6 @@ function SPDPoint(p::AbstractMatrix; store_p = true, store_sqrt = true, store_sq
 end
 convert(::Type{SPDPoint}, p::AbstractMatrix) = SPDPoint(p)
 
-function Base.:(==)(p::SPDPoint, q::SPDPoint)
-    return p.eigen == q.eigen
-end
 
 function allocate(p::SPDPoint)
     return SPDPoint(

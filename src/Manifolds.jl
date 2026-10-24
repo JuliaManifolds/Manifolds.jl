@@ -624,6 +624,7 @@ function __init__()
     return nothing
 end
 
+include("equality.jl")
 include("deprecated.jl")
 
 # Abstract main types

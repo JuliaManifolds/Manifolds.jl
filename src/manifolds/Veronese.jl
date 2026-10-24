@@ -145,9 +145,6 @@ function VeronesePoint(radial::AbstractVector, spherical::AbstractVector)
     return VeronesePoint{T, typeof(radial_T), typeof(spherical_T)}(radial_T, spherical_T)
 end
 
-function Base.:(==)(p::VeronesePoint, q::VeronesePoint)
-    return (p.radial == q.radial) && (p.spherical == q.spherical)
-end
 
 allocate(p::VeronesePoint) = VeronesePoint(allocate(p.radial), allocate(p.spherical))
 function allocate(p::VeronesePoint, ::Type{T}) where {T}
@@ -238,9 +235,6 @@ function Base.:-(X::VeroneseTangentVector, Y::VeroneseTangentVector)
 end
 Base.:-(X::VeroneseTangentVector) = VeroneseTangentVector(-X.radial, -X.spherical)
 Base.:+(X::VeroneseTangentVector) = VeroneseTangentVector(X.radial, X.spherical)
-function Base.:(==)(X::VeroneseTangentVector, Y::VeroneseTangentVector)
-    return (X.radial == Y.radial) && (X.spherical == Y.spherical)
-end
 
 function allocate(X::VeroneseTangentVector)
     return VeroneseTangentVector(allocate(X.radial), allocate(X.spherical))

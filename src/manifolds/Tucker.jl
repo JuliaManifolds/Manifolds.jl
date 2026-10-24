@@ -73,9 +73,6 @@ struct HOSVD{T, D}
     σ::NTuple{D, Vector{T}}
 end
 
-function Base.:(==)(a::HOSVD{T, D}, b::HOSVD{T, D}) where {T, D}
-    return a.U == b.U && a.core == b.core && a.σ == b.σ
-end
 
 @doc raw"""
     TuckerPoint{T,D}
@@ -121,9 +118,6 @@ function TuckerPoint(A::AbstractArray{T, D}, mlrank::NTuple{D, Int}) where {T, D
     return TuckerPoint(st_hosvd(A, mlrank))
 end
 
-function Base.:(==)(a::TuckerPoint{T, D}, b::TuckerPoint{T, D}) where {T, D}
-    return a.hosvd == b.hosvd
-end
 
 @doc raw"""
     TuckerTangentVector{T, D} <: AbstractTangentVector
@@ -174,9 +168,6 @@ function Base.:-(x::TuckerTangentVector, y::TuckerTangentVector)
 end
 Base.:-(x::TuckerTangentVector) = TuckerTangentVector(-x.Ċ, map(-, x.U̇))
 Base.:+(x::TuckerTangentVector) = TuckerTangentVector(x.Ċ, x.U̇)
-function Base.:(==)(x::TuckerTangentVector, y::TuckerTangentVector)
-    return (x.Ċ == y.Ċ) && all(x.U̇ .== y.U̇)
-end
 
 allocate(p::TuckerPoint) = allocate(p, number_eltype(p))
 function allocate(p::TuckerPoint{Tp, D}, ::Type{T}) where {T, Tp, D}
