@@ -388,10 +388,10 @@ end
 """
     default_inverse_retraction_method(M::Tucker)
 
-Return [`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`)
+Return [`ProjectionInverseRetraction`](@extref `ManifoldsBase.ProjectionInverseRetraction`)
 as the default inverse retraction for the [`Tucker`](@ref) manifold.
 """
-default_inverse_retraction_method(::Tucker) = PolarInverseRetraction()
+default_inverse_retraction_method(::Tucker) = ProjectionInverseRetraction()
 
 """
     default_retraction_method(M::Tucker)
@@ -689,6 +689,20 @@ function get_vectors(ℳ::Tucker, 𝔄::TuckerPoint, ℬ::DefaultOrthonormalBasi
     return get_vectors(ℳ, 𝔄, get_basis(ℳ, 𝔄, ℬ))
 end
 
+@doc raw"""
+    get_embedding(M::Tucker)
+
+Return the [`Euclidean`](@ref) space of ``N_1×\dots×N_D`` tensors, in which the
+[`Tucker`](@ref) manifold `M` is embedded, see [`embed`](@ref).
+"""
+function get_embedding(::Tucker{𝔽, TypeParameter{Tuple{n, r}}}) where {n, r, 𝔽}
+    return Euclidean(n...; field = 𝔽)
+end
+function get_embedding(M::Tucker{𝔽, <:Tuple}) where {𝔽}
+    n, r = get_parameter(M.size)
+    return Euclidean(n...; field = 𝔽, parameter = :field)
+end
+
 """
     inner(M::Tucker, p::TuckerPoint, X::TuckerTangentVector, Y::TuckerTangentVector)
 
@@ -733,7 +747,7 @@ function isapprox(p::TuckerPoint, q::TuckerPoint; kwargs...)
     ℳ = Tucker(size(p), size(p.hosvd.core))
     return isapprox(embed(ℳ, p), embed(ℳ, q); kwargs...)
 end
-isapprox(::Tucker, p::TuckerPoint, q::TuckerPoint; kwargs...) = isapprox(p, q; kwargs...)
+_isapprox(::Tucker, p::TuckerPoint, q::TuckerPoint; kwargs...) = isapprox(p, q; kwargs...)
 function _isapprox(
         M::Tucker, p::TuckerPoint, x::TuckerTangentVector, y::TuckerTangentVector;
         kwargs...,
