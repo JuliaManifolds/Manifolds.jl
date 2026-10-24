@@ -67,6 +67,7 @@ end
         include_test("manifolds/test_multinomial_spd.jl")
         include_test("manifolds/test_oblique.jl")
         include_test("manifolds/test_probability_simplex.jl")
+        include_test("manifolds/test_product_manifold.jl")
         include_test("manifolds/test_skew_hermitian_matrices.jl")
         include_test("manifolds/test_stiefel.jl")
         include_test("manifolds/test_symmetric.jl")
@@ -87,7 +88,6 @@ end
         include_test("manifolds-old/torus.jl")
 
         #meta manifolds
-        include_test("manifolds-old/product_manifold.jl")
         include_test("manifolds-old/power_manifold.jl")
         include_test("manifolds-old/fiber.jl")
         include_test("manifolds-old/fiber_bundle.jl")
