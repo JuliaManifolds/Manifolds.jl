@@ -81,6 +81,8 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
             sectional_curvature_min => 0.5,
             sharp => X,
             (vector_transport_to, ParallelTransport()) => X,
+            # the traceless skew-Hermitian part of qᴴpX = a(cos(a)J + sin(a)I) for X = aJ
+            (vector_transport_to, ProjectionTransport()) => cos(a) .* X,
             # the eigenvalues of X are ±ia
             volume_density => sin(a)^2 / a^2,
             Weingarten => -3 .* X,

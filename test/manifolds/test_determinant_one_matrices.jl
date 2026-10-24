@@ -29,6 +29,25 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             get_embedding => Euclidean(2, 2),
         ),
     )
+    @testset "embedding of tangent vectors" begin
+        # tangent vectors have trace zero, and pX is the corresponding matrix in the embedding
+        @test embed(M, q, X) == q * X
+        Y2 = similar(X)
+        embed!(M, Y2, q, X)
+        @test Y2 == q * X
+        @test project(M, q, embed(M, q, X)) ≈ X
+    end
+    @testset "projection transport" begin
+        # tangent vectors have trace zero, the matrix pZ in the embedding is projected at q
+        Z = [1.0 0.0; 0.0 -1.0]
+        W = vector_transport_to(M, p, Z, q, ProjectionTransport())
+        @test W ≈ [5.05 0.0; 0.0 -5.05] # q⁻¹pZ = diag(0.1, -10), with its trace -9.9 removed
+        @test is_vector(M, q, W)
+        W2 = similar(W)
+        vector_transport_to!(M, W2, p, Z, q, ProjectionTransport())
+        @test W2 ≈ W
+        @test vector_transport_to(M, q, Z, p, ProjectionTransport()) ≈ [5.05 0.0; 0.0 -5.05] # p⁻¹qZ = diag(10, -0.1)
+    end
     # Complex case
     Mc = DeterminantOneMatrices(2, ℂ)
     pc = [1.0im 0.0; 0.0 -1.0im]

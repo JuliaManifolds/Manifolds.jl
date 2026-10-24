@@ -80,7 +80,19 @@ function check_vector(
 end
 
 embed(::DeterminantOneMatrices, p) = p
-embed(::DeterminantOneMatrices, p, X) = X
+
+@doc raw"""
+    embed(M::DeterminantOneMatrices, p, X)
+    embed!(M::DeterminantOneMatrices, Y, p, X)
+
+Embed the tangent vector `X` at `p` on the [`DeterminantOneMatrices`](@ref) `M` into the
+[`Euclidean`](@ref) space of matrices. Since tangent vectors are represented by matrices of
+trace zero, this is ``pX``, so that
+[`project`](@ref project(::DeterminantOneMatrices, ::Any, ::Any)) is its left inverse.
+"""
+embed(::DeterminantOneMatrices, p, X) = p * X
+
+embed!(::DeterminantOneMatrices, Y, p, X) = mul!_safe(Y, p, X)
 
 function get_embedding(::DeterminantOneMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return Euclidean(n, n; field = 𝔽)

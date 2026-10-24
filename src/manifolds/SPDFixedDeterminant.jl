@@ -11,10 +11,10 @@ p ∈ ℝ^{n×n} \ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\back
 \bigr\}.
 ````
 
-This manifold is modelled as an isometrically embedded manifold in [`SymmetricPositiveDefinite`](@ref)`(n)`,
-see [`IsometricallyEmbeddedManifoldType`](@extref `ManifoldsBase.IsometricallyEmbeddedManifoldType`) for the implications.
-Since it is a totally geodesic submanifold, the exponential and logarithmic maps,
-parallel transport and the Riemann tensor are those of the embedding.
+This manifold is modelled as a submanifold of [`SymmetricPositiveDefinite`](@ref)`(n)`,
+see [`EmbeddedSubmanifoldType`](@extref `ManifoldsBase.EmbeddedSubmanifoldType`) for the implications.
+Since it is a totally geodesic submanifold, for example the exponential and logarithmic maps,
+retractions, parallel transport and the Riemann tensor are those of the embedding.
 
 These matrices are sometimes also called [isochoric](https://en.wiktionary.org/wiki/isochoric), which refers to the interpretation of
 the matrix representing an ellipsoid. All ellipsoids that represent points on this manifold have the same volume.
@@ -118,18 +118,8 @@ function get_embedding(M::SPDFixedDeterminant{Tuple{Int}})
 end
 
 function ManifoldsBase.get_embedding_type(::SPDFixedDeterminant)
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
-
-"""
-    exp(M::SPDFixedDeterminant, p, X)
-
-Compute the exponential map on the [`SPDFixedDeterminant`](@ref) `M`, which is the one of
-the [`SymmetricPositiveDefinite`](@ref) matrices, since `M` is a totally geodesic submanifold.
-"""
-exp(::SPDFixedDeterminant, ::Any, ::Any)
-
-exp!(M::SPDFixedDeterminant, q, p, X) = exp!(get_embedding(M), q, p, X)
 
 """
     injectivity_radius(M::SPDFixedDeterminant[, p])
@@ -155,16 +145,6 @@ Return true if the [`SPDFixedDeterminant`](@ref) `M` is a single point, i.e. for
 and false otherwise.
 """
 is_flat(M::SPDFixedDeterminant) = get_parameter(M.size)[1] == 1
-
-"""
-    log(M::SPDFixedDeterminant, p, q)
-
-Compute the logarithmic map on the [`SPDFixedDeterminant`](@ref) `M`, which is the one of
-the [`SymmetricPositiveDefinite`](@ref) matrices, since `M` is a totally geodesic submanifold.
-"""
-log(::SPDFixedDeterminant, ::Any, ::Any)
-
-log!(M::SPDFixedDeterminant, X, p, q) = log!(get_embedding(M), X, p, q)
 
 @doc raw"""
     manifold_dimension(M::SPDFixedDeterminant)
@@ -217,29 +197,6 @@ function project!(M::SPDFixedDeterminant, Y, p, X)
     copyto!(M, Y, p, X)
     Y .-= (tr(p \ X) / n) .* p
     return Y
-end
-
-"""
-    vector_transport_to(M::SPDFixedDeterminant, p, X, q, ::ProjectionTransport)
-
-Transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
-at `q`, see [`project`](@ref project(::SPDFixedDeterminant, ::Any, ::Any)).
-"""
-vector_transport_to(::SPDFixedDeterminant, ::Any, ::Any, ::Any, ::ProjectionTransport)
-
-vector_transport_to_project!(M::SPDFixedDeterminant, Y, p, X, q) = project!(M, Y, q, X)
-
-"""
-    parallel_transport_to(M::SPDFixedDeterminant, p, X, q)
-
-Compute the parallel transport of `X` from `p` to `q` on the [`SPDFixedDeterminant`](@ref) `M`,
-which is the one of the [`SymmetricPositiveDefinite`](@ref) matrices, since `M` is a
-totally geodesic submanifold.
-"""
-parallel_transport_to(::SPDFixedDeterminant, ::Any, ::Any, ::Any)
-
-function parallel_transport_to!(M::SPDFixedDeterminant, Y, p, X, q)
-    return parallel_transport_to!(get_embedding(M), Y, p, X, q)
 end
 
 """

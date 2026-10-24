@@ -20,11 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* `ProjectionTransport` on manifolds that represent tangent vectors in a Lie algebra, i.e. the `GeneralUnitaryMatrices` and the `DeterminantOneMatrices`, now projects the embedded tangent vector ``pX`` onto the tangent space at `q`; with the previous default of ManifoldsBase.jl the tangent vector `X` was returned unchanged.
+* `embed` of tangent vectors on the `DeterminantOneMatrices` now returns ``pX``, since tangent vectors are represented by matrices of trace zero; it returned `X`, so that `project` was not its left inverse.
 * `sectional_curvature` on the complex `UnitaryMatrices` and the `SpecialUnitaryMatrices` now returns a real number; the generic formula used the complex-valued `inner` product.
 * `project` onto the tangent space of the `SymmetricPositiveSemidefiniteFixedRank` now removes the vertical component; a sign error doubled it instead, which also affected `riemannian_gradient` and `ProjectionTransport`.
 * `is_flat` on the `SymmetricPositiveDefinite` matrices, also with the `AffineInvariantMetric`, the `BuresWassersteinMetric` and the `GeneralizedBuresWassersteinMetric`, now returns true for ``n = 1``, since a one-dimensional manifold is flat.
-* `SPDFixedDeterminant` is now an `IsometricallyEmbeddedManifoldType` instead of an `EmbeddedSubmanifoldType`, with `exp`, `log`, `parallel_transport_to` and `riemann_tensor` taken from the `SymmetricPositiveDefinite` matrices, and its own `injectivity_radius` and `is_flat`, which also cover the single point `SPDFixedDeterminant(1)`.
-  Previously all vector transports were forwarded to the embedding, so `ProjectionTransport` returned vectors that were in general not tangent vectors; it now projects onto the tangent space of the manifold.
+* `ProjectionTransport` on the `SPDFixedDeterminant` now projects onto the tangent space of the manifold; it was forwarded to the `SymmetricPositiveDefinite` embedding, so the transported vectors were in general not tangent vectors. This relies on ManifoldsBase.jl no longer forwarding `ProjectionTransport` on submanifolds to their embedding.
+* `SPDFixedDeterminant` has its own `riemann_tensor`, taken from the `SymmetricPositiveDefinite` matrices, and its own `injectivity_radius` and `is_flat`, which also cover the single point `SPDFixedDeterminant(1)`.
 * The `copy`, `get_coordinates` and `get_vectors` tests in `Manifolds.Test` now support numbers as points and tangent vectors and bases over ℂ of complex manifolds:
   a copy of an immutable value is not required to be a different object, the number of coordinates and basis vectors is compared to `number_of_coordinates`,
   and orthogonality of a basis over ℝ of a complex manifold refers to the real part of the inner product.
