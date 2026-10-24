@@ -50,6 +50,7 @@ end
         include_test("manifolds/test_segre.jl")
         include_test("manifolds/test_shape_space.jl")
         include_test("manifolds/test_orthogonal_matrices.jl")
+        include_test("manifolds/test_positive_numbers.jl")
         include_test("manifolds/test_rotations.jl")
         include_test("manifolds/test_sphere.jl")
         include_test("manifolds/test_sphere_symmetric_matrices.jl")
@@ -89,7 +90,6 @@ end
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
-        include_test("manifolds-old/positive_numbers.jl")
 
         #meta manifolds
         include_test("manifolds-old/fiber.jl")
