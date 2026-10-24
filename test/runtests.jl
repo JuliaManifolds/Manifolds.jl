@@ -38,6 +38,7 @@ end
         include_test("manifolds/test_elliptope.jl")
         include_test("manifolds/test_essential_manifold.jl")
         include_test("manifolds/test_euclidean.jl")
+        include_test("manifolds/test_fiber_bundle.jl")
         include_test("manifolds/test_fixed_rank.jl")
         include_test("manifolds/test_flag.jl")
         include_test("manifolds/test_generalized_grassmann.jl")
@@ -92,7 +93,6 @@ end
 
         #meta manifolds
         include_test("manifolds-old/fiber.jl")
-        include_test("manifolds-old/fiber_bundle.jl")
     end
     #
     # On CI, JET runs in its own job for simplicity; it comes last, since JET.jl 0.9 on
