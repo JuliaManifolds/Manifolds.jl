@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* `project` onto the tangent space of the `SymmetricPositiveSemidefiniteFixedRank` now removes the vertical component; a sign error doubled it instead, which also affected `riemannian_gradient` and `ProjectionTransport`.
 * `is_flat` on the `SymmetricPositiveDefinite` matrices, also with the `AffineInvariantMetric`, the `BuresWassersteinMetric` and the `GeneralizedBuresWassersteinMetric`, now returns true for ``n = 1``, since a one-dimensional manifold is flat.
 * `SPDFixedDeterminant` is now an `IsometricallyEmbeddedManifoldType` instead of an `EmbeddedSubmanifoldType`, with `exp`, `log`, `parallel_transport_to` and `riemann_tensor` taken from the `SymmetricPositiveDefinite` matrices, and its own `injectivity_radius` and `is_flat`, which also cover the single point `SPDFixedDeterminant(1)`.
   Previously all vector transports were forwarded to the embedding, so `ProjectionTransport` returned vectors that were in general not tangent vectors; it now projects onto the tangent space of the manifold.
@@ -32,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `embed!` for tangent vectors on `Rotations`, `OrthogonalMatrices` and `UnitaryMatrices` now works when the output is aliased with the input tangent vector.
 * `isapprox` on the `Flag` manifold now supports the `error=` keyword; the methods are now implemented as `_isapprox`.
 * `default_retraction_method` on the `Elliptope` is now `ProjectionRetraction`; it was `ExponentialRetraction`, but the exponential map is not implemented on the `Elliptope`.
-* `default_retraction_method` on the `Spectrahedron` is now `ProjectionRetraction`, and `default_vector_transport_method` on the `Elliptope` and the `Spectrahedron` is now `ProjectionTransport`; they were `ExponentialRetraction` and `ParallelTransport`, which are not implemented on these manifolds.
+* `default_retraction_method` on the `Spectrahedron` is now `ProjectionRetraction`, and `default_vector_transport_method` on the `Elliptope`, the `Spectrahedron` and the `SymmetricPositiveSemidefiniteFixedRank` is now `ProjectionTransport`; they were `ExponentialRetraction` and `ParallelTransport`, which are not implemented on these manifolds.
 
 ## [0.11.34] 2026-10-22
 

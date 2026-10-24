@@ -70,6 +70,7 @@ end
         include_test("manifolds/test_stiefel.jl")
         include_test("manifolds/test_symmetric.jl")
         include_test("manifolds/test_symmetric_positive_definite.jl")
+        include_test("manifolds/test_symmetric_positive_semidefinite_fixed_rank.jl")
         include_test("manifolds/test_unitary_matrices.jl")
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
@@ -77,7 +78,6 @@ end
         include_test("manifolds-old/lorentz.jl")
         include_test("manifolds-old/multinomial_symmetric.jl")
         include_test("manifolds-old/positive_numbers.jl")
-        include_test("manifolds-old/symmetric_positive_semidefinite_fixed_rank.jl")
         include_test("manifolds-old/symplectic.jl")
         include_test("manifolds-old/symplecticgrassmann.jl")
         include_test("manifolds-old/symplecticstiefel.jl")

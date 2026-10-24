@@ -107,6 +107,16 @@ end
 
 metric(::SymmetricPositiveSemidefiniteFixedRank) = EuclideanMetric()
 
+"""
+    default_vector_transport_method(M::SymmetricPositiveSemidefiniteFixedRank)
+
+Return [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`) as the default vector
+transport for the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) manifold.
+"""
+function default_vector_transport_method(::SymmetricPositiveSemidefiniteFixedRank)
+    return ProjectionTransport()
+end
+
 @doc raw"""
     distance(M::SymmetricPositiveSemidefiniteFixedRank, p, q)
 
@@ -221,8 +231,21 @@ function manifold_dimension(M::SymmetricPositiveSemidefiniteFixedRank{<:Any, ℂ
     return 2 * k * n - k * k
 end
 
+@doc raw"""
+    project(M::SymmetricPositiveSemidefiniteFixedRank, q, Y)
+
+Project `Y` onto the horizontal space at `q` on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`,
+i.e. remove its component in the vertical space ``\{qΩ\ |\ Ω = -Ω^{\mathrm{H}}\}``. The result reads
+````math
+\operatorname{proj}_q(Y) = Y - qΩ, \qquad
+(q^{\mathrm{H}}q)Ω + Ω(q^{\mathrm{H}}q) = q^{\mathrm{H}}Y - Y^{\mathrm{H}}q,
+````
+so that ``q^{\mathrm{H}}\operatorname{proj}_q(Y)`` is Hermitian.
+"""
+project(::SymmetricPositiveSemidefiniteFixedRank, ::Any, ::Any)
+
 function project!(::SymmetricPositiveSemidefiniteFixedRank, Z, q, Y)
-    Z .= Y - q * lyap(q' * q, q' * Y - Y' * q)
+    Z .= Y - q * lyap(q' * q, -(q' * Y - Y' * q))
     return Z
 end
 
