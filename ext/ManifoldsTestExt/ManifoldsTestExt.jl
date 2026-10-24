@@ -73,6 +73,7 @@ Possible entries of the `expectations` dictionary are
 * for `get_basis`, the key is a tuple of the function and the basis, e.g. `(get_basis, B) => ...` to the expected basis
 * for `get_coordinates` the key is a tuple of the function and the basis, e.g. `(get_coordinates, B) => c`
 * for `get_vector` the key is a tuple of the function, the coordinate vector, and the basis, e.g. `(get_vector, c, B) => X`
+* for `get_embedding` the key `(get_embedding, T)` with the type `T` of the first point is the expected embedding for points of that type, which defaults to the expectation for `get_embedding`
 * for `get_vectors` the key is a tuple of the function and the basis, e.g. `(get_vectors, B) => :Symbol` where
   * `:Orthogonal` tests for orthogonality
   * `:Orthonormal` tests additionally to the previous for unit length
@@ -257,12 +258,13 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 name = "get_embedding(M)", # shorten name within large suite
             )
             if length(points) >= 1
-                expected_embed_P = get_expectation(expectations, (get_embedding, typeof(points[1])))
+                expected_embed_P = get_expectation(
+                    expectations, (get_embedding, typeof(points[1])), expected_embed
+                )
                 Manifolds.Test.test_get_embedding(
                     # check the global one if this point type does not have an expected embedding
                     M, typeof(points[1]);
-                    expected_value = expected_embed,
-                    expected_type = expected_embed_P,
+                    expected_value = expected_embed_P,
                     name = "get_embedding(M, p)", # shorten name within large suite
                 )
             end

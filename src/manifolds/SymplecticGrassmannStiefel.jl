@@ -119,6 +119,31 @@ function inverse_retract_cayley!(M::SymplecticGrassmann, X, p, q)
 end
 
 @doc raw"""
+    project(::SymplecticGrassmann, p, Y)
+    project!(::SymplecticGrassmann, X, p, Y)
+
+Project a matrix ``Y ∈ ℝ^{2n×2k}`` onto the horizontal tangent vectors at the representative
+``p ∈ \operatorname{SpSt}(2n,2k)`` of a point on the [`SymplecticGrassmann`](@ref) manifold, i.e. the tangent vectors
+``X ∈ T_p\operatorname{SpSt}(2n,2k)`` with ``p^+X = 0``, as
+
+```math
+X = (I_{2n} - pp^+)Y,
+```
+
+where ``I_{2n}`` denotes the identity matrix and ``(⋅)^+`` the [`symplectic_inverse`](@ref).
+Since ``pp^+`` is the symplectic projector onto the column space of ``p``, the difference ``Y - X``
+lies in the kernel of the inner product ``g^{\mathrm{SpGr}}_p`` extended to ``ℝ^{2n×2k}``,
+see `inner` on the [`SymplecticGrassmann`](@ref) manifold.
+"""
+project(::SymplecticGrassmann, p, Y)
+
+function project!(M::SymplecticGrassmann, X, p, Y)
+    n, k = get_parameter(M.size)
+    X .= Y .- p * symplectic_inverse_times(SymplecticStiefel(2 * n, 2 * k), p, Y)
+    return X
+end
+
+@doc raw"""
     rand(::SymplecticGrassmann; σ::Real=1.0)
 
 Generate a random point on the [`SymplecticGrassmann`](@ref) manifold, represented on the

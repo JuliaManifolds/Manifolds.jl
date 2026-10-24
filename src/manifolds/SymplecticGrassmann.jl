@@ -96,6 +96,16 @@ end
 # Define Stiefel as the array fallback
 ManifoldsBase.@default_manifold_fallbacks SymplecticGrassmann StiefelPoint StiefelTangentVector value value
 
+function ManifoldsBase.default_inverse_retraction_method(::SymplecticGrassmann)
+    return CayleyInverseRetraction()
+end
+
+ManifoldsBase.default_retraction_method(::SymplecticGrassmann) = CayleyRetraction()
+
+function ManifoldsBase.default_vector_transport_method(::SymplecticGrassmann)
+    return ProjectionTransport()
+end
+
 """
     is_flat(::SymplecticGrassmann)
 

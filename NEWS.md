@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * `project` for points, coordinates in a `DefaultOrthonormalBasis`, `riemannian_Hessian`, `Weingarten`, `sectional_curvature_min` and `sectional_curvature_max` on the `SpecialUnitaryMatrices`, and `volume_density` on the complex `UnitaryMatrices` and `SpecialUnitaryMatrices`.
+* `project` onto the horizontal tangent vectors of the `SymplecticGrassmann` manifold in the representation by points on the `SymplecticStiefel` manifold, which also provides the `ProjectionTransport`.
 * `get_embedding` for the `Hyperrectangle`, which returns the `Euclidean` space of the same size, with the size stored in a field.
 * `zero_vector` and `zero_vector!` for points of the `Flag` manifold in the `OrthogonalPoint` representation.
 * `sectional_curvature`, `sectional_curvature_min` and `sectional_curvature_max` for the `ProbabilitySimplex`; `sectional_curvature` previously went through `riemann_tensor` and was only approximately ``1/4``.
@@ -32,12 +33,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and orthogonality of a basis over ℝ of a complex manifold refers to the real part of the inner product.
 * `copy` and `copyto!` on the `Segre` manifold now copy the factors of points and tangent vectors; previously the copy shared the factor arrays with the original, so mutating functions applied to a copy also changed the original.
 * `copyto!` on a `MetricManifold` now forwards to the underlying manifold, so representation-specific copying (for example on the `Segre` manifold with a `WarpedMetric`) is used.
+* The expectation `(get_embedding, T)` in `Manifolds.Test.test_manifold` is now the expected embedding for points of type `T`, falling back to the expectation for `get_embedding`; it was used as an expected type, while the embedding for points of type `T` was compared to the expectation for `get_embedding`.
 * The `embed` test in `Manifolds.Test` used the embedded point instead of the manifold point when checking aliased tangent vector embedding; it now only checks aliasing when the tangent vector and its embedding have the same type.
 * The `embed` test in `Manifolds.Test` now checks embedded points and vectors on `get_embedding(M, typeof(p))` instead of `get_embedding(M)`, and uses the point `p` instead of its embedding when projecting the embedded vector back.
 * `embed!` for tangent vectors on `Rotations`, `OrthogonalMatrices` and `UnitaryMatrices` now works when the output is aliased with the input tangent vector.
 * `isapprox` on the `Flag` manifold now supports the `error=` keyword; the methods are now implemented as `_isapprox`.
 * `default_retraction_method` on the `Elliptope` is now `ProjectionRetraction`; it was `ExponentialRetraction`, but the exponential map is not implemented on the `Elliptope`.
 * `default_retraction_method` on the `Spectrahedron` is now `ProjectionRetraction`, and `default_vector_transport_method` on the `Elliptope`, the `Spectrahedron` and the `SymmetricPositiveSemidefiniteFixedRank` is now `ProjectionTransport`; they were `ExponentialRetraction` and `ParallelTransport`, which are not implemented on these manifolds.
+* `default_retraction_method` and `default_inverse_retraction_method` on the `SymplecticGrassmann` manifold are now `CayleyRetraction` and `CayleyInverseRetraction`, as on the `SymplecticStiefel` manifold, and `default_vector_transport_method` is now `ProjectionTransport`; the default inverse retraction was `LogarithmicInverseRetraction` and the default vector transport `ParallelTransport`, which are not implemented on this manifold.
 * `default_vector_transport_method` on the `SymplecticMatrices` is now `ProjectionTransport`; it was `ParallelTransport`, which is not implemented on this manifold.
 * `is_point` on the `SymplecticMatrices` now accepts a relative tolerance `rtol`, relative to ``\lVert p \rVert_{\mathrm{F}}^2``, which has a nonzero default also when `atol` is given, since the rounding errors of ``p^{+}p`` grow with the norm of `p`; valid points of a large norm, for example from `rand`, were rejected.
 
