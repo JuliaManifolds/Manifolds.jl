@@ -11,7 +11,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     r = [2.0 1.0; 1.0 1.0]
     X = [a 0.0; 0.0 -a] # log(M, p, q)
     Y = [1.0 2.0; 2.0 -1.0]
-    Xq = [a*exp(a) 0.0; 0.0 -a*exp(-a)] # the velocity of the geodesic at q
+    Xq = [a * exp(a) 0.0; 0.0 -a * exp(-a)] # the velocity of the geodesic at q
 
     Manifolds.Test.test_manifold(
         M,
