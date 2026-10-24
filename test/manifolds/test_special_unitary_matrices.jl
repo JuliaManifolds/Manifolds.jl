@@ -105,6 +105,14 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
         @test sectional_curvature_max(M3) == 0.5
         @test sectional_curvature_min(M3) == 0.0
         @test sectional_curvature_max(SpecialUnitaryMatrices(1)) == 0.0
+        p3 = Matrix{ComplexF64}(I, 3, 3)
+        # commuting diagonal tangent vectors span a flat plane
+        D1 = ComplexF64[1im 0 0; 0 -1im 0; 0 0 0]
+        D2 = ComplexF64[0 0 0; 0 1im 0; 0 0 -1im]
+        @test sectional_curvature(M3, p3, D1, D2) == 0.0
+        # a plane in a subalgebra su(2) has the maximal curvature
+        E = ComplexF64[0 1 0; -1 0 0; 0 0 0]
+        @test sectional_curvature(M3, p3, E, D1) ≈ 0.5
     end
 
     @testset "volume, dimension and injectivity radius" begin

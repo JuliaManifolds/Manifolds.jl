@@ -1,4 +1,4 @@
-using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
+using LinearAlgebra, Manifolds, Quaternions, Random, Test, ManifoldsBase, StaticArrays
 
 @testset "Unitary Matrices" begin
     @test_throws DomainError UnitaryMatrices(-1)
@@ -14,7 +14,7 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
             :Functions => [
                 default_vector_transport_method,
                 get_embedding,
-                injectivity_radius, is_flat,
+                injectivity_radius, is_flat, is_point, is_vector,
                 manifold_dimension,
                 project,
                 rand, repr,
@@ -27,6 +27,7 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
             :Points => [p1],
             :Vectors => [X1],
             :Bases => [DefaultOrthonormalBasis()],
+            # the last point has a determinant of absolute value one, but is not unitary
             :InvalidPoints => [zeros(1), zeros(3, 3), 1 / 2 .* [1im 1im; -1im 1im], [1im 1.0; 0.0 -1im]],
             :InvalidVectors => [zeros(1), zeros(3, 3), ones(2, 2)],
             :RetractionMethods => [PolarRetraction()],
@@ -195,6 +196,15 @@ end
         # the norm, and hence the determinant, is not one
         @test_throws DomainError is_point(MH, fill(2 * p, 1, 1); error = :error)
         @test zero_vector(MH, fill(p, 1, 1)) == zeros(QuaternionF64, 1, 1)
+    end
+
+    @testset "rand with a random number generator" begin
+        q = rand(MersenneTwister(42), MH)
+        @test is_point(MH, q)
+        @test q == sign(rand(MersenneTwister(42), QuaternionF64))
+        X = rand(MersenneTwister(43), MH; vector_at = q)
+        @test is_vector(MH, q, X)
+        @test X == project(MH, q, rand(MersenneTwister(43), QuaternionF64))
     end
 
     @testset "Projection and embedding use the Lie algebra" begin
