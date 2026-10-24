@@ -65,6 +65,7 @@ end
         include_test("manifolds/test_hyperbolic.jl")
         include_test("manifolds/test_hyperrectangle.jl")
         include_test("manifolds/test_invertible_matrices.jl")
+        include_test("manifolds/test_lorentz.jl")
         include_test("manifolds/test_multinomial_doubly_stochastic.jl")
         include_test("manifolds/test_multinomial_matrices.jl")
         include_test("manifolds/test_multinomial_spd.jl")
@@ -88,7 +89,6 @@ end
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
-        include_test("manifolds-old/lorentz.jl")
         include_test("manifolds-old/positive_numbers.jl")
 
         #meta manifolds

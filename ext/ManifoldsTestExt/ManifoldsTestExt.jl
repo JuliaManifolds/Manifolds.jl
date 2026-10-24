@@ -373,6 +373,13 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 expected_value = get_expectation(expectations, is_flat), name = "is_flat(M)",
             )
         end
+        if (is_positive_definite_metric in functions)
+            Manifolds.Test.test_is_positive_definite_metric(
+                M;
+                expected_value = get_expectation(expectations, is_positive_definite_metric),
+                name = "is_positive_definite_metric(M)",
+            )
+        end
         if (is_point in functions)
             qs = get(properties, :InvalidPoints, [])
             # lets not wrap these in expectations
@@ -426,6 +433,13 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             Manifolds.Test.test_manifold_volume(
                 M;
                 expected_value = expected_vol, name = "manifold_volume(M)",
+            )
+        end
+        if (metric_signature in functions)
+            Manifolds.Test.test_metric_signature(
+                M;
+                expected_value = get_expectation(expectations, metric_signature),
+                name = "metric_signature(M)",
             )
         end
         if (mid_point in functions)
@@ -1387,7 +1401,7 @@ Test the inner product on the manifold `M` at point `p` for tangent vectors `X` 
 * that the result is a number, which may be complex, e.g. on complex manifolds
 * that the result matches `expected_value`, if given
 * that the inner product is conjugate symmetric
-* that the inner product of `X` with itself is real and non negative
+* that the inner product of `X` with itself is real and, if the metric is positive definite, see [`is_positive_definite_metric`](@ref), nonnegative
 * that the inner product of `X` with itself is the same as its norm squared (if activated)
 """
 function Manifolds.Test.test_inner(
@@ -1405,7 +1419,7 @@ function Manifolds.Test.test_inner(
         Test.@test isapprox(inner(M, p, Y, X), conj(v); kwargs...)
         w = inner(M, p, X, X)
         Test.@test isapprox(w, real(w); kwargs...)
-        Test.@test real(w) ≥ 0.0
+        is_positive_definite_metric(M) && Test.@test real(w) ≥ 0.0
         if test_norm
             n = norm(M, p, X)
             Test.@test isapprox(w, n^2; kwargs...)
@@ -1500,6 +1514,31 @@ function Manifolds.Test.test_is_flat(
     )
     Test.@testset "$(name)" begin
         v = is_flat(M)
+        !isexpected(expected_value) || Test.@test v == expect(expected_value)
+    end
+    return nothing
+end
+
+"""
+    Manifolds.Test.test_is_positive_definite_metric(
+        M;
+        expected_value = NoExpectation(),
+        name = "is_positive_definite_metric on \$M",
+    )
+
+Test the function [`is_positive_definite_metric`](@ref) on manifold `M`.
+
+* that it agrees with the numbers of negative and zero eigenvalues in the [`metric_signature`](@ref) being zero
+* that it agrees with the `expected_value`, if given
+"""
+function Manifolds.Test.test_is_positive_definite_metric(
+        M::AbstractManifold;
+        expected_value = NoExpectation(), name = "is_positive_definite_metric on $M",
+    )
+    Test.@testset "$(name)" begin
+        v = is_positive_definite_metric(M)
+        Test.@test v isa Bool
+        Test.@test v == (metric_signature(M)[2:3] == (0, 0))
         !isexpected(expected_value) || Test.@test v == expect(expected_value)
     end
     return nothing
@@ -1712,6 +1751,33 @@ function Manifolds.Test.test_manifold_volume(
     end
     return nothing
 end # Manifolds.Test.test_manifold_volume
+
+"""
+    Manifolds.Test.test_metric_signature(
+        M;
+        expected_value = NoExpectation(),
+        name = "Metric signature of \$M",
+    )
+
+Test the function [`metric_signature`](@ref) on manifold `M`.
+
+* that the result is a tuple of three nonnegative integers
+* that they sum to the [`manifold_dimension`](@extref `ManifoldsBase.manifold_dimension-Tuple{AbstractManifold}`) of `M`
+* that it agrees with the `expected_value`, if given
+"""
+function Manifolds.Test.test_metric_signature(
+        M::AbstractManifold;
+        expected_value = NoExpectation(), name = "Metric signature of $M",
+    )
+    Test.@testset "$(name)" begin
+        s = metric_signature(M)
+        Test.@test s isa Tuple{Int, Int, Int}
+        Test.@test all(≥(0), s)
+        Test.@test sum(s) == manifold_dimension(M)
+        !isexpected(expected_value) || Test.@test s == expect(expected_value)
+    end
+    return nothing
+end
 
 """
     Manifolds.Test.test_mid_point(M, p, q;

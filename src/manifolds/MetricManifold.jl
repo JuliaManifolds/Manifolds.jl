@@ -130,6 +130,34 @@ function sharp!(M::MetricManifold, X::TFVector, p, ξ::CoTFVector)
     return X
 end
 
+@doc raw"""
+    is_positive_definite_metric(M::AbstractManifold)
+
+Return whether the metric of `M` is positive definite, i.e. whether `M` is a Riemannian
+manifold and not only a pseudo-Riemannian or degenerate one. This is the case if the
+[`metric_signature`](@ref) of `M` has neither negative nor degenerate directions.
+"""
+function is_positive_definite_metric(M::AbstractManifold)
+    _, n₋, n₀ = metric_signature(M)
+    return n₋ == 0 && n₀ == 0
+end
+
+@doc raw"""
+    metric_signature(M::AbstractManifold)
+
+Return the signature ``(n_+, n_-, n_0)`` of the metric of `M`, i.e. the numbers of positive,
+negative and zero eigenvalues of the matrix of the metric in a basis of a tangent space,
+see [`local_metric`](@ref).
+They sum to the [`manifold_dimension`](@extref `ManifoldsBase.manifold_dimension-Tuple{AbstractManifold}`)
+of `M`. For a pseudo-Riemannian manifold the metric is nondegenerate, i.e. ``n_0 = 0``,
+and the signature is the same in all tangent spaces of a connected manifold.
+
+By default, the metric is assumed to be positive definite, so the signature is
+``(\dim \mathcal M, 0, 0)``.
+"""
+metric_signature(M::AbstractManifold) = (manifold_dimension(M), 0, 0)
+metric_signature(M::ValidationManifold) = metric_signature(M.manifold)
+
 for mf in [
         christoffel_symbols_first,
         christoffel_symbols_second,

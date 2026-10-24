@@ -93,6 +93,16 @@ function manifold_volume(M::PowerManifold)
     return manifold_volume(M.manifold)^prod(size)
 end
 
+@doc raw"""
+    metric_signature(M::AbstractPowerManifold)
+
+Return the signature of the metric of the power manifold `M`, i.e. the signature of the
+manifold that is raised to a power, multiplied by the number of its copies.
+"""
+function metric_signature(M::AbstractPowerManifold)
+    return prod(power_dimensions(M)) .* metric_signature(M.manifold)
+end
+
 Base.@propagate_inbounds @inline function _read(
         ::PowerManifoldMultidimensional, rep_size::Tuple, x::AbstractArray, i::Tuple
     )

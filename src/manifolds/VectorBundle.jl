@@ -142,6 +142,17 @@ function inner(B::FiberBundle, p, X, Y)
     return inner(B.manifold, px, VXM, VYM) + inner(F, Vx, VXF, VYF)
 end
 
+"""
+    metric_signature(B::Union{TangentBundle, CotangentBundle})
+
+Return the signature of the metric of the tangent or cotangent bundle `B`, which is
+twice the signature of its base manifold, since the metric is the sum of the metrics
+of the base manifold and the fiber.
+"""
+function metric_signature(B::Union{TangentBundle, CotangentBundle})
+    return 2 .* metric_signature(B.manifold)
+end
+
 function _inverse_retract(M::FiberBundle, p, q, ::FiberBundleInverseProductRetraction)
     return inverse_retract_product(M, p, q)
 end

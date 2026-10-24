@@ -57,6 +57,40 @@ end
 @tfvector_inner_via_get_vector Lorentz{<:Any, MinkowskiMetric}
 
 @doc raw"""
+    metric_signature(M::Lorentz)
+
+Return the signature ``(n-1, 1, 0)`` of the [`LorentzMetric`](@ref) of the ``n``-dimensional
+[`Lorentz`](@ref) manifold `M`, which has a single time dimension.
+"""
+metric_signature(M::Lorentz) = (manifold_dimension(M) - 1, 1, 0)
+
+@doc raw"""
+    exp(M::Lorentz{<:Any, MinkowskiMetric}, p, X)
+    log(M::Lorentz{<:Any, MinkowskiMetric}, p, q)
+    parallel_transport_to(M::Lorentz{<:Any, MinkowskiMetric}, p, X, q)
+
+Compute the exponential map, the logarithmic map and the parallel transport on the
+[`Lorentz`](@ref) manifold `M` with the [`MinkowskiMetric`](@ref).
+Since the metric is the same matrix at every point, its Levi-Civita connection is the one
+of the [`Euclidean`](@ref) space, so these are ``p + X``, ``q - p`` and ``X``, respectively.
+"""
+exp(::Lorentz{<:Any, MinkowskiMetric}, ::Any, ::Any)
+
+exp!(M::Lorentz{<:Any, MinkowskiMetric}, q, p, X) = exp!(M.manifold, q, p, X)
+function exp_fused!(M::Lorentz{<:Any, MinkowskiMetric}, q, p, X, t::Number)
+    return exp_fused!(M.manifold, q, p, X, t)
+end
+
+log!(M::Lorentz{<:Any, MinkowskiMetric}, X, p, q) = log!(M.manifold, X, p, q)
+
+function parallel_transport_direction!(M::Lorentz{<:Any, MinkowskiMetric}, Y, p, X, d)
+    return parallel_transport_direction!(M.manifold, Y, p, X, d)
+end
+function parallel_transport_to!(M::Lorentz{<:Any, MinkowskiMetric}, Y, p, X, q)
+    return parallel_transport_to!(M.manifold, Y, p, X, q)
+end
+
+@doc raw"""
     minkowski_metric(a, b)
 
 Compute the minkowski metric on $\mathbb R^n$ is given by
