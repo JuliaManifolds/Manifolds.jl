@@ -3,18 +3,6 @@ using Random: MersenneTwister, rand!
 using Test: Test
 using Manifolds: RieszRepresenterCotangentVector, get_chart_index
 
-"""
-    Manifolds.find_eps(x...)
-
-Find an appropriate tolerance for given points or tangent vectors, or their types.
-
-!!! note
-    This function is soon deprecated and will be replaced by a more systematic way in `Manifolds.Test`
-"""
-Manifolds.find_eps(x...) = Manifolds.find_eps(Base.promote_type(map(number_eltype, x)...))
-Manifolds.find_eps(x::Type{TN}) where {TN <: Number} = eps(real(TN))
-Manifolds.find_eps(x) = Manifolds.find_eps(number_eltype(x))
-
 function Manifolds.test_atlases(M::AbstractManifold, pts, test_atlases; is_mutating::Bool = true)
     return Test.@testset "atlases" begin # COV_EXCL_LINE
         if !isempty(test_atlases)

@@ -89,9 +89,3 @@ Manifolds.Test.NoExpectation
 Manifolds.Test.expect
 Manifolds.Test.isexpected
 ```
-
-## Former tests
-
-```@docs
-Manifolds.find_eps
-```

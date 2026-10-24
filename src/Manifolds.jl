@@ -599,7 +599,6 @@ function _jacobi_exp_matrix end
 function _adjoint_coordinate_map end
 
 # TODO: Remove once the new interface is done
-function find_eps end
 function test_atlases end
 # / remove
 
