@@ -75,7 +75,7 @@ Compute the Riemannian inner product ``g^{\mathrm{SpGr}}_p(X,Y)``
 on the [`SymplecticGrassmann`](@ref) manifold ``\mathrm{SpGr}``.
 
 For the case where ``p`` is represented by a point on the [`SymplecticStiefel`](@ref) manifold
-acting as a representant of its equivalence class ``[p] \in \mathrm{SpGr}``
+acting as a representer of its equivalence class ``[p] \in \mathrm{SpGr}``
 and the tangent vectors ``X,Y \in \mathrm{Hor}_p^π\operatorname{SpSt}(2n,2k)``
 are horizontal tangent vectors.
 
@@ -92,7 +92,7 @@ where ``I_{2n}`` denotes the identity matrix and ``(⋅)^+`` the [`symplectic_in
 function inner(M::SymplecticGrassmann, p, X, Y)
     n, k = get_parameter(M.size)
     J = SymplecticElement(p, X, Y) # in BZ21 also J
-    # Procompute lu(p'p) since we solve a^{-1}* 3 times
+    # Precompute lu(p'p) since we solve a^{-1}* 3 times
     a = lu(p' * p) # note that p'p is symmetric, thus so is its inverse c=a^{-1}
     # we split the original trace into two one with I -> (X'Yc)
     # 1) we permute X' and Y c to c^{\mathrm{T}}Y^{\mathrm{T}}X = a\(Y'X) (avoids a large interims matrix)
@@ -124,7 +124,7 @@ end
 
 Project a matrix ``Y ∈ ℝ^{2n×2k}`` onto the horizontal tangent vectors at the representative
 ``p ∈ \operatorname{SpSt}(2n,2k)`` of a point on the [`SymplecticGrassmann`](@ref) manifold, i.e. the tangent vectors
-``X ∈ T_p\operatorname{SpSt}(2n,2k)`` with ``p^+X = 0``, as
+``X ∈ T_p\operatorname{SpSt}(2n,2k)`` with ``p^+X = 0`` [BendokatZimmermann:2021](@cite), as
 
 ```math
 X = (I_{2n} - pp^+)Y,

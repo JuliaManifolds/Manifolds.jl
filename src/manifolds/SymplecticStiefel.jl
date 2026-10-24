@@ -72,12 +72,30 @@ end
 # Define Stiefel as the array fallback
 ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{ℝ} StiefelPoint StiefelTangentVector value value
 
+"""
+    default_inverse_retraction_method(M::SymplecticStiefel)
+
+The [`CayleyInverseRetraction`](@extref `ManifoldsBase.CayleyInverseRetraction`)
+is the default inverse retraction for the [`SymplecticStiefel`](@ref) manifold.
+"""
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel)
     return CayleyInverseRetraction()
 end
 
+"""
+    default_retraction_method(M::SymplecticStiefel)
+
+The [`CayleyRetraction`](@extref `ManifoldsBase.CayleyRetraction`)
+is the default retraction for the [`SymplecticStiefel`](@ref) manifold.
+"""
 ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction()
 
+"""
+    default_vector_transport_method(M::SymplecticStiefel)
+
+The [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`)
+is the default vector transport method for the [`SymplecticStiefel`](@ref) manifold.
+"""
 function ManifoldsBase.default_vector_transport_method(::SymplecticStiefel)
     return ProjectionTransport()
 end
