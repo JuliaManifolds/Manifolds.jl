@@ -551,6 +551,20 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
         @test length(c1) == length(c2)
     end
 
+    @testset "one-dimensional SPD matrices are flat" begin
+        for N in [SymmetricPositiveDefinite(1), SymmetricPositiveDefinite(1; parameter = :field)]
+            @test is_flat(N)
+            for g in [
+                    AffineInvariantMetric(), BuresWassersteinMetric(),
+                    GeneralizedBuresWassersteinMetric(fill(2.0, 1, 1)),
+                ]
+                @test is_flat(MetricManifold(N, g))
+            end
+        end
+        @test !is_flat(MetricManifold(M, BuresWassersteinMetric()))
+        @test !is_flat(MetricManifold(M, GeneralizedBuresWassersteinMetric(Matrix(2.0I, 3, 3))))
+    end
+
     @testset "field parameter" begin
         Mf = SymmetricPositiveDefinite(3; parameter = :field)
         @test typeof(get_embedding(Mf)) === Euclidean{ℝ, Tuple{Int, Int}}

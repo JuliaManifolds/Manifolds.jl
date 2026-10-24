@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* `is_flat` on the `SymmetricPositiveDefinite` matrices, also with the `AffineInvariantMetric`, the `BuresWassersteinMetric` and the `GeneralizedBuresWassersteinMetric`, now returns true for ``n = 1``, since a one-dimensional manifold is flat.
+* `SPDFixedDeterminant` is now an `IsometricallyEmbeddedManifoldType` instead of an `EmbeddedSubmanifoldType`, with `exp`, `log`, `parallel_transport_to` and `riemann_tensor` taken from the `SymmetricPositiveDefinite` matrices, and its own `injectivity_radius` and `is_flat`, which also cover the single point `SPDFixedDeterminant(1)`.
+  Previously all vector transports were forwarded to the embedding, so `ProjectionTransport` returned vectors that were in general not tangent vectors; it now projects onto the tangent space of the manifold.
 * The `copy`, `get_coordinates` and `get_vectors` tests in `Manifolds.Test` now support numbers as points and tangent vectors and bases over ℂ of complex manifolds:
   a copy of an immutable value is not required to be a different object, the number of coordinates and basis vectors is compared to `number_of_coordinates`,
   and orthogonality of a basis over ℝ of a complex manifold refers to the real part of the inner product.

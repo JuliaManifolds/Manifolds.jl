@@ -142,6 +142,15 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             ),
         )
         @test ManifoldsBase.exp_fused(M_euc, p, q - p, 0.5) ≈ (p + q) / 2
+
+        @testset "random points and vectors with a given random number generator" begin
+            pr = rand(MersenneTwister(42), M_euc)
+            @test is_point(M_euc, pr)
+            @test pr == rand!(MersenneTwister(42), M_euc, zeros(3))
+            Xr = rand(MersenneTwister(44), M_euc; vector_at = p, σ = 0.5)
+            @test is_vector(M_euc, p, Xr)
+            @test Xr == rand!(MersenneTwister(44), M_euc, zeros(3); vector_at = p, σ = 0.5)
+        end
     end
 
     @testset "Projection and metric conversion" begin
