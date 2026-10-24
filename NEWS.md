@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * `get_embedding` for the `Hyperrectangle`, which returns the `Euclidean` space of the same size, with the size stored in a field.
 * `zero_vector` and `zero_vector!` for points of the `Flag` manifold in the `OrthogonalPoint` representation.
+* `sectional_curvature`, `sectional_curvature_min` and `sectional_curvature_max` for the `ProbabilitySimplex`; `sectional_curvature` previously went through `riemann_tensor` and was only approximately ``1/4``.
 
 ### Changed
 
