@@ -347,8 +347,9 @@ function _vector_transport_direction!(
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     dx, dVx = submanifold_components(M.manifold, d)
-    vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal)
+    # the fiber part first, since VYM may be aliased with the direction dx
     bundle_transport_tangent_direction!(M, VYF, px, pVx, VXF, dx, m.method_vertical)
+    vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal)
     return Y
 end
 

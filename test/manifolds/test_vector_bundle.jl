@@ -47,7 +47,7 @@ end
                     get_basis, get_coordinates, get_vector, get_vectors, injectivity_radius,
                     inner, inverse_retract, is_flat, is_point, is_vector, manifold_dimension,
                     norm, project, rand, repr, representation_size, retract, sharp,
-                    vector_transport_to, zero_vector,
+                    vector_transport_direction, vector_transport_to, zero_vector,
                 ],
                 :InverseRetractionMethods => [m_prod_invretr, missing],
                 :InvalidPoints => [ArrayPartition([1.0, 0.0, 0.0], [1.0, 0.0, 0.0])],
@@ -91,6 +91,9 @@ end
                 (retract, m_prod_retr) => q,
                 sharp => X,
                 (vector_transport_to, m_prod_vt) =>
+                    ArrayPartition([-π / 2, 0.0, 0.0], [1.0, 0.0, 2.0]),
+                # the direction is the inverse retraction X of q, so the base point moves to q
+                (vector_transport_direction, m_prod_vt) =>
                     ArrayPartition([-π / 2, 0.0, 0.0], [1.0, 0.0, 2.0]),
                 :IsPointErrors => [ComponentManifoldError],
                 :IsVectorErrors => [ComponentManifoldError],

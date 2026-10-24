@@ -6,6 +6,9 @@ using LinearAlgebra, Manifolds, Random, Test
     @testset "Edge cases" begin
         @test repr(PositiveMatrices(2, 3)) == "PositiveMatrices(2, 3)"
         @test repr(PositiveArrays(2, 3, 4)) == "PositiveArrays(2, 3, 4)"
+        # without a method the exponential map and the logarithmic map are used
+        @test retract(M, 1.0, 1.0) == exp(M, 1.0, 1.0)
+        @test inverse_retract(M, 1.0, 4.0) == log(M, 1.0, 4.0)
         @test project(M, 1.5, 1.0) == 1.0
         @test embed(M, 1.0) == 1.0
         @test embed(M, 1.0, 2.0) == 2.0
@@ -118,13 +121,18 @@ using LinearAlgebra, Manifolds, Random, Test
         )
     end
 
-    @testset "Weingarten and Hessian" begin
+    @testset "Riemannian gradient and Hessian" begin
         p = 1.0
         G = 2.0
         H = 3.0
         X = 4.0
+        @test riemannian_gradient(M, 2.0, 3.0) == 12.0
         rH = riemannian_Hessian(M, p, G, H, X)
         @test rH == p * H * p + X * G * p
+        M3 = PositiveVectors(3)
+        p3 = [1.0, 2.0, 3.0]
+        @test riemannian_Hessian(M3, p3, fill(G, 3), fill(H, 3), fill(X, 3)) ≈
+            p3 .* H .* p3 .+ X .* G .* p3
     end
 
     @testset "In-place random values" begin

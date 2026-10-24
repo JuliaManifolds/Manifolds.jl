@@ -283,12 +283,18 @@ using RecursiveArrayTools: ArrayPartition
         )
         @test Distributions.support(pd) isa ext.MPointSupport
         @test is_point(M, rand(MersenneTwister(42), pd))
+        pr = allocate(p)
+        rand!(MersenneTwister(42), pd, pr)
+        @test is_point(M, pr)
         vd = ext.ProductFVectorDistribution(
             Manifolds.normal_tvector_distribution(M1, p.x[1], 1.0),
             Manifolds.normal_tvector_distribution(M2, p.x[2], 1.0),
         )
         @test Distributions.support(vd) isa ext.FVectorSupport
         @test is_vector(M, p, rand(MersenneTwister(42), vd))
+        Xr = allocate(p)
+        rand!(MersenneTwister(42), vd, Xr)
+        @test is_vector(M, p, Xr)
     end
 
     @testset "Atlases and induced bases" begin

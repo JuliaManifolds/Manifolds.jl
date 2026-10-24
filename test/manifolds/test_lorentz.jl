@@ -62,6 +62,9 @@ using LinearAlgebra, Manifolds, ManifoldsBase, StaticArrays, Test
         @test inner(M, p, [3.0, 4.0, 5.0], [3.0, 4.0, 5.0]) == 0.0
         @test inner(M, p, [0.0, 0.0, 1.0], [0.0, 0.0, 1.0]) == -1.0
         @test parallel_transport_direction(M, p, X, q) == X
+        Yd = similar(X)
+        parallel_transport_direction!(M, Yd, p, X, q)
+        @test Yd == X
     end
 
     @testset "Signatures of manifolds built from the Lorentz manifold" begin

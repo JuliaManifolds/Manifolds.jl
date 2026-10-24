@@ -149,7 +149,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         Pf3 = zeros(4, 4) # of a too low rank
         Xf1 = Matrix{Float64}(I, 4, 4)
         Xf1[1, 2] = 1.0 # not Hamiltonian
-        Xf2 = XP.value .+ Diagonal([1.0, 1.0, -1.0, -1.0]) # Hamiltonian, but not Xp + pX
+        Xf2 = Matrix{Float64}(I, 4, 4) # equal to its symplectic inverse, but not Xp + pX
         Manifolds.Test.test_manifold(
             M,
             Dict(

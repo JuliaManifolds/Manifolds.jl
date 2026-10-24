@@ -108,6 +108,13 @@ using RecursiveArrayTools
         @test !is_point(M, zeros(3, 3, 2))
         @test_throws DomainError is_point(M, ⊗(e(1), e(1), e(1)); error = :error)
         @test !is_point(Tucker((2, 2, 2), (2, 2, 2)), p)
+        @test_throws DomainError is_point(Tucker((3, 3, 3), (1, 2, 2)), p; error = :error)
+        # scaling the core breaks the match with the singular values
+        pa = allocate(p)
+        copyto!(M, pa, p)
+        @test pa == p
+        pa.hosvd.core .*= 2
+        @test !is_point(M, pa)
         @test !is_vector(M, q, X)
         # truncating the HOSVD of the full tensor recovers p
         @test isapprox(M, p, TuckerPoint(embed(M, p), (2, 2, 2)))
