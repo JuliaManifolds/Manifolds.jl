@@ -21,9 +21,10 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             :EmbeddedPoints => [[1.0 2.0 3.0; 4.0 5.0 6.0; 7.0 8.0 10.0]],
             :EmbeddedVectors => [[1.0 -1.0 0.0; 0.0 0.0 1.0; -1.0 1.0 1.1]],
             :Functions => [
-                copy, copyto!, default_retraction_method, embed, get_embedding, inner,
-                is_flat, is_point, is_vector, manifold_dimension, norm, project, rand, repr,
-                representation_size, retract, zero_vector,
+                copy, copyto!, default_retraction_method, default_vector_transport_method,
+                embed, get_embedding, inner, is_flat, is_point, is_vector, manifold_dimension,
+                norm, project, rand, repr, representation_size, retract, vector_transport_to,
+                zero_vector,
             ],
             :InvalidPoints => [pf1, pf2, pf2', pf3],
             :InvalidVectors => [Xf1, Xf1'],
@@ -31,12 +32,14 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             :RetractionMethods => [ProjectionRetraction()],
             :SecondVector => X2,
             :Vectors => [X, project(M, p2, Y), project(M, p3, Y)],
+            :VectorTransportMethods => [ProjectionTransport()],
             :Seed => 42,
         ),
         # Expectations
         Dict(
             :atol => 1.0e-12,
             default_retraction_method => ProjectionRetraction(),
+            default_vector_transport_method => ProjectionTransport(),
             (embed, :Point) => p1,
             (embed, :Vector) => X,
             get_embedding => MultinomialMatrices(3, 3),
@@ -47,6 +50,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             norm => sqrt(3 * dot(X, X)),
             repr => "MultinomialDoubleStochastic(3)",
             representation_size => (3, 3),
+            (vector_transport_to, ProjectionTransport()) => project(M, p2, X),
             :IsPointErrors => [
                 ManifoldDomainError, CompositeManifoldError, ManifoldDomainError,
                 ManifoldDomainError,
@@ -61,12 +65,6 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         @test project(M, p1) == p1
         Z = [1 2 3; 4 5 6; 7 8 10] # integer entries
         @test project!(M, zeros(3, 3), Z) ≈ project(M, float.(Z))
-        # vector_transport_to is not part of the suite, since it requires an inverse
-        # retraction compatible with the default retraction
-        @test is_vector(
-            M, p2, vector_transport_to(M, p1, X, p2, ProjectionTransport()); atol = 1.0e-15,
-        )
-        @test vector_transport_to(M, p1, X, p2, ProjectionTransport()) == project(M, p2, X)
     end
 
     @testset "Riemannian Gradient" begin

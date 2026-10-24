@@ -24,13 +24,14 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
                 copy, copyto!, default_retraction_method, default_vector_transport_method, embed,
                 get_embedding, inner, is_default_metric, is_flat, is_point, is_vector,
                 manifold_dimension, norm, project, rand, repr, representation_size, retract,
-                zero_vector,
+                vector_transport_to, zero_vector,
             ],
             :Points => [p, q, r], :Vectors => [X, Y, Z], :SecondVector => X2,
             :EmbeddedPoints => [2 .* p], :EmbeddedVectors => [Yamb],
             :InvalidPoints => [pf], :InvalidVectors => [Xf],
             :InverseRetractionMethods => [missing],
             :RetractionMethods => [ProjectionRetraction()],
+            :VectorTransportMethods => [ProjectionTransport()],
             :Seed => 42,
             :TestRandScaling => true,
         ),
@@ -53,18 +54,10 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             (retract, ProjectionRetraction()) => (p + X) / norm(p + X),
             repr => "Spectrahedron(4, 2)",
             representation_size => (4, 2),
+            (vector_transport_to, ProjectionTransport()) => project(M, q, X),
             :IsPointErrors => [DomainError],
             :IsVectorErrors => [DomainError],
         ),
-    )
-
-    # tested separately, since the default `direction` requires `log`, which is not available
-    Manifolds.Test.test_vector_transport(
-        M, p, X, q, ProjectionTransport();
-        direction = nothing,
-        expected_value = project(M, q, X),
-        name = "vector_transport_to(M, p, X, q, ProjectionTransport())",
-        atol = 1.0e-14,
     )
 
     @testset "Basics" begin

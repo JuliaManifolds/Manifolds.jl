@@ -1826,7 +1826,9 @@ Test the parallel transport on manifold `M` at point `p` with tangent vector `X`
 
 this defaults to testing `parallel_transport_to`, but can also be used to test `parallel_transport_direction`,
 by passing that function to the `available_functions`, using the `direction` argument.
-The `direction` has to be the one that transports `X` also to `q`.
+The `direction` has to be the one that transports `X` also to `q`. If it is `missing`, it is
+computed with the default inverse retraction when `vector_transport_direction` is tested,
+and `nothing` deactivates the test of `vector_transport_direction`.
 
 * that the result is a valid tangent vector at `q` on the manifold
 * that the result matches `expected_value`, if given
@@ -2356,7 +2358,7 @@ end # Manifolds.Test.test_vector_arithmetic
     Manifolds.Test.test_vector_transport(
         M, p, X, q, m = default_vector_transport_method(M);
         available_functions=[],
-        direction = inverse_retract(M, p, q, default_inverse_retraction_method(M)),
+        direction = missing,
         expected_value = NoExpectation(),
         expected_value_direction = NoExpectation(),
         test_aliased = true,
@@ -2383,7 +2385,7 @@ The `direction` has to be the one that transports `X` also to `q`.
 function Manifolds.Test.test_vector_transport(
         M, p, X, q, m = default_vector_transport_method(M);
         available_functions = [],
-        direction = inverse_retract(M, p, q, default_inverse_retraction_method(M)),
+        direction = missing,
         expected_value_direction = NoExpectation(),
         expected_value = NoExpectation(),
         test_aliased = true,
@@ -2406,6 +2408,9 @@ function Manifolds.Test.test_vector_transport(
             end
         end
         if (vector_transport_direction in available_functions) && !isnothing(direction)
+            if ismissing(direction)
+                direction = inverse_retract(M, p, q, default_inverse_retraction_method(M))
+            end
             Y4 = vector_transport_direction(M, p, X, direction, m)
             !isexpected(expected_value_direction) || Test.@test isapprox(M, q, Y4, expect(expected_value_direction); error = :error, kwargs...)
             if test_mutating

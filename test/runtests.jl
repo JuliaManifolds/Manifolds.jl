@@ -65,6 +65,7 @@ end
         include_test("manifolds/test_multinomial_doubly_stochastic.jl")
         include_test("manifolds/test_multinomial_matrices.jl")
         include_test("manifolds/test_multinomial_spd.jl")
+        include_test("manifolds/test_multinomial_symmetric.jl")
         include_test("manifolds/test_oblique.jl")
         include_test("manifolds/test_probability_simplex.jl")
         include_test("manifolds/test_power_manifold.jl")
@@ -82,7 +83,6 @@ end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
         include_test("manifolds-old/lorentz.jl")
-        include_test("manifolds-old/multinomial_symmetric.jl")
         include_test("manifolds-old/positive_numbers.jl")
         include_test("manifolds-old/tucker.jl")
 
