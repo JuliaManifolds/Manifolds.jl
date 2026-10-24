@@ -58,6 +58,7 @@ end
         include_test("manifolds/test_veronese.jl")
         include_test("manifolds/test_general_unitary.jl")
         include_test("manifolds/test_grassmann.jl")
+        include_test("manifolds/test_graph.jl")
         include_test("manifolds/test_hamiltonian.jl")
         include_test("manifolds/test_heisenberg_matrices.jl")
         include_test("manifolds/test_hyperbolic.jl")
@@ -92,7 +93,6 @@ end
         #meta manifolds
         include_test("manifolds-old/fiber.jl")
         include_test("manifolds-old/fiber_bundle.jl")
-        include_test("manifolds-old/graph.jl")
     end
     #
     # On CI, JET runs in its own job for simplicity; it comes last, since JET.jl 0.9 on
