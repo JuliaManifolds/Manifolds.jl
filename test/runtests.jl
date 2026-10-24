@@ -79,6 +79,7 @@ end
         include_test("manifolds/test_symplectic.jl")
         include_test("manifolds/test_symplectic_grassmann.jl")
         include_test("manifolds/test_symplectic_stiefel.jl")
+        include_test("manifolds/test_torus.jl")
         include_test("manifolds/test_tucker.jl")
         include_test("manifolds/test_unitary_matrices.jl")
         include_test("manifolds/test_vector_bundle.jl")
@@ -87,8 +88,6 @@ end
         # starting with tests of simple manifolds
         include_test("manifolds-old/lorentz.jl")
         include_test("manifolds-old/positive_numbers.jl")
-
-        include_test("manifolds-old/torus.jl")
 
         #meta manifolds
         include_test("manifolds-old/fiber.jl")
