@@ -82,8 +82,13 @@ using Manifolds: RiemannianProjectionBackend
         # p⁻¹X/2 = H/2, so the Cayley retraction is p(2I - H/2)⁻¹(2I + H/2)
         @test ManifoldsBase.retract_fused(M, p, X, 0.5, CayleyRetraction()) ≈
             p * Diagonal((4 .+ h) ./ (4 .- h))
-        # the rounding errors of p⁺p grow with the norm of a point
-        p_big = rand(MersenneTwister(42), M)
+        # the rounding errors of p⁺p grow with the norm of a point, here a product of
+        # two shears with symmetric blocks A and C and of a scaling with an invertible B
+        A = [10 * sqrt(i + j) for i in 1:2, j in 1:2]
+        C = [10 * sqrt(i * j + 1) for i in 1:2, j in 1:2]
+        B = [2.0 1 / 3; 0.0 4.0]
+        Z = zeros(2, 2)
+        p_big = [I A; Z I] * [B Z; Z inv(B)'] * [I Z; C I]
         @test norm(p_big) > 100
         @test norm(inv(M, p_big) * p_big - I) > 1.0e-13
         @test is_point(M, p_big; error = :error)

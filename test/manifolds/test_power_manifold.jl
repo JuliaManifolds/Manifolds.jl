@@ -383,10 +383,10 @@ end
 
     @testset "Errors in a single component" begin
         M = PowerManifold(Ms, NestedPowerRepresentation(), 2)
-        pn = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        p_n = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         Xn = [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         @test_throws ComponentManifoldError is_point(M, Xn; error = :error)
-        @test_throws ComponentManifoldError is_vector(M, pn, Xn; error = :error)
+        @test_throws ComponentManifoldError is_vector(M, p_n, Xn; error = :error)
     end
 
     @testset "Basis printing" begin
@@ -428,9 +428,9 @@ end
 
         Mn = PowerManifold(Ms, NestedReplacingPowerRepresentation(), 2)
         An = get_default_atlas(Mn)
-        pn = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
-        i_n = get_chart_index(Mn, An, pn)
-        @test isapprox(Mn, get_point(Mn, An, i_n, get_parameters(Mn, An, i_n, pn)), pn)
+        p_n = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        i_n = get_chart_index(Mn, An, p_n)
+        @test isapprox(Mn, get_point(Mn, An, i_n, get_parameters(Mn, An, i_n, p_n)), p_n)
     end
 
     @testset "Induced bases, $(repr(R))" for (R, P) in (

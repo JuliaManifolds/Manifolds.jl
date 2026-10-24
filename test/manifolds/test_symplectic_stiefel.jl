@@ -87,8 +87,14 @@ using Manifolds: RiemannianProjectionBackend
         @test inner(M, Float32.(p), Float32.(X), Float32.(X)) isa Float32
         @test ManifoldsBase.retract_fused(M, p, E, a, CayleyRetraction()) ≈
             [1 - a^2 / 4 0.0; a 0.0; 0.0 1 - a^2 / 4; 0.0 a] ./ (1 + a^2 / 4)
-        # the rounding errors of p⁺p grow with the norm of a point
-        p_big = rand(MersenneTwister(2), SymplecticStiefel(6, 4))
+        # the rounding errors of p⁺p grow with the norm of a point, here the columns 1, 2, 4
+        # and 5 of a symplectic matrix, a product of two shears with symmetric blocks A and C
+        # and of a scaling with an invertible B
+        A = [20 * sqrt(i + j) for i in 1:3, j in 1:3]
+        C = [20 * sqrt(i * j + 1) for i in 1:3, j in 1:3]
+        B = [2.0 1 / 3 1 / 3; 0.0 4.0 1 / 3; 0.0 0.0 8.0]
+        Z = zeros(3, 3)
+        p_big = ([I A; Z I] * [B Z; Z inv(B)'] * [I Z; C I])[:, [1, 2, 4, 5]]
         @test norm(p_big) > 100
         @test norm(inv(SymplecticStiefel(6, 4), p_big) * p_big - I) > 1.0e-12
         @test is_point(SymplecticStiefel(6, 4), p_big; atol = 1.0e-14)
