@@ -94,6 +94,4 @@ Manifolds.Test.isexpected
 
 ```@docs
 Manifolds.find_eps
-Manifolds.test_manifold
-Manifolds.test_parallel_transport
 ```

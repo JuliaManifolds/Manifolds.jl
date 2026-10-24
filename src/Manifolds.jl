@@ -600,8 +600,6 @@ function _adjoint_coordinate_map end
 
 # TODO: Remove once the new interface is done
 function find_eps end
-function test_parallel_transport end
-function test_manifold end
 function test_atlases end
 # / remove
 
