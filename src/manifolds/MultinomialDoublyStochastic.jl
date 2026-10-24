@@ -18,6 +18,15 @@ that the doubly stochastic multinomial manifolds implement.
 """
 default_retraction_method(::AbstractMultinomialDoublyStochastic) = ProjectionRetraction()
 
+"""
+    default_vector_transport_method(M::AbstractMultinomialDoublyStochastic)
+
+The [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`) is the default vector transport on [`AbstractMultinomialDoublyStochastic`](@ref)` manifolds.
+"""
+function default_vector_transport_method(::AbstractMultinomialDoublyStochastic)
+    return ProjectionTransport()
+end
+
 @doc raw"""
     representation_size(M::AbstractMultinomialDoublyStochastic)
 

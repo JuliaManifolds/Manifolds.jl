@@ -5,6 +5,57 @@ All notable changes to `Manifolds.jl` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.35] unreleased
+
+### Added
+
+* `project` for points, coordinates in a `DefaultOrthonormalBasis`, `riemannian_Hessian`, `Weingarten`, `sectional_curvature_min` and `sectional_curvature_max` on the `SpecialUnitaryMatrices`, and `volume_density` on the complex `UnitaryMatrices` and `SpecialUnitaryMatrices`.
+* `project` onto the horizontal tangent vectors of the `SymplecticGrassmann` manifold in the representation by points on the `SymplecticStiefel` manifold, which also provides the `ProjectionTransport`.
+* `==` and `hash` comparing by value for types that store arrays or wrap other objects and were compared by identity before: the `FiberBundle` (and hence the `TangentBundle`), the `FiberBundleProductVectorTransport`, the `ParametricSurface`, the atlases `RetractionAtlas`, `PowerAtlas`, `ProductAtlas` and `ParametricSurfaceAtlas`, the charts of the `Stiefel` manifold, the `InducedBasis`, the basis data of fiber bundles and of the `Tucker` manifold, the `RieszRepresenterCotangentVector` and the `StiefelFactorization`. They use `@fieldwise_equality` from ManifoldsBase.jl, which requires ManifoldsBase.jl 2.6.5.
+* `hash` for the `SPDPoint`, `SVDMPoint`, `UMVTangentVector`, `VeronesePoint`, `VeroneseTangentVector`, `TuckerPoint` and `TuckerTangentVector`, consistent with their `==`; equal values could have different hashes.
+* `exp`, `log` and `parallel_transport_to` on the `Lorentz` manifold with the `MinkowskiMetric`, which are the ones of the `Euclidean` space, since the metric is constant; previously they raised a `MethodError`, and so did `retract` with the default `ExponentialRetraction`.
+* `metric_signature`, the numbers of positive, negative and degenerate directions of the metric of a manifold, and `is_positive_definite_metric`, whether there are only positive ones. By default a metric is positive definite; the signature of the `Lorentz` manifold has one negative direction, and those of product and power manifolds, of tangent and cotangent spaces and bundles and of the `ValidationManifold` are derived from the manifolds they are built from. `Manifolds.Test` tests them with `test_metric_signature` and `test_is_positive_definite_metric`, and `test_inner` checks that the inner product of a tangent vector with itself is nonnegative only for positive definite metrics.
+* `get_embedding` for the `Tucker` manifold, which returns the `Euclidean` space of tensors of the same size.
+* `get_embedding` for the `Hyperrectangle`, which returns the `Euclidean` space of the same size, with the size stored in a field.
+* `zero_vector` and `zero_vector!` for points of the `Flag` manifold in the `OrthogonalPoint` representation.
+* `sectional_curvature`, `sectional_curvature_min` and `sectional_curvature_max` for the `ProbabilitySimplex`; `sectional_curvature` previously went through `riemann_tensor` and was only approximately ``1/4``.
+
+### Changed
+
+* Points and tangent vectors on the `Veronese` manifold are now represented by the new `VeronesePoint` and `VeroneseTangentVector` types instead of tuples. `VeroneseTangentVector` supports vector arithmetic and broadcasting, and both support `p[1]`/`p[2]` indexing of the radial and spherical components for compatibility with the tuple representation.
+
+### Fixed
+
+* `ProjectionTransport` on manifolds that represent tangent vectors in a Lie algebra, i.e. the `GeneralUnitaryMatrices` and the `DeterminantOneMatrices`, now projects the embedded tangent vector ``pX`` onto the tangent space at `q`; with the previous default of ManifoldsBase.jl the tangent vector `X` was returned unchanged.
+* `embed` of tangent vectors on the `DeterminantOneMatrices` now returns ``pX``, since tangent vectors are represented by matrices of trace zero; it returned `X`, so that `project` was not its left inverse.
+* `sectional_curvature` on the complex `UnitaryMatrices` and the `SpecialUnitaryMatrices` now returns a real number; the generic formula used the complex-valued `inner` product.
+* `project` onto the tangent space of the `SymmetricPositiveSemidefiniteFixedRank` now removes the vertical component; a sign error doubled it instead, which also affected `riemannian_gradient` and `ProjectionTransport`.
+* `is_flat` on the `SymmetricPositiveDefinite` matrices, also with the `AffineInvariantMetric`, the `BuresWassersteinMetric` and the `GeneralizedBuresWassersteinMetric`, now returns true for ``n = 1``, since a one-dimensional manifold is flat.
+* `ProjectionTransport` on the `SPDFixedDeterminant` now projects onto the tangent space of the manifold; it was forwarded to the `SymmetricPositiveDefinite` embedding, so the transported vectors were in general not tangent vectors. This relies on ManifoldsBase.jl no longer forwarding `ProjectionTransport` on submanifolds to their embedding.
+* `SPDFixedDeterminant` has its own `riemann_tensor`, taken from the `SymmetricPositiveDefinite` matrices, and its own `injectivity_radius` and `is_flat`, which also cover the single point `SPDFixedDeterminant(1)`.
+* The `copy`, `get_coordinates` and `get_vectors` tests in `Manifolds.Test` now support numbers as points and tangent vectors and bases over ℂ of complex manifolds:
+  a copy of an immutable value is not required to be a different object, the number of coordinates and basis vectors is compared to `number_of_coordinates`,
+  and orthogonality of a basis over ℝ of a complex manifold refers to the real part of the inner product.
+* `copy` and `copyto!` on the `Segre` manifold now copy the factors of points and tangent vectors; previously the copy shared the factor arrays with the original, so mutating functions applied to a copy also changed the original.
+* `copyto!` on a `MetricManifold` now forwards to the underlying manifold, so representation-specific copying (for example on the `Segre` manifold with a `WarpedMetric`) is used.
+* The expectation `(get_embedding, T)` in `Manifolds.Test.test_manifold` is now the expected embedding for points of type `T`, falling back to the expectation for `get_embedding`; it was used as an expected type, while the embedding for points of type `T` was compared to the expectation for `get_embedding`.
+* The vector transport test in `Manifolds.Test` now computes the default `direction` with the default inverse retraction only when `vector_transport_direction` is tested; previously it was always computed, so that the test failed on manifolds without an inverse retraction.
+* `isapprox` for points on the `Tucker` manifold now supports the `error` keyword; it passed all keywords to `isapprox` on arrays, which failed for `error`.
+* The default inverse retraction on the `Tucker` manifold is now the `ProjectionInverseRetraction`; the previous default, the `PolarInverseRetraction`, is not implemented there, so that `inverse_retract(M, p, q)` raised a `MethodError`.
+* The `embed` test in `Manifolds.Test` used the embedded point instead of the manifold point when checking aliased tangent vector embedding; it now only checks aliasing when the tangent vector and its embedding have the same type.
+* The `embed` test in `Manifolds.Test` now checks embedded points and vectors on `get_embedding(M, typeof(p))` instead of `get_embedding(M)`, and uses the point `p` instead of its embedding when projecting the embedded vector back.
+* `embed!` for tangent vectors on `Rotations`, `OrthogonalMatrices` and `UnitaryMatrices` now works when the output is aliased with the input tangent vector.
+* `isapprox` on the `Flag` manifold now supports the `error=` keyword; the methods are now implemented as `_isapprox`.
+* `default_retraction_method` on the `Elliptope` is now `ProjectionRetraction`; it was `ExponentialRetraction`, but the exponential map is not implemented on the `Elliptope`.
+* `default_retraction_method` on the `Spectrahedron` is now `ProjectionRetraction`, and `default_vector_transport_method` on the `Elliptope`, the `Spectrahedron` and the `SymmetricPositiveSemidefiniteFixedRank` is now `ProjectionTransport`; they were `ExponentialRetraction` and `ParallelTransport`, which are not implemented on these manifolds.
+* `default_retraction_method` and `default_inverse_retraction_method` on the `SymplecticGrassmann` manifold are now `CayleyRetraction` and `CayleyInverseRetraction`, as on the `SymplecticStiefel` manifold, and `default_vector_transport_method` is now `ProjectionTransport`; the default inverse retraction was `LogarithmicInverseRetraction` and the default vector transport `ParallelTransport`, which are not implemented on this manifold.
+* `default_vector_transport_method` on the `SymplecticStiefel` manifold is now `ProjectionTransport`; it was `ParallelTransport`, which is not implemented on this manifold.
+* `is_point` on the `SymplecticStiefel` manifold now measures the relative tolerance `rtol` relative to ``\lVert p \rVert_{\mathrm{F}}^2``, also when `atol` is given, since the rounding errors of ``p^{+}p`` grow with the norm of `p`; valid points of a large norm, for example from `rand`, were rejected for small absolute tolerances.
+* `project` of points onto the `MultinomialSymmetric` manifold now applies Sinkhorn's algorithm to the symmetric part of the matrix; for a nonsymmetric matrix the result was not symmetric and hence not a point on the manifold.
+* `default_vector_transport_method` on the `MultinomialDoubleStochastic` and the `MultinomialSymmetric` manifolds is now `ProjectionTransport`; it was `ParallelTransport`, which is not implemented on these manifolds.
+* `default_vector_transport_method` on the `SymplecticMatrices` is now `ProjectionTransport`; it was `ParallelTransport`, which is not implemented on this manifold.
+* `is_point` on the `SymplecticMatrices` now accepts a relative tolerance `rtol`, relative to ``\lVert p \rVert_{\mathrm{F}}^2``, which has a nonzero default also when `atol` is given, since the rounding errors of ``p^{+}p`` grow with the norm of `p`; valid points of a large norm, for example from `rand`, were rejected.
+
 ## [0.11.34] 2026-10-22
 
 ### Changed

@@ -108,6 +108,22 @@ function check_vector(
     return nothing
 end
 
+"""
+    default_retraction_method(M::Elliptope)
+
+Return [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) as the default retraction for the
+[`Elliptope`](@ref) manifold.
+"""
+default_retraction_method(::Elliptope) = ProjectionRetraction()
+
+"""
+    default_vector_transport_method(M::Elliptope)
+
+Return [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`) as the default vector
+transport for the [`Elliptope`](@ref) manifold.
+"""
+default_vector_transport_method(::Elliptope) = ProjectionTransport()
+
 function get_embedding(::Elliptope{TypeParameter{Tuple{n, k}}}) where {n, k}
     return Euclidean(n, k)
 end

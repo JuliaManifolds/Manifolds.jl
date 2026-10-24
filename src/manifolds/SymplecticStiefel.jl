@@ -72,11 +72,33 @@ end
 # Define Stiefel as the array fallback
 ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{ℝ} StiefelPoint StiefelTangentVector value value
 
+"""
+    default_inverse_retraction_method(M::SymplecticStiefel)
+
+The [`CayleyInverseRetraction`](@extref `ManifoldsBase.CayleyInverseRetraction`)
+is the default inverse retraction for the [`SymplecticStiefel`](@ref) manifold.
+"""
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel)
     return CayleyInverseRetraction()
 end
 
+"""
+    default_retraction_method(M::SymplecticStiefel)
+
+The [`CayleyRetraction`](@extref `ManifoldsBase.CayleyRetraction`)
+is the default retraction for the [`SymplecticStiefel`](@ref) manifold.
+"""
 ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction()
+
+"""
+    default_vector_transport_method(M::SymplecticStiefel)
+
+The [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`)
+is the default vector transport method for the [`SymplecticStiefel`](@ref) manifold.
+"""
+function ManifoldsBase.default_vector_transport_method(::SymplecticStiefel)
+    return ProjectionTransport()
+end
 
 @doc raw"""
     canonical_project(::SymplecticStiefel, p_Sp)
@@ -107,10 +129,18 @@ end
 Check whether `p` is a valid point on the [`SymplecticStiefel`](@ref),
 ``\mathrm{SpSt}(2n, 2k)`` manifold, that is ``p^{+}p`` is the identity,
 ``(⋅)^+`` denotes the [`symplectic_inverse`](@ref).
+
+The check succeeds if ``\lVert p^{+}p - I \rVert_{\mathrm{F}} ≤ \max(\mathrm{atol}, \mathrm{rtol}\lVert p \rVert_{\mathrm{F}}^2)``.
+The relative tolerance `rtol` is relative to ``\lVert p \rVert_{\mathrm{F}}^2``, the scale of the rounding
+errors of ``p^{+}p``, and keeps its default value when only `atol` is given.
 """
-function check_point(M::SymplecticStiefel{ℝ}, p; kwargs...)
-    # Perform check that the matrix lives on the real symplectic manifold:
-    if !isapprox(inv(M, p) * p, I; kwargs...)
+function check_point(
+        M::SymplecticStiefel{ℝ}, p::T;
+        atol::Real = 0, rtol::Real = sqrt(eps(real(float(number_eltype(T))))), kwargs...,
+    ) where {T}
+    # Perform check that the matrix lives on the real symplectic manifold;
+    # the rounding errors of p⁺p are relative to ‖p⁺‖‖p‖ = ‖p‖²
+    if !isapprox(inv(M, p) * p, I; atol = max(atol, rtol * norm(p)^2), rtol = 0, kwargs...)
         return DomainError(
             norm(inv(M, p) * p - I),
             (

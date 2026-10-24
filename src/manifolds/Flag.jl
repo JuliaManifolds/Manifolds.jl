@@ -141,7 +141,9 @@ Test whether two tangent vectors `X`, `Y` at `p` on the [`Flag`](@ref) manifold 
 the same, that is whether ``\lVert X - Y \rVert_p \approx 0`` with the classical `isapprox`.
 The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(X, Y))`.
 """
-function Base.isapprox(M::Flag, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
+isapprox(::Flag, ::Any, ::Any, ::Any)
+
+function _isapprox(M::Flag, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end
 
@@ -153,7 +155,9 @@ Since a point has more than one Stiefel representation, the test is performed on
 retraction, that is whether ``\lVert \operatorname{retr}^{-1}_p q \rVert_p \approx 0`` with the classical `isapprox`.
 The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(p, q))`.
 """
-function Base.isapprox(M::Flag, p, q; atol = sqrt(max_eps(p, q)), kwargs...)
+isapprox(::Flag, ::Any, ::Any)
+
+function _isapprox(M::Flag, p, q; atol = sqrt(max_eps(p, q)), kwargs...)
     X = inverse_retract(M, p, q, PolarInverseRetraction())
     return isapprox(norm(M, p, X), 0; atol = atol, kwargs...)
 end

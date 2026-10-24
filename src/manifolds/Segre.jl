@@ -70,6 +70,16 @@ function check_size(M::Segre{𝔽, V}, p, X) where {𝔽, V}
     return nothing
 end
 
+# points and tangent vectors are vectors of arrays, so copy the factors and not just references to them
+function copyto!(::Segre, q, p)
+    foreach(copyto!, q, p)
+    return q
+end
+function copyto!(::Segre, Y, p, X)
+    foreach(copyto!, Y, X)
+    return Y
+end
+
 @doc raw"""
     closest_representative!(M::Segre{ℝ, V}, q, p)
 

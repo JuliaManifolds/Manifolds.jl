@@ -66,6 +66,9 @@ struct SPDPoint{
     sqrt::Q
     sqrt_inv::R
 end
+
+ManifoldsBase.@fieldwise_equality SPDPoint (eigen,)
+
 SPDPoint(p::SPDPoint) = p
 function SPDPoint(p::AbstractMatrix; store_p = true, store_sqrt = true, store_sqrt_inv = true)
     e = eigen(Symmetric(p))
@@ -94,9 +97,6 @@ function SPDPoint(p::AbstractMatrix; store_p = true, store_sqrt = true, store_sq
 end
 convert(::Type{SPDPoint}, p::AbstractMatrix) = SPDPoint(p)
 
-function Base.:(==)(p::SPDPoint, q::SPDPoint)
-    return p.eigen == q.eigen
-end
 
 function allocate(p::SPDPoint)
     return SPDPoint(
@@ -262,11 +262,12 @@ function isapprox(p::SPDPoint, q::SPDPoint; kwargs...)
 end
 
 """
-    is_flat(::SymmetricPositiveDefinite)
+    is_flat(M::SymmetricPositiveDefinite)
 
-Return false. [`SymmetricPositiveDefinite`](@ref) is not a flat manifold.
+Return true if the [`SymmetricPositiveDefinite`](@ref) `M` is one-dimensional, i.e. for
+``n = 1``, and false otherwise.
 """
-is_flat(M::SymmetricPositiveDefinite) = false
+is_flat(M::SymmetricPositiveDefinite) = get_parameter(M.size)[1] == 1
 
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)

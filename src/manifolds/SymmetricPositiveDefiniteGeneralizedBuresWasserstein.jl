@@ -139,15 +139,15 @@ end
 }
 
 """
-    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric})
+    is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric})
 
-Return false. [`SymmetricPositiveDefinite`](@ref) with [`GeneralizedBuresWassersteinMetric`](@ref)
-is not a flat manifold.
+Return true if the [`SymmetricPositiveDefinite`](@ref) with [`GeneralizedBuresWassersteinMetric`](@ref)
+is one-dimensional, i.e. for ``n = 1``, and false otherwise.
 """
 function is_flat(
-        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric}
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric}
     )
-    return false
+    return is_flat(M.manifold)
 end
 
 @doc raw"""

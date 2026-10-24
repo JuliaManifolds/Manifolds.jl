@@ -142,6 +142,17 @@ function inner(B::FiberBundle, p, X, Y)
     return inner(B.manifold, px, VXM, VYM) + inner(F, Vx, VXF, VYF)
 end
 
+"""
+    metric_signature(B::Union{TangentBundle, CotangentBundle})
+
+Return the signature of the metric of the tangent or cotangent bundle `B`, which is
+twice the signature of its base manifold, since the metric is the sum of the metrics
+of the base manifold and the fiber.
+"""
+function metric_signature(B::Union{TangentBundle, CotangentBundle})
+    return 2 .* metric_signature(B.manifold)
+end
+
 function _inverse_retract(M::FiberBundle, p, q, ::FiberBundleInverseProductRetraction)
     return inverse_retract_product(M, p, q)
 end
@@ -336,8 +347,9 @@ function _vector_transport_direction!(
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     dx, dVx = submanifold_components(M.manifold, d)
-    vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal)
+    # the fiber part first, since VYM may be aliased with the direction dx
     bundle_transport_tangent_direction!(M, VYF, px, pVx, VXF, dx, m.method_vertical)
+    vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal)
     return Y
 end
 

@@ -74,6 +74,8 @@ struct StiefelChart{TU <: AbstractMatrix, TI <: AbstractVector}
     rows::TI
 end
 
+ManifoldsBase.@fieldwise_equality StiefelChart
+
 """
     PolarLightRetraction <: AbstractRetractionMethod
 
