@@ -6,8 +6,6 @@ using LinearAlgebra, Manifolds, Random, Test
     @testset "Edge cases" begin
         @test repr(PositiveMatrices(2, 3)) == "PositiveMatrices(2, 3)"
         @test repr(PositiveArrays(2, 3, 4)) == "PositiveArrays(2, 3, 4)"
-        @test retract(M, 1.0, 1.0) == exp(M, 1.0, 1.0)
-        @test inverse_retract(M, 1.0, 4.0) == log(M, 1.0, 4.0)
         @test project(M, 1.5, 1.0) == 1.0
         @test embed(M, 1.0) == 1.0
         @test embed(M, 1.0, 2.0) == 2.0
@@ -18,9 +16,9 @@ using LinearAlgebra, Manifolds, Random, Test
         @test change_representer(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2^2]
         @test project(PositiveVectors(2), [2.0, 4.0], [1.0, 10.0]) == [1.0, 10.0]
 
+        # the cotangent vector evaluates the inner product with the tangent vector
         xi = flat(M, 2.0, 1.0)
         @test xi(1.0) ≈ norm(M, 2.0, 1.0)^2
-        @test sharp(M, 2.0, xi) == 1.0
     end
 
     Manifolds.Test.test_manifold(
@@ -28,15 +26,16 @@ using LinearAlgebra, Manifolds, Random, Test
         Dict(
             :Functions => [
                 default_inverse_retraction_method, default_retraction_method, default_vector_transport_method,
-                distance, exp, geodesic, get_coordinates, get_vector,
+                distance, exp, flat, geodesic, get_coordinates, get_vector,
                 injectivity_radius, inner, inverse_retract, is_flat, is_point, is_vector,
                 log, manifold_dimension, manifold_volume, mid_point, norm,
                 parallel_transport_direction, parallel_transport_to,
-                rand, repr, representation_size, retract, shortest_geodesic,
+                rand, repr, representation_size, retract, sharp, shortest_geodesic,
                 vector_transport_direction, vector_transport_to, volume_density, zero_vector,
             ],
             :Bases => [DefaultOrthonormalBasis()],
             :Coordinates => [1.0],
+            :Covectors => [flat(M, 1.0, 1.0)],
             :InvalidPoints => [-1.0],
             :InverseRetractionMethods => [LogarithmicInverseRetraction()],
             :Mutating => false,
@@ -52,14 +51,20 @@ using LinearAlgebra, Manifolds, Random, Test
             default_retraction_method => ExponentialRetraction(),
             default_vector_transport_method => ParallelTransport(),
             distance => log(4.0),
+            # exp(p, X) = p exp(X/p) and log(p, q) = p log(q/p)
+            exp => ℯ,
             injectivity_radius => Inf,
             (injectivity_radius, ExponentialRetraction()) => Inf,
+            (inverse_retract, LogarithmicInverseRetraction()) => log(4.0),
             is_flat => false,
+            log => log(4.0),
             manifold_dimension => 1,
             manifold_volume => Inf,
             parallel_transport_to => 4.0,
             repr => "PositiveNumbers()",
             representation_size => (),
+            (retract, ExponentialRetraction()) => ℯ,
+            sharp => 1.0,
             volume_density => exp(1.0),
             :IsPointErrors => [DomainError],
         ),
