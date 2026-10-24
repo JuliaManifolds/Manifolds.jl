@@ -537,6 +537,13 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
         exp!(M, qR, p, ones(3, 3))
         @test isapprox(M, qR, exp(M, p, ones(3, 3)))
         @test exp(M, p, ones(3, 3)) == qR
+        # allocation keeps the stored fields and leaves the missing ones missing
+        pA = allocate(pF4)
+        @test pA isa SPDPoint
+        @test pA.p isa Matrix{Float64} && pA.p !== pF4.p
+        @test pA.sqrt isa Matrix{Float64} && pA.sqrt !== pF4.sqrt
+        @test ismissing(pA.sqrt_inv)
+        @test size(pA.eigen.vectors) == (3, 3)
         @test allocate_result(M, zero_vector, p) isa Matrix
         c1 = ManifoldsBase.allocate_coordinates(M, p, Float64, 6)
         c2 = ManifoldsBase.allocate_coordinates(M, embed(M, p), Float64, 6)

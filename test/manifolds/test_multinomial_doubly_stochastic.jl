@@ -102,6 +102,10 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             @test retract(N, p, Z) == retract(N, p, Z, ProjectionRetraction())
             @test is_point(N, retract(N, p, Z))
         end
+        # the fused retraction scales the tangent vector
+        q = ManifoldsBase.retract_fused(M, p, Z, 0.5, ProjectionRetraction())
+        @test is_point(M, q)
+        @test isapprox(M, q, retract(M, p, 0.5 .* Z, ProjectionRetraction()))
     end
 
     @testset "field parameter" begin
