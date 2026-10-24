@@ -108,7 +108,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
 
     @testset "Complex skew-Hermitian matrices" begin
         p1 = [1.0im -2.0 -3.0; 2.0 0.0 1.0; 3.0 -1.0 0.0]
-        p2 = [2.0im -2.0-2.0im -3.0; 2.0-2.0im 0.0 -1.0; 3.0 1.0 0.0]
+        p2 = [2.0im -2.0 - 2.0im -3.0; 2.0 - 2.0im 0.0 -1.0; 3.0 1.0 0.0]
         X = p2 - p1
         Y = ComplexF64[0 im 0; im 0 0; 0 0 -im]
         Manifolds.Test.test_manifold(
