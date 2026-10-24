@@ -1250,6 +1250,26 @@ function riemann_tensor!(::GeneralUnitaryMatrices, Xresult, p, X, Y, Z)
 end
 
 @doc raw"""
+    sectional_curvature(M::GeneralUnitaryMatrices, p, X, Y)
+
+Compute the sectional curvature of the plane spanned by the tangent vectors `X` and `Y` at `p`
+on the [`GeneralUnitaryMatrices`](@ref) `M`. Since the metric is bi-invariant, it reads,
+see [CheegerEbin:2008](@cite), Corollary 3.19,
+
+```math
+κ_p(X, Y) = \frac{\lVert [X, Y] \rVert^2}{4\bigl(\lVert X \rVert^2 \lVert Y \rVert^2 - \operatorname{Re}(⟨X, Y⟩)^2\bigr)},
+```
+
+which is real also on complex manifolds, where the [`inner`](@ref) product is complex-valued.
+"""
+sectional_curvature(::GeneralUnitaryMatrices, p, X, Y) = _bi_invariant_sectional_curvature(X, Y)
+
+function _bi_invariant_sectional_curvature(X, Y)
+    C = X * Y - Y * X
+    return norm(C)^2 / (4 * (norm(X)^2 * norm(Y)^2 - real(dot(X, Y))^2))
+end
+
+@doc raw"""
     volume_density(M::GeneralUnitaryMatrices{ℝ}, p, X)
 
 Compute volume density function of `M`, i.e. determinant of the differential of

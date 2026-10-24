@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* `project` for points, coordinates in a `DefaultOrthonormalBasis`, `riemannian_Hessian`, `Weingarten`, `sectional_curvature_min` and `sectional_curvature_max` on the `SpecialUnitaryMatrices`, and `volume_density` on the complex `UnitaryMatrices` and `SpecialUnitaryMatrices`.
 * `get_embedding` for the `Hyperrectangle`, which returns the `Euclidean` space of the same size, with the size stored in a field.
 * `zero_vector` and `zero_vector!` for points of the `Flag` manifold in the `OrthogonalPoint` representation.
 * `sectional_curvature`, `sectional_curvature_min` and `sectional_curvature_max` for the `ProbabilitySimplex`; `sectional_curvature` previously went through `riemann_tensor` and was only approximately ``1/4``.
@@ -19,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* `sectional_curvature` on the complex `UnitaryMatrices` and the `SpecialUnitaryMatrices` now returns a real number; the generic formula used the complex-valued `inner` product.
 * `project` onto the tangent space of the `SymmetricPositiveSemidefiniteFixedRank` now removes the vertical component; a sign error doubled it instead, which also affected `riemannian_gradient` and `ProjectionTransport`.
 * `is_flat` on the `SymmetricPositiveDefinite` matrices, also with the `AffineInvariantMetric`, the `BuresWassersteinMetric` and the `GeneralizedBuresWassersteinMetric`, now returns true for ``n = 1``, since a one-dimensional manifold is flat.
 * `SPDFixedDeterminant` is now an `IsometricallyEmbeddedManifoldType` instead of an `EmbeddedSubmanifoldType`, with `exp`, `log`, `parallel_transport_to` and `riemann_tensor` taken from the `SymmetricPositiveDefinite` matrices, and its own `injectivity_radius` and `is_flat`, which also cover the single point `SPDFixedDeterminant(1)`.

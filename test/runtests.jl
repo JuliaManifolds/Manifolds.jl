@@ -51,6 +51,7 @@ end
         include_test("manifolds/test_rotations.jl")
         include_test("manifolds/test_sphere.jl")
         include_test("manifolds/test_sphere_symmetric_matrices.jl")
+        include_test("manifolds/test_special_unitary_matrices.jl")
         include_test("manifolds/test_spd_fixed_determinant.jl")
         include_test("manifolds/test_spectrahedron.jl")
         include_test("manifolds/test_veronese.jl")
@@ -82,8 +83,6 @@ end
         include_test("manifolds-old/symplecticgrassmann.jl")
         include_test("manifolds-old/symplecticstiefel.jl")
         include_test("manifolds-old/tucker.jl")
-        # TODO Remove when finished unitary orthogonal
-        include_test("manifolds-old/unitary_matrices.jl")
 
         include_test("manifolds-old/torus.jl")
 

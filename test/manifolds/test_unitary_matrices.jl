@@ -38,6 +38,8 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
             manifold_dimension => 4,
             repr => "UnitaryMatrices(2)",
             injectivity_radius => π,
+            :IsPointErrors => [DomainError, DomainError, DomainError, DomainError],
+            :IsVectorErrors => [DomainError, DomainError, DomainError],
         )
     )
 
@@ -190,6 +192,9 @@ end
 
         @test is_point(MH, fill(p, 1, 1))
         @test is_point(MH, p)
+        # the norm, and hence the determinant, is not one
+        @test_throws DomainError is_point(MH, fill(2 * p, 1, 1); error = :error)
+        @test zero_vector(MH, fill(p, 1, 1)) == zeros(QuaternionF64, 1, 1)
     end
 
     @testset "Projection and embedding use the Lie algebra" begin
