@@ -54,6 +54,7 @@ end
         include_test("manifolds/test_veronese.jl")
         include_test("manifolds/test_general_unitary.jl")
         include_test("manifolds/test_grassmann.jl")
+        include_test("manifolds/test_hamiltonian.jl")
         include_test("manifolds/test_heisenberg_matrices.jl")
         include_test("manifolds/test_hyperbolic.jl")
         include_test("manifolds/test_hyperrectangle.jl")
@@ -70,7 +71,6 @@ end
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
-        include_test("manifolds-old/hamiltonian.jl")
         include_test("manifolds-old/lorentz.jl")
         include_test("manifolds-old/multinomial_symmetric.jl")
         include_test("manifolds-old/multinomial_spd.jl")

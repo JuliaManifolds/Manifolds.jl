@@ -137,7 +137,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
                     (embed, :Vector) => X,
                     exp => p2,
                     get_embedding => Euclidean(3, 3; field = ℂ),
-                    inner => real(dot(X, Y)),
+                    inner => dot(X, Y),
                     log => X,
                     manifold_dimension => 9,
                     mid_point => (p1 + p2) / 2,
