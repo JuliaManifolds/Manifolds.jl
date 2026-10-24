@@ -35,6 +35,7 @@ end
         include_test("manifolds/test_centered_matrices.jl")
         include_test("manifolds/test_determinant_one_matrices.jl")
         include_test("manifolds/test_elliptope.jl")
+        include_test("manifolds/test_essential_manifold.jl")
         include_test("manifolds/test_euclidean.jl")
         include_test("manifolds/test_fixed_rank.jl")
         include_test("manifolds/test_flag.jl")
@@ -84,7 +85,6 @@ end
         # TODO Remove when finished unitary orthogonal
         include_test("manifolds-old/unitary_matrices.jl")
 
-        include_test("manifolds-old/essential_manifold.jl")
         include_test("manifolds-old/torus.jl")
 
         #meta manifolds
