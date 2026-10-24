@@ -106,6 +106,22 @@ function check_vector(
     return nothing
 end
 
+"""
+    default_retraction_method(M::Spectrahedron)
+
+Return [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) as the default retraction for the
+[`Spectrahedron`](@ref) manifold.
+"""
+default_retraction_method(::Spectrahedron) = ProjectionRetraction()
+
+"""
+    default_vector_transport_method(M::Spectrahedron)
+
+Return [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`) as the default vector
+transport for the [`Spectrahedron`](@ref) manifold.
+"""
+default_vector_transport_method(::Spectrahedron) = ProjectionTransport()
+
 function get_embedding(::Spectrahedron{TypeParameter{Tuple{n, k}}}) where {n, k}
     return Euclidean(n, k)
 end

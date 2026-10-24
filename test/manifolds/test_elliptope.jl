@@ -21,9 +21,10 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         M,
         Dict(
             :Functions => [
-                copy, copyto!, default_retraction_method, embed, get_embedding, inner, is_default_metric, is_flat,
-                is_point, is_vector, manifold_dimension, norm, project, rand, repr,
-                representation_size, retract, zero_vector,
+                copy, copyto!, default_retraction_method, default_vector_transport_method, embed,
+                get_embedding, inner, is_default_metric, is_flat, is_point, is_vector,
+                manifold_dimension, norm, project, rand, repr, representation_size, retract,
+                zero_vector,
             ],
             :Points => [p, q, r], :Vectors => [X, Y, Z], :SecondVector => X2,
             :EmbeddedPoints => [2 .* p], :EmbeddedVectors => [Yamb],
@@ -37,6 +38,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         Dict(
             :atol => 1.0e-14,
             default_retraction_method => ProjectionRetraction(),
+            default_vector_transport_method => ProjectionTransport(),
             embed => p,
             (embed, :Vector) => X,
             get_embedding => Euclidean(4, 2),
