@@ -10,6 +10,8 @@ struct RieszRepresenterCotangentVector{TM <: AbstractManifold, TP, TX}
     X::TX
 end
 
+ManifoldsBase.@fieldwise_equality RieszRepresenterCotangentVector
+
 function allocate(ξ::RieszRepresenterCotangentVector)
     return RieszRepresenterCotangentVector(ξ.manifold, copy(ξ.manifold, ξ.p), allocate(ξ.X))
 end

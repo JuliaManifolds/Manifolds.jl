@@ -312,6 +312,9 @@ struct StiefelFactorization{UT, ZT} <: AbstractManifoldPoint
     U::UT
     Z::ZT
 end
+
+ManifoldsBase.@fieldwise_equality StiefelFactorization
+
 """
     stiefel_factorization(p, x) -> StiefelFactorization
 

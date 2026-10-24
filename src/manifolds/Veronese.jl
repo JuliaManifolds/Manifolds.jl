@@ -138,6 +138,8 @@ struct VeronesePoint{T, TR <: AbstractVector{T}, TS <: AbstractVector{T}} <:
     spherical::TS
 end
 
+ManifoldsBase.@fieldwise_equality VeronesePoint (radial, spherical)
+
 function VeronesePoint(radial::AbstractVector, spherical::AbstractVector)
     T = promote_type(eltype(radial), eltype(spherical))
     radial_T = convert(AbstractVector{T}, radial)
@@ -184,6 +186,8 @@ struct VeroneseTangentVector{T, TR <: AbstractVector{T}, TS <: AbstractVector{T}
     radial::TR
     spherical::TS
 end
+
+ManifoldsBase.@fieldwise_equality VeroneseTangentVector (radial, spherical)
 
 function VeroneseTangentVector(radial::AbstractVector, spherical::AbstractVector)
     T = promote_type(eltype(radial), eltype(spherical))

@@ -35,6 +35,9 @@ struct FiberBundleProductVectorTransport{
     method_horizontal::TMP
     method_vertical::TMV
 end
+
+ManifoldsBase.@fieldwise_equality FiberBundleProductVectorTransport
+
 function FiberBundleProductVectorTransport(
         M::AbstractManifold = ManifoldsBase.DefaultManifold(),
         fiber::FiberType = TangentSpaceType();
@@ -79,6 +82,8 @@ struct FiberBundle{
     manifold::TM
     vector_transport::TVT
 end
+
+ManifoldsBase.@fieldwise_equality FiberBundle (type, manifold, vector_transport)
 
 function FiberBundle(fiber::FiberType, M::AbstractManifold)
     vtmm = vector_bundle_transport(fiber, M)
@@ -151,6 +156,8 @@ struct FiberBundleBasisData{BBasis <: CachedBasis, TBasis <: CachedBasis}
     base_basis::BBasis
     fiber_basis::TBasis
 end
+
+ManifoldsBase.@fieldwise_equality FiberBundleBasisData
 
 """
     base_manifold(B::FiberBundle)

@@ -250,6 +250,8 @@ struct PowerAtlas{TA <: AbstractAtlas{ℝ}} <: AbstractAtlas{ℝ}
     atlas::TA
 end
 
+ManifoldsBase.@fieldwise_equality PowerAtlas
+
 """
     get_default_atlas(M::AbstractPowerManifold)
 

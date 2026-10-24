@@ -73,6 +73,8 @@ struct HOSVD{T, D}
     σ::NTuple{D, Vector{T}}
 end
 
+ManifoldsBase.@fieldwise_equality HOSVD{T, D} (T <: Number, D) (U, core, σ)
+
 
 @doc raw"""
     TuckerPoint{T,D}
@@ -99,6 +101,9 @@ values are truncated to get a multilinear rank `mlrank`
 struct TuckerPoint{T, D} <: AbstractManifoldPoint
     hosvd::HOSVD{T, D}
 end
+
+ManifoldsBase.@fieldwise_equality TuckerPoint{T, D} (T <: Number, D) (hosvd,)
+
 function TuckerPoint(
         core::AbstractArray{T, D}, factors::Vararg{MtxT, D}
     ) where {T, D, MtxT <: AbstractMatrix{T}}
@@ -145,12 +150,17 @@ struct TuckerTangentVector{T, D} <: AbstractTangentVector
     U̇::NTuple{D, Matrix{T}}
 end
 
+ManifoldsBase.@fieldwise_equality TuckerTangentVector (Ċ, U̇)
+
 # An implicitly stored basis of the tangent space to the Tucker manifold. This is the basis
 # from [Dewaele2021] and acts as the default orthonormal basis.
 struct HOSVDBasis{T, D}
     point::TuckerPoint{T, D}
     U⊥::NTuple{D, Matrix{T}}
 end
+
+ManifoldsBase.@fieldwise_equality HOSVDBasis
+
 CachedHOSVDBasis{𝔽, T, D} =
     CachedBasis{𝔽, DefaultOrthonormalBasis{𝔽, TangentSpaceType}, HOSVDBasis{T, D}}
 

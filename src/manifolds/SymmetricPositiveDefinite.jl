@@ -66,6 +66,9 @@ struct SPDPoint{
     sqrt::Q
     sqrt_inv::R
 end
+
+ManifoldsBase.@fieldwise_equality SPDPoint (eigen,)
+
 SPDPoint(p::SPDPoint) = p
 function SPDPoint(p::AbstractMatrix; store_p = true, store_sqrt = true, store_sqrt_inv = true)
     e = eigen(Symmetric(p))

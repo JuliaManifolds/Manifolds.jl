@@ -79,6 +79,9 @@ struct SVDMPoint{TU <: AbstractMatrix, TS <: AbstractVector, TVt <: AbstractMatr
     S::TS
     Vt::TVt
 end
+
+ManifoldsBase.@fieldwise_equality SVDMPoint (U, S, Vt)
+
 SVDMPoint(A::AbstractMatrix) = SVDMPoint(svd(A))
 SVDMPoint(S::SVD) = SVDMPoint(S.U, S.S, S.Vt)
 SVDMPoint(A::Matrix, k::Int) = SVDMPoint(svd(A), k)
@@ -106,6 +109,8 @@ struct UMVTangentVector{TU <: AbstractMatrix, TM <: AbstractMatrix, TVt <: Abstr
     M::TM
     Vt::TVt
 end
+
+ManifoldsBase.@fieldwise_equality UMVTangentVector (U, M, Vt)
 
 UMVTangentVector(U, M, Vt, k::Int) = UMVTangentVector(U[:, 1:k], M[1:k, 1:k], Vt[1:k, :])
 

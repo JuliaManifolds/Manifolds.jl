@@ -123,6 +123,9 @@ corresponding factor chart indices and coordinates are concatenated factor coord
 struct ProductAtlas{𝔽, TA <: NTuple{N, AbstractAtlas{𝔽}} where {N}} <: AbstractAtlas{𝔽}
     atlases::TA
 end
+
+ManifoldsBase.@fieldwise_equality ProductAtlas
+
 ProductAtlas(atlases::AbstractAtlas{𝔽}...) where {𝔽} = ProductAtlas{𝔽, typeof(atlases)}(atlases)
 
 """

@@ -45,6 +45,8 @@ struct ParametricSurface{
     jacobian_f!::TDF
 end
 
+ManifoldsBase.@fieldwise_equality ParametricSurface
+
 """
     get_embedding(M::ParametricSurface)
 
@@ -168,6 +170,8 @@ Atlas for a [`ParametricSurface`](@ref) obtained by forwarding the parameter-spa
 struct ParametricSurfaceAtlas{TA <: AbstractAtlas{ℝ}} <: AbstractAtlas{ℝ}
     A::TA
 end
+
+ManifoldsBase.@fieldwise_equality ParametricSurfaceAtlas
 
 """
     get_default_atlas(M::ParametricSurface)

@@ -41,6 +41,8 @@ struct RetractionAtlas{
     basis::TBasis
 end
 
+ManifoldsBase.@fieldwise_equality RetractionAtlas{𝔽} 𝔽 (retr, invretr, basis)
+
 function RetractionAtlas(
         retr::AbstractRetractionMethod, invretr::AbstractInverseRetractionMethod
     )
@@ -583,6 +585,8 @@ struct InducedBasis{𝔽, VST <: VectorSpaceType, TA <: AbstractAtlas, TI} <: Ab
     A::TA
     i::TI
 end
+
+ManifoldsBase.@fieldwise_equality InducedBasis{𝔽} 𝔽 (vs, A, i)
 
 """
     induced_basis(::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType = TangentSpaceType())
