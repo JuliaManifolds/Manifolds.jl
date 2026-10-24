@@ -38,6 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `isapprox` on the `Flag` manifold now supports the `error=` keyword; the methods are now implemented as `_isapprox`.
 * `default_retraction_method` on the `Elliptope` is now `ProjectionRetraction`; it was `ExponentialRetraction`, but the exponential map is not implemented on the `Elliptope`.
 * `default_retraction_method` on the `Spectrahedron` is now `ProjectionRetraction`, and `default_vector_transport_method` on the `Elliptope`, the `Spectrahedron` and the `SymmetricPositiveSemidefiniteFixedRank` is now `ProjectionTransport`; they were `ExponentialRetraction` and `ParallelTransport`, which are not implemented on these manifolds.
+* `default_vector_transport_method` on the `SymplecticMatrices` is now `ProjectionTransport`; it was `ParallelTransport`, which is not implemented on this manifold.
+* `is_point` on the `SymplecticMatrices` now accepts a relative tolerance `rtol`, relative to ``\lVert p \rVert_{\mathrm{F}}^2``, which has a nonzero default also when `atol` is given, since the rounding errors of ``p^{+}p`` grow with the norm of `p`; valid points of a large norm, for example from `rand`, were rejected.
 
 ## [0.11.34] 2026-10-22
 
