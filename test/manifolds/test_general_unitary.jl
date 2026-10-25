@@ -1,4 +1,4 @@
-using Manifolds, ManifoldsBase, Test, StaticArrays
+using LinearAlgebra, Manifolds, ManifoldsBase, Test, StaticArrays
 
 # This file tests a few generic functions for general unitary matrices
 # independent of their matrix type, so we check that with a dummy type
@@ -111,6 +111,39 @@ Test.@testset "GeneralUnitaryMatrices" begin
             @test Z ≈ Y
             parallel_transport_direction!(N, Z, p, X, X)
             @test Z ≈ Y
+        end
+    end
+
+    @testset "SO(4) and O(4) exp/log edge cases" begin
+        Xs = [
+            [0, 0, π, 0, 0, π],  # θ = (π, π)
+            [0, 0, π, 0, 0, 0],  # θ = (π, 0)
+            [0, 0, π / 2, 0, 0, π],  # θ = (π, π/2)
+            [0, 0, π, 0, 0, 0] ./ 2,  # θ = (π/2, 0)
+            [0, 0, π, 0, 0, π] ./ 2,  # θ = (π/2, π/2)
+            [0, 0, 0, 0, 0, 0],  # θ = (0, 0)
+            [0, 0, 1, 0, 0, 1] .* 1.0e-100, # α = β ≈ 0
+            [0, 0, 1, 0, 0, 1] .* 1.0e-6, # α = β ⩰ 0
+            [0, 0, 10, 0, 0, 1] .* 1.0e-6, # α ⪆ β ⩰ 0
+            [0, 0, π / 4, 0, 0, π / 4 - 1.0e-6], # α ⪆ β > 0
+        ]
+        E = diagm(ones(4))
+        for Xf in Xs, M in [Rotations(4), OrthogonalMatrices(4)]
+            X = get_vector(M, E, Xf, DefaultOrthogonalBasis())
+            p = exp(X)
+            @test p ≈ exp(M, E, X)
+            # the last vector, with nearly equal angles, is off by less than 1e-10
+            @test isapprox(M, p, exp(M, E, log(M, E, p)); atol = 1.0e-4)
+        end
+        # rotations by π in a coordinate plane
+        for (R, (i, j)) in [
+                (diagm([-1.0, -1.0, 1.0, 1.0]), (1, 2)),
+                (diagm([-1.0, 1.0, -1.0, 1.0]), (1, 3)),
+                (diagm([1.0, -1.0, -1.0, 1.0]), (2, 3)),
+            ]
+            Xa = log(Rotations(4), E, R)
+            @test is_vector(Rotations(4), E, Xa)
+            @test Xa[i, j] ≈ π
         end
     end
 end

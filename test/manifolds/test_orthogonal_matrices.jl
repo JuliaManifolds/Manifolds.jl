@@ -51,6 +51,10 @@ using LinearAlgebra, Manifolds, Quaternions, Test, Random
             "OrthogonalMatrices(3; parameter=:field)"
     end
 
+    @testset "Projection of a point" begin
+        @test is_point(M, project(M, ones(3, 3)); error = :error)
+    end
+
     @testset "Selected methods on OrthogonalMatrices(1)" begin
         @test abs(rand(OrthogonalMatrices(1))[]) == 1
         @test abs(rand(MersenneTwister(), OrthogonalMatrices(1))[]) == 1

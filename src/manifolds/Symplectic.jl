@@ -220,15 +220,22 @@ Check whether `p` is a valid point on the [`SymplecticMatrices`](@ref) `M`=$\mat
 i.e. that it has the right [`AbstractNumbers`](@extref ManifoldsBase number-system) type and ``p^{+}p`` is (approximately)
 the identity, where ``A^+`` denotes the [`symplectic_inverse`](@ref).
 
-The tolerance can be set with `kwargs...`.
+The check succeeds if ``\lVert p^{+}p - I \rVert_{\mathrm{F}} ≤ \max(\mathrm{atol}, \mathrm{rtol}\lVert p \rVert_{\mathrm{F}}^2)``.
+The relative tolerance `rtol` is relative to ``\lVert p \rVert_{\mathrm{F}}^2``, the scale of the rounding
+errors of ``p^{+}p``, and keeps its default value when only `atol` is given.
 """
 function check_point(
         M::SymplecticMatrices, p::T;
-        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        atol::Real = 0,
+        rtol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
     ) where {T}
-    # Perform check that the matrix lives on the real symplectic manifold:
-    if !isapprox(inv(M, p) * p, LinearAlgebra.I; atol = atol, kwargs...)
+    # Perform check that the matrix lives on the real symplectic manifold;
+    # the rounding errors of p⁺p are relative to ‖p⁺‖‖p‖ = ‖p‖²
+    if !isapprox(
+            inv(M, p) * p, LinearAlgebra.I;
+            atol = max(atol, rtol * norm(p)^2), rtol = 0, kwargs...,
+        )
         return DomainError(
             norm(inv(M, p) * p - LinearAlgebra.I),
             (
@@ -276,6 +283,10 @@ end
 metric(::SymplecticMatrices) = RealSymplecticMetric()
 
 ManifoldsBase.default_retraction_method(::SymplecticMatrices) = CayleyRetraction()
+
+function ManifoldsBase.default_vector_transport_method(::SymplecticMatrices)
+    return ProjectionTransport()
+end
 
 @doc raw"""
     distance(M::SymplecticMatrices, p, q)

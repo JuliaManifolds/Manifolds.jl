@@ -137,9 +137,30 @@ where ``I_n`` is the ``n×n`` unit matrix and ``\mathbf{1}_n`` is the vector of 
 """
 project(::MultinomialSymmetric, ::Any, ::Any)
 
+@doc raw"""
+    project(M::MultinomialSymmetric, p; kwargs...)
+    project!(M::MultinomialSymmetric, q, p; kwargs...)
+
+Project a matrix `p` with positive entries onto the [`MultinomialSymmetric`](@ref) manifold
+by applying Sinkhorn's algorithm, as for the [`MultinomialDoubleStochastic`](@ref) manifold,
+to its symmetric part ``\frac{1}{2}(p+p^{\mathrm{T}})``, which keeps the matrix symmetric.
+The `kwargs...` are passed to Sinkhorn's algorithm.
+"""
+project(::MultinomialSymmetric, ::Any)
+
+function project!(M::MultinomialSymmetric, q, p; kwargs...)
+    invoke(
+        project!, Tuple{AbstractMultinomialDoublyStochastic, Any, Any},
+        M, q, symmetrize(p); kwargs...,
+    )
+    # remove the asymmetry due to rounding errors
+    symmetrize!(q, q)
+    return q
+end
+
 function project!(M::MultinomialSymmetric, X, p, Y)
     n = get_parameter(M.size)[1]
-    Ys = (Y .+ Y') ./ 2
+    Ys = symmetrize(Y)
     α = (I + p) \ sum(Ys, dims = 2) # Formula (49) from 1802.02628
     return X .= Ys .- (repeat(α, 1, n) .+ repeat(α', n, 1)) .* p
 end

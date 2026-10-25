@@ -4,6 +4,7 @@ using Manifolds
 using ManifoldsBase
 using Random
 using Test
+using LinearAlgebra: Symmetric, det, isposdef
 using Manifolds.Test: AbstractExpectation, Expect, NoExpectation, isexpected, expect
 
 get_expectation(g::Dict, key, default = NoExpectation()) = Expect(get(g, key, default))
@@ -24,6 +25,9 @@ which should contain at least two points and two tangent vectors, respectively.
 Possible properties are
 
 * `:Aliased` is a boolean (same as `:Mutating` by default) whether to test the mutating variants with aliased input
+* `:Atlases` is a vector of atlases, which can be used to test chart related functions like `get_parameters` and `get_point` at each of the `:Points`,
+  each in the chart selected by `get_chart_index`. Transition maps are tested from the chart of the first to the chart of the last point.
+  Since atlases usually differ in which functions they implement, call `test_manifold` separately for atlases with different sets of `:Functions`.
 * `:Bases` is a vector of bases, which can be used to test basis related functions, one basis for each entry in `:Coordinates`
 * `:Covectors` is a vector of covectors, which should be in the cotangent space of the correspondinig point entry in `:Points`
 * `:Coordinates` is a vector of coordinates, which can be used to test coordinate related functions, one coordinate vector for each entry in `:Bases`
@@ -53,7 +57,12 @@ Possible properties are
 * `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entries in `:Points`
 * `:SecondVector` is a single second vector in the tangent space of the first entry of `:Points`, for example to test [`inner`](@extref `ManifoldsBase.inner-Tuple{AbstractManifold, Any, Any, Any}`)
 * `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
+* `:TestVectorArithmetic` is a boolean (`true` by default) whether to test basic arithmetic and broadcasting of the first two `:Vectors` (or the first one and `:SecondVector`), if at least one tangent vector is provided
+* `:TestRandReproducibility` is a boolean (by default the value of `:Mutating`, or `true` if `rand!` is among the `:Functions`) whether to test that `rand` and `rand!` draw the same points and tangent vectors from copies of a random number generator
+* `:TestRandScaling` is a boolean (`false` by default) whether to test that random tangent vectors scale linearly with the keyword `σ` of `rand`
 * `:TestMidpointSymmetry` is a boolean (`true` by default) whether to test the symmetry property of the midpoint function
+* `:TestChartIndexParameters` is a boolean (`false` by default) whether to test the variant `get_chart_index(M, A, i, a)` for the `:Atlases`
+* `:InducedBasisBackend` is a differentiation backend (`missing` by default, which deactivates the test), for example `AutoFiniteDifferences(central_fdm(5, 1))`, to test the `induced_basis` of the `:Atlases` against the derivative of `get_point`, see [`test_induced_basis`](@ref Manifolds.Test.test_induced_basis)
 * `:TestInfo` is a boolean (`true` by default) whether to test that whether `error=:info` in verification functions issues info messages.
 * `:TestWarn` is a boolean (`true` by default) whether to test that whether `error=:warn` in verification functions issues warning.
 
@@ -70,11 +79,17 @@ Possible entries of the `expectations` dictionary are
 * for `get_basis`, the key is a tuple of the function and the basis, e.g. `(get_basis, B) => ...` to the expected basis
 * for `get_coordinates` the key is a tuple of the function and the basis, e.g. `(get_coordinates, B) => c`
 * for `get_vector` the key is a tuple of the function, the coordinate vector, and the basis, e.g. `(get_vector, c, B) => X`
+* for atlas related functions, the key is a tuple of the function and the atlas `A` for the result at the first point in the chart selected by `get_chart_index`,
+  e.g. `(get_parameters, A) => a`, `(get_chart_index, A) => i`, `(check_chart_switch, A) => false`, `(local_metric, A) => g`,
+  `(Manifolds.inverse_chart_injectivity_radius, A) => r`, and `(transition_map_diff, A) => c` for the coordinates of the first vector,
+  while `(transition_map, A_from, A_to) => b` is keyed by both atlases
+* for `get_embedding` the key `(get_embedding, T)` with the type `T` of the first point is the expected embedding for points of that type, which defaults to the expectation for `get_embedding`
 * for `get_vectors` the key is a tuple of the function and the basis, e.g. `(get_vectors, B) => :Symbol` where
   * `:Orthogonal` tests for orthogonality
   * `:Orthonormal` tests additionally to the previous for unit length
   For any basis this test calls `get_basis` on any provided basis, if that function is available.
 * for `is_default_metric`, the value is the default metric
+* for `rand`, `(number_eltype, rand) => T` specifies the expected number type `T` of random points and tangent vectors
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
@@ -102,6 +117,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     retraction_methods = get(properties, :RetractionMethods, [])
     inverse_retraction_methods = get(properties, :InverseRetractionMethods, [])
     vector_transport_methods = get(properties, :VectorTransportMethods, [])
+    atlases = get(properties, :Atlases, [])
     t = Test.@testset "$test_name" begin # COV_EXCL_LINE
         n_points = length(points)
         n_vectors = length(vectors)
@@ -113,6 +129,30 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             ),
         )
         (!isempty(two_point_functions) && (n_points < 2)) && error("To test `$(join(two_point_functions, "`, `"))`, at least two `:Points` must be provided.")
+        if (affine_connection in functions)
+            for A in atlases, p in points
+                i = get_chart_index(M, A, p)
+                a = get_parameters(M, A, i, p)
+                Xc, Yc = _chart_test_coordinates(a)
+                Manifolds.Test.test_affine_connection(
+                    M, A, i, a, Xc, Yc;
+                    available_functions = functions,
+                    test_mutating = (affine_connection! in functions) ? true : mutating,
+                    name = "affine_connection(M, $A, i, a, Xc, Yc)", # shorten name within large suite
+                    atol = get(function_atols, affine_connection, atol),
+                )
+            end
+        end
+        if (check_chart_switch in functions)
+            for A in atlases, p in points
+                i = get_chart_index(M, A, p)
+                Manifolds.Test.test_check_chart_switch(
+                    M, A, i, get_parameters(M, A, i, p);
+                    expected_value = (p === points[1]) ? get_expectation(expectations, (check_chart_switch, A)) : NoExpectation(),
+                    name = "check_chart_switch(M, $A, i, a)", # shorten name within large suite
+                )
+            end
+        end
         if (copy in functions)
             Manifolds.Test.test_copy(
                 M, points[1], vectors[1];
@@ -231,6 +271,18 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 )
             end
         end
+        if (get_chart_index in functions)
+            for A in atlases, p in points
+                Manifolds.Test.test_get_chart_index(
+                    M, A, p;
+                    available_functions = functions,
+                    expected_value = (p === points[1]) ? get_expectation(expectations, (get_chart_index, A)) : NoExpectation(),
+                    test_parameters = get(properties, :TestChartIndexParameters, false),
+                    name = "get_chart_index(M, $A, p)", # shorten name within large suite
+                    atol = get(function_atols, get_chart_index, atol),
+                )
+            end
+        end
         if (get_coordinates in functions)
             expected_coordinates = get_expectation(expectations, get_coordinates)
             for B in bases
@@ -244,6 +296,13 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 )
             end
         end
+        if (get_default_atlas in functions)
+            Manifolds.Test.test_get_default_atlas(
+                M;
+                expected_value = get_expectation(expectations, get_default_atlas),
+                name = "get_default_atlas(M)", # shorten name within large suite
+            )
+        end
         if (get_embedding in functions)
             expected_embed = get_expectation(expectations, get_embedding)
             Manifolds.Test.test_get_embedding(
@@ -253,13 +312,40 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 name = "get_embedding(M)", # shorten name within large suite
             )
             if length(points) >= 1
-                expected_embed_P = get_expectation(expectations, (get_embedding, typeof(points[1])))
+                expected_embed_P = get_expectation(
+                    expectations, (get_embedding, typeof(points[1])), expected_embed
+                )
                 Manifolds.Test.test_get_embedding(
                     # check the global one if this point type does not have an expected embedding
                     M, typeof(points[1]);
-                    expected_value = expected_embed,
-                    expected_type = expected_embed_P,
+                    expected_value = expected_embed_P,
                     name = "get_embedding(M, p)", # shorten name within large suite
+                )
+            end
+        end
+        if (get_parameters in functions)
+            for A in atlases, p in points
+                i = get_chart_index(M, A, p)
+                Manifolds.Test.test_get_parameters(
+                    M, A, i, p;
+                    available_functions = functions,
+                    expected_value = (p === points[1]) ? get_expectation(expectations, (get_parameters, A)) : NoExpectation(),
+                    test_mutating = (get_parameters! in functions) ? true : mutating,
+                    name = "get_parameters(M, $A, i, p)", # shorten name within large suite
+                    atol = get(function_atols, get_parameters, atol),
+                )
+            end
+        end
+        if (get_point in functions)
+            for A in atlases, p in points
+                i = get_chart_index(M, A, p)
+                Manifolds.Test.test_get_point(
+                    M, A, i, get_parameters(M, A, i, p);
+                    available_functions = functions,
+                    expected_value = p,
+                    test_mutating = (get_point! in functions) ? true : mutating,
+                    name = "get_point(M, $A, i, a)", # shorten name within large suite
+                    atol = get(function_atols, get_point, atol),
                 )
             end
         end
@@ -301,6 +387,17 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 name = "geodesic(M, p, X, $t)", # shorten name within large suite
             )
         end
+        if (induced_basis in functions)
+            for A in atlases, (p, X) in zip(points, vectors)
+                Manifolds.Test.test_induced_basis(
+                    M, A, get_chart_index(M, A, p), p, X;
+                    available_functions = functions,
+                    differential_backend = get(properties, :InducedBasisBackend, missing),
+                    name = "induced_basis(M, $A, i)", # shorten name within large suite
+                    atol = get(function_atols, induced_basis, atol),
+                )
+            end
+        end
         if (injectivity_radius in functions)
             expected = get_expectation(expectations, (injectivity_radius, points[1]))
             expected_global = get_expectation(expectations, injectivity_radius)
@@ -339,6 +436,15 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 atol = get(function_atols, inner, atol),
             )
         end
+        if (Manifolds.inverse_chart_injectivity_radius in functions)
+            for A in atlases
+                Manifolds.Test.test_inverse_chart_injectivity_radius(
+                    M, A, get_chart_index(M, A, points[1]);
+                    expected_value = get_expectation(expectations, (Manifolds.inverse_chart_injectivity_radius, A)),
+                    name = "inverse_chart_injectivity_radius(M, $A, i)", # shorten name within large suite
+                )
+            end
+        end
         if (inverse_retract in functions)
             for (irm, rm) in zip(inverse_retraction_methods, retraction_methods)
                 ismissing(irm) && continue
@@ -365,6 +471,13 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             Manifolds.Test.test_is_flat(
                 M;
                 expected_value = get_expectation(expectations, is_flat), name = "is_flat(M)",
+            )
+        end
+        if (is_positive_definite_metric in functions)
+            Manifolds.Test.test_is_positive_definite_metric(
+                M;
+                expected_value = get_expectation(expectations, is_positive_definite_metric),
+                name = "is_positive_definite_metric(M)",
             )
         end
         if (is_point in functions)
@@ -395,6 +508,19 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 atol = get(function_atols, is_vector, atol),
             )
         end
+        if (local_metric in functions)
+            for A in atlases, p in points
+                i = get_chart_index(M, A, p)
+                Manifolds.Test.test_local_metric(
+                    M, A, i, get_parameters(M, A, i, p);
+                    available_functions = functions,
+                    expected_value = (p === points[1]) ? get_expectation(expectations, (local_metric, A)) : NoExpectation(),
+                    test_positive_definite = is_positive_definite_metric(M),
+                    name = "local_metric(M, $A, i, a)", # shorten name within large suite
+                    atol = get(function_atols, local_metric, atol),
+                )
+            end
+        end
         if (log in functions)
             expected_log = get_expectation(expectations, log)
             Manifolds.Test.test_log(
@@ -420,6 +546,13 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             Manifolds.Test.test_manifold_volume(
                 M;
                 expected_value = expected_vol, name = "manifold_volume(M)",
+            )
+        end
+        if (metric_signature in functions)
+            Manifolds.Test.test_metric_signature(
+                M;
+                expected_value = get_expectation(expectations, metric_signature),
+                name = "metric_signature(M)",
             )
         end
         if (mid_point in functions)
@@ -487,7 +620,12 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 seed = seed,
                 rng = rng,
                 vector_at = points[1],
+                expected_eltype = get_expectation(expectations, (number_eltype, rand)),
                 test_mutating = (rand! in functions) ? true : mutating,
+                test_reproducibility = get(
+                    properties, :TestRandReproducibility, (rand! in functions) ? true : mutating
+                ),
+                test_scaling = get(properties, :TestRandScaling, false),
                 name = "rand(M)",
                 atol = get(function_atols, rand, atol),
             )
@@ -555,6 +693,43 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 expected_value = expected_geod,
                 N = get(properties, :GeodesicSamples, 100),
                 name = "shortest_geodesic(M, p, X, $t)", # shorten name within large suite
+            )
+        end
+        if (transition_map in functions)
+            # from the chart of the first point to the chart of the last point
+            for A_from in atlases, A_to in atlases
+                i_from = get_chart_index(M, A_from, points[1])
+                Manifolds.Test.test_transition_map(
+                    M, A_from, i_from, A_to, get_chart_index(M, A_to, points[end]),
+                    get_parameters(M, A_from, i_from, points[1]);
+                    available_functions = functions,
+                    expected_value = get_expectation(expectations, (transition_map, A_from, A_to)),
+                    test_mutating = (transition_map! in functions) ? true : mutating,
+                    name = "transition_map(M, $A_from, i, $A_to, j, a)", # shorten name within large suite
+                    atol = get(function_atols, transition_map, atol),
+                )
+            end
+        end
+        if (transition_map_diff in functions) && n_vectors ≥ 1
+            for A in atlases
+                i_from = get_chart_index(M, A, points[1])
+                Manifolds.Test.test_transition_map_diff(
+                    M, A, i_from, get_parameters(M, A, i_from, points[1]),
+                    get_coordinates(M, points[1], vectors[1], induced_basis(M, A, i_from)),
+                    get_chart_index(M, A, points[end]);
+                    available_functions = functions,
+                    expected_value = get_expectation(expectations, (transition_map_diff, A)),
+                    test_mutating = (transition_map_diff! in functions) ? true : mutating,
+                    name = "transition_map_diff(M, $A, i, a, c, j)", # shorten name within large suite
+                    atol = get(function_atols, transition_map_diff, atol),
+                )
+            end
+        end
+        if get(properties, :TestVectorArithmetic, true) && n_vectors ≥ 1
+            Manifolds.Test.test_vector_arithmetic(
+                M, points[1], vectors[1], ismissing(vector) ? vectors[1] : vector;
+                name = "Tangent vector arithmetic",
+                atol = atol,
             )
         end
         if (vector_transport_to in functions)
@@ -627,11 +802,12 @@ function Manifolds.Test.test_copy(
         q = copy(M, p)
         Test.@test is_point(M, q; error = :error, kwargs...)
         Test.@test q == p
-        Test.@test q !== p
+        # immutable values like numbers can not be distinguished from their copies
+        ismutable(p) && Test.@test q !== p
         Y = copy(M, p, X)
         Test.@test is_vector(M, p, Y; error = :error, kwargs...)
         Test.@test Y == X
-        Test.@test Y !== X
+        ismutable(X) && Test.@test Y !== X
 
     end
     return nothing
@@ -660,7 +836,7 @@ function Manifolds.Test.test_copyto(
         q2 = copyto!(M, q, p)
         Test.@test q == p
         Test.@test q2 === q
-        Y = allocate_result(M, exp, p, X)
+        Y = allocate(X)
         Y2 = copyto!(M, Y, p, X)
         Test.@test Y == X
         Test.@test Y2 === Y
@@ -831,7 +1007,7 @@ function Manifolds.Test.test_embed(
         kwargs...,
     )
     Test.@testset "$(name)" begin
-        E = get_embedding(M) isa AbstractManifold ? get_embedding(M) : missing
+        E = get_embedding(M, typeof(p)) isa AbstractManifold ? get_embedding(M, typeof(p)) : missing
         # Test point embedding
         q = embed(M, p)
         if !ismissing(E)
@@ -864,21 +1040,21 @@ function Manifolds.Test.test_embed(
                 Test.@test is_vector(E, q, Y; error = :error, kwargs...)
                 !isexpected(expected_vector) || Test.@test isapprox(E, q, Y, expect(expected_vector); error = :error, kwargs...)
                 if project in available_functions
-                    X2 = project(M, q, Y)
+                    X2 = project(M, p, Y)
                     Test.@test isapprox(M, p, X, X2; error = :error, kwargs...)
                 end
                 if test_mutating
                     Y2 = copy(E, q, Y)
                     embed!(M, Y2, p, X)
                     Test.@test isapprox(E, q, Y2, Y; error = :error, kwargs...)
-                    if test_aliased
-                        Y3 = copy(E, q, Y)
-                        embed!(M, Y3, q, Y3)  # aliased
+                    if test_aliased && (typeof(X) == typeof(Y))
+                        Y3 = copy(M, p, X)
+                        embed!(M, Y3, p, Y3)  # aliased
                         Test.@test isapprox(E, q, Y3, Y; error = :error, kwargs...)
                     end
                     if project in available_functions
                         X3 = copy(M, p, X)
-                        project!(M, X3, q, Y2)
+                        project!(M, X3, p, Y2)
                         Test.@test isapprox(M, p, X, X3; error = :error, kwargs...)
                     end
                 end
@@ -1147,8 +1323,8 @@ function Manifolds.Test.test_get_coordinates(
     )
     Test.@testset "$(name)" begin
         c = get_coordinates(M, p, X, B)
-        # TODO: Improve for complex manifolds and check for real of complex coordinates
-        Test.@test length(c) == manifold_dimension(M)
+        # on a complex manifold, a basis over ℂ has half as many coordinates as one over ℝ
+        Test.@test length(c) == number_of_coordinates(M, B)
         !isexpected(expected_value) || Test.@test isapprox(c, expect(expected_value); kwargs...)
         if test_mutating
             c2 = similar(c)
@@ -1194,6 +1370,33 @@ function Manifolds.Test.test_get_basis(
 end # Manifolds.Test.test_get_basis
 
 """
+    Manifolds.Test.test_get_default_atlas(M;
+        expected_value = NoExpectation(),
+        expected_type = isexpected(expected_value) ? Expect(typeof(expect(expected_value))) : Expect(AbstractAtlas{ℝ}),
+        name = "get_default_atlas on \$M",
+    )
+
+Test the [`get_default_atlas`](@ref) on manifold `M`.
+
+* that it returns an atlas of type `expected_type`, which defaults to a real-valued [`AbstractAtlas`](@ref)
+* that the result matches `expected_value`, if given
+"""
+function Manifolds.Test.test_get_default_atlas(
+        M::AbstractManifold;
+        expected_value = NoExpectation(),
+        expected_type = isexpected(expected_value) ? Expect(typeof(expect(expected_value))) : Expect(AbstractAtlas{ℝ}),
+        name = "get_default_atlas on $M",
+    )
+    Test.@testset "$(name)" begin
+        A = get_default_atlas(M)
+        Test.@test A isa AbstractAtlas
+        !isexpected(expected_type) || Test.@test A isa expect(expected_type)
+        !isexpected(expected_value) || Test.@test A == expect(expected_value)
+    end
+    return nothing
+end # Manifolds.Test.test_get_default_atlas
+
+"""
     Manifolds.Test.test_get_embedding(M, P=missing;
         expected_value = NoExpectation(),
         expected_type = isexpected(expected_value) ? Expect(typeof(expect(expected_value))) : NoExpectation(),
@@ -1220,6 +1423,471 @@ function Manifolds.Test.test_get_embedding(
     end
     return nothing
 end # Manifolds.Test.test_get_embedding
+
+"""
+    Manifolds.Test.test_get_parameters(
+        M, A, i, p;
+        available_functions = [],
+        expected_value = NoExpectation(),
+        name = "get_parameters on \$M in \$A for point \$(typeof(p))",
+        test_mutating = true,
+        kwargs...
+    )
+
+Test the [`get_parameters`](@ref) on manifold `M` for point `p` in chart `i` of atlas `A`.
+
+* that the result is a vector of length [`manifold_dimension`](@extref `ManifoldsBase.manifold_dimension-Tuple{AbstractManifold}`)
+* that the result matches `expected_value`, if given
+* that the mutating version `get_parameters!` matches the non-mutating version, (if activated)
+* that [`get_point`](@ref) inverts `get_parameters` (if activated)
+"""
+function Manifolds.Test.test_get_parameters(
+        M::AbstractManifold, A::AbstractAtlas, i, p;
+        available_functions = Function[],
+        expected_value = NoExpectation(),
+        test_mutating = true,
+        name = "get_parameters on $M in $A for point $(typeof(p))",
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        a = get_parameters(M, A, i, p)
+        Test.@test a isa AbstractVector
+        Test.@test length(a) == manifold_dimension(M)
+        !isexpected(expected_value) || Test.@test isapprox(a, expect(expected_value); kwargs...)
+        if test_mutating
+            a2 = similar(a)
+            get_parameters!(M, a2, A, i, p)
+            Test.@test isapprox(a2, a; kwargs...)
+        end
+        if (get_point in available_functions)
+            q = get_point(M, A, i, a)
+            Test.@test isapprox(M, q, p; error = :error, kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_get_parameters
+
+"""
+    Manifolds.Test.test_get_point(
+        M, A, i, a;
+        available_functions = [],
+        expected_value = NoExpectation(),
+        name = "get_point on \$M in \$A for parameters \$(typeof(a))",
+        test_mutating = true,
+        kwargs...
+    )
+
+Test the [`get_point`](@ref) on manifold `M` for parameters `a` in chart `i` of atlas `A`.
+
+* that the result is a valid point on the manifold
+* that the result matches `expected_value`, if given
+* that the mutating version `get_point!` matches the non-mutating version, (if activated)
+* that [`get_parameters`](@ref) inverts `get_point` (if activated)
+"""
+function Manifolds.Test.test_get_point(
+        M::AbstractManifold, A::AbstractAtlas, i, a;
+        available_functions = Function[],
+        expected_value = NoExpectation(),
+        test_mutating = true,
+        name = "get_point on $M in $A for parameters $(typeof(a))",
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        p = get_point(M, A, i, a)
+        Test.@test is_point(M, p; error = :error, kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(M, p, expect(expected_value); error = :error, kwargs...)
+        if test_mutating
+            q = allocate(p)
+            get_point!(M, q, A, i, a)
+            Test.@test isapprox(M, q, p; error = :error, kwargs...)
+        end
+        if (get_parameters in available_functions)
+            a2 = get_parameters(M, A, i, p)
+            Test.@test isapprox(a2, a; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_get_point
+
+# deterministic, linearly independent (for length ≥ 2) coordinate vectors to test chart functions with
+function _chart_test_coordinates(a)
+    n = length(a)
+    Xc = [k / n for k in 1:n]
+    Yc = [(-1)^k / k for k in 1:n]
+    return Xc, Yc
+end
+
+_unit_coordinates(a, j) = [k == j ? one(eltype(a)) : zero(eltype(a)) for k in eachindex(a)]
+
+"""
+    Manifolds.Test.test_affine_connection(
+        M, A, i, a, Xc, Yc;
+        available_functions = [],
+        expected_value = NoExpectation(),
+        name = "affine_connection on \$M in \$A",
+        test_mutating = true,
+        test_symmetry = true,
+        kwargs...
+    )
+
+Test the [`affine_connection`](@ref) on manifold `M` at the point with parameters `a` in chart `i` of
+atlas `A` for vectors with coordinates `Xc` and `Yc` in the induced basis.
+
+* that the result is a coordinate vector of the same length as `a`
+* that the result matches `expected_value`, if given
+* that the result is linear in `Xc` and in `Yc`
+* that the result is symmetric in `Xc` and `Yc`, i.e. the connection is torsion-free (if activated)
+* that the mutating version `affine_connection!` matches the non-mutating version, (if activated)
+* that the result matches [`levi_civita_affine_connection`](@ref) (if activated)
+"""
+function Manifolds.Test.test_affine_connection(
+        M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc;
+        available_functions = Function[],
+        expected_value = NoExpectation(),
+        test_mutating = true,
+        test_symmetry = true,
+        name = "affine_connection on $M in $A",
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        Zc = affine_connection(M, A, i, a, Xc, Yc)
+        Test.@test length(Zc) == length(a)
+        !isexpected(expected_value) || Test.@test isapprox(Zc, expect(expected_value); kwargs...)
+        Test.@test isapprox(affine_connection(M, A, i, a, 2 .* Xc, Yc), 2 .* Zc; kwargs...)
+        Test.@test isapprox(
+            affine_connection(M, A, i, a, Xc, Xc .+ Yc),
+            affine_connection(M, A, i, a, Xc, Xc) .+ Zc; kwargs...
+        )
+        test_symmetry && Test.@test isapprox(affine_connection(M, A, i, a, Yc, Xc), Zc; kwargs...)
+        if test_mutating
+            Zc2 = similar(Zc)
+            affine_connection!(M, Zc2, A, i, a, Xc, Yc)
+            Test.@test isapprox(Zc2, Zc; kwargs...)
+        end
+        if (levi_civita_affine_connection in available_functions)
+            Test.@test isapprox(levi_civita_affine_connection(M, A, i, a, Xc, Yc), Zc; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_affine_connection
+
+"""
+    Manifolds.Test.test_check_chart_switch(
+        M, A, i, a;
+        expected_value = NoExpectation(),
+        name = "check_chart_switch on \$M in \$A",
+    )
+
+Test the [`check_chart_switch`](@ref) on manifold `M` for parameters `a` in chart `i` of atlas `A`.
+
+* that the result is a boolean
+* that the result matches `expected_value`, if given
+"""
+function Manifolds.Test.test_check_chart_switch(
+        M::AbstractManifold, A::AbstractAtlas, i, a;
+        expected_value = NoExpectation(),
+        name = "check_chart_switch on $M in $A",
+    )
+    Test.@testset "$(name)" begin
+        s = check_chart_switch(M, A, i, a)
+        Test.@test s isa Bool
+        !isexpected(expected_value) || Test.@test s == expect(expected_value)
+    end
+    return nothing
+end # Manifolds.Test.test_check_chart_switch
+
+"""
+    Manifolds.Test.test_get_chart_index(
+        M, A, p;
+        available_functions = [],
+        expected_value = NoExpectation(),
+        name = "get_chart_index on \$M in \$A for point \$(typeof(p))",
+        test_parameters = false,
+        kwargs...
+    )
+
+Test the [`get_chart_index`](@ref) on manifold `M` in atlas `A` for point `p`.
+
+* that the chart selection is deterministic
+* that the result matches `expected_value`, if given
+* that `p` lies in the domain of the selected chart, i.e. [`get_point`](@ref) inverts [`get_parameters`](@ref) there
+  (if both are available)
+* that the variant `get_chart_index(M, A, i, a)` selecting a chart based on parameters `a` in chart `i`
+  is deterministic and selects a chart, whose domain contains `p` (if activated)
+"""
+function Manifolds.Test.test_get_chart_index(
+        M::AbstractManifold, A::AbstractAtlas, p;
+        available_functions = Function[],
+        expected_value = NoExpectation(),
+        test_parameters = false,
+        name = "get_chart_index on $M in $A for point $(typeof(p))",
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        i = get_chart_index(M, A, p)
+        Test.@test get_chart_index(M, A, p) == i
+        !isexpected(expected_value) || Test.@test i == expect(expected_value)
+        if (get_parameters in available_functions) && (get_point in available_functions)
+            a = get_parameters(M, A, i, p)
+            Test.@test isapprox(M, get_point(M, A, i, a), p; error = :error, kwargs...)
+        end
+        if test_parameters
+            a = get_parameters(M, A, i, p)
+            j = get_chart_index(M, A, i, a)
+            Test.@test get_chart_index(M, A, i, a) == j
+            b = transition_map(M, A, i, j, a)
+            Test.@test isapprox(M, get_point(M, A, j, b), p; error = :error, kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_get_chart_index
+
+"""
+    Manifolds.Test.test_induced_basis(
+        M, A, i, p, X;
+        available_functions = [],
+        differential_atol = 1.0e-8,
+        differential_backend = missing,
+        expected_value = NoExpectation(),
+        name = "induced_basis on \$M in \$A",
+        kwargs...
+    )
+
+Test the [`induced_basis`](@ref) on manifold `M` of chart `i` in atlas `A` using a point `p`
+in the domain of the chart and a tangent vector `X` at `p`.
+
+* that the result is a basis
+* that the result matches `expected_value`, if given
+* that [`get_coordinates`](@extref `ManifoldsBase.get_coordinates`) in the basis yields
+  [`manifold_dimension`](@extref `ManifoldsBase.manifold_dimension-Tuple{AbstractManifold}`) coordinates (if available)
+  and [`get_vector`](@extref `ManifoldsBase.get_vector`) inverts it (if available)
+* that each basis vector matches, up to `differential_atol`, the [`project`](@extref `ManifoldsBase.project-Tuple{AbstractManifold, Any, Any}`)ion
+  of the derivative of the embedded (see [`embed`](@extref `ManifoldsBase.embed-Tuple{AbstractManifold, Any}`))
+  [`get_point`](@ref) along the corresponding parameter curve, computed with the
+  [DifferentiationInterface.jl](https://juliadiff.org/DifferentiationInterface.jl/DifferentiationInterface/stable/)
+  backend `differential_backend`, for example `AutoFiniteDifferences(central_fdm(5, 1))` from
+  [FiniteDifferences.jl](https://github.com/JuliaDiff/FiniteDifferences.jl) (if not `missing`)
+"""
+function Manifolds.Test.test_induced_basis(
+        M::AbstractManifold, A::AbstractAtlas, i, p, X;
+        available_functions = Function[],
+        differential_atol = 1.0e-8,
+        differential_backend = missing,
+        expected_value = NoExpectation(),
+        name = "induced_basis on $M in $A",
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        B = induced_basis(M, A, i)
+        Test.@test B isa AbstractBasis
+        !isexpected(expected_value) || Test.@test B == expect(expected_value)
+        if (get_coordinates in available_functions)
+            c = get_coordinates(M, p, X, B)
+            Test.@test length(c) == manifold_dimension(M)
+            if (get_vector in available_functions)
+                Test.@test isapprox(M, p, get_vector(M, p, c, B), X; error = :error, kwargs...)
+            end
+        end
+        if !ismissing(differential_backend)
+            a = get_parameters(M, A, i, p)
+            for j in eachindex(a)
+                e = _unit_coordinates(a, j)
+                Xj = get_vector(M, p, e, B)
+                dq = Manifolds.DI.derivative(
+                    t -> embed(M, get_point(M, A, i, a .+ t .* e)), differential_backend, zero(eltype(a))
+                )
+                # projecting removes for example vertical components on quotient manifolds
+                Test.@test isapprox(M, p, Xj, project(M, p, dq); atol = differential_atol)
+            end
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_induced_basis
+
+"""
+    Manifolds.Test.test_inverse_chart_injectivity_radius(
+        M, A, i;
+        expected_value = NoExpectation(),
+        name = "inverse_chart_injectivity_radius on \$M in \$A",
+        kwargs...
+    )
+
+Test the [`inverse_chart_injectivity_radius`](@ref Manifolds.inverse_chart_injectivity_radius)
+on manifold `M` for chart `i` of atlas `A`.
+
+* that the result is a positive real number
+* that the result matches `expected_value`, if given
+"""
+function Manifolds.Test.test_inverse_chart_injectivity_radius(
+        M::AbstractManifold, A::AbstractAtlas, i;
+        expected_value = NoExpectation(),
+        name = "inverse_chart_injectivity_radius on $M in $A",
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        r = Manifolds.inverse_chart_injectivity_radius(M, A, i)
+        Test.@test r isa Real
+        Test.@test r > 0
+        !isexpected(expected_value) || Test.@test isapprox(r, expect(expected_value); kwargs...)
+    end
+    return nothing
+end # Manifolds.Test.test_inverse_chart_injectivity_radius
+
+"""
+    Manifolds.Test.test_local_metric(
+        M, A, i, a;
+        available_functions = [],
+        expected_value = NoExpectation(),
+        name = "local_metric on \$M in \$A",
+        test_positive_definite = true,
+        kwargs...
+    )
+
+Test the [`local_metric`](@ref) on manifold `M` at the point with parameters `a` in chart `i` of atlas `A`.
+
+* that the result is a symmetric matrix of size `n×n`, where `n` is the length of `a`
+* that the result is positive definite (if activated)
+* that the result matches `expected_value`, if given
+* that the result is the Gram matrix of the [`induced_basis`](@ref) vectors with respect to
+  [`inner`](@extref `ManifoldsBase.inner-Tuple{AbstractManifold, Any, Any, Any}`) (if `get_vector` is available)
+* that [`inverse_local_metric`](@ref) is its inverse (if available)
+* that [`det_local_metric`](@ref) is its determinant (if available)
+* that [`log_local_metric_density`](@ref) is the logarithm of the square root of the absolute value of its determinant (if available)
+"""
+function Manifolds.Test.test_local_metric(
+        M::AbstractManifold, A::AbstractAtlas, i, a;
+        available_functions = Function[],
+        expected_value = NoExpectation(),
+        test_positive_definite = true,
+        name = "local_metric on $M in $A",
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        g = local_metric(M, A, i, a)
+        n = length(a)
+        Test.@test size(g) == (n, n)
+        Test.@test isapprox(g, transpose(g); kwargs...)
+        test_positive_definite && Test.@test isposdef(Symmetric(Matrix(g)))
+        !isexpected(expected_value) || Test.@test isapprox(g, expect(expected_value); kwargs...)
+        if (get_vector in available_functions)
+            p = get_point(M, A, i, a)
+            B = induced_basis(M, A, i)
+            Xs = [get_vector(M, p, _unit_coordinates(a, j), B) for j in 1:n]
+            G = [inner(M, p, Xs[j], Xs[k]) for j in 1:n, k in 1:n]
+            Test.@test isapprox(g, G; kwargs...)
+        end
+        if (inverse_local_metric in available_functions)
+            Test.@test isapprox(inverse_local_metric(M, A, i, a), inv(Matrix(g)); kwargs...)
+        end
+        if (det_local_metric in available_functions)
+            Test.@test isapprox(det_local_metric(M, A, i, a), det(Matrix(g)); kwargs...)
+        end
+        if (log_local_metric_density in available_functions)
+            Test.@test isapprox(log_local_metric_density(M, A, i, a), log(abs(det(Matrix(g)))) / 2; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_local_metric
+
+"""
+    Manifolds.Test.test_transition_map(
+        M, A_from, i_from, A_to, i_to, a;
+        available_functions = [],
+        expected_value = NoExpectation(),
+        name = "transition_map on \$M from \$A_from to \$A_to",
+        test_mutating = true,
+        kwargs...
+    )
+
+Test the [`transition_map`](@ref) on manifold `M` of parameters `a` from chart `i_from` of atlas `A_from`
+to chart `i_to` of atlas `A_to`.
+
+* that the result is a vector of the same length as `a`
+* that the result matches `expected_value`, if given
+* that the short form `transition_map(M, A, i_from, i_to, a)` agrees, if `A_from == A_to`
+* that both parameters represent the same point, i.e. [`get_point`](@ref) agrees on them (if available)
+* that the transition map back to `(A_from, i_from)` inverts it
+* that the mutating version `transition_map!` matches the non-mutating version, (if activated)
+"""
+function Manifolds.Test.test_transition_map(
+        M::AbstractManifold, A_from::AbstractAtlas, i_from, A_to::AbstractAtlas, i_to, a;
+        available_functions = Function[],
+        expected_value = NoExpectation(),
+        test_mutating = true,
+        name = "transition_map on $M from $A_from to $A_to",
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        b = transition_map(M, A_from, i_from, A_to, i_to, a)
+        Test.@test length(b) == length(a)
+        !isexpected(expected_value) || Test.@test isapprox(b, expect(expected_value); kwargs...)
+        if A_from == A_to
+            Test.@test isapprox(transition_map(M, A_from, i_from, i_to, a), b; kwargs...)
+        end
+        if (get_point in available_functions)
+            Test.@test isapprox(
+                M, get_point(M, A_to, i_to, b), get_point(M, A_from, i_from, a); error = :error, kwargs...
+            )
+        end
+        Test.@test isapprox(transition_map(M, A_to, i_to, A_from, i_from, b), a; kwargs...)
+        if test_mutating
+            b2 = similar(b)
+            transition_map!(M, b2, A_from, i_from, A_to, i_to, a)
+            Test.@test isapprox(b2, b; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_transition_map
+
+"""
+    Manifolds.Test.test_transition_map_diff(
+        M, A, i_from, a, c, i_to;
+        available_functions = [],
+        expected_value = NoExpectation(),
+        name = "transition_map_diff on \$M in \$A",
+        test_mutating = true,
+        kwargs...
+    )
+
+Test the [`transition_map_diff`](@ref) on manifold `M` from chart `i_from` to chart `i_to` of atlas `A`
+at the point with parameters `a` for the tangent vector with coordinates `c` in the induced basis.
+
+* that the result is a vector of the same length as `c`
+* that the result matches `expected_value`, if given
+* that both coordinates represent the same tangent vector in the respective
+  [`induced_basis`](@ref) (if `get_vector` is available)
+* that the differential of the transition map back to `i_from` inverts it
+* that the mutating version `transition_map_diff!` matches the non-mutating version, (if activated)
+"""
+function Manifolds.Test.test_transition_map_diff(
+        M::AbstractManifold, A::AbstractAtlas, i_from, a, c, i_to;
+        available_functions = Function[],
+        expected_value = NoExpectation(),
+        test_mutating = true,
+        name = "transition_map_diff on $M in $A",
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        d = transition_map_diff(M, A, i_from, a, c, i_to)
+        Test.@test length(d) == length(c)
+        !isexpected(expected_value) || Test.@test isapprox(d, expect(expected_value); kwargs...)
+        if (get_vector in available_functions)
+            p = get_point(M, A, i_from, a)
+            Test.@test isapprox(
+                M, p, get_vector(M, p, d, induced_basis(M, A, i_to)), get_vector(M, p, c, induced_basis(M, A, i_from));
+                error = :error, kwargs...
+            )
+        end
+        b = transition_map(M, A, i_from, i_to, a)
+        Test.@test isapprox(transition_map_diff(M, A, i_to, b, d, i_from), c; kwargs...)
+        if test_mutating
+            d2 = similar(d)
+            transition_map_diff!(M, d2, A, i_from, a, c, i_to)
+            Test.@test isapprox(d2, d; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_transition_map_diff
 
 """
     Manifolds.Test.test_get_vector(
@@ -1294,14 +1962,15 @@ function Manifolds.Test.test_get_vectors(
         Vs = get_vectors(M, p, b)
         n = length(Vs)
         if manifold_dimension in available_functions
-            md = manifold_dimension(M)
-            Test.@test n == md
+            Test.@test n == number_of_coordinates(M, b)
         end
         for i in 1:n
             Test.@test is_vector(M, p, Vs[i]; error = :error, kwargs...)
             if test_orthogonality
                 for j in (i + 1):n
                     ip = inner(M, p, Vs[i], Vs[j])
+                    # for a basis over ℝ of a complex manifold, orthogonality refers to the real part
+                    number_system(b) === ℝ && (ip = real(ip))
                     Test.@test isapprox(ip, 0.0; kwargs...)
                 end
             end
@@ -1364,9 +2033,10 @@ end # Manifolds.Test.test_injectivity_radius
 
 Test the inner product on the manifold `M` at point `p` for tangent vectors `X` and `Y`.
 
-* that the result is a real number
+* that the result is a number, which may be complex, e.g. on complex manifolds
 * that the result matches `expected_value`, if given
-* that the inner product of `X` with itself is non negative
+* that the inner product is conjugate symmetric
+* that the inner product of `X` with itself is real and, if the metric is positive definite, see [`is_positive_definite_metric`](@ref), nonnegative
 * that the inner product of `X` with itself is the same as its norm squared (if activated)
 """
 function Manifolds.Test.test_inner(
@@ -1379,13 +2049,58 @@ function Manifolds.Test.test_inner(
     )
     Test.@testset "$(name)" begin
         v = inner(M, p, X, Y)
-        Test.@test v isa (Real)
+        Test.@test v isa Number
         !isexpected(expected_value) || Test.@test isapprox(v, expect(expected_value); kwargs...)
+        Test.@test isapprox(inner(M, p, Y, X), conj(v); kwargs...)
         w = inner(M, p, X, X)
-        Test.@test w ≥ 0.0
+        Test.@test isapprox(w, real(w); kwargs...)
+        is_positive_definite_metric(M) && Test.@test real(w) ≥ 0.0
         if test_norm
             n = norm(M, p, X)
             Test.@test isapprox(w, n^2; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_inner
+
+"""
+    Manifolds.Test.test_inner(M, A::AbstractAtlas, i, a, Xc, Yc;
+        available_functions=[], expected_value = NoExpectation(),
+        name = "Inner product on \$M in \$A",
+        test_norm = (norm in available_functions),
+        kwargs...
+    )
+
+Test the inner product on the manifold `M` at the point with parameters `a` in chart `i` of
+atlas `A` for tangent vectors with coordinates `Xc` and `Yc` in the induced basis.
+
+* that the result is a number
+* that the result matches `expected_value`, if given
+* that the inner product is conjugate symmetric
+* that the inner product of `Xc` with itself is the same as its norm squared (if activated)
+* that the result matches the inner product of the corresponding tangent vectors (if `get_vector` is available)
+"""
+function Manifolds.Test.test_inner(
+        M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc;
+        available_functions = Function[],
+        expected_value = NoExpectation(),
+        test_norm = (norm in available_functions),
+        name = "Inner product on $M in $A",
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        v = inner(M, A, i, a, Xc, Yc)
+        Test.@test v isa Number
+        !isexpected(expected_value) || Test.@test isapprox(v, expect(expected_value); kwargs...)
+        Test.@test isapprox(inner(M, A, i, a, Yc, Xc), conj(v); kwargs...)
+        if test_norm
+            n = norm(M, A, i, a, Xc)
+            Test.@test isapprox(inner(M, A, i, a, Xc, Xc), n^2; kwargs...)
+        end
+        if (get_vector in available_functions)
+            p = get_point(M, A, i, a)
+            B = induced_basis(M, A, i)
+            Test.@test isapprox(inner(M, p, get_vector(M, p, Xc, B), get_vector(M, p, Yc, B)), v; kwargs...)
         end
     end
     return nothing
@@ -1477,6 +2192,31 @@ function Manifolds.Test.test_is_flat(
     )
     Test.@testset "$(name)" begin
         v = is_flat(M)
+        !isexpected(expected_value) || Test.@test v == expect(expected_value)
+    end
+    return nothing
+end
+
+"""
+    Manifolds.Test.test_is_positive_definite_metric(
+        M;
+        expected_value = NoExpectation(),
+        name = "is_positive_definite_metric on \$M",
+    )
+
+Test the function [`is_positive_definite_metric`](@ref) on manifold `M`.
+
+* that it agrees with the numbers of negative and zero eigenvalues in the [`metric_signature`](@ref) being zero
+* that it agrees with the `expected_value`, if given
+"""
+function Manifolds.Test.test_is_positive_definite_metric(
+        M::AbstractManifold;
+        expected_value = NoExpectation(), name = "is_positive_definite_metric on $M",
+    )
+    Test.@testset "$(name)" begin
+        v = is_positive_definite_metric(M)
+        Test.@test v isa Bool
+        Test.@test v == (metric_signature(M)[2:3] == (0, 0))
         !isexpected(expected_value) || Test.@test v == expect(expected_value)
     end
     return nothing
@@ -1691,6 +2431,33 @@ function Manifolds.Test.test_manifold_volume(
 end # Manifolds.Test.test_manifold_volume
 
 """
+    Manifolds.Test.test_metric_signature(
+        M;
+        expected_value = NoExpectation(),
+        name = "Metric signature of \$M",
+    )
+
+Test the function [`metric_signature`](@ref) on manifold `M`.
+
+* that the result is a tuple of three nonnegative integers
+* that they sum to the [`manifold_dimension`](@extref `ManifoldsBase.manifold_dimension-Tuple{AbstractManifold}`) of `M`
+* that it agrees with the `expected_value`, if given
+"""
+function Manifolds.Test.test_metric_signature(
+        M::AbstractManifold;
+        expected_value = NoExpectation(), name = "Metric signature of $M",
+    )
+    Test.@testset "$(name)" begin
+        s = metric_signature(M)
+        Test.@test s isa Tuple{Int, Int, Int}
+        Test.@test all(≥(0), s)
+        Test.@test sum(s) == manifold_dimension(M)
+        !isexpected(expected_value) || Test.@test s == expect(expected_value)
+    end
+    return nothing
+end
+
+"""
     Manifolds.Test.test_mid_point(M, p, q;
         available_functions=[],
         expected_value = NoExpectation(),
@@ -1787,6 +2554,49 @@ function Manifolds.Test.test_norm(
 end # Manifolds.Test.test_norm
 
 """
+    Manifolds.Test.test_norm(M, A::AbstractAtlas, i, a, Xc;
+        available_functions = [], expected_value = NoExpectation(),
+        name = "Norm on \$M in \$A",
+        test_inner = (inner in available_functions),
+        kwargs...
+    )
+
+Test the norm on the manifold `M` at the point with parameters `a` in chart `i` of atlas `A`
+for the tangent vector with coordinates `Xc` in the induced basis.
+
+* that the result is a real number
+* that the result matches `expected_value`, if given
+* that the norm is non negative
+* that the inner product of `Xc` with itself in the chart is the same as its norm squared (if activated)
+* that the result matches the norm of the corresponding tangent vector (if `get_vector` is available)
+"""
+function Manifolds.Test.test_norm(
+        M::AbstractManifold, A::AbstractAtlas, i, a, Xc;
+        available_functions = Function[],
+        expected_value = NoExpectation(),
+        test_inner = (inner in available_functions),
+        name = "Norm on $M in $A",
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        v = norm(M, A, i, a, Xc)
+        Test.@test v isa (Real)
+        !isexpected(expected_value) || Test.@test isapprox(v, expect(expected_value); kwargs...)
+        Test.@test v ≥ 0.0
+        if test_inner
+            w = inner(M, A, i, a, Xc, Xc)
+            Test.@test isapprox(w, v^2; kwargs...)
+        end
+        if (get_vector in available_functions)
+            p = get_point(M, A, i, a)
+            X = get_vector(M, p, Xc, induced_basis(M, A, i))
+            Test.@test isapprox(norm(M, p, X), v; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_norm
+
+"""
     Manifolds.Test.test_parallel_transport(
         M, p, X, q;
         available_functions=[],
@@ -1803,7 +2613,9 @@ Test the parallel transport on manifold `M` at point `p` with tangent vector `X`
 
 this defaults to testing `parallel_transport_to`, but can also be used to test `parallel_transport_direction`,
 by passing that function to the `available_functions`, using the `direction` argument.
-The `direction` has to be the one that transports `X` also to `q`.
+The `direction` has to be the one that transports `X` also to `q`. If it is `missing`, it is
+computed with the default inverse retraction when `vector_transport_direction` is tested,
+and `nothing` deactivates the test of `vector_transport_direction`.
 
 * that the result is a valid tangent vector at `q` on the manifold
 * that the result matches `expected_value`, if given
@@ -1954,8 +2766,11 @@ end # Manifolds.Test.test_repr
 """
     Manifolds.Test.test_rand(M;
         vector_at = missing,
+        expected_eltype = NoExpectation(),
         seed = missing,
         test_mutating = true,
+        test_reproducibility = test_mutating,
+        test_scaling = false,
         rng = missing,
         name = "Random sampling on \$M",
         kwargs...
@@ -1968,12 +2783,20 @@ the point drawn by `rand(M)` unless the keyword `vector_at` provides one.
 * that the result of `rand(M; vector_at=p)` is a valid tangent vector at `p` on the manifold
 * that the mutating versions `rand!` match the non-mutating versions (if activated)
 * that the four mentioned functions also work with a seed upfront.
+* that both the point and the tangent vector have the number type `expected_eltype` (if provided)
+* that `rand` and `rand!` draw the same point and the same tangent vector from copies of
+  the random number generator `rng`, or of the default one (if `test_reproducibility` is activated)
+* that `rand(M; vector_at=p, σ=2)` is twice the tangent vector drawn with the default `σ`
+  from the same random number generator state (if `test_scaling` is activated)
 """
 function Manifolds.Test.test_rand(
         M::AbstractManifold;
         vector_at = missing,
+        expected_eltype = NoExpectation(),
         seed = missing,
         test_mutating = true,
+        test_reproducibility = test_mutating,
+        test_scaling = false,
         rng = missing,
         name = "Random sampling on $M $(ismissing(vector_at) ? "" : "at points of type $(typeof(vector_at))")",
         kwargs...,
@@ -1996,6 +2819,29 @@ function Manifolds.Test.test_rand(
             X2 = copy(M, q, X)
             ismissing(rng) ? rand!(M, X2; vector_at = q) : rand!(rng, M, X2; vector_at = q)
             Test.@test is_vector(M, q, X2; error = :error, kwargs...)
+        end
+        if isexpected(expected_eltype)
+            Test.@test number_eltype(p) === expect(expected_eltype)
+            Test.@test number_eltype(X) === expect(expected_eltype)
+        end
+        if test_reproducibility
+            rng1 = copy(ismissing(rng) ? Random.default_rng() : rng)
+            rng2 = copy(rng1)
+            p3 = rand(rng1, M)
+            p4 = copy(M, p3)
+            rand!(rng2, M, p4)
+            Test.@test isapprox(M, p3, p4; error = :error, kwargs...)
+            X3 = rand(rng1, M; vector_at = q)
+            X4 = copy(M, q, X3)
+            rand!(rng2, M, X4; vector_at = q)
+            Test.@test isapprox(M, q, X3, X4; error = :error, kwargs...)
+        end
+        if test_scaling
+            rng1 = copy(ismissing(rng) ? Random.default_rng() : rng)
+            rng2 = copy(rng1)
+            X3 = rand(rng1, M; vector_at = q)
+            X4 = rand(rng2, M; vector_at = q, σ = 2.0)
+            Test.@test isapprox(M, q, 2 * X3, X4; error = :error, kwargs...)
         end
     end
     return nothing
@@ -2244,10 +3090,62 @@ function Manifolds.Test.test_shortest_geodesic(
 end # Manifolds.Test.test_shortest_geodesic
 
 """
+    Manifolds.Test.test_vector_arithmetic(
+        M, p, X, Y;
+        name = "Tangent vector arithmetic on \$M at point \$(typeof(p))",
+        test_inplace = !(X isa Number),
+        kwargs...
+    )
+
+Test that tangent vectors `X` and `Y` at `p` on `M` support the basic arithmetic of a vector space.
+
+* that `X + Y`, `X - Y`, `2 * X`, `X * 2`, `X / 2`, `2 \\ X`, `+X` and `-X` are tangent vectors
+  and consistent with each other
+* that broadcasting, e.g. `2 .* X .+ Y`, agrees with the non-broadcasting operations
+  and returns the same type as `X` (unless `X` is a zero-dimensional array)
+* that in-place broadcasting, e.g. `Z .= 2 .* X .+ Y`, works (if activated)
+"""
+function Manifolds.Test.test_vector_arithmetic(
+        M::AbstractManifold, p, X, Y;
+        name = "Tangent vector arithmetic on $M at point $(typeof(p))",
+        test_inplace = !(X isa Number),
+        kwargs...,
+    )
+    Test.@testset "$(name)" begin
+        for Z in (X + Y, X - Y, 2 * X, -X)
+            Test.@test is_vector(M, p, Z; error = :error, kwargs...)
+        end
+        Test.@test isapprox(M, p, (X + Y) - Y, X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, X - Y, X + (-Y); error = :error, kwargs...)
+        Test.@test isapprox(M, p, 2 * X, X + X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, X * 2, 2 * X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, X / 2 + X / 2, X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, 2 \ X, X / 2; error = :error, kwargs...)
+        Test.@test isapprox(M, p, +X, X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, -X, (-1) * X; error = :error, kwargs...)
+        # broadcasting
+        Z = 2 .* X .+ Y
+        # broadcasting over zero-dimensional arrays returns a scalar in Julia
+        (X isa AbstractArray && ndims(X) == 0) || Test.@test Z isa typeof(X)
+        Test.@test isapprox(M, p, Z, 2 * X + Y; error = :error, kwargs...)
+        Test.@test isapprox(M, p, X .- 2 .* X, -X; error = :error, kwargs...)
+        Test.@test isapprox(M, p, .-X, -X; error = :error, kwargs...)
+        if test_inplace
+            Z2 = copy(M, p, X)
+            Z2 .= 2 .* X .+ Y
+            Test.@test isapprox(M, p, Z2, 2 * X + Y; error = :error, kwargs...)
+            Z2 .= X
+            Test.@test isapprox(M, p, Z2, X; error = :error, kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_vector_arithmetic
+
+"""
     Manifolds.Test.test_vector_transport(
         M, p, X, q, m = default_vector_transport_method(M);
         available_functions=[],
-        direction = inverse_retract(M, p, q, default_inverse_retraction_method(M)),
+        direction = missing,
         expected_value = NoExpectation(),
         expected_value_direction = NoExpectation(),
         test_aliased = true,
@@ -2274,7 +3172,7 @@ The `direction` has to be the one that transports `X` also to `q`.
 function Manifolds.Test.test_vector_transport(
         M, p, X, q, m = default_vector_transport_method(M);
         available_functions = [],
-        direction = inverse_retract(M, p, q, default_inverse_retraction_method(M)),
+        direction = missing,
         expected_value_direction = NoExpectation(),
         expected_value = NoExpectation(),
         test_aliased = true,
@@ -2297,6 +3195,9 @@ function Manifolds.Test.test_vector_transport(
             end
         end
         if (vector_transport_direction in available_functions) && !isnothing(direction)
+            if ismissing(direction)
+                direction = inverse_retract(M, p, q, default_inverse_retraction_method(M))
+            end
             Y4 = vector_transport_direction(M, p, X, direction, m)
             !isexpected(expected_value_direction) || Test.@test isapprox(M, q, Y4, expect(expected_value_direction); error = :error, kwargs...)
             if test_mutating
@@ -2417,15 +3318,12 @@ function Manifolds.Test.test_zero_vector(
             Test.@test isapprox(n, 0.0; kwargs...)
         end
         if test_mutating
-            Z2 = copy(M, p)
+            Z2 = allocate(Z)
             zero_vector!(M, Z2, p)
             Test.@test isapprox(M, p, Z2, Z; error = :error, kwargs...)
         end
     end
     return nothing
 end # Manifolds.Test.test_zero_vector
-
-# Include the old tests for now as well
-include("tests_general.jl")
 
 end

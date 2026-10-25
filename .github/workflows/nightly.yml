@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         julia-version: ["pre"]
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest]
         group:
           - 'manifolds'
           - 'integration'

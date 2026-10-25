@@ -12,8 +12,9 @@ p ∈ ℝ^{n×n} \ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\back
 ````
 
 This manifold is modelled as a submanifold of [`SymmetricPositiveDefinite`](@ref)`(n)`,
-see [`EmbeddedSubmanifoldType`](@extref `ManifoldsBase.EmbeddedSubmanifoldType`) for the implications,
-but for example retractions and inverse retractions are all available
+see [`EmbeddedSubmanifoldType`](@extref `ManifoldsBase.EmbeddedSubmanifoldType`) for the implications.
+Since it is a totally geodesic submanifold, for example the exponential and logarithmic maps,
+retractions, parallel transport and the Riemann tensor are those of the embedding.
 
 These matrices are sometimes also called [isochoric](https://en.wiktionary.org/wiki/isochoric), which refers to the interpretation of
 the matrix representing an ellipsoid. All ellipsoids that represent points on this manifold have the same volume.
@@ -120,6 +121,31 @@ function ManifoldsBase.get_embedding_type(::SPDFixedDeterminant)
     return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
+"""
+    injectivity_radius(M::SPDFixedDeterminant[, p])
+
+Return the injectivity radius of the [`SPDFixedDeterminant`](@ref) `M`, which is ``∞`` as for
+the [`SymmetricPositiveDefinite`](@ref) matrices, since a totally geodesic submanifold of a
+Hadamard manifold is a Hadamard manifold. For ``n = 1`` the manifold consists of a single point
+and the injectivity radius is ``0``.
+"""
+function injectivity_radius(M::SPDFixedDeterminant)
+    return get_parameter(M.size)[1] == 1 ? 0.0 : Inf
+end
+injectivity_radius(M::SPDFixedDeterminant, p) = injectivity_radius(M)
+injectivity_radius(M::SPDFixedDeterminant, ::AbstractRetractionMethod) = injectivity_radius(M)
+function injectivity_radius(M::SPDFixedDeterminant, p, ::AbstractRetractionMethod)
+    return injectivity_radius(M)
+end
+
+"""
+    is_flat(M::SPDFixedDeterminant)
+
+Return true if the [`SPDFixedDeterminant`](@ref) `M` is a single point, i.e. for ``n = 1``,
+and false otherwise.
+"""
+is_flat(M::SPDFixedDeterminant) = get_parameter(M.size)[1] == 1
+
 @doc raw"""
     manifold_dimension(M::SPDFixedDeterminant)
 
@@ -172,6 +198,20 @@ function project!(M::SPDFixedDeterminant, Y, p, X)
     Y .-= (tr(p \ X) / n) .* p
     return Y
 end
+
+"""
+    riemann_tensor(M::SPDFixedDeterminant, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at `p` on the [`SPDFixedDeterminant`](@ref) `M`,
+which is the one of the [`SymmetricPositiveDefinite`](@ref) matrices, since `M` is a
+totally geodesic submanifold.
+"""
+riemann_tensor(::SPDFixedDeterminant, ::Any, ::Any, ::Any, ::Any)
+
+function riemann_tensor!(M::SPDFixedDeterminant, Xresult, p, X, Y, Z)
+    return riemann_tensor!(get_embedding(M), Xresult, p, X, Y, Z)
+end
+
 
 @doc raw"""
     rand(M::SPDFixedDeterminant; vector_at=nothing, σ::Real=1.0)

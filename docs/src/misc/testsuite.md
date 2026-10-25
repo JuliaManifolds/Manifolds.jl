@@ -35,6 +35,8 @@ Manifolds.Test.test_manifold(
 ## Functions for individual tests
 
 ```@docs
+Manifolds.Test.test_affine_connection
+Manifolds.Test.test_check_chart_switch
 Manifolds.Test.test_copy
 Manifolds.Test.test_copyto
 Manifolds.Test.test_default_retraction
@@ -45,22 +47,31 @@ Manifolds.Test.test_exp
 Manifolds.Test.test_embed
 Manifolds.Test.test_embed_project
 Manifolds.Test.test_flat
+Manifolds.Test.test_induced_basis
 Manifolds.Test.test_injectivity_radius
 Manifolds.Test.test_inner
+Manifolds.Test.test_inverse_chart_injectivity_radius
 Manifolds.Test.test_inverse_retract
 Manifolds.Test.test_is_default_metric
 Manifolds.Test.test_is_flat
+Manifolds.Test.test_is_positive_definite_metric
 Manifolds.Test.test_is_point
 Manifolds.Test.test_is_vector
 Manifolds.Test.test_geodesic
 Manifolds.Test.test_get_basis
+Manifolds.Test.test_get_chart_index
 Manifolds.Test.test_get_coordinates
+Manifolds.Test.test_get_default_atlas
 Manifolds.Test.test_get_embedding
+Manifolds.Test.test_get_parameters
+Manifolds.Test.test_get_point
 Manifolds.Test.test_get_vector
 Manifolds.Test.test_get_vectors
+Manifolds.Test.test_local_metric
 Manifolds.Test.test_log
 Manifolds.Test.test_manifold_dimension
 Manifolds.Test.test_manifold_volume
+Manifolds.Test.test_metric_signature
 Manifolds.Test.test_mid_point
 Manifolds.Test.test_norm
 Manifolds.Test.test_parallel_transport
@@ -72,6 +83,8 @@ Manifolds.Test.test_retract
 Manifolds.Test.test_sectional_curvature
 Manifolds.Test.test_sharp
 Manifolds.Test.test_shortest_geodesic
+Manifolds.Test.test_transition_map
+Manifolds.Test.test_transition_map_diff
 Manifolds.Test.test_vector_transport
 Manifolds.Test.test_volume_density
 Manifolds.Test.test_Weingarten
@@ -86,12 +99,4 @@ Manifolds.Test.Expect
 Manifolds.Test.NoExpectation
 Manifolds.Test.expect
 Manifolds.Test.isexpected
-```
-
-## Former tests
-
-```@docs
-Manifolds.find_eps
-Manifolds.test_manifold
-Manifolds.test_parallel_transport
 ```

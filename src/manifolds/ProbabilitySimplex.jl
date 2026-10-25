@@ -540,6 +540,39 @@ function riemann_tensor!(M::ProbabilitySimplex, Xresult, p, X, Y, Z)
     return Xresult
 end
 
+@doc raw"""
+    sectional_curvature(M::ProbabilitySimplex, p, X, Y)
+
+Return the sectional curvature of the [`ProbabilitySimplex`](@ref) `M`, i.e.
+``\frac{1}{4}``, the curvature of the sphere of radius 2 it is isometric to (part of),
+if the dimension is greater than 1, and 0 otherwise.
+"""
+function sectional_curvature(M::ProbabilitySimplex, p, X, Y)
+    return manifold_dimension(M) > 1 ? 0.25 : 0.0
+end
+
+@doc raw"""
+    sectional_curvature_max(M::ProbabilitySimplex)
+
+Return the maximum sectional curvature of the [`ProbabilitySimplex`](@ref) `M`, i.e.
+``\frac{1}{4}``, the curvature of the sphere of radius 2 it is isometric to (part of),
+if the dimension is greater than 1, and 0 otherwise.
+"""
+function sectional_curvature_max(M::ProbabilitySimplex)
+    return manifold_dimension(M) > 1 ? 0.25 : 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::ProbabilitySimplex)
+
+Return the minimum sectional curvature of the [`ProbabilitySimplex`](@ref) `M`, i.e.
+``\frac{1}{4}``, the curvature of the sphere of radius 2 it is isometric to (part of),
+if the dimension is greater than 1, and 0 otherwise.
+"""
+function sectional_curvature_min(M::ProbabilitySimplex)
+    return manifold_dimension(M) > 1 ? 0.25 : 0.0
+end
+
 function Base.show(
         io::IO, ::ProbabilitySimplex{TypeParameter{Tuple{n}}, boundary}
     ) where {n, boundary}

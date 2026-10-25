@@ -2,6 +2,8 @@
 
 ```@docs
 Veronese
+VeronesePoint
+VeroneseTangentVector
 ```
 
 ```@autodocs

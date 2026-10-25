@@ -1,0 +1,93 @@
+using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
+
+@testset "The Spectrahedron" begin
+    @test_throws DomainError Spectrahedron(0, 0)
+    @test_throws DomainError Spectrahedron(2, 3)
+
+    M = Spectrahedron(4, 2)
+    p = [1.0 0.0; 0.0 1.0; 1.0 1.0; -1.0 1.0] / sqrt(6)
+    q = [4.0 / 5 3.0 / 5; 3.0 / 5.0 -4.0 / 5.0; 1.0 0.0; 0.0 1.0] / 2
+    r = [12.0 / 13.0 5.0 / 13.0; 1.0 0.0; -12.0 / 13.0 5.0 / 13.0; 0.0 1.0] / 2
+    X = [0.0 1.0; 1.0 0.0; 0.0 0.0; 0.0 0.0]
+    Yamb = [0.3 -0.2; 0.1 0.4; -0.5 0.2; 0.25 -0.15] # a vector in the embedding
+    X2 = project(M, p, Yamb)
+    Y = project(M, q, Yamb)
+    Z = project(M, r, Yamb)
+    # Invalids
+    pf = [2.0 0.0; 0.0 1.0; 1 / sqrt(2) -1 / sqrt(2); 1 / sqrt(2) 1 / sqrt(2)] # not of unit norm
+    Xf = [0.1 1.0; 1.0 0.1; 0.0 0.0; 0.0 0.0] # the trace of pXfᵀ + Xfpᵀ does not vanish
+
+    Manifolds.Test.test_manifold(
+        M,
+        Dict(
+            :Functions => [
+                copy, copyto!, default_retraction_method, default_vector_transport_method, embed,
+                get_embedding, inner, is_default_metric, is_flat, is_point, is_vector,
+                manifold_dimension, norm, project, rand, repr, representation_size, retract,
+                vector_transport_to, zero_vector,
+            ],
+            :Points => [p, q, r], :Vectors => [X, Y, Z], :SecondVector => X2,
+            :EmbeddedPoints => [2 .* p], :EmbeddedVectors => [Yamb],
+            :InvalidPoints => [pf], :InvalidVectors => [Xf],
+            :InverseRetractionMethods => [missing],
+            :RetractionMethods => [ProjectionRetraction()],
+            :VectorTransportMethods => [ProjectionTransport()],
+            :Seed => 42,
+            :TestRandScaling => true,
+        ),
+        # Expectations
+        Dict(
+            :atol => 1.0e-14,
+            default_retraction_method => ProjectionRetraction(),
+            default_vector_transport_method => ProjectionTransport(),
+            embed => p,
+            (embed, :Vector) => X,
+            get_embedding => Euclidean(4, 2),
+            inner => dot(X, X2),
+            is_default_metric => EuclideanMetric(),
+            is_flat => false,
+            manifold_dimension => 6,
+            norm => sqrt(2),
+            (project, :Point) => p,
+            (project, :Vector) => X2,
+            # the projection retraction normalizes p + X
+            (retract, ProjectionRetraction()) => (p + X) / norm(p + X),
+            repr => "Spectrahedron(4, 2)",
+            representation_size => (4, 2),
+            (vector_transport_to, ProjectionTransport()) => project(M, q, X),
+            :IsPointErrors => [DomainError],
+            :IsVectorErrors => [DomainError],
+        ),
+    )
+
+    @testset "Basics" begin
+        @test base_manifold(M) === M
+        @test metric(M) == EuclideanMetric()
+        @test riemannian_gradient(M, p, Yamb) == X2
+        @test isapprox(X2, project(M, p, X2); atol = 1.0e-14) # the projection is idempotent
+        @test isapprox(p' * X2, (p' * X2)'; atol = 1.0e-14) # and lands in the horizontal space
+        @test ManifoldsBase.retract_fused(M, p, X, 0.5, ProjectionRetraction()) ≈
+            (p + X / 2) / norm(p + X / 2)
+    end
+
+    @testset "tangent vectors of any length" begin
+        M2 = Spectrahedron(3, 2)
+        p2 = [1.0 2.0; 3.0 4.0; 5.0 6.0] / norm([1.0 2.0; 3.0 4.0; 5.0 6.0])
+        @test is_vector(M2, p2, project(M2, p2, [100.0 -50.0; 30.0 20.0; -10.0 5.0]))
+        @test !is_vector(M2, p2, project(M2, p2, [1.0 -0.5; 0.3 0.2; -0.1 0.4]) .+ 1.0e-6 .* p2)
+    end
+
+    Manifolds.Test.test_manifold(
+        Spectrahedron(4, 2; parameter = :field),
+        Dict(
+            :Functions => [get_embedding, is_point, is_vector, manifold_dimension, repr],
+            :Points => [p, q], :Vectors => [X, Y],
+        ),
+        # Expectations
+        Dict(
+            get_embedding => Euclidean(4, 2; parameter = :field),
+            manifold_dimension => 6,
+            repr => "Spectrahedron(4, 2; parameter=:field)",
+        ),
+    )
+end

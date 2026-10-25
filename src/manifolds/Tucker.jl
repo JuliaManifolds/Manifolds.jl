@@ -73,9 +73,8 @@ struct HOSVD{T, D}
     σ::NTuple{D, Vector{T}}
 end
 
-function Base.:(==)(a::HOSVD{T, D}, b::HOSVD{T, D}) where {T, D}
-    return a.U == b.U && a.core == b.core && a.σ == b.σ
-end
+ManifoldsBase.@fieldwise_equality HOSVD{T, D} (T <: Number, D) (U, core, σ)
+
 
 @doc raw"""
     TuckerPoint{T,D}
@@ -102,6 +101,9 @@ values are truncated to get a multilinear rank `mlrank`
 struct TuckerPoint{T, D} <: AbstractManifoldPoint
     hosvd::HOSVD{T, D}
 end
+
+ManifoldsBase.@fieldwise_equality TuckerPoint{T, D} (T <: Number, D) (hosvd,)
+
 function TuckerPoint(
         core::AbstractArray{T, D}, factors::Vararg{MtxT, D}
     ) where {T, D, MtxT <: AbstractMatrix{T}}
@@ -121,9 +123,6 @@ function TuckerPoint(A::AbstractArray{T, D}, mlrank::NTuple{D, Int}) where {T, D
     return TuckerPoint(st_hosvd(A, mlrank))
 end
 
-function Base.:(==)(a::TuckerPoint{T, D}, b::TuckerPoint{T, D}) where {T, D}
-    return a.hosvd == b.hosvd
-end
 
 @doc raw"""
     TuckerTangentVector{T, D} <: AbstractTangentVector
@@ -151,12 +150,17 @@ struct TuckerTangentVector{T, D} <: AbstractTangentVector
     U̇::NTuple{D, Matrix{T}}
 end
 
+ManifoldsBase.@fieldwise_equality TuckerTangentVector (Ċ, U̇)
+
 # An implicitly stored basis of the tangent space to the Tucker manifold. This is the basis
 # from [Dewaele2021] and acts as the default orthonormal basis.
 struct HOSVDBasis{T, D}
     point::TuckerPoint{T, D}
     U⊥::NTuple{D, Matrix{T}}
 end
+
+ManifoldsBase.@fieldwise_equality HOSVDBasis
+
 CachedHOSVDBasis{𝔽, T, D} =
     CachedBasis{𝔽, DefaultOrthonormalBasis{𝔽, TangentSpaceType}, HOSVDBasis{T, D}}
 
@@ -174,9 +178,6 @@ function Base.:-(x::TuckerTangentVector, y::TuckerTangentVector)
 end
 Base.:-(x::TuckerTangentVector) = TuckerTangentVector(-x.Ċ, map(-, x.U̇))
 Base.:+(x::TuckerTangentVector) = TuckerTangentVector(x.Ċ, x.U̇)
-function Base.:(==)(x::TuckerTangentVector, y::TuckerTangentVector)
-    return (x.Ċ == y.Ċ) && all(x.U̇ .== y.U̇)
-end
 
 allocate(p::TuckerPoint) = allocate(p, number_eltype(p))
 function allocate(p::TuckerPoint{Tp, D}, ::Type{T}) where {T, Tp, D}
@@ -397,10 +398,10 @@ end
 """
     default_inverse_retraction_method(M::Tucker)
 
-Return [`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`)
+Return [`ProjectionInverseRetraction`](@extref `ManifoldsBase.ProjectionInverseRetraction`)
 as the default inverse retraction for the [`Tucker`](@ref) manifold.
 """
-default_inverse_retraction_method(::Tucker) = PolarInverseRetraction()
+default_inverse_retraction_method(::Tucker) = ProjectionInverseRetraction()
 
 """
     default_retraction_method(M::Tucker)
@@ -698,6 +699,20 @@ function get_vectors(ℳ::Tucker, 𝔄::TuckerPoint, ℬ::DefaultOrthonormalBasi
     return get_vectors(ℳ, 𝔄, get_basis(ℳ, 𝔄, ℬ))
 end
 
+@doc raw"""
+    get_embedding(M::Tucker)
+
+Return the [`Euclidean`](@ref) space of ``N_1×\dots×N_D`` tensors, in which the
+[`Tucker`](@ref) manifold `M` is embedded, see [`embed`](@ref).
+"""
+function get_embedding(::Tucker{𝔽, TypeParameter{Tuple{n, r}}}) where {n, r, 𝔽}
+    return Euclidean(n...; field = 𝔽)
+end
+function get_embedding(M::Tucker{𝔽, <:Tuple}) where {𝔽}
+    n, r = get_parameter(M.size)
+    return Euclidean(n...; field = 𝔽, parameter = :field)
+end
+
 """
     inner(M::Tucker, p::TuckerPoint, X::TuckerTangentVector, Y::TuckerTangentVector)
 
@@ -742,7 +757,7 @@ function isapprox(p::TuckerPoint, q::TuckerPoint; kwargs...)
     ℳ = Tucker(size(p), size(p.hosvd.core))
     return isapprox(embed(ℳ, p), embed(ℳ, q); kwargs...)
 end
-isapprox(::Tucker, p::TuckerPoint, q::TuckerPoint; kwargs...) = isapprox(p, q; kwargs...)
+_isapprox(::Tucker, p::TuckerPoint, q::TuckerPoint; kwargs...) = isapprox(p, q; kwargs...)
 function _isapprox(
         M::Tucker, p::TuckerPoint, x::TuckerTangentVector, y::TuckerTangentVector;
         kwargs...,

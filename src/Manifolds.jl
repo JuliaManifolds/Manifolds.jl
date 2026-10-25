@@ -598,13 +598,6 @@ function solve_chart_adjoint_differential_log_argument end
 function _jacobi_exp_matrix end
 function _adjoint_coordinate_map end
 
-# TODO: Remove once the new interface is done
-function find_eps end
-function test_parallel_transport end
-function test_manifold end
-function test_atlases end
-# / remove
-
 function __init__()
     @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
         Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
@@ -704,6 +697,8 @@ export HyperboloidTangentVector,
     PoincareHalfSpaceTangentVector,
     TuckerTangentVector,
     UMVTangentVector,
+    VeronesePoint,
+    VeroneseTangentVector,
     ProjectorTangentVector,
     StiefelTangentVector
 export AbstractNumbers, ℝ, ℂ, ℍ
@@ -879,6 +874,7 @@ export ×,
     is_default_metric,
     is_flat,
     is_hamiltonian,
+    is_positive_definite_metric,
     is_point,
     is_vector,
     kurtosis,
@@ -892,6 +888,7 @@ export ×,
     manifold_dimension,
     manifold_volume,
     metric,
+    metric_signature,
     mean,
     mean!,
     mean_and_var,

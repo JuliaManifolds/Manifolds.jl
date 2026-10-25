@@ -1,5 +1,7 @@
 using LinearAlgebra, Manifolds, Test, StaticArrays, Quaternions, Random, Distributions, RecursiveArrayTools
-using ManifoldDiff
+using ManifoldDiff, ForwardDiff
+using ADTypes: AutoFiniteDifferences
+using FiniteDifferences: central_fdm
 
 
 @testset "The Spheres" begin
@@ -33,6 +35,7 @@ using ManifoldDiff
             :EmbeddedPoints => [p],
             :EmbeddedVectors => [X],
             :Coordinates => [[π / 2, 0.0]],
+            :Atlases => [RetractionAtlas(), Manifolds.StereographicAtlas()],
             :Bases => [DefaultOrthogonalBasis(), DefaultOrthonormalBasis()],
             :InvalidPoints => [2 * p],
             :InvalidVectors => [p],
@@ -40,6 +43,7 @@ using ManifoldDiff
             :OtherMetrics => [MinkowskiMetric()],
             :Covectors => [ξ],
             :RetractionMethods => [ExponentialRetraction(), ProjectionRetraction()],
+            :InducedBasisBackend => AutoFiniteDifferences(central_fdm(5, 1)),
             :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
         ),
         # Expectations
@@ -80,7 +84,24 @@ using ManifoldDiff
         @test Y1 == X1
     end
 
-    Manifolds.test_atlases(M, [p, q], (RetractionAtlas(), Manifolds.StereographicAtlas()))
+    # the stereographic atlas additionally provides the metric and the connection in charts
+    Manifolds.Test.test_manifold(
+        M,
+        Dict(
+            :Functions => [
+                affine_connection, det_local_metric, get_chart_index, get_parameters, get_point,
+                get_vector, inverse_local_metric, local_metric, log_local_metric_density,
+            ],
+            :Atlases => [Manifolds.StereographicAtlas()],
+            :Points => [p, q, -p],
+            :TestChartIndexParameters => true,
+        ),
+        Dict(
+            :atol => 1.0e-12,
+            (get_chart_index, Manifolds.StereographicAtlas()) => :north,
+            (local_metric, Manifolds.StereographicAtlas()) => 4 * I(2),
+        ),
+    )
 
     @testset "Complex Sphere" begin
         M = Sphere(2, ℂ)

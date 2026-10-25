@@ -1,7 +1,7 @@
 using NLsolve
 using LinearAlgebra
 
-include("header.jl")
+using Manifolds, ManifoldsBase, Test, Random
 
 Random.seed!(10)
 

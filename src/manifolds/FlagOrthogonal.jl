@@ -94,8 +94,8 @@ function inner(
     return dot(X.value, Y.value) / 2
 end
 
-function Base.isapprox(M::Flag, p::OrthogonalPoint, q::OrthogonalPoint; kwargs...)
-    return isapprox(M, convert(AbstractMatrix, M, p), convert(AbstractMatrix, M, q); kwargs...)
+function _isapprox(M::Flag, p::OrthogonalPoint, q::OrthogonalPoint; kwargs...)
+    return _isapprox(M, convert(AbstractMatrix, M, p), convert(AbstractMatrix, M, q); kwargs...)
 end
 
 function norm(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector)
@@ -198,4 +198,19 @@ function ManifoldsBase.retract_qr_fused!(
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     copyto!(q.value, qr_decomp.Q * D)
     return q
+end
+
+@doc raw"""
+    zero_vector(M::Flag, p::OrthogonalPoint)
+
+Return the zero tangent vector at `p` on the [`Flag`](@ref) `M` in the orthogonal matrix
+representation, that is an [`OrthogonalTangentVector`](@ref) wrapping an ``N×N`` zero matrix.
+"""
+function zero_vector(::Flag, p::OrthogonalPoint)
+    return OrthogonalTangentVector(zero(p.value))
+end
+
+function zero_vector!(::Flag, X::OrthogonalTangentVector, ::OrthogonalPoint)
+    fill!(X.value, 0)
+    return X
 end

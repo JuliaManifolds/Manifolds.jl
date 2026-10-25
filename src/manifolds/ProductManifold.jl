@@ -46,6 +46,14 @@ Return the volume of [`ProductManifold`](@extref `ManifoldsBase.ProductManifold`
 """
 manifold_volume(M::ProductManifold) = mapreduce(manifold_volume, *, M.manifolds)
 
+"""
+    metric_signature(M::ProductManifold)
+
+Return the signature of the metric of the [`ProductManifold`](@extref `ManifoldsBase.ProductManifold`)
+`M`, i.e. the sum of the signatures of the manifolds `M` is constructed from.
+"""
+metric_signature(M::ProductManifold) = mapreduce(metric_signature, .+, M.manifolds)
+
 function riemannian_gradient!(M::ProductManifold, Y, p, X)
     map(
         riemannian_gradient!,
@@ -115,6 +123,9 @@ corresponding factor chart indices and coordinates are concatenated factor coord
 struct ProductAtlas{𝔽, TA <: NTuple{N, AbstractAtlas{𝔽}} where {N}} <: AbstractAtlas{𝔽}
     atlases::TA
 end
+
+ManifoldsBase.@fieldwise_equality ProductAtlas
+
 ProductAtlas(atlases::AbstractAtlas{𝔽}...) where {𝔽} = ProductAtlas{𝔽, typeof(atlases)}(atlases)
 
 """

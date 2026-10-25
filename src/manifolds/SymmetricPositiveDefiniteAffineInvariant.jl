@@ -312,12 +312,14 @@ function inner(::SymmetricPositiveDefinite, p, X, Y)
 end
 
 """
-    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,AffineInvariantMetric})
+    is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,AffineInvariantMetric})
 
-Return false. [`SymmetricPositiveDefinite`](@ref) with [`AffineInvariantMetric`](@ref)
-is not a flat manifold.
+Return true if the [`SymmetricPositiveDefinite`](@ref) with [`AffineInvariantMetric`](@ref)
+is one-dimensional, i.e. for ``n = 1``, and false otherwise.
 """
-is_flat(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, AffineInvariantMetric}) = false
+function is_flat(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, AffineInvariantMetric})
+    return is_flat(M.manifold)
+end
 
 @doc raw"""
     log(M::SymmetricPositiveDefinite, p, q)
