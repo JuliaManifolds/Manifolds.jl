@@ -85,6 +85,7 @@ Manifolds.Test.test_sharp
 Manifolds.Test.test_shortest_geodesic
 Manifolds.Test.test_transition_map
 Manifolds.Test.test_transition_map_diff
+Manifolds.Test.test_vector_arithmetic
 Manifolds.Test.test_vector_transport
 Manifolds.Test.test_volume_density
 Manifolds.Test.test_Weingarten
