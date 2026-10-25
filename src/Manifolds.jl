@@ -598,10 +598,6 @@ function solve_chart_adjoint_differential_log_argument end
 function _jacobi_exp_matrix end
 function _adjoint_coordinate_map end
 
-# TODO: Remove once the new interface is done
-function test_atlases end
-# / remove
-
 function __init__()
     @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
         Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs

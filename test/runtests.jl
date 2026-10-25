@@ -28,7 +28,7 @@ end
         include_test("test_atlases.jl")
         include_test("approx_inverse_retraction.jl")
         # manifolds requiring ODE solvers
-        include_test("manifolds-old/embedded_torus.jl")
+        include_test("manifolds/test_embedded_torus.jl")
         # If we are not on apple, test recipes
         Sys.isapple() || include_test("test_recipes.jl")
     end
@@ -38,6 +38,7 @@ end
         include_test("manifolds/test_elliptope.jl")
         include_test("manifolds/test_essential_manifold.jl")
         include_test("manifolds/test_euclidean.jl")
+        include_test("manifolds/test_fiber.jl")
         include_test("manifolds/test_fiber_bundle.jl")
         include_test("manifolds/test_fixed_rank.jl")
         include_test("manifolds/test_flag.jl")
@@ -87,12 +88,6 @@ end
         include_test("manifolds/test_tucker.jl")
         include_test("manifolds/test_unitary_matrices.jl")
         include_test("manifolds/test_vector_bundle.jl")
-    end
-    (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
-        # starting with tests of simple manifolds
-
-        #meta manifolds
-        include_test("manifolds-old/fiber.jl")
     end
     #
     # On CI, JET runs in its own job for simplicity; it comes last, since JET.jl 0.9 on

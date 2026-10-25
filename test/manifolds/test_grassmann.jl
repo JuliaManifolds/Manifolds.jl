@@ -1,5 +1,7 @@
 using Distributions, LinearAlgebra, Manifolds, ManifoldsBase, Quaternions, Random, StaticArrays, Test
 using DiffEqCallbacks, OrdinaryDiffEq
+using ADTypes: AutoFiniteDifferences
+using FiniteDifferences: central_fdm
 
 @testset "The Grassmann manifolds" begin
     @test_throws DomainError Grassmann(2, 3)
@@ -463,6 +465,38 @@ using DiffEqCallbacks, OrdinaryDiffEq
         d = [-0.3, 0.5, 0.1, -0.2]
 
         @test Manifolds.get_chart_index(M, A, [1, 2], 3 * a) == [1, 4]
+        p = get_point(M, A, [1, 2], a)
+        q = get_point(M, A, [3, 4], a)
+        Manifolds.Test.test_manifold(
+            M,
+            Dict(
+                :Functions => [
+                    affine_connection, check_chart_switch, det_local_metric, get_chart_index,
+                    get_coordinates, get_parameters, get_point, get_vector, induced_basis,
+                    Manifolds.inverse_chart_injectivity_radius, inverse_local_metric,
+                    levi_civita_affine_connection, local_metric, log_local_metric_density,
+                    transition_map, transition_map_diff,
+                ],
+                :Atlases => [GrassmannAtlas()],
+                :Points => [p, q],
+                :Vectors => [get_vector(M, p, c, induced_basis(M, A, [1, 2]))],
+                :TestChartIndexParameters => true,
+                :InducedBasisBackend => AutoFiniteDifferences(central_fdm(5, 1)),
+            ),
+            Dict(
+                :atol => 1.0e-10,
+                (Manifolds.inverse_chart_injectivity_radius, GrassmannAtlas()) => Inf,
+                (check_chart_switch, GrassmannAtlas()) => false,
+            ),
+        )
+        Manifolds.Test.test_inner(
+            M, A, [1, 2], a, c, d;
+            available_functions = [get_vector, norm], atol = 1.0e-12,
+        )
+        Manifolds.Test.test_norm(
+            M, A, [1, 2], a, c;
+            available_functions = [get_vector, inner], atol = 1.0e-12,
+        )
         for i in charts
             @testset "chart $i" begin
                 p = get_point(M, A, i, a)

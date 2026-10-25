@@ -1,5 +1,4 @@
-include("../header.jl")
-
+using Manifolds, Test, ManifoldsBase
 using RecursiveArrayTools
 
 struct TestVectorSpaceType <: VectorSpaceType end

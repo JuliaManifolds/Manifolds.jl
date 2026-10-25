@@ -80,6 +80,7 @@ expect(e::Union{Expect, NoExpectation})
 struct DummyMatrixType <: Manifolds.AbstractMatrixType end
 
 const _ALL_FUNCTIONS = [
+    check_chart_switch,
     copy,
     copyto!,
     default_inverse_retraction_method,
@@ -92,10 +93,15 @@ const _ALL_FUNCTIONS = [
     flat,
     geodesic,
     get_basis,
+    get_chart_index,
     get_coordinates,
+    get_default_atlas,
     get_embedding,
+    get_parameters,
+    get_point,
     get_vector,
     get_vectors,
+    induced_basis,
     injectivity_radius,
     inner,
     inverse_retract,
@@ -118,6 +124,8 @@ const _ALL_FUNCTIONS = [
     sectional_curvature,
     sharp,
     shortest_geodesic,
+    transition_map,
+    transition_map_diff,
     vector_transport_direction,
     vector_transport_to,
     volume_density,
@@ -132,6 +140,8 @@ function test_manifold end
 #
 #
 # the small functions per single API function
+function test_affine_connection end
+function test_check_chart_switch end
 function test_copy end
 function test_copyto end
 function test_default_retraction end
@@ -144,18 +154,25 @@ function test_exp end
 function test_flat end
 function test_geodesic end
 function test_get_basis end
+function test_get_chart_index end
 function test_get_coordinates end
+function test_get_default_atlas end
 function test_get_embedding end
+function test_get_parameters end
+function test_get_point end
 function test_get_vector end
 function test_get_vectors end
+function test_induced_basis end
 function test_injectivity_radius end
 function test_inner end
+function test_inverse_chart_injectivity_radius end
 function test_inverse_retract end
 function test_is_default_metric end
 function test_is_flat end
 function test_is_positive_definite_metric end
 function test_is_point end
 function test_is_vector end
+function test_local_metric end
 function test_log end
 function test_manifold_dimension end
 function test_manifold_volume end
@@ -167,6 +184,8 @@ function test_project end
 function test_sectional_curvature end
 function test_sharp end
 function test_shortest_geodesic end
+function test_transition_map end
+function test_transition_map_diff end
 function test_rand end
 function test_repr end
 function test_representation_size end
@@ -185,17 +204,6 @@ function test_zero_vector end
 function test_estimated_sectional_curvature_matrix end
 # What to exactly test on this?
 function test_sectional_curvature_matrix end
-function test_affine_connection end
-function test_get_atlas end
-function test_get_parameters end
-function test_get_point end
-function test_transition_map end
-function test_transition_map_diff end
-function test_induced_basis end
-function test_check_chart_switch end
-function test_get_chart_index end
-# add second variant inner(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
-# add second variant norm(M::AbstractManifold, A::AbstractAtlas, i, a, Xc)
 
 # How approximate is ok?
 function test_mean end
