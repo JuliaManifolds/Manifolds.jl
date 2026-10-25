@@ -1662,7 +1662,7 @@ in the domain of the chart and a tangent vector `X` at `p`.
   [`manifold_dimension`](@extref `ManifoldsBase.manifold_dimension-Tuple{AbstractManifold}`) coordinates (if available)
   and [`get_vector`](@extref `ManifoldsBase.get_vector`) inverts it (if available)
 * that each basis vector matches, up to `differential_atol`, the [`project`](@extref `ManifoldsBase.project-Tuple{AbstractManifold, Any, Any}`)ion
-  of the derivative of the [`embed`](@extref `ManifoldsBase.embed-Tuple{AbstractManifold, Any}`)ded
+  of the derivative of the embedded (see [`embed`](@extref `ManifoldsBase.embed-Tuple{AbstractManifold, Any}`))
   [`get_point`](@ref) along the corresponding parameter curve, computed with the
   [DifferentiationInterface.jl](https://juliadiff.org/DifferentiationInterface.jl/DifferentiationInterface/stable/)
   backend `differential_backend`, for example `AutoFiniteDifferences(central_fdm(5, 1))` from
