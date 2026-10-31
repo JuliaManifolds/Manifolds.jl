@@ -648,9 +648,10 @@ function retract_polar_light!(::Stiefel, q, p, X; kwargs...)
     # Inspired by the steps from the original implementation in Python, see
     # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L86-L115
     A = p' * X
-    q .= p * (exp(A) - A) + X
     # QR of (I - p*p')*X = X - p*A
     s = svd(qr(X - p * A).R)
+    # now we can write into q even when the memory of p and q is aliased
+    q .= p * (exp(A) - A) + X
     # to compute inv(sqrt(I + R'R)) we SVD R = UdV and add the diagonal “inside”
     # S = I + R'R = V(I+d.^2)V and hence the inv sqrt is V (1./sqrt.(1 .+ d.^2) V'
     d, V = s.S, s.V
