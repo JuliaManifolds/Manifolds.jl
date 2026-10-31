@@ -434,10 +434,10 @@ using Distributions, LinearAlgebra, Manifolds, Random, RecursiveArrayTools, Stat
                 ],
                 :InvalidPoints => [pcf, 2 .* pc],
                 :InvalidVectors => [Xcf],
-                :InverseRetractionMethods => [PolarInverseRetraction(), QRInverseRetraction()],
+                :InverseRetractionMethods => [PolarInverseRetraction(), PolarLightInverseRetraction(), QRInverseRetraction()],
                 :Points => [pc, qc, rc],
                 :Vectors => [Xc, Yc, Zc],
-                :RetractionMethods => [PolarRetraction(), QRRetraction()],
+                :RetractionMethods => [PolarRetraction(), PolarLightRetraction(), QRRetraction()],
                 :VectorTransportMethods => [
                     DifferentiatedRetractionVectorTransport(PolarRetraction()),
                 ],
