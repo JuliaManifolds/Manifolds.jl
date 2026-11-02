@@ -6,7 +6,8 @@ using ManifoldsBase
 using Manifolds: affine_connection
 import Manifolds: solve_chart_log_bvp, estimate_distance_from_bvp
 
-using BoundaryValueDiffEq
+using BoundaryValueDiffEqMIRK: MIRK4
+using SciMLBase: BVProblem, solve
 
 function chart_log_problem!(du, u, params, t)
     M, A, i = params
@@ -32,18 +33,20 @@ using solver `solver`. Geodesic γ is sampled at time interval `dt`, with γ(0) 
 """
 function solve_chart_log_bvp(
         M::AbstractManifold, a1, a2, A::AbstractAtlas, i;
-        solver = MIRK4(), dt::Real = 0.05, kwargs...
+        solver = MIRK4(), dt::Real = 0.05, kwargs...,
     )
     tspan = (0.0, 1.0)
     function bc1!(residual, u, p, t)
-        mid = div(length(u[1]), 2)
-        residual[1:mid] = u[1][1:mid] - a1
-        residual[(mid + 1):end] = u[end][1:mid] - a2
+        ua = u(tspan[1])
+        ub = u(tspan[2])
+        mid = div(length(ua), 2)
+        residual[1:mid] = ua[1:mid] - a1
+        residual[(mid + 1):end] = ub[1:mid] - a2
         return residual
     end
-    u0 = [vcat(a1, zero(a1)), vcat(a2, zero(a1))]
+    u0 = (p, t) -> vcat(a1 .+ t .* (a2 .- a1), zero(a1))
     bvp1 = BVProblem(chart_log_problem!, bc1!, u0, tspan, (M, A, i))
-    sol1 = solve(bvp1, solver, dt = dt)
+    sol1 = solve(bvp1, solver; dt = dt, kwargs...)
     return sol1
 end
 
@@ -59,11 +62,11 @@ Estimate distance between points on [`AbstractManifold`](@extref `ManifoldsBase.
 """
 function estimate_distance_from_bvp(
         M::AbstractManifold, a1, a2, A::AbstractAtlas, i;
-        solver = MIRK4(), dt = 0.05, kwargs...
+        solver = MIRK4(), dt = 0.05, kwargs...,
     )
     sol = solve_chart_log_bvp(M, a1, a2, A, i; solver, dt, kwargs...)
     mid = length(a1)
-    Xc = sol.u[1][(mid + 1):end]
+    Xc = sol(0.0)[(mid + 1):end]
     return norm(M, A, i, a1, Xc)
 end
 

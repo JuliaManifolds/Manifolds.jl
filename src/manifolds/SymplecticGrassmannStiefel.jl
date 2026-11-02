@@ -14,10 +14,10 @@ end
 @doc raw"""
     check_vector(M::SymplecticGrassmann, p, X; kwargs...)
 
-Check whether `X` is a valid tangent vector at `p` on the [`SymplecticGrassmann`](@ref),
-``\operatorname{SpGr}(2n, 2k)`` manifold by verifying that it
-is a valid representer of an equivalence class of the corresponding
-[`SymplecticStiefel`](@ref) manifolds tangent space at `p`.
+Check whether `X` is a valid tangent vector at `p` on the [`SymplecticGrassmann`](@ref)
+``\operatorname{SpGr}(2n, 2k)`` manifold `M`.
+This is done by verifying that it is a valid representer of an equivalence class of the
+tangent space of the corresponding [`SymplecticStiefel`](@ref) manifold at `p`.
 """
 function check_vector(M::SymplecticGrassmann, p, X; kwargs...)
     n, k = get_parameter(M.size)
@@ -72,10 +72,10 @@ end
     inner(::SymplecticGrassmann, p, X, Y)
 
 Compute the Riemannian inner product ``g^{\mathrm{SpGr}}_p(X,Y)``
-on the [`SymplecticGrassmann`](@ref) manifold `\mathrm{SpGr}``.
+on the [`SymplecticGrassmann`](@ref) manifold ``\mathrm{SpGr}``.
 
 For the case where ``p`` is represented by a point on the [`SymplecticStiefel`](@ref) manifold
-acting as a representant of its equivalence class ``[p] \in \mathrm{SpGr}``
+acting as a representer of its equivalence class ``[p] \in \mathrm{SpGr}``
 and the tangent vectors ``X,Y \in \mathrm{Hor}_p^π\operatorname{SpSt}(2n,2k)``
 are horizontal tangent vectors.
 
@@ -92,13 +92,13 @@ where ``I_{2n}`` denotes the identity matrix and ``(⋅)^+`` the [`symplectic_in
 function inner(M::SymplecticGrassmann, p, X, Y)
     n, k = get_parameter(M.size)
     J = SymplecticElement(p, X, Y) # in BZ21 also J
-    # Procompute lu(p'p) since we solve a^{-1}* 3 times
+    # Precompute lu(p'p) since we solve a^{-1}* 3 times
     a = lu(p' * p) # note that p'p is symmetric, thus so is its inverse c=a^{-1}
     # we split the original trace into two one with I -> (X'Yc)
     # 1) we permute X' and Y c to c^{\mathrm{T}}Y^{\mathrm{T}}X = a\(Y'X) (avoids a large interims matrix)
     # 2) the second we compute as c (X'p)(p^+Y) since both brackets are the smaller matrices
     return tr(a \ (Y' * X)) - tr(
-        a \ ((X' * p) * symplectic_inverse_times(SymplecticStiefel(2 * n, 2 * k), p, Y)),
+        a \ ((X' * p) * symplectic_inverse_times(SymplecticStiefel(2 * n, 2 * k), p, Y))
     )
 end
 
@@ -116,6 +116,52 @@ inverse_retract(::SymplecticGrassmann, p, q, ::CayleyInverseRetraction)
 function inverse_retract_cayley!(M::SymplecticGrassmann, X, p, q)
     n, k = get_parameter(M.size)
     return inverse_retract_cayley!(SymplecticStiefel(2 * n, 2 * k), X, p, q)
+end
+
+@doc raw"""
+    project(::SymplecticGrassmann, p, Y)
+    project!(::SymplecticGrassmann, X, p, Y)
+
+Project a matrix ``Y ∈ ℝ^{2n×2k}`` onto the horizontal tangent vectors at the representative
+``p ∈ \operatorname{SpSt}(2n,2k)`` of a point on the [`SymplecticGrassmann`](@ref) manifold, i.e. the tangent vectors
+``X ∈ T_p\operatorname{SpSt}(2n,2k)`` with ``p^+X = 0`` [BendokatZimmermann:2021](@cite), as
+
+```math
+X = (I_{2n} - pp^+)Y,
+```
+
+where ``I_{2n}`` denotes the identity matrix and ``(⋅)^+`` the [`symplectic_inverse`](@ref).
+Since ``pp^+`` is the symplectic projector onto the column space of ``p``, the difference ``Y - X``
+lies in the kernel of the inner product ``g^{\mathrm{SpGr}}_p`` extended to ``ℝ^{2n×2k}``,
+see `inner` on the [`SymplecticGrassmann`](@ref) manifold.
+"""
+project(::SymplecticGrassmann, p, Y)
+
+function project!(M::SymplecticGrassmann, X, p, Y)
+    n, k = get_parameter(M.size)
+    X .= Y .- p * symplectic_inverse_times(SymplecticStiefel(2 * n, 2 * k), p, Y)
+    return X
+end
+
+@doc raw"""
+    rand(::SymplecticGrassmann; σ::Real=1.0)
+
+Generate a random point on the [`SymplecticGrassmann`](@ref) manifold, represented on the
+[`SymplecticStiefel`](@ref) manifold, as a random point on the [`SymplecticStiefel`](@ref)
+manifold generated with the same `σ`.
+Random tangent vectors, that is `rand` with `vector_at`, are not yet available.
+"""
+rand(::SymplecticGrassmann; σ::Real = 1.0, kwargs...)
+
+function Random.rand!(
+        rng::AbstractRNG, M::SymplecticGrassmann, pX;
+        vector_at = nothing, σ::Real = 1.0,
+    )
+    vector_at === nothing || throw(
+        ArgumentError("Random tangent vectors on the symplectic Grassmann manifold are not yet available."),
+    )
+    n, k = get_parameter(M.size)
+    return rand!(rng, SymplecticStiefel(2 * n, 2 * k), pX; σ = σ)
 end
 
 @doc raw"""
@@ -143,9 +189,12 @@ end
 @doc raw"""
     riemannian_gradient(M::SymplecticGrassmann, p, Y)
 
-Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^{2n×2k}`` or at
-least around the [`SymplecticGrassmann`](@ref) `M` where `p` (the embedding of) a point on `M`,
-and the restriction ``\tilde f`` to the [`SymplecticStiefel`](@ref) be invariant for the equivalence classes.
+Compute the Riemannian gradient ``X = \operatorname{grad} f(p)`` on the [`SymplecticGrassmann`](@ref) `M`
+from the gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding.
+
+Here ``Y`` is the gradient in the embedding ``ℝ^{2n×2k}``, or at least in a neighbourhood of `M`,
+where `p` is (the embedding of) a point on `M`, and the restriction of ``\tilde f`` to the
+[`SymplecticStiefel`](@ref) is assumed to be invariant on the equivalence classes.
 In other words ``f(p) = f(qp)`` for ``q \in \mathrm{Sp}(2k, ℝ)``,
 where ``\mathrm{Sp}(2k, ℝ)`` denotes the [`SymplecticMatrices`](@ref) manifold.
 Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by
@@ -160,11 +209,10 @@ where ``J_{2n}`` denotes the [`SymplecticElement`](@ref), and
 riemannian_gradient(M::SymplecticGrassmann, p, Y; kwargs...)
 
 function riemannian_gradient!(M::SymplecticGrassmann, X, p, Y; kwargs...)
-    n, k = get_parameter(M.size)
     J = SymplecticElement(p, X)
     # Since J' = -J We can write (J'YJ) = -J * (YJ)
     JTYJ = (-J * (Y * J))
     H = (I - p * symplectic_inverse(p)) * JTYJ
-    X .= (-J * (H * J)) * (p' * p) .- JTYJ * (H' * p)
+    X .= (-J * (H * J)) * (p' * p) .- (-J * (p * J)) * (H' * p)
     return X
 end

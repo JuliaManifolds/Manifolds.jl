@@ -9,7 +9,7 @@ Segre manifold, i.e., the set of rank-1 tensors.
 
 Let ``𝔽`` be the real or complex numbers.
 Any tensor ``p`` on the Tucker manifold can be represented as a multilinear product in HOSVD
-[DeLathauwerDeMoorVanderwalle:2000](@cite) form
+[DeLathauwerDeMoorVandewalle:2000](@cite) form
 ```math
 p = (U_1,\dots,U_D) ⋅ \mathcal{C}
 ```
@@ -48,7 +48,12 @@ function Tucker(
         n⃗::NTuple{D, Int}, r⃗::NTuple{D, Int}, field::AbstractNumbers = ℝ;
         parameter::Symbol = :type,
     ) where {D}
-    @assert is_valid_mlrank(n⃗, r⃗)
+    is_valid_mlrank(n⃗, r⃗) || throw(
+        DomainError(
+            (n⃗, r⃗),
+            "The multilinear rank r⃗ = $(r⃗) of a Tucker manifold must be positive, at most n⃗ = $(n⃗) and satisfy r⃗[i] ≤ ∏ⱼ₌₁,ⱼ≠ᵢ r⃗[j] for every i.",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n⃗, r⃗))
     return Tucker{field, typeof(size), D}(size)
 end
@@ -68,9 +73,8 @@ struct HOSVD{T, D}
     σ::NTuple{D, Vector{T}}
 end
 
-function Base.:(==)(a::HOSVD{T, D}, b::HOSVD{T, D}) where {T, D}
-    return a.U == b.U && a.core == b.core && a.σ == b.σ
-end
+ManifoldsBase.@fieldwise_equality HOSVD{T, D} (T <: Number, D) (U, core, σ)
+
 
 @doc raw"""
     TuckerPoint{T,D}
@@ -97,8 +101,11 @@ values are truncated to get a multilinear rank `mlrank`
 struct TuckerPoint{T, D} <: AbstractManifoldPoint
     hosvd::HOSVD{T, D}
 end
+
+ManifoldsBase.@fieldwise_equality TuckerPoint{T, D} (T <: Number, D) (hosvd,)
+
 function TuckerPoint(
-        core::AbstractArray{T, D}, factors::Vararg{MtxT, D},
+        core::AbstractArray{T, D}, factors::Vararg{MtxT, D}
     ) where {T, D, MtxT <: AbstractMatrix{T}}
     # Take the QR decompositions of the factors and multiply the R factors into the core
     qrfacs = map(qr, factors)
@@ -116,9 +123,6 @@ function TuckerPoint(A::AbstractArray{T, D}, mlrank::NTuple{D, Int}) where {T, D
     return TuckerPoint(st_hosvd(A, mlrank))
 end
 
-function Base.:(==)(a::TuckerPoint{T, D}, b::TuckerPoint{T, D}) where {T, D}
-    return a.hosvd == b.hosvd
-end
 
 @doc raw"""
     TuckerTangentVector{T, D} <: AbstractTangentVector
@@ -146,12 +150,17 @@ struct TuckerTangentVector{T, D} <: AbstractTangentVector
     U̇::NTuple{D, Matrix{T}}
 end
 
+ManifoldsBase.@fieldwise_equality TuckerTangentVector (Ċ, U̇)
+
 # An implicitly stored basis of the tangent space to the Tucker manifold. This is the basis
 # from [Dewaele2021] and acts as the default orthonormal basis.
 struct HOSVDBasis{T, D}
     point::TuckerPoint{T, D}
     U⊥::NTuple{D, Matrix{T}}
 end
+
+ManifoldsBase.@fieldwise_equality HOSVDBasis
+
 CachedHOSVDBasis{𝔽, T, D} =
     CachedBasis{𝔽, DefaultOrthonormalBasis{𝔽, TangentSpaceType}, HOSVDBasis{T, D}}
 
@@ -169,20 +178,22 @@ function Base.:-(x::TuckerTangentVector, y::TuckerTangentVector)
 end
 Base.:-(x::TuckerTangentVector) = TuckerTangentVector(-x.Ċ, map(-, x.U̇))
 Base.:+(x::TuckerTangentVector) = TuckerTangentVector(x.Ċ, x.U̇)
-function Base.:(==)(x::TuckerTangentVector, y::TuckerTangentVector)
-    return (x.Ċ == y.Ċ) && all(x.U̇ .== y.U̇)
-end
 
 allocate(p::TuckerPoint) = allocate(p, number_eltype(p))
 function allocate(p::TuckerPoint{Tp, D}, ::Type{T}) where {T, Tp, D}
     @assert promote_type(Tp, T) == T
     return TuckerPoint(
-        HOSVD(allocate(p.hosvd.U, T), allocate(p.hosvd.core, T), allocate(p.hosvd.σ, T)),
+        HOSVD(allocate(p.hosvd.U, T), allocate(p.hosvd.core, T), allocate(p.hosvd.σ, T))
     )
 end
 allocate(x::TuckerTangentVector) = allocate(x, number_eltype(x))
 function allocate(x::TuckerTangentVector, ::Type{T}) where {T}
     return TuckerTangentVector(allocate(x.Ċ, T), allocate(x.U̇, T))
+end
+
+# coordinates are a plain vector
+function ManifoldsBase.allocate_coordinates(::Tucker, ::TuckerTangentVector, T, n::Int)
+    return zeros(T, n)
 end
 
 # Tuple-like broadcasting of TuckerTangentVector
@@ -194,18 +205,18 @@ function Broadcast.BroadcastStyle(::Type{TuckerTangentVector{T, D}}) where {T, D
     return Broadcast.Style{TuckerTangentVector{Any, D}}()
 end
 function Broadcast.BroadcastStyle(
-        ::Broadcast.AbstractArrayStyle{0}, b::Broadcast.Style{<:TuckerTangentVector},
+        ::Broadcast.AbstractArrayStyle{0}, b::Broadcast.Style{<:TuckerTangentVector}
     )
     return b
 end
 
 function Broadcast.instantiate(
-        bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTangentVector{Any, D}}, Nothing},
+        bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTangentVector{Any, D}}, Nothing}
     ) where {D}
     return bc
 end
 function Broadcast.instantiate(
-        bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTangentVector{Any, D}}},
+        bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTangentVector{Any, D}}}
     ) where {D}
     Broadcast.check_broadcast_axes(bc.axes, bc.args...)
     return bc
@@ -214,7 +225,7 @@ end
 Broadcast.broadcastable(v::TuckerTangentVector) = v
 
 Base.@propagate_inbounds function Broadcast._broadcast_getindex(
-        v::TuckerTangentVector, ::Val{I},
+        v::TuckerTangentVector, ::Val{I}
     ) where {I}
     if I isa Symbol
         return getfield(v, I)
@@ -249,10 +260,7 @@ function check_point(M::Tucker, x::TuckerPoint; kwargs...)
     U = x.hosvd.U
     ℭ = x.hosvd.core
     if size(ℭ) ≠ R
-        return DomainError(
-            size(x.hosvd.core),
-            s * "since the size of the core is not $(R).",
-        )
+        return DomainError(size(x.hosvd.core), s * "since the size of the core is not $(R).")
     end
     if size(x) ≠ N
         return DomainError(size(x), s * "since its dimensions are not $(N).")
@@ -271,8 +279,7 @@ function check_point(M::Tucker, x::TuckerPoint; kwargs...)
         end
         if rank(Diagonal(x.hosvd.σ[d]); kwargs...) ≠ R[d]
             return DomainError(
-                minimum(x.hosvd.σ[d]),
-                s * "since the core does not have full multilinear rank.",
+                minimum(x.hosvd.σ[d]), s * "since the core does not have full multilinear rank."
             )
         end
     end
@@ -280,25 +287,35 @@ function check_point(M::Tucker, x::TuckerPoint; kwargs...)
 end
 
 @doc raw"""
-    check_vector(M::Tucker{<:Any,D}, p::TuckerPoint{T,D}, X::TuckerTangentVector) where {T,D}
+    check_vector(M::Tucker{<:Any,D}, p::TuckerPoint{T,D}, X::TuckerTangentVector; atol, rtol, kwargs...) where {T,D}
 
-Check whether a [`TuckerTangentVector`](@ref) `X` is is in the tangent space to
+Check whether a [`TuckerTangentVector`](@ref) `X` is in the tangent space to
 the `D`th order [`Tucker`](@ref) manifold `M` at the `D`th order [`TuckerPoint`](@ref) `p`.
 This
 is the case when the dimensions of the factors in `X` agree with those of `p` and the factor
-matrices of `X` are in the orthogonal complement of the HOSVD factors of `p`.
+matrices of `X` are in the orthogonal complement of the HOSVD factors of `p`, the latter up
+to `max(atol, rtol * norm(X.U̇[d]))` for the `d`th factor.
+The default of `rtol` is the one of `isapprox`.
 """
 function check_vector(
-        M::Tucker{𝔽, <:Any, D},
-        p::TuckerPoint{T, D},
-        X::TuckerTangentVector,
+        M::Tucker{𝔽, <:Any, D}, p::TuckerPoint{T, D}, X::TuckerTangentVector;
+        atol::Real = sqrt(prod(size(p)) * eps(float(real(T)))),
+        rtol::Real = sqrt(eps(float(real(T)))),
+        kwargs...,
     ) where {T, D, 𝔽}
     s = "The tangent vector $(X) is not a tangent vector to $(p) on $(M), "
     if size(p.hosvd.core) ≠ size(X.Ċ) || any(size.(X.U̇) .≠ size.(p.hosvd.U))
         return DomainError(
-            size(X.Ċ),
-            s * "since the array dimensions of $(p) and $(X)" * " do not agree.",
+            size(X.Ċ), s * "since the array dimensions of $(p) and $(X)" * " do not agree."
         )
+    end
+    for d in 1:D
+        r = norm(p.hosvd.U[d]' * X.U̇[d])
+        if !(r <= atol || r <= rtol * norm(X.U̇[d]))
+            return DomainError(
+                r, s * "since the factor $(d) of $(X) is not orthogonal to that of $(p)."
+            )
+        end
     end
     return nothing
 end
@@ -334,7 +351,7 @@ function Base.convert(::Type{Matrix}, basis::CachedHOSVDBasis{𝔽, T, D}) where
 end
 
 @inline function Base.copy(
-        bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTangentVector{Any, D}}},
+        bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTangentVector{Any, D}}}
     ) where {D}
     return TuckerTangentVector(
         @inbounds(Broadcast._broadcast_getindex(bc, Val(:Ċ))),                  # COV_EXCL_LINE
@@ -351,6 +368,9 @@ function Base.copyto!(q::TuckerPoint, p::TuckerPoint)
     copyto!(q.hosvd.core, p.hosvd.core)
     return q
 end
+Base.copy(p::TuckerPoint) = TuckerPoint(
+    HOSVD(map(copy, p.hosvd.U), copy(p.hosvd.core), map(copy, p.hosvd.σ))
+)
 function Base.copyto!(y::TuckerTangentVector, x::TuckerTangentVector)
     for d in 1:ndims(y.Ċ)
         copyto!(y.U̇[d], x.U̇[d])
@@ -378,10 +398,10 @@ end
 """
     default_inverse_retraction_method(M::Tucker)
 
-Return [`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`)
+Return [`ProjectionInverseRetraction`](@extref `ManifoldsBase.ProjectionInverseRetraction`)
 as the default inverse retraction for the [`Tucker`](@ref) manifold.
 """
-default_inverse_retraction_method(::Tucker) = PolarInverseRetraction()
+default_inverse_retraction_method(::Tucker) = ProjectionInverseRetraction()
 
 """
     default_retraction_method(M::Tucker)
@@ -398,6 +418,106 @@ Return the [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`)
 as the default vector transport method for the [`Tucker`](@ref) manifold.
 """
 default_vector_transport_method(::Tucker) = ProjectionTransport()
+
+@doc raw"""
+    vector_transport_to(M::Tucker, p, X, q, ::ProjectionTransport)
+
+Compute the projection vector transport on the [`Tucker`](@ref) manifold by projecting
+the tangent vector `X` onto the tangent space of `M` at `q`.
+
+Let
+````math
+p = (C_p, U_p^1, …, U_p^D), \qquad X = (C_X, U_X^1, …, U_X^D) ∈ T_p M, \qquad q = (C_q, U_q^1, …, U_q^D).
+````
+
+This means that
+````math 
+    X = C_X ×_{j = 1, …, D} U_p^j + \sum_{k = 1}^D C_p ×_{j ≠ k} U_p^j ×_k U_X^k
+````
+as an embedded vector.
+For complex tensors, every transpose ``(⋅)^T`` below is the Hermitian adjoint ``(⋅)^{\mathrm{H}}``,
+see [Hackbusch:2019](@cite), Lemma 17.8.
+Let
+````math
+C_Y = X ×_{j} (U_q^j)^T =  C_X ×_{j = 1, …, D} U_p^j (U_q^j)^T + \sum_{k = 1}^D C_p ×_{j ≠ k} U_p^j (U_q^j)^T ×_k U_X^k(U_q^k)^T
+```` 
+and
+````math 
+U_Y^i 
+= P_{U_q^i}^⊥ \left[X ×_{j ≠ i} (U_q^j)^T\right]_{(i)} (C_q)_{(i)}^+ \\
+= \left[C_X ×_{j ≠ i} U_p^j (U_q^j)^T ×_i U_p^i (I - U_q^i (U_q^i)^T)\right]_{(i)} (C_q)_{(i)}^+
++ \sum_{k ≠ i} \left[ C_p ×_{j ≠ k ≠ i} U_p^j (U_q^j)^T ×_k U_X^k(U_q^k)^T ×_i U_p^i (I - U_q^i (U_q^i)^T)\right]_{(i)} (C_q)_{(i)}^+
++ \left[ C_p ×_{j ≠ i} U_p^j (U_q^j)^T ×_i U_X^i (I - U_q^i (U_q^i)^T)\right]_{(i)} (C_q)_{(i)}^+ 
+````
+
+Note that ``(C_q)_{(i)}^+ = (C_q)_{(i)}^T ((C_q)_{(i)} (C_q)_{(i)}^T)^{-1} = (C_q)_{(i)}^T Σ_{(i)}^{-2}``,
+where ``Σ_{(i)}`` is the diagonal Matrix containing the singular values of the mode-``i`` unfolding of ``C_q``.
+The first equality holds because ``(C_q)_{(i)}`` has full row rank, see [KressnerSteinlechnerVandereycken:2013](@cite), Section 2.2.
+
+Then the transported tangent vector is represented by
+````math
+Y = (C_Y, U_Y^1, …, U_Y^D).
+````
+For details, see [KressnerSteinlechnerVandereycken:2013](@cite).
+"""
+vector_transport_to(::Tucker{𝔽, T, D}, ::TuckerPoint{T, D}, ::TuckerTangentVector{T, D}, ::TuckerPoint{T, D}, ::ProjectionTransport) where {𝔽, T, D}
+
+function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T, D}, p::TuckerPoint{T, D}, X::TuckerTangentVector{T, D}, q::TuckerPoint{T, D}) where {T, D}
+    dims, ranks = Manifolds.get_parameter(M.size)
+
+    # allocate variables for intermediate results
+    factors = Vector{Matrix{T}}(undef, D)
+    T1 = Array{T, D}(undef, ranks)
+    T2 = Array{T, D}(undef, ranks)
+    Ci = [Matrix{T}(undef, ranks[i], ranks[i]) for i in 1:D]
+    Ui = [Matrix{T}(undef, dims[i], ranks[i]) for i in 1:D]
+    Vi = [Matrix{T}(undef, dims[i], ranks[i]) for i in 1:D]
+
+    # compute transpose(q.hosvd.U[i]' * p.hosvd.U[i]) and store as intermediate result
+    pUi_qUi = [Matrix{T}(undef, r, r) for r in ranks]
+    for i in 1:D
+        pUi_qUi[i] .= conj.(p.hosvd.U[i]' * q.hosvd.U[i])
+    end
+
+    # compute transpose(q.hosvd.U[i]' * X.U̇[i]) and store as intermediate result
+    XUi_qUi = [Matrix{T}(undef, r, r) for r in ranks]
+    for i in 1:D
+        XUi_qUi[i] .= conj.(X.U̇[i]' * q.hosvd.U[i])
+    end
+
+    # compute Y.U[i]
+    for i in 1:D
+        buffer = (Vi[i], Ui[i], Ci[i], T1, T2)
+
+        Σ⁻¹ = (1 ./ (q.hosvd.σ[i] .^ 2))
+
+        # first compute summand for k = i, so we can then directly write into Y.U[i] (this is only a problem if X === Y)
+        compute_projection_summand!(Y.U̇[i], buffer, p.hosvd.core, X.U̇[i], q, Σ⁻¹, pUi_qUi, i, false)
+
+        # compute summand for core
+        compute_projection_summand!(Y.U̇[i], buffer, X.Ċ, p.hosvd.U[i], q, Σ⁻¹, pUi_qUi, i, true)
+
+        # compute remaining summands
+        for k in 1:D
+            if k ≠ i
+                factors .= pUi_qUi
+                factors[k] = XUi_qUi[k]
+                compute_projection_summand!(Y.U̇[i], buffer, p.hosvd.core, p.hosvd.U[i], q, Σ⁻¹, factors, i, true)
+            end
+        end
+    end
+
+    # compute Y.Ċ
+    contract_with_factors!(Y.Ċ, T1, T2, X.Ċ, pUi_qUi, false)
+    for k in 1:D
+        factors .= pUi_qUi
+        factors[k] = XUi_qUi[k]
+        contract_with_factors!(Y.Ċ, T1, T2, p.hosvd.core, factors, true)
+    end
+
+    return Y
+end
+
 
 @doc raw"""
     embed(::Tucker, p::TuckerPoint)
@@ -441,7 +561,7 @@ Using a [`CachedBasis`](@extref `ManifoldsBase.CachedBasis`) may speed up the co
 the vector is to be stored, `f` must make a copy.
 """
 function Base.foreach(
-        f, M::Tucker, p::TuckerPoint, basis::AbstractBasis, indices = 1:manifold_dimension(M),
+        f, M::Tucker, p::TuckerPoint, basis::AbstractBasis, indices = 1:manifold_dimension(M)
     )
     # Use in-place variants to avoid superfluous allocation
     bᵢ = zero_vector(M, p)
@@ -491,22 +611,38 @@ end
 
 #=
 get_coordinates(::Tucker, A, X::TuckerTangentVector, b)
+get_coordinates!(::Tucker, c, A, X::TuckerTangentVector, b)
 
 The coordinates of a tangent vector X at point A on the Tucker manifold with respect to the
-basis b.
+basis b, computed in place of c for the mutating variant.
 =#
-function get_coordinates(::Tucker, 𝔄, X::TuckerTangentVector, ℬ::CachedHOSVDBasis)
-    coords = vec(X.Ċ)
-    for d in 1:length(X.U̇)
-        coord_mtx = (ℬ.data.U⊥[d] \ X.U̇[d]) * Diagonal(𝔄.hosvd.σ[d])
-        coords = vcat(coords, vec(coord_mtx'))
-    end
-    return coords
+function get_coordinates(M::Tucker, 𝔄, X::TuckerTangentVector, ℬ::CachedHOSVDBasis)
+    T = promote_type(number_eltype(𝔄), number_eltype(X))
+    return get_coordinates!(M, Vector{T}(undef, manifold_dimension(M)), 𝔄, X, ℬ)
 end
 function get_coordinates(
-        M::Tucker, 𝔄, X, ℬ::DefaultOrthonormalBasis{𝔽, TangentSpaceType},
+        M::Tucker, 𝔄, X, ℬ::DefaultOrthonormalBasis{𝔽, TangentSpaceType}
     ) where {𝔽}
     return get_coordinates(M, 𝔄, X, get_basis(M, 𝔄, ℬ))
+end
+function get_coordinates!(::Tucker, c, 𝔄, X::TuckerTangentVector, ℬ::CachedHOSVDBasis)
+    ℭ = 𝔄.hosvd.core
+    r⃗ = size(ℭ)
+    n⃗ = size(𝔄)
+    copyto!(view(c, 1:length(ℭ)), vec(X.Ċ))
+    # the coordinates of X.U̇[d] are the rows of its coordinate matrix, one after another
+    nextcolumn = length(ℭ) + 1
+    for d in 1:length(X.U̇)
+        numcols = r⃗[d] * (n⃗[d] - r⃗[d])
+        coord_mtx = (ℬ.data.U⊥[d] \ X.U̇[d]) * Diagonal(𝔄.hosvd.σ[d])
+        reshape(view(c, nextcolumn:(nextcolumn + numcols - 1)), r⃗[d], n⃗[d] - r⃗[d]) .=
+            transpose(coord_mtx)
+        nextcolumn += numcols
+    end
+    return c
+end
+function get_coordinates_orthonormal!(M::Tucker, c, 𝔄::TuckerPoint, X::TuckerTangentVector, N)
+    return get_coordinates!(M, c, 𝔄, X, get_basis(M, 𝔄, DefaultOrthonormalBasis(N)))
 end
 
 #=
@@ -515,7 +651,7 @@ get_vector(::Tucker, A, x, b)
 The tangent vector at a point A whose coordinates with respect to the basis b are x.
 =#
 function get_vector!(
-        ::Tucker, y, 𝔄::TuckerPoint, x::AbstractVector{T}, ℬ::CachedHOSVDBasis,
+        ::Tucker, y, 𝔄::TuckerPoint, x::AbstractVector{T}, ℬ::CachedHOSVDBasis
     ) where {T}
     ξ = convert(Vector{promote_type(number_eltype(𝔄), eltype(x))}, x)
     ℭ = 𝔄.hosvd.core
@@ -549,7 +685,7 @@ function get_vector!(
     return y
 end
 function get_vector!(
-        ℳ::Tucker, y, 𝔄::TuckerPoint, x, ℬ::DefaultOrthonormalBasis{𝔽, TangentSpaceType},
+        ℳ::Tucker, y, 𝔄::TuckerPoint, x, ℬ::DefaultOrthonormalBasis{𝔽, TangentSpaceType}
     ) where {𝔽}
     return get_vector!(ℳ, y, 𝔄, x, get_basis(ℳ, 𝔄, ℬ))
 end
@@ -561,6 +697,20 @@ function get_vectors(ℳ::Tucker, 𝔄::TuckerPoint{T, D}, ℬ::CachedHOSVDBasis
 end
 function get_vectors(ℳ::Tucker, 𝔄::TuckerPoint, ℬ::DefaultOrthonormalBasis)
     return get_vectors(ℳ, 𝔄, get_basis(ℳ, 𝔄, ℬ))
+end
+
+@doc raw"""
+    get_embedding(M::Tucker)
+
+Return the [`Euclidean`](@ref) space of ``N_1×\dots×N_D`` tensors, in which the
+[`Tucker`](@ref) manifold `M` is embedded, see [`embed`](@ref).
+"""
+function get_embedding(::Tucker{𝔽, TypeParameter{Tuple{n, r}}}) where {n, r, 𝔽}
+    return Euclidean(n...; field = 𝔽)
+end
+function get_embedding(M::Tucker{𝔽, <:Tuple}) where {𝔽}
+    n, r = get_parameter(M.size)
+    return Euclidean(n...; field = 𝔽, parameter = :field)
 end
 
 """
@@ -596,9 +746,7 @@ The projection inverse retraction on the Tucker manifold interprets `q` as a poi
 ambient Euclidean space (see [`embed`](@ref)) and projects it onto the tangent space at
 to `M` at `p`.
 """
-inverse_retract(
-    ::Tucker, ::Any, ::TuckerPoint, ::TuckerPoint, ::ProjectionInverseRetraction,
-)
+inverse_retract(::Tucker, ::Any, ::TuckerPoint, ::TuckerPoint, ::ProjectionInverseRetraction)
 
 function inverse_retract_project!(ℳ::Tucker, X, 𝔄::TuckerPoint, 𝔅::TuckerPoint)
     diffVector = embed(ℳ, 𝔅) - embed(ℳ, 𝔄)
@@ -609,9 +757,10 @@ function isapprox(p::TuckerPoint, q::TuckerPoint; kwargs...)
     ℳ = Tucker(size(p), size(p.hosvd.core))
     return isapprox(embed(ℳ, p), embed(ℳ, q); kwargs...)
 end
-isapprox(::Tucker, p::TuckerPoint, q::TuckerPoint; kwargs...) = isapprox(p, q; kwargs...)
+_isapprox(::Tucker, p::TuckerPoint, q::TuckerPoint; kwargs...) = isapprox(p, q; kwargs...)
 function _isapprox(
-        M::Tucker, p::TuckerPoint, x::TuckerTangentVector, y::TuckerTangentVector; kwargs...,
+        M::Tucker, p::TuckerPoint, x::TuckerTangentVector, y::TuckerTangentVector;
+        kwargs...,
     )
     return isapprox(embed(M, p, x), embed(M, p, y); kwargs...)
 end
@@ -670,11 +819,8 @@ function project!(ℳ::Tucker, Y, 𝔄::TuckerPoint, X)
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::Tucker,
-        pX::Union{TuckerPoint{T, D}, TuckerTangentVector{T, D}};
-        σ::Real = 1.0,
-        vector_at::Union{Nothing, TuckerPoint{T, D}} = nothing,
+        rng::AbstractRNG, M::Tucker, pX::Union{TuckerPoint{T, D}, TuckerTangentVector{T, D}};
+        σ::Real = 1.0, vector_at::Union{Nothing, TuckerPoint{T, D}} = nothing,
     ) where {T, D}
     if vector_at === nothing
         N, R = Manifolds.get_parameter(M.size)
@@ -717,7 +863,7 @@ retraction produces a boundary point, which is outside the manifold.
 retract(::Tucker, ::Any, ::Any, ::PolarRetraction)
 
 function ManifoldsBase.retract_polar!(
-        ::Tucker, q::TuckerPoint, p::TuckerPoint{T, D}, x::TuckerTangentVector,
+        ::Tucker, q::TuckerPoint, p::TuckerPoint{T, D}, x::TuckerTangentVector
     ) where {T, D}
     U = p.hosvd.U
     V = x.U̇
@@ -753,12 +899,10 @@ function ManifoldsBase.retract_polar!(
     return q
 end
 
-function Base.show(
-        io::IO, ::MIME"text/plain", ::Tucker{𝔽, TypeParameter{Tuple{n, r}}, D},
-    ) where {n, r, D, 𝔽}
+function Base.show(io::IO, ::Tucker{𝔽, TypeParameter{Tuple{n, r}}, D}) where {n, r, D, 𝔽}
     return print(io, "Tucker($(n), $(r), $(𝔽))")
 end
-function Base.show(io::IO, ::MIME"text/plain", M::Tucker{𝔽, <:Tuple, D}) where {D, 𝔽}
+function Base.show(io::IO, M::Tucker{𝔽, <:Tuple, D}) where {D, 𝔽}
     n, r = get_parameter(M.size)
     return print(io, "Tucker($(n), $(r), $(𝔽); parameter=:field)")
 end
@@ -898,13 +1042,16 @@ end
 # of the same type as the manifold point. We want a vector instead.
 for fun in [:get_vector, :inverse_retract, :project, :zero_vector, :rand]
     @eval function ManifoldsBase.allocate_result(
-            ::Tucker,
-            ::typeof($(fun)),
-            p::TuckerPoint,
-            args...,
+            ::Tucker, ::typeof($(fun)), p::TuckerPoint, args...
         )
         return TuckerTangentVector(allocate(p.hosvd.core), allocate(p.hosvd.U))
     end
+end
+
+function ManifoldsBase.allocate_result_embedding(
+        M::Tucker, ::typeof(project), X, p::TuckerPoint, vals...
+    )
+    return TuckerTangentVector(allocate(p.hosvd.core), allocate(p.hosvd.U))
 end
 
 function ManifoldsBase.allocate_result(M::Tucker, ::typeof(rand))
@@ -917,4 +1064,159 @@ end
 function ManifoldsBase.allocate_result(M::Tucker, ::typeof(embed), p, args...)
     dims = get_parameter(M.size)[1]
     return Array{number_eltype(p), length(dims)}(undef, dims)
+end
+
+@doc raw""" 
+    compute_projection_summand!(result::Matrix{T}, buffer::NTuple{5, Array{T}}, core::Array{T, D}, Uᵢ::Matrix{T}, q::TuckerPoint{T, D}, Σ⁻¹::Vector{T}, factors::Vector{Matrix{T}}, i::Int64, add_to_result::Bool) where {T, D}
+
+Helper function for the computation of summands in `vector_transport_to_project!`
+Let 
+``
+q = (C_q, U_q^1, …, U_q^D)
+``
+and
+`` 
+\mathrm{factors} = (F_1, F_2, \ldots, F_D)\, .
+``
+This function computes
+```math
+[\mathrm{core} ×_{j ≠ i} F_j ×_i U_i (I - U_q^i (U_q^i)^{\mathrm{H}})]_{(i)} \cdot (C_q)_{(i)}^{\mathrm{H}} \cdot Σ^{-1}\, .
+```
+If `add_to_result == true`, the result is added to the matrix `result`, otherwise, `result` is overwritten.
+Note that `buffer` is a 5-tuple of arrays that are used only to store intermediate results of the computation.
+Let `dims` be the dimensions of `q` and `ranks` its ranks. Then the contents of `buffer` must be arrays with sizes: 
+
+`(dims[i], ranks[i]), (dims[i], ranks[i]), (ranks[i], ranks[i]), (ranks...), (ranks...)`.
+"""
+function compute_projection_summand!(
+        result::Matrix{T},
+        buffer::NTuple{5, Array{T}},
+        core::Array{T, D},
+        Uᵢ::Matrix{T},
+        q::TuckerPoint{T, D},
+        Σ⁻¹::Vector{T},
+        factors::Vector{Matrix{T}},
+        i::Int64,
+        add_to_result::Bool
+    ) where {T, D}
+    V, U, E, T1, T2 = buffer
+    contract_with_partial_factors!(T1, T2, core, factors, i)
+    _contract_core_with_ginv!(E, T1, q.hosvd.core, Σ⁻¹, Val(i))
+    mul!(U, Uᵢ, E)
+    V .= U
+    Qᵢ = q.hosvd.U[i]
+    @tensor V[n, r] -= U[j, r] * conj(Qᵢ[j, k]) * Qᵢ[n, k]
+    if add_to_result
+        result .+= V
+    else
+        result .= V
+    end
+    return result
+end
+
+@doc raw"""
+    contract_with_partial_factors!(result::Array{T, D}, B::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64) where {T, D}
+
+Computes the contraction of the order-``D`` tensor `core` with the quadratic factor matrices `factors` in all except the `k`-th mode.
+That is, if 
+`` 
+\mathrm{factors} = (F_1, F_2, \ldots, F_D)\, ,
+``
+this computes
+```math
+\mathrm{result} = \mathrm{core} \times_{j ≠ k} F_j \, .
+```
+For D = 3, k = 1, e.g.
+
+`result[r1, n1, n2] = core[r1, r2, r3] * factors[2][r2, n2] * factors[3][r3, n3]`.
+The array `B` is a buffer array used to store intermediate results and must have the same size as `core`.
+"""
+function contract_with_partial_factors!(result::Array{T, D}, B::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64) where {T, D}
+    T2 = result
+    B .= core
+    for i in 1:D
+        if i ≠ k
+            _contract_with_factor!(T2, B, factors[i], Val(i))
+            B, T2 = T2, B
+        end
+    end
+    result .= B
+    return result
+end
+
+@doc raw"""
+    contract_with_factors!(result::Array{T, D}, B1::Array{T, D}, B2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result::Bool) where {T, D}
+
+This function compute the contraction of the order-`D` tensor `core` with the quadratic factor matrices `factors`.
+That is, if 
+``
+\mathrm{factors} = (F_1, F_2, \ldots, F_D)\, ,
+``
+this function computes
+```math
+\mathrm{result}= \mathrm{core} \times_{j = 1, \ldots, D} F_j
+```
+For D = 3, e.g. 
+
+`result[n1, n2, n3] = core[r1, r2, r3] * factors[1][r1, n1] * factors[2][r2, n2] * factors[3][r3, n3]`.
+
+If `add_to_result == true`, adds to the result array, otherwise overwrites the result array.
+The arrays `B1` and `B2` are buffer arrays used to store intermediate results and must have the same size as `core`.
+"""
+function contract_with_factors!(result::Array{T, D}, B1::Array{T, D}, B2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result::Bool) where {T, D}
+    _contract_with_factor!(B1, core, factors[1], Val(1))
+    for i in 2:D
+        _contract_with_factor!(B2, B1, factors[i], Val(i))
+        B1, B2 = B2, B1
+    end
+    if add_to_result
+        result .+= B1
+    else
+        result .= B1
+    end
+    return result
+end
+
+for d in 2:16
+    for J in 1:d
+        N = [Symbol(:n, i) for i in 1:d]
+        N[J] = :n
+        R = [Symbol(:n, i) for i in 1:d]
+        R[J] = :r
+        """
+        Computes the in-place contraction of `core1` with the Moore-Penrose inverse of core2, which is given by
+        `conj(core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D]) * Σ⁻¹[r]` because `core2` is all-orthogonal.
+        Altogether, the computed contraction is
+        ``
+            result[n, r] = core1[n_1, …, n_{k-1}, n, n_{k_1}, n_D] * conj(core2[n_1, …, n_{k-1}, r, n_{k_1}, n_D]) * Σ⁻¹[r]
+        ``
+        For D=3, J=1 e.g. result[n, r] = core1[n, n_2, n_3] * conj(core2[r, n_2, n_3]) * Σ⁻¹[r]
+        """
+        ex = quote
+            function _contract_core_with_ginv!(result::Matrix{T}, core1::Array{T, $(d)}, core2::Array{T, $(d)}, Σ⁻¹::Vector{T}, ::Val{$J}) where {T}
+                @tensor result[n, r] = core1[$(N...)] * conj(core2[$(R...)])
+                result .*= transpose(Σ⁻¹)
+                return result
+            end
+        end
+        eval(ex)
+
+        N = [Symbol(:n, i) for i in 1:d]
+        N[J] = :n
+        R = copy(N)
+        R[J] = :r
+        """
+        Computes the mode-J contraction of core with F, that is, 
+        ``
+            result[n_1, …, n_{k-1}, n, n_{k+1}, …, n_D] = core[n_1, …, n_{k-1}, r, n_{k+1}, …, n_D] * F[r, n]
+        ``
+        For D=3, N = 1 e.g. result[n, n_2, n_3] = core[r, n_2, n_3] * F[r, n]
+        """
+        ex = quote
+            function _contract_with_factor!(result::Array{T, $(d)}, core::Array{T, $(d)}, F::Matrix{T}, ::Val{$J}) where {T}
+                return @tensor result[$(N...)] = core[$(R...)] * F[r, n]
+            end
+        end
+        eval(ex)
+    end
 end

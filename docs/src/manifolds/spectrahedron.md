@@ -7,3 +7,8 @@ Order = [:type, :function]
 ```
 
 ## Literature
+
+```@bibliography
+Pages = ["spectrahedron.md"]
+Canonical=false
+```

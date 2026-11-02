@@ -1,5 +1,5 @@
 @doc raw"""
-    Grassmann{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    Grassmann{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The Grassmann manifold ``\mathrm{Gr}(n,k)`` consists of all subspaces spanned by ``k`` linear independent
 vectors ``𝔽^n``, where ``𝔽  ∈ \{ℝ, ℂ\}`` is either the real- (or complex-) valued vectors.
@@ -31,29 +31,29 @@ on the Stiefel manifold, the resulting quotient metric on Grassmann is the same.
 The tangent space at a point (subspace) ``p`` is given by
 
 ````math
-T_p\mathrm{Gr}(n,k) = \bigl\{
-X ∈ 𝔽^{n×k} :
-X^{\mathrm{H}}p + p^{\mathrm{H}}X = 0_{k} \bigr\},
+T_p\mathrm{Gr}(n,k) = \bigl\{ X ∈ 𝔽^{n×k} : p^{\mathrm{H}}X = 0_{k} \bigr\},
 ````
 
 where ``0_k`` is the ``k×k`` zero matrix.
+Note that this is a subspace (called the horizontal space) of the tangent space of the
+[`Stiefel`](@ref) manifold, whose tangent space requires ``p^{\mathrm{H}}X = -p^{\mathrm{H}}X``,
+which is here fulfilled for all ``X`` automatically, even for any “rotated basis” ``pQ``, ``Q ∈ \operatorname{O}(k)``
 
 Note that a point ``p ∈ \operatorname{Gr}(n,k)`` might be represented by
 different matrices (i.e. matrices with unitary column vectors that span
-the same subspace). Different representations of ``p`` also lead to different
-representation matrices for the tangent space ``T_p\mathrm{Gr}(n,k)``
+the same subspace).
 
-For a representation of points as orthogonal projectors. Here
+Points can also be represented as orthogonal projectors, where
 
 ```math
-\operatorname{Gr}(n,k) := \bigl\{ p \in \mathbb R^{n×n} : p = p^˜\mathrm{T}, p^2 = p, \operatorname{rank}(p) = k\},
+\operatorname{Gr}(n,k) := \bigl\{ p \in \mathbb 𝔽^{n×n} : p = p^{\mathrm{H}, p^2 = p, \operatorname{rank}(p) = k\},
 ```
 
 with tangent space
 
 ```math
 T_p\mathrm{Gr}(n,k) = \bigl\{
-X ∈ \mathbb R^{n×n} : X=X^{\mathrm{T}} \text{ and } X = pX+Xp \bigr\},
+X ∈ \mathbb 𝔽^{n×n} : X=X^{\mathrm{H}} \text{ and } X = pX+Xp \bigr\},
 ```
 
 see also [`ProjectorPoint`](@ref) and [`ProjectorTangentVector`](@ref).
@@ -78,9 +78,37 @@ end
 # Generic functions independent of the representation of points
 #
 function Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    0 <= k <= n || throw(
+        DomainError(
+            (n, k),
+            "The number of columns k of a Grassmann manifold must satisfy 0 ≤ k ≤ n, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return Grassmann{field, typeof(size)}(size)
 end
+
+@doc raw"""
+    GrassmannAtlas()
+
+The standard atlas of the real Grassmann manifold ``\mathrm{Gr}(n,k)``. Its
+``\binom{n}{k}`` charts are indexed by ordered tuples `i` of `k` row indices.
+The chart indexed by `i` contains the subspaces whose corresponding `k`-by-`k`
+minor in the rows `i` is invertible.
+
+For a Stiefel representative `p`, let `pᵢ` denote this minor and let `j` be
+the complementary row indices. The coordinate map is
+
+````math
+\varphi_i([p]) = \operatorname{vec}\left((p p_i^{-1})_j\right).
+````
+
+Its inverse inserts the reshaped coordinates into the rows `j`, inserts the
+identity into the rows `i`, and orthonormalizes the resulting matrix.
+
+The construction is similar to the one presented in [UsevichMarkovsky:2014](@cite).
+"""
+struct GrassmannAtlas <: AbstractAtlas{ℝ} end
 
 function allocation_promotion_function(::Grassmann{ℂ}, f, args::Tuple)
     return complex
@@ -123,11 +151,30 @@ injectivity_radius(::Grassmann, p) = π / 2
 injectivity_radius(::Grassmann, ::AbstractRetractionMethod) = π / 2
 injectivity_radius(::Grassmann, p, ::AbstractRetractionMethod) = π / 2
 
+@doc raw"""
+    isapprox(M::Grassmann, p, X, Y; kwargs...)
+
+Test whether two tangent vectors `X`, `Y` at `p` on the [`Grassmann`](@ref) manifold `M` are (approximately)
+the same, that is whether ``\lVert X - Y \rVert_p \approx 0`` with the classical `isapprox`.
+The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(X, Y))`.
+"""
+isapprox(::Grassmann, ::Any, ::Any, ::Any)
+
+@doc raw"""
+    isapprox(M::Grassmann, p, q; kwargs...)
+
+Test whether two points `p`, `q` on the [`Grassmann`](@ref) manifold `M` are (approximately) the same.
+Since this is a quotient manifold, the test is performed by checking their distance if they are
+not equal, that is ``d_{\mathcal M}(p,q) \approx 0`` with the classical `isapprox`.
+The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(p, q))`.
+"""
+isapprox(::Grassmann, ::Any, ::Any)
+
 function _isapprox(M::Grassmann, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end
 function _isapprox(M::Grassmann, p, q; atol = sqrt(max_eps(p, q)), kwargs...)
-    return isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
+    return p == q || isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
 end
 
 """
@@ -210,7 +257,7 @@ for
 """
 convert(::Type{ProjectorPoint}, p::AbstractMatrix) = ProjectorPoint(p * p')
 @doc raw"""
-    convert(::Type{ProjectorPoint}, ::Stiefelpoint)
+    convert(::Type{ProjectorPoint}, ::StiefelPoint)
 
 Convert a point `p` on [`Stiefel`](@ref) that also represents a point (i.e. subspace) on [`Grassmann`](@ref)
 to a projector representation of said subspace, i.e. compute the [`canonical_project!`](@ref)
@@ -239,3 +286,92 @@ Return the default vector transport method for the [`Grassmann`](@ref) manifold,
 which is `ParallelTransport``()`.
 """
 default_vector_transport_method(::Grassmann) = ParallelTransport()
+
+function _grassmann_chart_rows(M::Grassmann, i::AbstractVector)
+    n, k = get_parameter(M.size)
+    rows = collect(i)
+    if length(rows) != k || !all(row -> 1 <= row <= n, rows) || length(unique(rows)) != k
+        throw(ArgumentError("A Grassmann chart index must contain $k distinct row indices in 1:$n."))
+    end
+    return rows
+end
+
+function _grassmann_chart_complement(M::Grassmann, i::AbstractVector)
+    n, _ = get_parameter(M.size)
+    return setdiff(collect(1:n), _grassmann_chart_rows(M, i))
+end
+
+@doc raw"""
+    inner(M::Grassmann, A::GrassmannAtlas, i::AbstractVector, a, Xc, Yc)
+
+Compute the Riemannian inner product of coordinate vectors `Xc` and `Yc` at
+coordinates `a` in the chart `i` of the standard [`GrassmannAtlas`](@ref).
+Writing `Z = reshape(a, n-k, k)`, `U = reshape(Xc, n-k, k)`,
+`V = reshape(Yc, n-k, k)`, and `G = I + ZᵀZ`, the formula is
+
+````math
+g_Z(U,V) = \operatorname{tr}\left(G^{-1} U^\mathsf{T}
+\left(I - ZG^{-1}Z^\mathsf{T}\right)V\right).
+````
+"""
+function inner(M::Grassmann{ℝ}, ::GrassmannAtlas, i::AbstractVector, a, Xc, Yc)
+    _grassmann_chart_rows(M, i)
+    n, k = get_parameter(M.size)
+    coordinate_dimension = k * (n - k)
+    length(a) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension chart coordinates."))
+    length(Xc) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension vector coordinates."))
+    length(Yc) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension vector coordinates."))
+    Z = reshape(a, n - k, k)
+    U = reshape(Xc, n - k, k)
+    V = reshape(Yc, n - k, k)
+    G = I + transpose(Z) * Z
+    return dot(U / G, V - Z * (G \ (transpose(Z) * V)))
+end
+
+@doc raw"""
+    affine_connection!(M::Grassmann, Zc, A::GrassmannAtlas, i, a, Xc, Yc)
+
+Store the Levi-Civita covariant derivative of `Yc` in direction `Xc` in
+`Zc`, using the standard [`GrassmannAtlas`](@ref). Writing
+`Z = reshape(a, n-k, k)`, `U = reshape(Xc, n-k, k)`,
+`V = reshape(Yc, n-k, k)`, and `G = I + ZᵀZ`, the coordinate expression is
+
+````math
+\nabla_U V = -UG^{-1}Z^\mathsf{T}V - VG^{-1}Z^\mathsf{T}U.
+````
+"""
+function affine_connection!(M::Grassmann{ℝ}, Zc, ::GrassmannAtlas, i::AbstractVector, a, Xc, Yc)
+    _grassmann_chart_rows(M, i)
+    n, k = get_parameter(M.size)
+    coordinate_dimension = k * (n - k)
+    length(a) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension chart coordinates."))
+    length(Xc) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension vector coordinates."))
+    length(Yc) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension vector coordinates."))
+    length(Zc) == coordinate_dimension || throw(DimensionMismatch("Expected $coordinate_dimension output coordinates."))
+    Z = reshape(a, n - k, k)
+    U = reshape(Xc, n - k, k)
+    V = reshape(Yc, n - k, k)
+    G = I + transpose(Z) * Z
+    Zc .= vec(-(U * (G \ (transpose(Z) * V)) + V * (G \ (transpose(Z) * U))))
+    return Zc
+end
+
+@doc raw"""
+    det_local_metric(M::Grassmann, A::GrassmannAtlas, i::AbstractVector, a)
+
+Return the determinant of the local metric in the standard
+[`GrassmannAtlas`](@ref) at coordinates `a` in chart `i`.
+"""
+function det_local_metric(M::Grassmann{ℝ}, A::GrassmannAtlas, i::AbstractVector, a)
+    return det(local_metric(M, A, i, a))
+end
+
+@doc raw"""
+    inverse_chart_injectivity_radius(M::Grassmann, A::GrassmannAtlas, i)
+
+Return the injectivity radius of an affine chart in the standard
+[`GrassmannAtlas`](@ref), which is infinite.
+"""
+function inverse_chart_injectivity_radius(M::Grassmann{ℝ}, ::GrassmannAtlas, i::AbstractVector)
+    return Inf
+end

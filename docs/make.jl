@@ -26,6 +26,8 @@ if "--help" ∈ ARGS
     exit(0)
 end
 
+using Pkg
+
 run_quarto = "--quarto" in ARGS
 run_on_CI = (get(ENV, "CI", nothing) == "true")
 tutorials_in_menu = !("--exclude-tutorials" ∈ ARGS)
@@ -49,7 +51,7 @@ for (name, file) in tutorials_menu.second
         global all_tutorials_exist = false
         if !run_quarto
             @warn "Tutorial $name does not exist at $fn."
-            if (!isfile(fn)) && (endswith(file, "getstarted.md"))
+            if (!isfile(fn)) && (basename(file) in ("getstarted.md", "hand-gestures.md"))
                 @warn "Generating empty file, since this tutorial is linked to from the documentation."
                 touch(fn)
             end
@@ -74,7 +76,6 @@ end
 # (b) if docs is not the current active environment, switch to it
 # (from https://github.com/JuliaIO/HDF5.jl/pull/1020/) 
 if Base.active_project() != joinpath(@__DIR__, "Project.toml")
-    using Pkg
     Pkg.activate(@__DIR__)
     Pkg.instantiate()
 end
@@ -88,15 +89,19 @@ if run_quarto || run_on_CI
     # For a breaking release -> also set the tutorials folder to the most recent version
     Pkg.instantiate()
     Pkg.activate(@__DIR__) # but return to the docs one before
-    run(`quarto render $(tutorials_folder)`)
+    run(`quarto render $(tutorials_folder) --log-level debug`)
+    # Info to know in the event of stalling if quarto is the culprit
+    @info "Finished rendering Quarto"
 end
 
 # (d) load necessary packages for the docs
-using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
-using DocumenterCitations, DocumenterInterLinks
+using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter
+using DocumenterCitations, DocumenterCodeBlocks, DocumenterInterLinks, DocumenterLandingPage
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
 using NLsolve
+# required for loading the distributions on manifolds
+using Distributions, RecursiveArrayTools
 # required for loading the manifold tests functions
 using Test, FiniteDifferences
 ENV["GKSwstype"] = "100"
@@ -142,12 +147,15 @@ end
 # (f) final step: render the docs
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style = :alpha)
 links = InterLinks(
+    "Julia" => "https://docs.julialang.org/en/v1/",
+    "ManifoldMakie" => "https://juliamanifolds.github.io/ManifoldMakie.jl/stable/",
     "ManifoldsBase" => ("https://juliamanifolds.github.io/ManifoldsBase.jl/stable/"),
 )
 
 modules = [
     Manifolds,
     Base.get_extension(Manifolds, :ManifoldsBoundaryValueDiffEqExt),
+    Base.get_extension(Manifolds, :ManifoldsDistributionsExt),
     Base.get_extension(Manifolds, :ManifoldsNLsolveExt),
     Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqDiffEqCallbacksExt),
     Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqExt),
@@ -163,7 +171,7 @@ end
 makedocs(;
     format = Documenter.HTML(
         prettyurls = (get(ENV, "CI", nothing) == "true") || ("--prettyurls" ∈ ARGS),
-        assets = ["assets/favicon.ico", "assets/citations.css", "assets/link-icons.css"],
+        assets = ["assets/favicon.ico", "assets/link-icons.css"],
         search_size_threshold_warn = 1000 * 2^10, # raise slightly from 500 to 1 MiB
         size_threshold_warn = 200 * 2^10, # raise slightly from 100 to 200 KiB
         size_threshold = 300 * 2^10,      # raise slightly 200 to 300 KiB
@@ -199,6 +207,7 @@ makedocs(;
                 "Multinomial symmetric matrices" => "manifolds/multinomialsymmetric.md",
                 "Multinomial symmetric positive definite matrices" => "manifolds/multinomialsymmetricpositivedefinite.md",
                 "Oblique manifold" => "manifolds/oblique.md",
+                "Parametric surfaces" => "manifolds/parametric.md",
                 "Probability simplex" => "manifolds/probabilitysimplex.md",
                 "Positive numbers" => "manifolds/positivenumbers.md",
                 "Projective space" => "manifolds/projectivespace.md",
@@ -220,6 +229,7 @@ makedocs(;
                 "Torus" => "manifolds/torus.md",
                 "Tucker" => "manifolds/tucker.md",
                 "Unit-norm symmetric matrices" => "manifolds/spheresymmetricmatrices.md",
+                "Veronese" => "manifolds/veronese.md",
             ],
             "Combined manifolds" => [
                 "Fiber bundle" => "manifolds/fiber_bundle.md",
@@ -251,7 +261,7 @@ makedocs(;
             "References" => "misc/references.md",
         ],
     ],
-    plugins = [bib, links],
+    plugins = [bib, links, CodeBlocks(), LandingPage()],
 )
 deploydocs(repo = "github.com/JuliaManifolds/Manifolds.jl.git", push_preview = true)
 #back to main env

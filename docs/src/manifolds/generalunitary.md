@@ -34,3 +34,8 @@ Pages = ["manifolds/GeneralUnitaryMatrices.jl"]
 Order = [:constant, :type, :function]
 ```
 ## Footnotes and References
+
+```@bibliography
+Pages = ["generalunitary.md"]
+Canonical=false
+```

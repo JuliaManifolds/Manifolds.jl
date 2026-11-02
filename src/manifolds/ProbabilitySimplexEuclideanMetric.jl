@@ -1,13 +1,11 @@
 exp!(::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, q, p, X) = (q .= p .+ X)
 function exp_fused!(
-        ::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric},
-        q,
-        p,
-        X,
-        t::Number,
+        ::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, q, p, X, t::Number
     )
     return (q .= p .+ t .* X)
 end
+
+log!(::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, X, p, q) = (X .= q .- p)
 
 @doc raw"""
     manifold_volume(::MetricManifold{ℝ,<:ProbabilitySimplex{n},<:EuclideanMetric})) where {n}
@@ -28,17 +26,18 @@ end
 @doc raw"""
     rand(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}; vector_at=nothing, σ::Real=1.0)
 
-When `vector_at` is `nothing`, return a random (uniform) point `x` on the [`ProbabilitySimplex`](@ref) with the Euclidean metric
-manifold `M` by normalizing independent exponential draws to unit sum, see [Devroye:1986](@cite), Theorems 2.1 and 2.2 on p. 207 and 208, respectively.
+When `vector_at` is `nothing`, return a random (uniform) point `x` on the [`ProbabilitySimplex`](@ref) `M` with the Euclidean metric.
+This is done by normalizing independent exponential draws to unit sum, see [Devroye:1986](@cite),
+Theorems 2.1 and 2.2 on p. 207 and 208, respectively.
+
 When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
-``T_{p}\mathrm{\Delta}^n``by shifting a multivariate Gaussian with standard deviation `σ`
+``T_{p}\mathrm{\Delta}^n`` by shifting a multivariate Gaussian with standard deviation `σ`
 to have a zero component sum.
 """
 rand(::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}; σ::Real = 1.0)
 function Random.rand(
         M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric};
-        vector_at = nothing,
-        kwargs...,
+        vector_at = nothing, kwargs...,
     )
     if vector_at === nothing
         pX = allocate_result(M, rand)
@@ -49,10 +48,8 @@ function Random.rand(
     return pX
 end
 function Random.rand(
-        rng::AbstractRNG,
-        M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric};
-        vector_at = nothing,
-        kwargs...,
+        rng::AbstractRNG, M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric};
+        vector_at = nothing, kwargs...,
     )
     if vector_at === nothing
         pX = allocate_result(M, rand)
@@ -64,11 +61,8 @@ function Random.rand(
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        ::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric},
-        pX;
-        vector_at = nothing,
-        σ = one(eltype(pX)),
+        rng::AbstractRNG, ::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, pX;
+        vector_at = nothing, σ = one(eltype(pX)),
     )
     if isnothing(vector_at)
         Random.randexp!(rng, pX)
@@ -81,8 +75,7 @@ function Random.rand!(
 end
 
 function Random.rand!(
-        M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric},
-        pX;
+        M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, pX;
         kwargs...,
     )
     return rand!(Random.default_rng(), M, pX; kwargs...)

@@ -25,7 +25,9 @@ ManifoldsBase.@manifold_element_forwards ProjectorPoint value
 
 Check whether an orthogonal projector is a point from the [`Grassmann`](@ref)`(n,k)` manifold,
 i.e. the [`ProjectorPoint`](@ref) ``p ∈ \mathbb F^{n×n}``, ``\mathbb F ∈ \{\mathbb R, \mathbb C\}``
-has to fulfill ``p^{\mathrm{T}} = p``, ``p^2=p``, and ``\operatorname{rank} p = k`.
+has to fulfill ``p^{\mathrm{H}} = p``, ``p^2=p``, and ``\operatorname{rank} p = k``.
+Here ``⋅^{\mathrm{H}}`` denotes the conjugate transpose, which is the transpose for real matrices.
+For ``\mathbb F = \mathbb C`` these are the conditions in Section 1.2, p. 9, of [HelmkeMoore:1994](@cite).
 """
 function check_point(M::Grassmann, p::ProjectorPoint; kwargs...)
     n, k = get_parameter(M.size)
@@ -36,10 +38,10 @@ function check_point(M::Grassmann, p::ProjectorPoint; kwargs...)
             "The point $(p) is not equal to its square $c, so it does not lie on $M.",
         )
     end
-    if !isapprox(p.value, transpose(p.value); kwargs...)
+    if !isapprox(p.value, p.value'; kwargs...)
         return DomainError(
-            norm(p.value - transpose(p.value)),
-            "The point $(p) is not equal to its transpose, so it does not lie on $M.",
+            norm(p.value - p.value'),
+            "The point $(p) is not equal to its conjugate transpose, so it does not lie on $M.",
         )
     end
     k2 = rank(p.value; kwargs...)
@@ -58,7 +60,7 @@ end
 Check that the [`ProjectorPoint`](@ref) is of correct size, i.e. from ``\mathbb F^{n×n}``
 """
 function check_size(M::Grassmann, p::ProjectorPoint; kwargs...)
-    return check_size(get_embedding(M, typeof(p)), p.value; kwargs...)
+    return check_size(get_embedding(M, typeof(p)), p.value)
 end
 
 @doc raw"""
@@ -66,13 +68,13 @@ end
 
 Check whether the [`ProjectorTangentVector`](@ref) `X` is from the tangent space ``T_p\operatorname{Gr}(n,k) ``
 at the [`ProjectorPoint`](@ref) `p` on the [`Grassmann`](@ref) manifold ``\operatorname{Gr}(n,k)``.
-This means that `X` has to be symmetric and that
+This means that `X` has to be Hermitian, ``X^{\mathrm{H}} = X``, and that
 
 ```math
 Xp + pX = X
 ```
 
-must hold, where the `kwargs` can be used to check both for symmetrix of ``X```
+must hold, where the `kwargs` can be used to check both ``X^{\mathrm{H}} = X``
 and this equality up to a certain tolerance.
 """
 function check_vector(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector; kwargs...)
@@ -103,13 +105,11 @@ Return the embedding of the [`ProjectorPoint`](@ref) representation of the [`Gra
 manifold, i.e. the Euclidean space ``\mathbb F^{n×n}``.
 """
 function get_embedding(
-        ::Grassmann{𝔽, TypeParameter{Tuple{n, k}}}, ::Type{<:ProjectorPoint},
+        ::Grassmann{𝔽, TypeParameter{Tuple{n, k}}}, ::Type{<:ProjectorPoint}
     ) where {n, k, 𝔽}
     return Euclidean(n, n; field = 𝔽)
 end
-function get_embedding(
-        M::Grassmann{𝔽, Tuple{Int, Int}}, ::Type{<:ProjectorPoint},
-    ) where {𝔽}
+function get_embedding(M::Grassmann{𝔽, Tuple{Int, Int}}, ::Type{<:ProjectorPoint}) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(n, n; field = 𝔽, parameter = :field)
 end
@@ -150,9 +150,16 @@ function allocate_result(M::Grassmann, ::typeof(canonical_project), p::StiefelPo
     n, k = get_parameter(M.size)
     return ProjectorPoint(allocate(p.value, (n, n)))
 end
+function allocate_result(
+        M::Grassmann, ::typeof(diff_canonical_project), X::StiefelTangentVector, p::StiefelPoint
+    )
+    n, k = get_parameter(M.size)
+    return ProjectorTangentVector(allocate(X.value, (n, n)))
+end
 
 @doc raw"""
-    diff_canonical_project!(M::Grassmann, q::ProjectorPoint, p)
+    diff_canonical_project(M::Grassmann, p::StiefelPoint, X::StiefelTangentVector)
+    diff_canonical_project!(M::Grassmann, Y::ProjectorTangentVector, p, X)
 
 Compute the differential of canonical projection ``π(p)`` from the [`Stiefel`](@ref) manifold onto the [`Grassmann`](@ref)
 manifold when represented as [`ProjectorPoint`](@ref), i.e.
@@ -167,10 +174,7 @@ function diff_canonical_project!(::Grassmann, Y::ProjectorTangentVector, p, X)
     return Y
 end
 function diff_canonical_project!(
-        M::Grassmann,
-        Y::ProjectorTangentVector,
-        p::StiefelPoint,
-        X::StiefelTangentVector,
+        M::Grassmann, Y::ProjectorTangentVector, p::StiefelPoint, X::StiefelTangentVector
     )
     diff_canonical_project!(M, Y, p.value, X.value)
     return Y
@@ -200,6 +204,67 @@ function exp!(::Grassmann, q::ProjectorPoint, p::ProjectorPoint, X::ProjectorTan
     q.value .= exp_xppx * p.value / exp_xppx
     return q
 end
+
+@doc raw"""
+    distance(M::Grassmann, p::ProjectorPoint, q::ProjectorPoint)
+
+Compute the Riemannian distance between two [`ProjectorPoint`](@ref)s `p` and `q` on the [`Grassmann`](@ref) manifold `M`.
+
+The projectors are written as ``p = UU^{\mathrm{H}}`` and ``q = VV^{\mathrm{H}}``, where the columns of
+``U, V ∈ 𝔽^{n×k}`` are the eigenvectors of `p` and `q` for their ``k`` largest eigenvalues, which are one,
+see Section 2.1, p. 6, of [BendokatZimmermannAbsil:2024](@cite).
+The result is the distance `distance(M, U, V)` of these Stiefel representatives,
+
+```math
+d_{\mathrm{Gr}(n,k)}(p,q) = \Bigl(\sum_{i=1}^k θ_i^2\Bigr)^{1/2},
+```
+
+where ``θ_i`` are the principal angles between the spans of ``U`` and ``V``,
+see Section 5.1, equation (5.3), p. 29, of [BendokatZimmermannAbsil:2024](@cite).
+"""
+function distance(M::Grassmann, p::ProjectorPoint, q::ProjectorPoint)
+    n, k = get_parameter(M.size)
+    U = eigvecs(Hermitian(p.value))[:, (n - k + 1):n]
+    V = eigvecs(Hermitian(q.value))[:, (n - k + 1):n]
+    return distance(M, U, V)
+end
+
+@doc raw"""
+    inner(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector, Y::ProjectorTangentVector)
+
+Compute the inner product of two [`ProjectorTangentVector`](@ref)s `X` and `Y` at `p` on the [`Grassmann`](@ref) manifold `M`.
+
+It is half the Frobenius inner product, see Section 3.1, equation (3.2), p. 14, of
+[BendokatZimmermannAbsil:2024](@cite),
+
+```math
+g_p(X,Y) = \frac{1}{2}\operatorname{tr}(X^{\mathrm{H}}Y).
+```
+"""
+function inner(
+        ::Grassmann, ::ProjectorPoint, X::ProjectorTangentVector, Y::ProjectorTangentVector
+    )
+    return dot(X.value, Y.value) / 2
+end
+
+@doc raw"""
+    norm(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector)
+
+Compute the norm of a [`ProjectorTangentVector`](@ref) `X` at `p` on the [`Grassmann`](@ref) manifold `M`.
+
+It is the norm of the inner product, see Section 3.1, p. 15, of [BendokatZimmermannAbsil:2024](@cite),
+
+```math
+\lVert X \rVert_p = \frac{1}{\sqrt{2}}\lVert X \rVert_{\mathrm{F}},
+```
+
+where ``\lVert ⋅ \rVert_{\mathrm{F}}`` denotes the Frobenius norm.
+"""
+function norm(::Grassmann, ::ProjectorPoint, X::ProjectorTangentVector)
+    nX = norm(X.value)
+    return nX / sqrt(oftype(nX, 2))
+end
+
 @doc raw"""
     horizontal_lift(N::Stiefel{n,k}, q, X::ProjectorTangentVector)
 
@@ -233,10 +298,7 @@ i.e. to ``q=\exp_pd``. The formula is given in Proposition 3.5 of [BendokatZimme
 where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = A B - B A`` denotes the matrix commutator.
 """
 function parallel_transport_direction(
-        M::Grassmann,
-        p::ProjectorPoint,
-        X::ProjectorTangentVector,
-        d::ProjectorTangentVector,
+        M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector, d::ProjectorTangentVector
     )
     Y = allocate_result(M, vector_transport_direction, X, p, d)
     parallel_transport_direction!(M, Y, p, X, d)

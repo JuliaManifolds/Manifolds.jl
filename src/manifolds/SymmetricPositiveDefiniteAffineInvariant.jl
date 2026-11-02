@@ -9,12 +9,12 @@ struct AffineInvariantMetric <: RiemannianMetric end
 @doc raw"""
     change_representer(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
-space at `p` with respect to the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`)
-`g_E`, this is turned into the representer with respect to the (default) metric,
-the [`AffineInvariantMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
+Compute the representer of the linear function given by ``X ∈ T_p\mathcal M`` with respect to
+the (default) [`AffineInvariantMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
+Here `X` represents the linear function on the tangent space at `p` with respect to the
+[`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) `g_E`.
 
-To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)```
+To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)``
 it holds
 
 ```math
@@ -38,7 +38,7 @@ Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`Euclidea
 [`SymmetricPositiveDefinite`](@ref) `M`.
 
 To be precise we are looking for ``c\colon T_p\mathcal P(n) → T_p\mathcal P(n) ``
-such that for all ``Y,Z ∈ T_p\mathcal P(n)``` it holds
+such that for all ``Y,Z ∈ T_p\mathcal P(n)`` it holds
 
 ```math
 ⟨Y,Z⟩ = \operatorname{tr}(YZ) = \operatorname{tr}(p^{-1}c(Y)p^{-1}c(Z)) = g_p(c(Z),c(Y))
@@ -69,10 +69,10 @@ where ``\operatorname{Log}`` denotes the matrix logarithm and
 """
 function distance(::SymmetricPositiveDefinite, p, q)
     # avoid numerical instabilities in cholesky
-    norm(p - q) < eps(eltype(p + q)) && return zero(eltype(p + q))
+    p == q && return zero(eltype(p + q))
     cq = cholesky(Symmetric(q)) # to avoid numerical inaccuracies
     s = eigvals(Symmetric(cq.L \ p / cq.U))
-    return any(s .<= eps()) ? zero(eltype(p)) : sqrt(sum(abs.(log.(s)) .^ 2))
+    return sqrt(sum(abs.(log.(max.(s, floatmin(eltype(s))))) .^ 2))
 end
 function distance(M::SymmetricPositiveDefinite, p::SPDPoint, q::SPDPoint)
     return distance(M, convert(AbstractMatrix, p), convert(AbstractMatrix, q))
@@ -131,7 +131,7 @@ function exp!(::SymmetricPositiveDefinite, q::SPDPoint, p, X)
     pU_e = p_sqrt * U_e
     Q = pU_e * Se * transpose(pU_e)
     !ismissing(q.p) && copyto!(q.p, Q)
-    Q_e = eigen(Q)
+    Q_e = eigen(Symmetric(Q))
     copyto!(q.eigen.values, Q_e.values)
     copyto!(q.eigen.vectors, Q_e.vectors)
     if !ismissing(q.sqrt) && !ismissing(q.sqrt_inv)
@@ -147,19 +147,16 @@ end
     [Ξ,κ] = get_basis_diagonalizing(M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis)
     [Ξ,κ] = get_basis_diagonalizing(M::MetricManifold{<:SymmetricPositiveDefinite,AffineInvariantMetric}, p, B::DiagonalizingOrthonormalBasis)
 
-Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
-[`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
-[`MetricManifold`](@extref ManifoldsBase.MetricManifold) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
-[`AffineInvariantMetric`](@ref) that diagonalizes the curvature tensor ``R(u,v)w``
-with eigenvalues `κ` and where the direction `B.frame_direction` ``V`` has curvature `0`.
+Return an orthonormal basis `Ξ` of the tangent space at `p` that diagonalizes the curvature tensor ``R(u,v)w``, together with its eigenvalues `κ`.
+The basis is a vector of tangent vectors (of length [`manifold_dimension`](@ref) of `M`) on the
+[`MetricManifold`](@extref ManifoldsBase.MetricManifold) of the [`SymmetricPositiveDefinite`](@ref) manifold `M` with
+[`AffineInvariantMetric`](@ref), and the direction `B.frame_direction` ``V`` has curvature `0`.
 
 The construction is based on an ONB for the symmetric matrices similar to [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
 just that the ONB here is build from the eigen vectors of ``p^{\frac{1}{2}}Vp^{\frac{1}{2}}``.
 """
 function get_basis_diagonalizing(
-        M::SymmetricPositiveDefinite,
-        p,
-        B::DiagonalizingOrthonormalBasis,
+        M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis
     )
     N = get_parameter(M.size)[1]
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
@@ -228,10 +225,10 @@ end
     get_coordinates(::SymmetricPositiveDefinite, p, X, ::DefaultOrthonormalBasis)
 
 Using the basis from [`get_basis`](@ref get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
-the coordinates with respect to this ONB can be simplified to
+the coordinates with respect to this ONB are the inner products with its basis vectors ``\Xi_{i,j}``,
 
 ```math
-   c_k = \mathrm{tr}(p^{-\frac{1}{2}}\Delta_{i,j} X)
+   c_k = g_p(X, \Xi_{i,j}) = \operatorname{tr}(p^{-1} X p^{-1} \Xi_{i,j}),
 ```
 where ``k`` is the linearized index of the ``i=1,\ldots,n, j=i,\ldots,n``.
 """
@@ -315,12 +312,14 @@ function inner(::SymmetricPositiveDefinite, p, X, Y)
 end
 
 """
-    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,AffineInvariantMetric})
+    is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,AffineInvariantMetric})
 
-Return false. [`SymmetricPositiveDefinite`](@ref) with [`AffineInvariantMetric`](@ref)
-is not a flat manifold.
+Return true if the [`SymmetricPositiveDefinite`](@ref) with [`AffineInvariantMetric`](@ref)
+is one-dimensional, i.e. for ``n = 1``, and false otherwise.
 """
-is_flat(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, AffineInvariantMetric}) = false
+function is_flat(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, AffineInvariantMetric})
+    return is_flat(M.manifold)
+end
 
 @doc raw"""
     log(M::SymmetricPositiveDefinite, p, q)
@@ -337,12 +336,7 @@ where ``\operatorname{Log}`` denotes to the matrix logarithm.
 """
 log(::SymmetricPositiveDefinite, ::Any...)
 
-function allocate_result(
-        M::SymmetricPositiveDefinite,
-        ::typeof(log),
-        q::SPDPoint,
-        p::SPDPoint,
-    )
+function allocate_result(M::SymmetricPositiveDefinite, ::typeof(log), q::SPDPoint, p::SPDPoint)
     return allocate_result(M, log, convert(AbstractMatrix, q), convert(AbstractMatrix, p))
 end
 
@@ -350,7 +344,11 @@ function log!(::SymmetricPositiveDefinite, X, p, q)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv)
     e2 = eigen(T)
-    Se = Diagonal(log.(max.(e2.values, eps())))
+    R = eltype(e2.values)
+    a = norm(e2.values, Inf)
+    # below eps() clamp at the LAPACK eigenvalue error bound (Anderson et al. 1999, Sec. 4.7)
+    c = a < eps() ? max(eps(R) / 2 * a, floatmin(R)) : eps()
+    Se = Diagonal(log.(max.(e2.values, c)))
     pU_e = p_sqrt * e2.vectors
     return mul!(X, pU_e, Se * transpose(pU_e))
 end
@@ -390,7 +388,7 @@ and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
 parallel_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any)
 
 function parallel_transport_to!(M::SymmetricPositiveDefinite, Y, p, X, q)
-    distance(M, p, q) < 2 * eps(eltype(p)) && copyto!(Y, X)
+    distance(M, p, q) < 2 * eps(eltype(p)) && return copyto!(Y, X)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     tv = Symmetric(p_sqrt_inv * X * p_sqrt_inv) # p^(-1/2)Xp^{-1/2}
     ty = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv) # p^(-1/2)qp^(-1/2)
@@ -456,40 +454,55 @@ end
 """
     sectional_curvature_min(M::SymmetricPositiveDefinite)
 
-Return minimum sectional curvature of [`SymmetricPositiveDefinite`](@ref) manifold,
-that is 0 for SPD(1) and SPD(2) and -0.25 otherwise.
+Return the minimum sectional curvature of the [`SymmetricPositiveDefinite`](@ref) manifold
+with the [`AffineInvariantMetric`](@ref).
+
+This is 0 for ``1×1`` matrices, where the manifold has dimension one, and ``-1/2`` otherwise:
+the sectional curvatures of this metric are at most 0, see `sectional_curvature_max`,
+and their absolute values are bounded by ``1/2`` and by no smaller constant,
+see [CriscitielloBoumal:2023](@cite), Section 2, comment 4 after Theorem 2.7, p. 1445.
 """
 function sectional_curvature_min(M::SymmetricPositiveDefinite)
     if manifold_dimension(M) < 2
         return 0.0
     else
-        return -0.25
+        return -0.5
     end
 end
 
 """
     sectional_curvature_max(M::SymmetricPositiveDefinite)
 
-Return minimum sectional curvature of [`SymmetricPositiveDefinite`](@ref) manifold,
+Return maximum sectional curvature of [`SymmetricPositiveDefinite`](@ref) manifold,
 that is 0.
 """
 function sectional_curvature_max(::SymmetricPositiveDefinite)
     return 0.0
 end
 
-"""
+@doc raw"""
     volume_density(::SymmetricPositiveDefinite, p, X)
 
 Compute the volume density of the [`SymmetricPositiveDefinite`](@ref) manifold at `p`
 in direction `X`. See [ChevallierKalungaAngulo:2017](@cite), Section 6.2 for details.
 Note that metric in Manifolds.jl has a different scaling factor than the reference.
+It is the determinant of the differential of ``\exp_p`` at `X` in orthonormal bases.
+With the eigenvalues ``λ_1,…,λ_n`` of ``p^{-1/2}Xp^{-1/2}`` it reads
+
+```math
+θ_p(X) = \prod_{1 ≤ i < j ≤ n} \frac{\sinh\bigl(\lvert λ_i-λ_j\rvert/2\bigr)}{\lvert λ_i-λ_j\rvert/2},
+```
+
+where a factor with ``λ_i = λ_j`` is ``1``,
+see [DeSurrelLotteChevallierYger:2025](@cite), Proposition 4.3.
 """
 function volume_density(::SymmetricPositiveDefinite, p, X)
-    eig = eigvals(X)
+    (_, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
+    eig = eigvals(Symmetric(p_sqrt_inv * X * p_sqrt_inv))
     dens = 1.0
     for i in 1:length(eig)
         for j in (i + 1):length(eig)
-            absdiff = abs(eig[i] - eig[j])
+            absdiff = abs(eig[i] - eig[j]) / 2
             if absdiff > eps(absdiff)
                 dens *= sinh(absdiff) / absdiff
             end

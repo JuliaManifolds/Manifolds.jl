@@ -1,6 +1,7 @@
-using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
+using LinearAlgebra, Manifolds, Quaternions, Random, Test, ManifoldsBase, StaticArrays
 
-@testset "Unitray Matrices" begin
+@testset "Unitary Matrices" begin
+    @test_throws DomainError UnitaryMatrices(-1)
     M = UnitaryMatrices(2)
     p1 = [1im 0.0; 0.0 1im]
     X1 = [0.0 1.0; -1.0 0.0]
@@ -13,17 +14,20 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
             :Functions => [
                 default_vector_transport_method,
                 get_embedding,
-                is_flat,
+                injectivity_radius, is_flat, is_point, is_vector,
+                manifold_dimension,
                 project,
                 rand, repr,
-                # Weingarten, # TODO: V is not normal?!
+                Weingarten,
                 riemannian_Hessian,
             ],
             :EmbeddedPoints => [ones(2, 2), 1im .* ones(2, 2), [2im 0.0; 0.0 2im]],
             :EmbeddedVectors => [[2im 0.0; 1.0 2im]],
-            :NormalVectors => [[1.0 0.0; 1.0 0.0]],
+            :NormalVectors => [[1im 0.0; 0.0 2im]],
             :Points => [p1],
             :Vectors => [X1],
+            :Bases => [DefaultOrthonormalBasis()],
+            # the last point has a determinant of absolute value one, but is not unitary
             :InvalidPoints => [zeros(1), zeros(3, 3), 1 / 2 .* [1im 1im; -1im 1im], [1im 1.0; 0.0 -1im]],
             :InvalidVectors => [zeros(1), zeros(3, 3), ones(2, 2)],
             :RetractionMethods => [PolarRetraction()],
@@ -35,6 +39,8 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
             manifold_dimension => 4,
             repr => "UnitaryMatrices(2)",
             injectivity_radius => π,
+            :IsPointErrors => [DomainError, DomainError, DomainError, DomainError],
+            :IsVectorErrors => [DomainError, DomainError, DomainError],
         )
     )
 
@@ -54,6 +60,23 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
         @test isapprox(M, r, r1; atol = 1.0e-10)
     end
 
+    @testset "Orthonormal coordinates (U(3))" begin
+        M3 = UnitaryMatrices(3)
+        p3 = Matrix{ComplexF64}(I, 3, 3)
+        c3 = collect(1.0:9.0)
+
+        X3 = zeros(ComplexF64, 3, 3)
+        ManifoldsBase.get_vector_orthonormal!(M3, X3, p3, c3, ℝ)
+        @test is_vector(M3, p3, X3; error = :error)
+
+        c3r = zeros(9)
+        ManifoldsBase.get_coordinates_orthonormal!(M3, c3r, p3, X3, ℝ)
+        @test c3r ≈ c3
+
+        @test get_vector(M3, p3, c3, DefaultOrthonormalBasis(ℝ)) ≈ X3
+        @test get_coordinates(M3, p3, X3, DefaultOrthonormalBasis(ℝ)) ≈ c3
+    end
+
     @testset "Projection with points outside of the manifold" begin
         M = UnitaryMatrices(2)
         pE = [2im 0.0; 0.0 2im]
@@ -63,14 +86,24 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
         X = project(M, p, pE)
         @test is_vector(M, p, X; error = :error)
     end
+
+    @testset "gradient and metric conversion" begin
+        Xm = change_metric(M, EuclideanMetric(), p1, X1)
+        @test Xm == X1
+        Xr = change_representer(M, EuclideanMetric(), p1, X1)
+        @test Xr == X1
+    end
+
     @testset "Riemannian Hessian" begin
         p = Matrix{Float64}(I, 2, 2)
         X = [0.0 3.0; -3.0 0.0]
-        V = [1.0 0.0; 1.0 0.0]
-        @test Weingarten(M, p, X, V) == -1 / 2 * p * (V' * X - X' * V)
+        q = [0.0 1im; 1im 0.0]
+        @test Weingarten(M, q, X, q * [1.0 0.0; 0.0 2.0]) == [0.0 -4.5; 4.5 0.0]
         G = [0.0 1.0; 0.0 0.0]
         H = [0.0 0.0; 2.0 0.0]
         @test riemannian_Hessian(M, p, G, H, X) == [0.0 -1.0; 1.0 0.0]
+        p2 = [0.0 1.0; -1.0 0.0]
+        @test riemannian_Hessian(M, p2, G, H, X) == [0.0 -1.5; 1.5 0.0]
     end
 
     @test is_flat(UnitaryMatrices(1))
@@ -78,9 +111,9 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
 
     @testset "manifold_volume" begin
         @test manifold_volume(UnitaryMatrices(1)) ≈ 2 * π
-        @test manifold_volume(UnitaryMatrices(2)) ≈ 4 * π^3
-        @test manifold_volume(UnitaryMatrices(3)) ≈ sqrt(3) * 2 * π^6
-        @test manifold_volume(UnitaryMatrices(4)) ≈ sqrt(2) * 8 * π^10 / 12
+        @test manifold_volume(UnitaryMatrices(2)) ≈ 8 * π^3
+        @test manifold_volume(UnitaryMatrices(3)) ≈ 32 * π^6
+        @test manifold_volume(UnitaryMatrices(4)) ≈ 256 * π^10 / 3
     end
 
     @testset "Polar retraction" begin
@@ -113,6 +146,7 @@ end
                 get_embedding,
                 injectivity_radius, is_flat,
                 log,
+                manifold_dimension,
                 project,
                 rand, repr,
             ],
@@ -154,28 +188,39 @@ end
 
     @testset "Matrix point" begin
         p = QuaternionF64(
-            0.4815296357756736,
-            0.6041613272484806,
-            -0.2322369798903669,
-            0.5909181717450419,
+            0.4815296357756736, 0.6041613272484806, -0.2322369798903669, 0.5909181717450419
         )
 
         @test is_point(MH, fill(p, 1, 1))
         @test is_point(MH, p)
+        # the norm, and hence the determinant, is not one
+        @test_throws DomainError is_point(MH, fill(2 * p, 1, 1); error = :error)
+        @test zero_vector(MH, fill(p, 1, 1)) == zeros(QuaternionF64, 1, 1)
+    end
+
+    @testset "rand with a random number generator" begin
+        q = rand(MersenneTwister(42), MH)
+        @test is_point(MH, q)
+        @test q == sign(rand(MersenneTwister(42), QuaternionF64))
+        X = rand(MersenneTwister(43), MH; vector_at = q)
+        @test is_vector(MH, q, X)
+        @test X == project(MH, q, rand(MersenneTwister(43), QuaternionF64))
+    end
+
+    @testset "Projection and embedding use the Lie algebra" begin
+        p = QuaternionF64(0.0, 1.0, 0.0, 0.0)
+        X = QuaternionF64(1.0, 0.0, 0.0, 0.0) # tangent at p in the embedding
+        @test project(MH, p, X) == QuaternionF64(0.0, -1.0, 0.0, 0.0)
+        @test embed(MH, p, project(MH, p, X))[] == X
+        @test is_point(MH, exp(MH, p, project(MH, p, X)))
     end
 
     @testset "Functions with specific expectation" begin
         p = QuaternionF64(
-            0.4815296357756736,
-            0.6041613272484806,
-            -0.2322369798903669,
-            0.5909181717450419,
+            0.4815296357756736, 0.6041613272484806, -0.2322369798903669, 0.5909181717450419
         )
         pu = QuaternionF64(
-            -0.2178344173900564,
-            -0.4072721993877449,
-            -2.2484219560115712,
-            -0.4718862793239344,
+            -0.2178344173900564, -0.4072721993877449, -2.2484219560115712, -0.4718862793239344
         )
         q = project(MH, pu)
         @test is_point(MH, q)

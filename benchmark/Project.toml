@@ -1,0 +1,25 @@
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
+ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
+PkgBenchmark = "32113eaa-f34f-5b0d-bd6c-c81e245fc73d"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[sources]
+Manifolds = {path = ".."}
+
+[compat]
+BenchmarkTools = "1"
+HybridArrays = "0.4"
+LinearAlgebra = "1.10"
+Manifolds = "0.11.23"
+ManifoldsBase = "2.3.0"
+PkgBenchmark = "0.2"
+Random = "1.6"
+RecursiveArrayTools = "2, 3, 4"
+StaticArrays = "1.9.18"
+julia = "1.10"

@@ -16,14 +16,6 @@ Pages = ["connection.md"]
 Depth = 2
 ```
 
-## Types
-
-```@autodocs
-Modules = [Manifolds, ManifoldsBase]
-Pages = ["manifolds/ConnectionManifold.jl"]
-Order = [:type]
-```
-
 ## Functions
 
 ```@autodocs

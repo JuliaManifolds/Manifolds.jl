@@ -7,7 +7,7 @@ function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     x = get_coordinates(M, p, X, B)
     C1 = cholesky(G1).L
     C2 = cholesky(G2).L
-    z = (C1 \ C2)'x
+    z = C1' \ (C2' * x)
     return get_vector!(M, Y, p, z, B)
 end
 
@@ -18,9 +18,13 @@ function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     G1 = local_metric(M, p, B)
     G2 = local_metric(G(M), p, B)
     x = get_coordinates(M, p, X, B)
-    z = (G1 \ G2)'x
+    z = (G1 \ G2) * x
     return get_vector!(M, Y, p, z, B)
 end
+
+# the metric does not change the representation of points and tangent vectors
+copyto!(M::MetricManifold, q, p) = copyto!(M.manifold, q, p)
+copyto!(M::MetricManifold, Y, p, X) = copyto!(M.manifold, Y, p, X)
 
 @doc raw"""
     flat(N::MetricManifold{M,G}, p, X::TFVector)
@@ -37,7 +41,12 @@ where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@r
 """
 flat(::MetricManifold, ::Any, ::TFVector)
 
-function flat!(M::AbstractManifold, ξ::CoTFVector, p, X::TFVector)
+function flat(M::MetricManifold, p, X::TFVector{<:Any, <:InducedBasis})
+    (metric(M.manifold) == M.metric) && (return flat(M.manifold, p, X))
+    return CoTFVector(local_metric(M, p, X.basis) * X.data, dual_basis(M, p, X.basis))
+end
+
+function flat!(M::MetricManifold, ξ::CoTFVector, p, X::TFVector)
     (metric(M.manifold) == M.metric) && (return flat!(M.manifold, ξ, p, X))
     g = local_metric(M, p, ξ.basis)
     copyto!(ξ.data, g * X.data)
@@ -48,6 +57,48 @@ function inner(M::MetricManifold, p, X::TFVector, Y::TFVector)
     X.basis === Y.basis ||
         error("calculating inner product of vectors from different bases is not supported")
     return dot(X.data, local_metric(M, p, X.basis) * Y.data)
+end
+
+"""
+    @tfvector_inner_via_get_vector T
+
+Define `inner(M::T, p, X::TFVector, Y::TFVector)`, which converts both coefficient vectors
+to tangent vectors using [`get_vector`](@extref `ManifoldsBase.get_vector`) and calls `inner` on them.
+
+This resolves the ambiguity between `inner(::MetricManifold, p, ::TFVector, ::TFVector)`
+and a closed-form `inner(::T, p, X, Y)` of a metric manifold type `T`, so it should be
+used after each such method. `T` can be a `UnionAll` written as `(T where {...})`.
+"""
+macro tfvector_inner_via_get_vector(T)
+    return esc(
+        quote
+            function inner(M::$T, p, X::TFVector, Y::TFVector)
+                return inner(
+                    M, p, get_vector(M, p, X.data, X.basis), get_vector(M, p, Y.data, Y.basis)
+                )
+            end
+        end,
+    )
+end
+
+"""
+    @tfvector_norm_via_get_vector T
+
+Define `norm(M::T, p, X::TFVector)`, which converts the coefficient vector to a tangent
+vector using [`get_vector`](@extref `ManifoldsBase.get_vector`) and calls `norm` on it.
+
+This resolves the ambiguity between `norm(::MetricManifold, p, ::TFVector)`
+and a closed-form `norm(::T, p, X)` of a metric manifold type `T`, so it should be
+used after each such method. `T` can be a `UnionAll` written as `(T where {...})`.
+"""
+macro tfvector_norm_via_get_vector(T)
+    return esc(
+        quote
+            function norm(M::$T, p, X::TFVector)
+                return norm(M, p, get_vector(M, p, X.data, X.basis))
+            end
+        end,
+    )
 end
 
 @doc raw"""
@@ -66,9 +117,69 @@ where ``G_p`` is the local matrix representation of `G`, i.e. one employs
 """
 sharp(::MetricManifold, ::Any, ::CoTFVector)
 
+function sharp(M::MetricManifold, p, ξ::CoTFVector{<:Any, <:InducedBasis})
+    (metric(M.manifold) == M.metric) && (return sharp(M.manifold, p, ξ))
+    B = dual_basis(M, p, ξ.basis)
+    return TFVector(inverse_local_metric(M, p, B) * ξ.data, B)
+end
+
 function sharp!(M::MetricManifold, X::TFVector, p, ξ::CoTFVector)
     (metric(M.manifold) == M.metric) && (return sharp!(M.manifold, X, p, ξ))
     Ginv = inverse_local_metric(M, p, X.basis)
     copyto!(X.data, Ginv * ξ.data)
     return X
+end
+
+@doc raw"""
+    is_positive_definite_metric(M::AbstractManifold)
+
+Return whether the metric of `M` is positive definite, i.e. whether `M` is a Riemannian
+manifold and not only a pseudo-Riemannian or degenerate one. This is the case if the
+[`metric_signature`](@ref) of `M` has neither negative nor degenerate directions.
+"""
+function is_positive_definite_metric(M::AbstractManifold)
+    _, n₋, n₀ = metric_signature(M)
+    return n₋ == 0 && n₀ == 0
+end
+
+@doc raw"""
+    metric_signature(M::AbstractManifold)
+
+Return the signature ``(n_+, n_-, n_0)`` of the metric of `M`, i.e. the numbers of positive,
+negative and zero eigenvalues of the matrix of the metric in a basis of a tangent space,
+see [`local_metric`](@ref).
+They sum to the [`manifold_dimension`](@extref `ManifoldsBase.manifold_dimension-Tuple{AbstractManifold}`)
+of `M`. For a pseudo-Riemannian manifold the metric is nondegenerate, i.e. ``n_0 = 0``,
+and the signature is the same in all tangent spaces of a connected manifold.
+
+By default, the metric is assumed to be positive definite, so the signature is
+``(\dim \mathcal M, 0, 0)``.
+"""
+metric_signature(M::AbstractManifold) = (manifold_dimension(M), 0, 0)
+metric_signature(M::ValidationManifold) = metric_signature(M.manifold)
+
+for mf in [
+        christoffel_symbols_first,
+        christoffel_symbols_second,
+        det_local_metric,
+        einstein_tensor,
+        flat!,
+        gaussian_curvature,
+        inverse_local_metric,
+        local_metric,
+        log_local_metric_density,
+        mean,
+        mean!,
+        median,
+        median!,
+        ricci_curvature,
+        ricci_tensor,
+        riemann_tensor,
+        riemannian_gradient,
+        riemannian_gradient!,
+        riemannian_Hessian,
+        riemannian_Hessian!,
+        sharp!,
+    ]
+    @eval is_metric_function(::typeof($mf)) = true
 end

@@ -5,10 +5,7 @@ Since in the metric we have the term `` α = \frac{2}{1-\sum_{i=1}^n p_i^2}`` pe
 the correction for the gradient reads `` Y = \frac{1}{α^2}X``.
 """
 change_representer(
-    ::Hyperbolic,
-    ::EuclideanMetric,
-    ::PoincareBallPoint,
-    ::PoincareBallTangentVector,
+    ::Hyperbolic, ::EuclideanMetric, ::PoincareBallPoint, ::PoincareBallTangentVector
 )
 
 function change_representer!(
@@ -29,12 +26,7 @@ end
 Since in the metric we always have the term `` α = \frac{2}{1-\sum_{i=1}^n p_i^2}`` per element,
 the correction for the metric reads ``Z = \frac{1}{α}X``.
 """
-change_metric(
-    ::Hyperbolic,
-    ::EuclideanMetric,
-    ::PoincareBallPoint,
-    ::PoincareBallTangentVector,
-)
+change_metric(::Hyperbolic, ::EuclideanMetric, ::PoincareBallPoint, ::PoincareBallTangentVector)
 
 function change_metric!(
         ::Hyperbolic,
@@ -60,18 +52,14 @@ end
 function check_size(M::Hyperbolic, p::PoincareBallPoint)
     N = get_parameter(M.size)[1]
     if size(p.value, 1) != N
-        !(norm(p.value) < 1)
         return DomainError(
-            size(p.value, 1),
-            "The point $p does not lie on $M since its length is not $N.",
+            size(p.value, 1), "The point $p does not lie on $M since its length is not $N."
         )
     end
 end
 
 function check_size(
-        M::Hyperbolic,
-        p::PoincareBallPoint,
-        X::PoincareBallTangentVector;
+        M::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTangentVector;
         kwargs...,
     )
     N = get_parameter(M.size)[1]
@@ -128,10 +116,10 @@ end
     convert(::Type{PoincareBallTangentVector}, p::HyperboloidPoint, X::HyperboloidTangentVector)
     convert(::Type{PoincareBallTangentVector}, p::P, X::T) where {P<:AbstractVector, T<:AbstractVector}
 
-convert a [`HyperboloidTangentVector`](@ref) `X` at `p` to a [`PoincareBallTangentVector`](@ref)
-on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` by computing the push forward ``π_*(p)[X]`` of
-the isometry ``π`` that maps from the Hyperboloid to the Poincaré ball,
-cf. [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref).
+Convert a [`HyperboloidTangentVector`](@ref) `X` at `p` to a [`PoincareBallTangentVector`](@ref)
+on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n``.
+This computes the push forward ``π_*(p)[X]`` of the isometry ``π`` that maps from the
+Hyperboloid to the Poincaré ball, cf. [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref).
 
 The formula reads
 
@@ -144,19 +132,15 @@ and ``\tilde p = \begin{pmatrix}p_1\\⋮\\p_n\end{pmatrix}``.
 """
 convert(::Type{PoincareBallTangentVector}, ::Any)
 function convert(
-        t::Type{PoincareBallTangentVector},
-        p::HyperboloidPoint,
-        X::HyperboloidTangentVector,
+        t::Type{PoincareBallTangentVector}, p::HyperboloidPoint, X::HyperboloidTangentVector
     )
     return convert(t, convert(AbstractVector, p), convert(AbstractVector, p, X))
 end
 function convert(
-        ::Type{PoincareBallTangentVector},
-        p::P,
-        X::T,
+        ::Type{PoincareBallTangentVector}, p::P, X::T
     ) where {P <: AbstractVector, T <: AbstractVector}
     return PoincareBallTangentVector(
-        1 / (p[end] + 1) .* (X[1:(end - 1)] .- (X[end] / (p[end] + 1) .* p[1:(end - 1)])),
+        1 / (p[end] + 1) .* (X[1:(end - 1)] .- (X[end] / (p[end] + 1) .* p[1:(end - 1)]))
     )
 end
 
@@ -171,8 +155,8 @@ end
     ) where {P<:AbstractVector, T <: AbstractVector}
 
 Convert a [`HyperboloidPoint`](@ref) `p` and a [`HyperboloidTangentVector`](@ref) `X`
-to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTangentVector`](@ref) simultaneously,
-see [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref) and
+to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTangentVector`](@ref) simultaneously.
+See [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref) and
 [`convert(::Type{PoincareBallTangentVector}, ::HyperboloidPoint, ::HyperboloidTangentVector)`](@ref)
 for the formulae.
 """
@@ -183,8 +167,7 @@ function convert(
     return (convert(PoincareBallPoint, p), convert(PoincareBallTangentVector, p, X))
 end
 function convert(
-        ::Type{Tuple{PoincareBallPoint, PoincareBallTangentVector}},
-        (p, X)::Tuple{P, T},
+        ::Type{Tuple{PoincareBallPoint, PoincareBallTangentVector}}, (p, X)::Tuple{P, T}
     ) where {P <: AbstractVector, T <: AbstractVector}
     return (convert(PoincareBallPoint, p), convert(PoincareBallTangentVector, p, X))
 end
@@ -196,10 +179,10 @@ end
         X::PoincareHalfSpaceTangentVector
     )
 
-convert a [`PoincareHalfSpaceTangentVector`](@ref) `X` at `p` to a [`PoincareBallTangentVector`](@ref)
-on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` by computing the push forward ``π_*(p)[X]`` of
-the isometry ``π`` that maps from the Poincaré half space to the Poincaré ball,
-cf. [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref).
+Convert a [`PoincareHalfSpaceTangentVector`](@ref) `X` at `p` to a [`PoincareBallTangentVector`](@ref)
+on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n``.
+This computes the push forward ``π_*(p)[X]`` of the isometry ``π`` that maps from the
+Poincaré half space to the Poincaré ball, cf. [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref).
 
 The formula reads
 
@@ -248,8 +231,8 @@ end
     ) where {T <: AbstractVector}
 
 Convert a [`PoincareHalfSpacePoint`](@ref) `p` and a [`PoincareHalfSpaceTangentVector`](@ref) `X`
-to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTangentVector`](@ref) simultaneously,
-see [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref) and
+to a [`PoincareBallPoint`](@ref) and a [`PoincareBallTangentVector`](@ref) simultaneously.
+See [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref) and
 [`convert(::Type{PoincareBallTangentVector}, ::PoincareHalfSpacePoint, ::PoincareHalfSpaceTangentVector)`](@ref)
 for the formulae.
 """
@@ -296,7 +279,7 @@ function get_embedding(M::Hyperbolic{Tuple{Int}}, ::Type{<:PoincareBallPoint})
 end
 
 function ManifoldsBase.get_embedding_type(::Hyperbolic, ::Type{<:PoincareBallPoint})
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 @doc raw"""
@@ -329,10 +312,7 @@ the tangent space consists of all ``ℝ^n``.
 project(::Hyperbolic, ::PoincareBallPoint, ::PoincareBallTangentVector)
 
 function ManifoldsBase.allocate_result_embedding(
-        ::Hyperbolic,
-        ::typeof(project),
-        X::PoincareBallTangentVector,
-        ::PoincareBallPoint,
+        ::Hyperbolic, ::typeof(project), X::PoincareBallTangentVector, ::PoincareBallPoint
     )
     return PoincareBallTangentVector(allocate(X.value))
 end
@@ -343,5 +323,6 @@ function project!(
         ::PoincareBallPoint,
         X::PoincareBallTangentVector,
     )
-    return (Y.value .= X.value)
+    Y.value .= X.value
+    return Y
 end

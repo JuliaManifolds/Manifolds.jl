@@ -1,10 +1,9 @@
 """
     ArrayPowerRepresentation
 
-Representation of points and tangent vectors on a power manifold using multidimensional
-arrays where first dimensions are equal to [`representation_size`](@ref) of the
-wrapped manifold and the following ones are equal to the number of elements in each
-direction.
+Representation of points and tangent vectors on a power manifold using multidimensional arrays.
+The first dimensions are equal to [`representation_size`](@ref) of the wrapped manifold and
+the following ones are equal to the number of elements in each direction.
 
 [`Torus`](@ref) uses this representation.
 """
@@ -21,8 +20,7 @@ tangent space of the power manifold.
 struct PowerMetric <: AbstractMetric end
 
 function ManifoldsBase.PowerManifold(
-        M::AbstractManifold{𝔽},
-        size::Integer...;
+        M::AbstractManifold{𝔽}, size::Integer...;
         parameter::Symbol = :field,
     ) where {𝔽}
     size_w = wrap_type_parameter(parameter, size)
@@ -40,16 +38,12 @@ end
 
 for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
     @eval begin
-        function allocate_result(::$PowerRepr, ::typeof(get_point), a)
-            return error("Operation unsupported")
+        function allocate_result(M::$PowerRepr, ::typeof(get_point), a)
+            return ManifoldsBase.allocate_on(M)
         end
         function allocate_result(M::$PowerRepr, f::typeof(get_parameters), p)
             return invoke(
-                allocate_result,
-                Tuple{AbstractManifold, typeof(get_parameters), Any},
-                M,
-                f,
-                p,
+                allocate_result, Tuple{AbstractManifold, typeof(get_parameters), Any}, M, f, p
             )
         end
     end
@@ -79,16 +73,12 @@ function flat!(M::AbstractPowerManifold, ξ::RieszRepresenterCotangentVector, p,
 end
 
 Base.@propagate_inbounds function Base.getindex(
-        p::AbstractArray,
-        M::PowerManifoldMultidimensional,
-        I::Integer...,
+        p::AbstractArray, M::PowerManifoldMultidimensional, I::Integer...
     )
     return collect(get_component(M, p, I...))
 end
 Base.@propagate_inbounds function Base.getindex(
-        p::AbstractArray{T, N},
-        M::PowerManifoldMultidimensional,
-        I::Vararg{Integer, N},
+        p::AbstractArray{T, N}, M::PowerManifoldMultidimensional, I::Vararg{Integer, N}
     ) where {T, N}
     return get_component(M, p, I...)
 end
@@ -103,19 +93,23 @@ function manifold_volume(M::PowerManifold)
     return manifold_volume(M.manifold)^prod(size)
 end
 
+@doc raw"""
+    metric_signature(M::AbstractPowerManifold)
+
+Return the signature of the metric of the power manifold `M`, i.e. the signature of the
+manifold that is raised to a power, multiplied by the number of its copies.
+"""
+function metric_signature(M::AbstractPowerManifold)
+    return prod(power_dimensions(M)) .* metric_signature(M.manifold)
+end
+
 Base.@propagate_inbounds @inline function _read(
-        ::PowerManifoldMultidimensional,
-        rep_size::Tuple,
-        x::AbstractArray,
-        i::Tuple,
+        ::PowerManifoldMultidimensional, rep_size::Tuple, x::AbstractArray, i::Tuple
     )
     return view(x, rep_size_to_colons(rep_size)..., i...)
 end
 Base.@propagate_inbounds @inline function _read(
-        ::PowerManifoldMultidimensional,
-        rep_size::Tuple{},
-        x::AbstractArray,
-        i::NTuple{N, Int},
+        ::PowerManifoldMultidimensional, rep_size::Tuple{}, x::AbstractArray, i::NTuple{N, Int}
     ) where {N}
     return x[i...]
 end
@@ -161,6 +155,30 @@ function riemannian_Hessian!(M::AbstractPowerManifold, Y, p, G, H, X)
 end
 
 @doc raw"""
+    riemannian_gradient(M::PowerManifold, p, G; kwargs...)
+    riemannian_gradient!(M::PowerManifold, X, p, G; kwargs...)
+
+Compute the Riemannian gradient from the Euclidean gradient `G` of the representation in the
+embedding. For the array and the nested power representation it decouples: for every index ``i``
+the element ``X_i`` is the Riemannian gradient on the factor manifold at ``p_i`` computed from ``G_i``.
+"""
+riemannian_gradient(M::PowerManifold, p, G)
+
+function riemannian_gradient!(
+        M::PowerManifold{𝔽, TM, TSize, <:Union{ArrayPowerRepresentation, NestedPowerRepresentation}},
+        X, p, G; kwargs...,
+    ) where {𝔽, TM, TSize}
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        riemannian_gradient!(
+            M.manifold, _write(M, rep_size, X, i), _read(M, rep_size, p, i),
+            _read(M, rep_size, G, i); kwargs...,
+        )
+    end
+    return X
+end
+
+@doc raw"""
     sharp(M::AbstractPowerManifold, p, ξ::RieszRepresenterCotangentVector)
 
 Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
@@ -184,17 +202,14 @@ function sharp!(M::AbstractPowerManifold, X, p, ξ::RieszRepresenterCotangentVec
 end
 
 function Base.show(
-        io::IO,
-        M::PowerManifold{𝔽, TM, TypeParameter{TSize}, ArrayPowerRepresentation},
+        io::IO, M::PowerManifold{𝔽, TM, TypeParameter{TSize}, ArrayPowerRepresentation}
     ) where {𝔽, TM <: AbstractManifold{𝔽}, TSize}
     return print(
-        io,
-        "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")), parameter=:type)",
+        io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")), parameter=:type)"
     )
 end
 function Base.show(
-        io::IO,
-        M::PowerManifold{𝔽, TM, <:Tuple, ArrayPowerRepresentation},
+        io::IO, M::PowerManifold{𝔽, TM, <:Tuple, ArrayPowerRepresentation}
     ) where {𝔽, TM <: AbstractManifold{𝔽}}
     size = get_parameter(M.size)
     return print(io, "PowerManifold($(M.manifold), $(join(size, ", ")))")
@@ -207,7 +222,7 @@ Return volume density on the [`PowerManifold`](@extref `ManifoldsBase.PowerManif
 volume densities.
 """
 function volume_density(M::PowerManifold, p, X)
-    density = one(float(eltype(X)))
+    density = one(float(number_eltype(X)))
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         p_i = _read(M, rep_size, p, i)
@@ -218,10 +233,162 @@ function volume_density(M::PowerManifold, p, X)
 end
 
 @inline function _write(
-        ::PowerManifoldMultidimensional,
-        rep_size::Tuple,
-        x::AbstractArray,
-        i::Tuple,
+        ::PowerManifoldMultidimensional, rep_size::Tuple, x::AbstractArray, i::Tuple
     )
     return view(x, rep_size_to_colons(rep_size)..., i...)
+end
+
+
+"""
+    PowerAtlas(atlas)
+
+Atlas on an [`AbstractPowerManifold`](@extref `ManifoldsBase.AbstractPowerManifold`)
+obtained by using `atlas` independently on every component. Chart indices have the power
+dimensions of the manifold and coordinates concatenate the coordinates of its components.
+"""
+struct PowerAtlas{TA <: AbstractAtlas{ℝ}} <: AbstractAtlas{ℝ}
+    atlas::TA
+end
+
+ManifoldsBase.@fieldwise_equality PowerAtlas
+
+"""
+    get_default_atlas(M::AbstractPowerManifold)
+
+Return the power atlas induced by the default atlas of the underlying manifold of `M`.
+
+# See also
+
+[`PowerAtlas`](@ref)
+"""
+get_default_atlas(M::AbstractPowerManifold) = PowerAtlas(get_default_atlas(M.manifold))
+
+@inline _power_index(i, j::Tuple) = i[j...]
+@inline _power_index(i, j::Int) = i[j]
+@inline _set_power_index!(i, j::Tuple, value) = (i[j...] = value; i)
+@inline _set_power_index!(i, j::Int, value) = (i[j] = value; i)
+
+function get_chart_index(M::AbstractPowerManifold, A::PowerAtlas, p)
+    indices = Array{Any}(undef, power_dimensions(M)...)
+    rep_size = representation_size(M.manifold)
+    for j in get_iterator(M)
+        _set_power_index!(indices, j, get_chart_index(M.manifold, A.atlas, _read(M, rep_size, p, j)))
+    end
+    return indices
+end
+
+function get_chart_index(M::AbstractPowerManifold, A::PowerAtlas, i, a)
+    indices = Array{Any}(undef, power_dimensions(M)...)
+    dim, offset = manifold_dimension(M.manifold), 0
+    for j in get_iterator(M)
+        _set_power_index!(indices, j, get_chart_index(M.manifold, A.atlas, _power_index(i, j), view(a, (offset + 1):(offset + dim))))
+        offset += dim
+    end
+    return indices
+end
+
+function get_parameters!(M::AbstractPowerManifold, a, A::PowerAtlas, i, p)
+    rep_size = representation_size(M.manifold)
+    dim = manifold_dimension(M.manifold)
+    offset = 0
+    for j in get_iterator(M)
+        get_parameters!(M.manifold, view(a, (offset + 1):(offset + dim)), A.atlas, _power_index(i, j), _read(M, rep_size, p, j))
+        offset += dim
+    end
+    return a
+end
+
+function get_point!(M::AbstractPowerManifold, p, A::PowerAtlas, i, a)
+    rep_size = representation_size(M.manifold)
+    dim = manifold_dimension(M.manifold)
+    offset = 0
+    for j in get_iterator(M)
+        get_point!(M.manifold, _write(M, rep_size, p, j), A.atlas, _power_index(i, j), view(a, (offset + 1):(offset + dim)))
+        offset += dim
+    end
+    return p
+end
+
+function get_point!(M::PowerManifoldNestedReplacing, p, A::PowerAtlas, i, a)
+    dim, offset = manifold_dimension(M.manifold), 0
+    for j in get_iterator(M)
+        _set_power_index!(p, j, get_point(M.manifold, A.atlas, _power_index(i, j), view(a, (offset + 1):(offset + dim))))
+        offset += dim
+    end
+    return p
+end
+
+function get_coordinates_induced_basis!(
+        M::AbstractPowerManifold, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
+    )
+    rep_size = representation_size(M.manifold)
+    dim, offset = manifold_dimension(M.manifold), 0
+    for j in get_iterator(M)
+        get_coordinates_induced_basis!(
+            M.manifold,
+            view(c, (offset + 1):(offset + dim)),
+            _read(M, rep_size, p, j),
+            _read(M, rep_size, X, j),
+            induced_basis(M.manifold, B.A.atlas, _power_index(B.i, j)),
+        )
+        offset += dim
+    end
+    return c
+end
+
+function get_vector_induced_basis!(
+        M::AbstractPowerManifold, Y, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
+    )
+    rep_size = representation_size(M.manifold)
+    dim, offset = manifold_dimension(M.manifold), 0
+    for j in get_iterator(M)
+        get_vector_induced_basis!(
+            M.manifold,
+            _write(M, rep_size, Y, j),
+            _read(M, rep_size, p, j),
+            view(c, (offset + 1):(offset + dim)),
+            induced_basis(M.manifold, B.A.atlas, _power_index(B.i, j)),
+        )
+        offset += dim
+    end
+    return Y
+end
+function get_vector_induced_basis!(M::PowerManifoldNestedReplacing, Y, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas})
+    dim = manifold_dimension(M.manifold)
+    rep_size = representation_size(M.manifold)
+    v_iter = 1
+    for j in get_iterator(M)
+        Y[j...] = get_vector(
+            M.manifold,
+            _read(M, rep_size, p, j),
+            view(c, v_iter:(v_iter + dim - 1)),
+            induced_basis(M.manifold, B.A.atlas, _power_index(B.i, j)),
+        )
+        v_iter += dim
+    end
+    return Y
+end
+function get_coordinates(
+        M::AbstractPowerManifold, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
+    )
+    return get_coordinates_induced_basis(M, p, X, B)
+end
+function get_coordinates!(
+        M::AbstractPowerManifold, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
+    )
+    return get_coordinates_induced_basis!(M, c, p, X, B)
+end
+
+function get_vector(
+        M::AbstractPowerManifold, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
+    )
+    return get_vector_induced_basis(M, p, c, B)
+end
+function get_vector!(
+        M::AbstractPowerManifold, Y, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
+    )
+    return get_vector_induced_basis!(M, Y, p, c, B)
+end
+function get_vector!(M::PowerManifoldNestedReplacing, Y, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas})
+    return get_vector_induced_basis!(M, Y, p, c, B)
 end

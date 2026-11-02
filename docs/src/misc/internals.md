@@ -32,3 +32,13 @@ Manifolds.vec2skew!
 Modules = [Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqDiffEqCallbacksExt)]
 Order = [:type, :function]
 ```
+
+## Deprecated Functions
+
+The following functions are deprecated and already located in the `deprecated.jl` file. They will be removed in the next breaking release.
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["deprecated.jl"]
+Order = [:type, :function]
+```

@@ -1,5 +1,7 @@
 # A bit of duplication of tests in ManifoldDiff.jl but it ensures that it works here too.
 
+using Manifolds, Test
+
 using Manifolds:
     default_differential_backend,
     _derivative,
@@ -52,7 +54,6 @@ using ForwardDiff
 
     @testset "gradient" begin
         set_default_differential_backend!(fd51)
-        r2 = Euclidean(2)
 
         c1(t) = [sin(t), cos(t)]
         f1(x) = x[1] + x[2]^2
@@ -60,7 +61,6 @@ using ForwardDiff
             y .= x[1] + x[2]^2
             return y
         end
-        f2(x) = 3 * x[1] * x[2] + x[2]^3
         @test _jacobian(c1, 0.0) ≈ [1.0; 0.0]
 
         @testset for backend in [fd51]
@@ -83,7 +83,7 @@ using ForwardDiff
             @test _gradient(f1, [1.0, -1.0], backend) ≈ [1.0, -2.0]
             @test _jacobian(c1, 0.0, backend) ≈ [1.0; 0.0]
             jac = [NaN; NaN]
-            _jacobian!(c1, jac, 0.0, backend)
+            @test _jacobian!(c1, jac, 0.0, backend) === jac
             @test jac ≈ [1.0; 0.0]
         end
 
@@ -91,7 +91,6 @@ using ForwardDiff
     end
 
     @testset "Hessian" begin
-        r2 = Euclidean(2)
         f1(p) = norm(p - [1.0, -1.0])^2
         q = [2.0, 3.0]
 
@@ -112,12 +111,10 @@ rb_onb_fd51 = TangentDiffBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 rb_onb_default2 = TangentDiffBackend(
     default_differential_backend();
     basis_arg = CachedBasis(
-        DefaultOrthonormalBasis(),
-        [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
+        DefaultOrthonormalBasis(), [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]]
     ),
     basis_val = CachedBasis(
-        DefaultOrthonormalBasis(),
-        [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
+        DefaultOrthonormalBasis(), [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]]
     ),
 )
 
@@ -134,13 +131,13 @@ rb_onb_fwd_diff = TangentDiffBackend(AutoForwardDiff())
     Xval = [-sqrt(2) / 2, 0.0, sqrt(2) / 2]
     @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4, rb_onb_default), Xval)
     X = similar(p)
-    differential!(s2, c1, X, π / 4, rb_onb_default)
+    @test differential!(s2, c1, X, π / 4, rb_onb_default) === X
     @test isapprox(s2, c1(π / 4), X, Xval)
 
     @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff]
         @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4, backend), Xval)
         X = similar(p)
-        differential!(s2, c1, X, π / 4, backend)
+        @test differential!(s2, c1, X, π / 4, backend) === X
         @test isapprox(s2, c1(π / 4), X, Xval)
     end
 end
@@ -151,7 +148,7 @@ end
 
     q = [sqrt(2) / 2, 0, sqrt(2) / 2]
     X = similar(q)
-    for backend in [rb_onb_default, rb_proj]
+    for backend in [rb_onb_default, rb_proj, rb_onb_fwd_diff]
         @test isapprox(s2, q, gradient(s2, f1, q, backend), [0.5, 0.0, -0.5])
         @test gradient!(s2, f1, X, q, backend) === X
         @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
@@ -175,12 +172,7 @@ end
 
     q = [sqrt(2) / 2, 0, sqrt(2) / 2]
     X = similar(q)
-    @test isapprox(
-        s2,
-        q,
-        Manifolds.jacobian(s2, s2, f1, q, rb_onb_default),
-        [1.0 0.0; 0.0 1.0],
-    )
+    @test isapprox(s2, q, Manifolds.jacobian(s2, s2, f1, q, rb_onb_default), [1.0 0.0; 0.0 1.0])
 
     q2 = [1.0, 0.0, 0.0]
     f2(X) = [0.0 0.0 0.0; 0.0 2.0 -1.0; 0.0 -3.0 1.0] * X
@@ -206,10 +198,14 @@ end
 
     f1(p) = distance(s2, q2, p)^2
 
-    @test_broken isapprox(
-        ManifoldDiff.hessian(s2, f1, q, rb_onb_fwd_diff),
-        [2.0 0.0; 0.0 0.0],
-    )
+    @test isapprox(ManifoldDiff.hessian(s2, f1, q, rb_onb_fwd_diff), [2.0 0.0; 0.0 0.0])
+    # the third coordinate, whose Riemannian Hessian is -p[3] times the identity
+    f2(p) = p[3]
+    @test isapprox(ManifoldDiff.hessian(s2, f2, q, rb_onb_fwd_diff), [-q[3] 0.0; 0.0 -q[3]])
+    # the same along the fused exponential map with t = 1/2, which scales the Hessian by 1/4
+    B = DefaultOrthonormalBasis()
+    g2(c) = f2(Manifolds.exp_fused(s2, q, get_vector(s2, q, c, B), 0.5))
+    @test isapprox(ForwardDiff.hessian(g2, zeros(2)), [-q[3] 0.0; 0.0 -q[3]] ./ 4)
 end
 
 @testset "EmbeddedBackend" begin

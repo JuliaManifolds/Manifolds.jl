@@ -28,6 +28,9 @@ struct SkewHermitianMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SkewHermitianMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    n < 0 && throw(
+        DomainError(n, "The matrix size n of skew-Hermitian matrices must be nonnegative, but was $(n).")
+    )
     size = wrap_type_parameter(parameter, (n,))
     return SkewHermitianMatrices{field, typeof(size)}(size)
 end
@@ -40,7 +43,7 @@ This is equivalent to [`SkewHermitianMatrices(n, ℝ)`](@ref).
 
 # Constructor
 
-    SkewSymmetricMatrices(n::Int)
+    SkewSymmetricMatrices(n::Int; parameter::Symbol=:type)
 """
 const SkewSymmetricMatrices{T} = SkewHermitianMatrices{ℝ, T}
 
@@ -49,9 +52,7 @@ function SkewSymmetricMatrices(n::Int; parameter::Symbol = :type)
 end
 
 function allocation_promotion_function(
-        ::SkewHermitianMatrices{ℂ},
-        ::typeof(get_vector),
-        args::Tuple,
+        ::SkewHermitianMatrices{ℂ}, ::typeof(get_vector), args::Tuple
     )
     return complex
 end
@@ -68,8 +69,7 @@ The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 function check_point(M::SkewHermitianMatrices{𝔽}, p; kwargs...) where {𝔽}
     if !isapprox(p, -p'; kwargs...)
         return DomainError(
-            norm(p + p'),
-            "The point $(p) does not lie on $M, since it is not skew-hermitian.",
+            norm(p + p'), "The point $(p) does not lie on $M, since it is not skew-hermitian."
         )
     end
     return nothing
@@ -106,13 +106,7 @@ function get_coordinates_orthonormal!(M::SkewSymmetricMatrices, Y, p, X, ::RealN
     end
     return Y
 end
-function get_coordinates_orthonormal!(
-        M::SkewHermitianMatrices{ℂ},
-        Y,
-        p,
-        X,
-        ::ComplexNumbers,
-    )
+function get_coordinates_orthonormal!(M::SkewHermitianMatrices{ℂ}, Y, p, X, ::RealNumbers)
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -160,13 +154,7 @@ function get_vector_orthonormal!(M::SkewSymmetricMatrices, Y, p, X, ::RealNumber
     end
     return Y
 end
-function get_vector_orthonormal!(
-        M::SkewHermitianMatrices{ℂ},
-        Y,
-        p,
-        X,
-        ::ComplexNumbers,
-    )
+function get_vector_orthonormal!(M::SkewHermitianMatrices{ℂ}, Y, p, X, ::RealNumbers)
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -199,7 +187,7 @@ Return the dimension of the [`SkewHermitianMatrices`](@ref) matrix `M` over the 
 system `𝔽`, i.e.
 
 ````math
-\dim \mathrm{SkewHerm}(n,ℝ) = \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,
+\dim \mathrm{SkewHerm}(n,𝔽) = \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,
 ````
 
 where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of ``𝔽``. The first term corresponds to
@@ -209,10 +197,6 @@ corresponds to the constraint that the real part of the diagonal be zero.
 function manifold_dimension(M::SkewHermitianMatrices{𝔽}) where {𝔽}
     N = get_parameter(M.size)[1]
     return div(N * (N + 1), 2) * real_dimension(𝔽) - N
-end
-
-function number_of_coordinates(M::SkewHermitianMatrices{ℂ}, ::AbstractBasis{ℂ})
-    return manifold_dimension(M)
 end
 
 @doc raw"""
@@ -249,11 +233,8 @@ project(::SkewHermitianMatrices, ::Any, ::Any)
 project!(M::SkewHermitianMatrices, Y, p, X) = project!(M, Y, X)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::SkewHermitianMatrices,
-        pX;
-        σ::Real = one(real(eltype(pX))),
-        kwargs...,
+        rng::AbstractRNG, M::SkewHermitianMatrices, pX;
+        σ::Real = one(real(eltype(pX))), kwargs...,
     )
     rand!(rng, pX)
     pX .= (σ / (2 * norm(pX))) .* (pX - pX')
@@ -263,6 +244,27 @@ end
 function representation_size(M::SkewHermitianMatrices)
     N = get_parameter(M.size)[1]
     return (N, N)
+end
+
+@doc raw"""
+    riemann_tensor(M::SkewHermitianMatrices, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`SkewHermitianMatrices`](@ref) `M`.
+Its value is always the zero tangent vector.
+"""
+riemann_tensor(M::SkewHermitianMatrices, p, X, Y, Z)
+
+function riemann_tensor!(::SkewHermitianMatrices, Xresult, p, X, Y, Z)
+    return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(M::SkewHermitianMatrices, p, X, Y)
+
+Sectional curvature of [`SkewHermitianMatrices`](@ref) `M` is 0.
+"""
+function sectional_curvature(::SkewHermitianMatrices, p, X, Y)
+    return 0.0
 end
 
 function Base.show(io::IO, ::SkewHermitianMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
@@ -278,6 +280,24 @@ end
 function Base.show(io::IO, M::SkewSymmetricMatrices{Tuple{Int}})
     n = get_parameter(M.size)[1]
     return print(io, "SkewSymmetricMatrices($(n); parameter=:field)")
+end
+
+@doc raw"""
+    sectional_curvature_max(M::SkewHermitianMatrices)
+
+Return the upper bound 0 of the sectional curvature of [`SkewHermitianMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_max(::SkewHermitianMatrices)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::SkewHermitianMatrices)
+
+Return the lower bound 0 of the sectional curvature of [`SkewHermitianMatrices`](@ref) `M`, which is flat.
+"""
+function sectional_curvature_min(::SkewHermitianMatrices)
+    return 0.0
 end
 
 @doc raw"""

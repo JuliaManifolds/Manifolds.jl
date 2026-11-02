@@ -17,3 +17,5 @@ accuracy/.quarto
 docs/src/tutorials/hand-gestures_files/figure-commonmark
 docs/src/tutorials/work-with-a-metric-defined-in-a-chart_files
 docs/.CondaPkg
+temp
+

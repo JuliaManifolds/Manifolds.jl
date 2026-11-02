@@ -71,7 +71,7 @@ A disadvantage might be that with nested arrays one loses a little bit of perfor
 The data however is nicely encapsulated. Accessing the first data item is just `p[1]`.
 
 For accessing points on power manifolds in both representations you can use [`get_component`](@extref `ManifoldsBase.get_component-Tuple{AbstractPowerManifold, Any, Vararg{Any}}`) and [`set_component!`](@extref `ManifoldsBase.set_component!-Tuple{AbstractPowerManifold, Any, Any, Vararg{Any}}`) functions.
-They work work both point representations.
+They work for both point representations.
 
 ```@example 3
 using Manifolds

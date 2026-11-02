@@ -98,3 +98,8 @@ Manifolds.spd_sqrt_and_sqrt_inv
 ```
 
 ## Literature
+
+```@bibliography
+Pages = ["symmetricpositivedefinite.md"]
+Canonical=false
+```

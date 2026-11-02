@@ -1,5 +1,10 @@
 """
-`Manifolds.jl` provides a library of manifolds aiming for an easy-to-use and fast implementation.
+Manifolds.jl: Riemannian manifolds in Julia
+
+* 📚 Documentation: [juliamanifolds.github.io/Manifolds.jl/](https://juliamanifolds.github.io/Manifolds.jl/)
+* 📦 Repository: [github.com/JuliaManifolds/Manifolds.jl](https://github.com/JuliaManifolds/Manifolds.jl)
+* 💬 Discussions: [github.com/JuliaManifolds/Manifolds.jl/discussions](https://github.com/JuliaManifolds/Manifolds.jl/discussions)
+* 🎯 Issues: [github.com/JuliaManifolds/Manifolds.jl/issues](https://github.com/JuliaManifolds/Manifolds.jl/issues)
 """
 module Manifolds
 
@@ -55,6 +60,8 @@ import ManifoldsBase:
     default_retraction_method,
     default_vector_transport_method,
     decorated_manifold,
+    diff_canonical_project,
+    diff_canonical_project!,
     distance,
     dual_basis,
     embed,
@@ -203,15 +210,11 @@ import StatsBase: mean_and_var
 
 using ADTypes:
     AbstractADType,
-    AutoFiniteDiff,
-    AutoFiniteDifferences,
-    AutoForwardDiff,
-    AutoReverseDiff,
-    AutoZygote
+    AutoForwardDiff
 import DifferentiationInterface as DI
 
 using Base.Iterators: repeated
-using Tullio: @einsum, @tullio
+using TensorOperations: @tensor
 using Kronecker
 using Graphs
 using LinearAlgebra
@@ -219,6 +222,7 @@ using ManifoldsBase:
     ℝ,
     ℂ,
     ℍ,
+    AbstractAffineConnection,
     AbstractApproximationMethod,
     AbstractBasis,
     AbstractDecoratorManifold,
@@ -415,6 +419,9 @@ function uniform_distribution(M::AbstractManifold)
     return uniform_distribution(M, allocate_result(M, uniform_distribution))
 end
 
+# Atlases (required by most other things)
+include("atlases.jl")
+
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
@@ -433,16 +440,16 @@ METAMANIFOLDS = [
     AbstractManifold,
     AbstractDecoratorManifold,
     AbstractPowerManifold,
+    MetricManifold,
     PowerManifoldNested,
     PowerManifoldNestedReplacing,
     ProductManifold,
     TangentSpace,
     ValidationManifold,
-    VectorBundle,
+    FiberBundle,
 ]
 
 # Features II: That require MetaManifolds
-include("atlases.jl")
 include("differentiation/ode_callback.jl")
 include("cotangent_space.jl")
 
@@ -464,6 +471,7 @@ include("manifolds/Elliptope.jl")
 include("manifolds/EmbeddedTorus.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/Flag.jl")
+include("manifolds/ParametricSurface.jl")
 include("manifolds/FlagOrthogonal.jl")
 include("manifolds/FlagStiefel.jl")
 include("manifolds/GeneralizedGrassmann.jl")
@@ -498,6 +506,7 @@ include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Tucker.jl")
+include("manifolds/Veronese.jl")
 #
 include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/ProbabilitySimplexEuclideanMetric.jl")
@@ -577,13 +586,18 @@ function estimate_distance_from_bvp end
 
 function solve_chart_exp_ode end
 function solve_chart_parallel_transport_ode end
-
-# TODO: Remove once the new interface is done
-function find_eps end
-function test_parallel_transport end
-function test_manifold end
-function test_atlases end
-# / remove
+function solve_chart_jacobi_field end
+function solve_chart_volume_density end
+function solve_chart_differential_exp_basepoint end
+function solve_chart_differential_exp_argument end
+function solve_chart_differential_log_basepoint end
+function solve_chart_differential_log_argument end
+function solve_chart_adjoint_differential_exp_basepoint end
+function solve_chart_adjoint_differential_exp_argument end
+function solve_chart_adjoint_differential_log_basepoint end
+function solve_chart_adjoint_differential_log_argument end
+function _jacobi_exp_matrix end
+function _adjoint_coordinate_map end
 
 function __init__()
     @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
@@ -665,7 +679,8 @@ export Euclidean,
     SymplecticElement,
     Torus,
     Tucker,
-    UnitaryMatrices
+    UnitaryMatrices,
+    Veronese
 # Point representation types
 export HyperboloidPoint,
     OrthogonalPoint,
@@ -684,6 +699,8 @@ export HyperboloidTangentVector,
     PoincareHalfSpaceTangentVector,
     TuckerTangentVector,
     UMVTangentVector,
+    VeronesePoint,
+    VeroneseTangentVector,
     ProjectorTangentVector,
     StiefelTangentVector
 export AbstractNumbers, ℝ, ℂ, ℍ
@@ -702,6 +719,7 @@ export AbstractPowerManifold,
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export TangentBundle
+export ParametricSurface, ParametricSurfaceAtlas
 export TangentSpace, VectorSpaceFiber, VectorSpaceType, VectorBundle
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport, ParallelTransport
@@ -729,7 +747,14 @@ export AbstractMetric,
     RiemannianMetric,
     StiefelSubmersionMetric,
     WarpedMetric
-export AbstractAtlas, RetractionAtlas
+export AbstractAtlas,
+    GrassmannAtlas,
+    PowerAtlas,
+    ProductAtlas,
+    RetractionAtlas,
+    StereographicAtlas,
+    StiefelAtlas,
+    StiefelChart
 # Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 # Retraction types
@@ -766,7 +791,8 @@ export AbstractApproximationMethod,
     EfficientEstimator,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius,
-    ExtrinsicEstimation
+    ExtrinsicEstimation,
+    WeiszfeldEstimation
 # Tangent space bases
 export CachedBasis,
     DefaultBasis,
@@ -809,6 +835,8 @@ export ×,
     default_retraction_method,
     default_vector_transport_method,
     det_local_metric,
+    diff_canonical_project,
+    diff_canonical_project!,
     distance,
     dual_basis,
     einstein_tensor,
@@ -848,9 +876,12 @@ export ×,
     is_default_metric,
     is_flat,
     is_hamiltonian,
+    is_positive_definite_metric,
     is_point,
     is_vector,
     kurtosis,
+    levi_civita_affine_connection,
+    levi_civita_affine_connection!,
     local_metric,
     local_metric_jacobian,
     log,
@@ -859,6 +890,7 @@ export ×,
     manifold_dimension,
     manifold_volume,
     metric,
+    metric_signature,
     mean,
     mean!,
     mean_and_var,
@@ -943,7 +975,15 @@ export get_basis,
     get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors, number_system
 
 # atlases and charts
-export get_point, get_point!, get_parameters, get_parameters!
+export get_chart_index,
+    get_parameters,
+    get_parameters!,
+    get_point,
+    get_point!,
+    transition_map,
+    transition_map!,
+    transition_map_diff,
+    transition_map_diff!
 
 # Last (not least, but _after_ exports) include the test submodule
 include("test-suite.jl")

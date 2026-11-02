@@ -7,3 +7,8 @@ Order = [:type,:function]
 ```
 
 ## Literature
+
+```@bibliography
+Pages = ["elliptope.md"]
+Canonical=false
+```

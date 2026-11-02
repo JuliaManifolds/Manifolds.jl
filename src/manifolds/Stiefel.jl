@@ -36,9 +36,45 @@ struct Stiefel{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 end
 
 function Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
+    0 <= k <= n || throw(
+        DomainError(
+            (n, k),
+            "The number of columns k of a Stiefel manifold must satisfy 0 ≤ k ≤ n, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return Stiefel{field, typeof(size)}(size)
 end
+
+@doc raw"""
+    StiefelAtlas()
+
+The Cayley atlas of the real Stiefel manifold. A chart is indexed by a
+[`StiefelChart`](@ref), consisting of its center `U` and a set `I` of row
+indices for which `U[I, :]` is invertible. Its coordinates are the coefficients
+of a skew-symmetric matrix ``Ω`` supported in the rows and columns touching
+`I`. The parametrization is
+
+````math
+\varphi_{U,I}(Ω) = (I_n + Ω)(I_n - Ω)^{-1}U.
+````
+
+This construction follows Section 2 of [BirteaCaşuComănescu:2019](@cite).
+"""
+struct StiefelAtlas <: AbstractAtlas{ℝ} end
+
+"""
+    StiefelChart(center, rows)
+
+The index of a chart in [`StiefelAtlas`](@ref), consisting of its center and
+the row indices of one of the center's invertible square minors.
+"""
+struct StiefelChart{TU <: AbstractMatrix, TI <: AbstractVector}
+    center::TU
+    rows::TI
+end
+
+ManifoldsBase.@fieldwise_equality StiefelChart
 
 """
     PolarLightRetraction <: AbstractRetractionMethod
@@ -60,7 +96,8 @@ struct PolarLightInverseRetraction <: AbstractInverseRetractionMethod end
 function inverse_retract_polar_light! end
 # Forwarding functions Level 2
 function ManifoldsBase._inverse_retract!(
-        M::AbstractManifold, X, p, q, ::PolarLightInverseRetraction; kwargs...,
+        M::AbstractManifold, X, p, q, ::PolarLightInverseRetraction;
+        kwargs...,
     )
     return inverse_retract_polar_light!(M, X, p, q; kwargs...)
 end
@@ -76,12 +113,13 @@ end
 function retract_polar_light_fused! end
 # Forwarding function Level 2
 function ManifoldsBase._retract_fused!(
-        M::AbstractManifold, q, p, X, t::Number, ::PolarLightRetraction; kwargs...,
+        M::AbstractManifold, q, p, X, t::Number, ::PolarLightRetraction;
+        kwargs...,
     )
     return retract_polar_light_fused!(M, q, p, X, t; kwargs...)
 end
-function retract_polar_light_fused!(M::AbstractManifold, q, p, X, t::Number)
-    return retract_polar_light!(M, q, p, t * X)
+function retract_polar_light_fused!(M::AbstractManifold, q, p, X, t::Number; kwargs...)
+    return retract_polar_light!(M, q, p, t * X; kwargs...)
 end
 
 function allocation_promotion_function(::Stiefel{ℂ}, ::Any, ::Tuple)
@@ -102,7 +140,7 @@ function change_representer!(M::Stiefel, Y, ::EuclideanMetric, p, X)
 end
 
 @doc raw"""
-    change_metric(M::Stiefel, ::EuclideanMetric, p X)
+    change_metric(M::Stiefel, ::EuclideanMetric, p, X)
 
 Change `X` to the corresponding vector with respect to the metric of the [`Stiefel`](@ref) `M`,
 which is just the identity, since the manifold is isometrically embedded.
@@ -135,6 +173,15 @@ function check_point(M::Stiefel, p; kwargs...)
 end
 
 @doc raw"""
+    is_vector(M::Stiefel, p, X; atol, kwargs...)
+
+Check whether `X` is a tangent vector at `p` on the [`Stiefel`](@ref) `M`, that is whether
+``p^{\mathrm{H}}X = -X^{\mathrm{H}}p`` holds, using `isapprox` with the keyword arguments, where
+`atol` defaults to ``\sqrt{ε}\lVert X\rVert`` with the machine epsilon ``ε``.
+"""
+is_vector(::Stiefel, ::Any, ::Any)
+
+@doc raw"""
     check_vector(M::Stiefel, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
@@ -142,13 +189,16 @@ Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 it (approximately) holds that ``p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0``.
 The settings for approximately can be set with `kwargs...`.
 """
-function check_vector(M::Stiefel, p, X; kwargs...)
+function check_vector(
+        M::Stiefel, p, X;
+        atol::Real = sqrt(eps(real(float(number_eltype(X))))) * norm(X), kwargs...,
+    )
     n, k = get_parameter(M.size)
     cks = check_size(M, p, X)
     cks === nothing || return cks
-    if !isapprox(p' * X, -conj(X' * p); kwargs...)
+    if !isapprox(p' * X, -X' * p; atol = atol, kwargs...)
         return DomainError(
-            norm(p' * X + conj(X' * p)),
+            norm(p' * X + X' * p),
             "The matrix $(X) is does not lie in the tangent space of $(p) on the Stiefel manifold of dimension ($(n),$(k)), since p'X + X'p is not the zero matrix.",
         )
     end
@@ -175,7 +225,7 @@ default_retraction_method(::Stiefel) = PolarRetraction()
 """
     default_vector_transport_method(M::Stiefel)
 
-Return the [`DifferentiatedRetractionVectorTransport`](@extref `ManifoldsBase.DifferentiatedRetractionVectorTransport`) of the [`PolarRetraction`]([`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
+Return the [`DifferentiatedRetractionVectorTransport`](@extref `ManifoldsBase.DifferentiatedRetractionVectorTransport`) of the [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
 as the default vector transport method for the [`Stiefel`](@ref) manifold.
 """
 function default_vector_transport_method(::Stiefel)
@@ -222,15 +272,22 @@ This implementation follows the Lyapunov approach.
 inverse_retract(::Stiefel, ::Any, ::Any, ::PolarInverseRetraction)
 
 @doc raw"""
-    inverse_retract(M::Stiefel, p, X, ::PolarLightInverseRetraction)
+    inverse_retract(M::Stiefel, p, q, ::PolarLightInverseRetraction)
 
 Compute an SVD-based inverse retraction [`PolarLightInverseRetraction`](@ref) on the
-[`Stiefel`](@ref)`(n,k)` manifold `M` following [JensenZimmermann:2026](@cite), equation (3.5)
+[`Stiefel`](@ref)`(n,k)` manifold `M`.
+Following equation (3.5) of [JensenZimmermann:2026](@cite) it reads
 
 ````math
 \operatorname{retr}_p^{-1} q =
 p \log\bigl( p^\mathrm{T}q(q^\mathrm{T}pp^\mathrm{T}q)^{-\frac{1}{2}} \bigr)
-+ \bigl(I_n-pp^\mathrm{T}\bigr)p (q^\mathrm{T}pp^\mathrm{T}q)^{-\frac{1}{2}}
++ \bigl(I_n-pp^\mathrm{T}\bigr)q (q^\mathrm{T}pp^\mathrm{T}q)^{-\frac{1}{2}},
+````
+which is computed with the singular value decomposition ``USV^\mathrm{T} = p^\mathrm{T}q``
+as in equation (3.7) of [JensenZimmermann:2026](@cite),
+
+````math
+\operatorname{retr}_p^{-1} q = p\bigl(\log(UV^\mathrm{T}) - UV^\mathrm{T}\bigr) + qVS^{-1}V^\mathrm{T}.
 ````
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::PolarLightInverseRetraction)
@@ -242,7 +299,9 @@ inverse_retract(::Stiefel, ::Any, ::Any, ::PolarLightInverseRetraction)
 Compute the inverse retraction based on a qr decomposition
 for two points `p`, `q` on the [`Stiefel`](@ref) manifold `M` and return
 the resulting tangent vector in `X`. The computation follows Algorithm 1
-in [KanekoFioriTanaka:2013](@cite).
+in [KanekoFioriTanaka:2013](@cite). For complex matrices, the upper triangular factor is
+determined by the tangent space condition ``p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0`` and a real
+diagonal, as in the QR retraction.
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
 
@@ -251,8 +310,13 @@ function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
     @inbounds for i in 1:k
         b = zeros(eltype(R), i)
         b[i] = 1
-        b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
+        b[1:(end - 1)] = -adjoint(R[1:(i - 1), 1:(i - 1)]) * conj(A[i, 1:(i - 1)])
         R[1:i, i] = A[1:i, 1:i] \ b
+        if eltype(R) <: Complex
+            # imaginary part of (AR)[i, i] that makes R[i, i] real, as in the QR retraction
+            g = A[1:i, 1:i] \ [zeros(eltype(R), i - 1); one(eltype(R))]
+            R[1:i, i] -= (im * imag(R[i, i]) / real(g[i])) * g
+        end
     end
     #TODO: replace with this once it's supported by StaticArrays
     #return mul!(X, q, UpperTriangular(R))
@@ -260,13 +324,13 @@ function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
 end
 
 function _stiefel_inv_retr_qr_mul_by_r!(
-        ::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A, ::Type,
+        ::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A, ::Type
     ) where {𝔽, n}
-    @inbounds R = SMatrix{1, 1}(inv(A[1, 1]))
+    @inbounds R = SMatrix{1, 1}(inv(real(A[1, 1])))
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A::StaticArray, ::Type{ElT},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A::StaticArray, ::Type{ElT}
     ) where {𝔽, n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
@@ -275,16 +339,22 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        ::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A, ::Type{ElT},
+        ::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A, ::Type{ElT}
     ) where {𝔽, n, ElT}
-    R11 = inv(A[1, 1])
-    @inbounds R = hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
+    R11 = inv(real(A[1, 1]))
+    @inbounds R2 = A[SOneTo(2), SOneTo(2)] \ SA[-conj(R11 * A[2, 1]), one(ElT)]
+    if ElT <: Complex
+        # imaginary part of (AR)[2, 2] that makes R[2, 2] real, as in the QR retraction
+        g = A[SOneTo(2), SOneTo(2)] \ SA[zero(ElT), one(ElT)]
+        R2 -= (im * imag(R2[2]) / real(g[2])) * g
+    end
+    R = hcat(SA[R11, zero(ElT)], R2)
     #TODO: replace with this once it's supported by StaticArrays
     #return mul!(X, q, UpperTriangular(R))
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A::StaticArray, ::Type{ElT},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A::StaticArray, ::Type{ElT}
     ) where {𝔽, n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
@@ -293,7 +363,7 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}, X, q, A::StaticArray, ::Type{ElT},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}, X, q, A::StaticArray, ::Type{ElT}
     ) where {𝔽, n, k, ElT}
     R = zeros(MMatrix{k, k, ElT})
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
@@ -312,7 +382,7 @@ function inverse_retract_polar!(::Stiefel, X, p, q)
     X .-= p
     return X
 end
-function inverse_retract_polar_light!(::Stiefel, X, p, q)
+function inverse_retract_polar_light!(::Stiefel, X, p, q; kwargs...)
     # n, k = get_parameter(M.size)
     # Inspired by the steps from the original implementation in Python, see
     # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L119-L146
@@ -337,6 +407,15 @@ function inverse_retract_qr!(M::Stiefel, X, p, q)
     X .-= p
     return X
 end
+
+@doc raw"""
+    isapprox(M::Stiefel, p, X, Y; kwargs...)
+
+Test whether two tangent vectors `X`, `Y` at `p` on the [`Stiefel`](@ref) manifold `M` are (approximately)
+the same, that is whether ``\lVert X - Y \rVert_p \approx 0`` with the classical `isapprox`.
+The `kwargs...` are passed on to this; `atol` defaults to `sqrt(max_eps(X, Y))`.
+"""
+isapprox(::Stiefel, ::Any, ::Any, ::Any)
 
 function _isapprox(M::Stiefel, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
@@ -379,10 +458,9 @@ end
 @doc raw"""
     rand(::Stiefel; vector_at=nothing, σ::Real=1.0)
 
-When `vector_at` is `nothing`, return a random (Gaussian) point `x` on the [`Stiefel`](@ref)
-manifold `M` by generating a (Gaussian) matrix with standard deviation `σ` and return the
-orthogonalized version, i.e. return the Q component of the QR decomposition of the random
-matrix of size ``n×k``.
+When `vector_at` is `nothing`, return a random (Gaussian) point `x` on the [`Stiefel`](@ref) manifold `M`.
+This generates a (Gaussian) matrix of size ``n×k`` with standard deviation `σ` and returns its
+orthogonalized version, i.e. the Q component of its QR decomposition.
 
 When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
 ``T_{vector\_at}\mathrm{St}(n,k)`` with mean zero and standard deviation `σ` by projecting a
@@ -396,12 +474,11 @@ function Random.rand!(
     ) where {𝔽}
     n, k = get_parameter(M.size)
     if vector_at === nothing
-        A = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, n, k)
+        A = σ * randn(rng, eltype(pX), n, k)
         pX .= Matrix(qr(A).Q)
     else
         Z = σ * randn(rng, eltype(pX), size(pX))
         project!(M, pX, vector_at, Z)
-        normalize!(pX)
     end
     return pX
 end
@@ -467,10 +544,10 @@ retract(::Stiefel, ::Any, ::Any, ::PadeRetraction)
     retract(M::Stiefel, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
-[`Stiefel`](@ref) manifold `M`. With ``USV = p + X`` the retraction reads
+[`Stiefel`](@ref) manifold `M`. With ``USV^\mathrm{H} = p + X`` the retraction reads
 
 ````math
-\operatorname{retr}_p X = U\bar{V}^\mathrm{H}.
+\operatorname{retr}_p X = UV^\mathrm{H}.
 ````
 """
 retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
@@ -479,12 +556,13 @@ retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
     retract(M::Stiefel, p, X, ::PolarLightRetraction)
 
 Compute an SVD-based retraction [`PolarLightRetraction`](@ref) on the
-[`Stiefel`](@ref)`(n,k)` manifold `M` following [JensenZimmermann:2026](@cite), equation (3.4)
+[`Stiefel`](@ref)`(n,k)` manifold `M`.
+Following equation (3.4) of [JensenZimmermann:2026](@cite) it reads
 
 ````math
 \operatorname{retr}_p X =
 \Bigl( p\exp\bigl( p^\mathrm{T}X \bigr) + \bigl(I_n-pp^\mathrm{T}\bigr)X \Bigr)
-\bigr( I_k  + X^\mathrm{T}(I_n - pp^\mathrm{T})X\bigr).
+\bigl( I_k  + X^\mathrm{T}(I_n - pp^\mathrm{T})X\bigr)^{-\frac{1}{2}}.
 ````
 """
 retract(::Stiefel, ::Any, ::Any, ::PolarLightRetraction)
@@ -521,7 +599,7 @@ function ManifoldsBase.retract_pade!(M::Stiefel, q, p, X, m::PadeRetraction)
 end
 
 function ManifoldsBase.retract_pade_fused!(
-        ::Stiefel, q, p, X, t::Number, ::PadeRetraction{m},
+        ::Stiefel, q, p, X, t::Number, ::PadeRetraction{m}
     ) where {m}
     tX = t * X
     Pp = I - 1 // 2 * p * p'
@@ -565,14 +643,15 @@ function ManifoldsBase.retract_qr_fused!(::Stiefel, q, p, X, t::Number)
     return mul!(q, _qrfac_to_q(qrfac), D)
 end
 
-function retract_polar_light!(::Stiefel, q, p, X)
+function retract_polar_light!(::Stiefel, q, p, X; kwargs...)
     # n, k = get_parameter(M.size)
     # Inspired by the steps from the original implementation in Python, see
     # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L86-L115
     A = p' * X
-    q .= p * (exp(A) - A) + X
     # QR of (I - p*p')*X = X - p*A
     s = svd(qr(X - p * A).R)
+    # now we can write into q even when the memory of p and q is aliased
+    q .= p * (exp(A) - A) + X
     # to compute inv(sqrt(I + R'R)) we SVD R = UdV and add the diagonal “inside”
     # S = I + R'R = V(I+d.^2)V and hence the inv sqrt is V (1./sqrt.(1 .+ d.^2) V'
     d, V = s.S, s.V
@@ -588,6 +667,192 @@ Returns the representation size of the [`Stiefel`](@ref) `M`=``\operatorname{St}
 i.e. `(n,k)`, which is the matrix dimensions.
 """
 representation_size(M::Stiefel) = get_parameter(M.size)
+
+# StiefelAtlas
+
+function _stiefel_chart_rows(M::Stiefel, rows::AbstractVector)
+    n, k = get_parameter(M.size)
+    chart_rows = collect(rows)
+    if length(chart_rows) != k ||
+            !all(row -> 1 <= row <= n, chart_rows) ||
+            length(unique(chart_rows)) != k
+        throw(ArgumentError("A Stiefel chart index must contain $k distinct row indices in 1:$n."))
+    end
+    return chart_rows
+end
+
+function _stiefel_chart_complement(M::Stiefel, rows::AbstractVector)
+    n, _ = get_parameter(M.size)
+    return setdiff(collect(1:n), _stiefel_chart_rows(M, rows))
+end
+
+function _stiefel_largest_minor_rows(p, k)
+    n = size(p, 1)
+    rows = collect(1:k)
+    best_rows = copy(rows)
+    best_minor = zero(real(eltype(p)))
+    while true
+        minor = abs(det(p[rows, :]))
+        if minor > best_minor
+            best_minor = minor
+            best_rows .= rows
+        end
+        position = k
+        while position >= 1 && rows[position] == n - k + position
+            position -= 1
+        end
+        position == 0 && break
+        rows[position] += 1
+        for next_position in (position + 1):k
+            rows[next_position] = rows[next_position - 1] + 1
+        end
+    end
+    iszero(best_minor) && throw(DomainError(p, "The point has no invertible $k-by-$k row minor."))
+    return best_rows
+end
+
+function _stiefel_chart_data(M::Stiefel, i::StiefelChart)
+    rows = _stiefel_chart_rows(M, i.rows)
+    center_rows = i.center[rows, :]
+    iszero(det(center_rows)) && throw(DomainError(i.center, "The chart center does not have an invertible row minor at $(i.rows)."))
+    return rows, _stiefel_chart_complement(M, rows)
+end
+
+function _stiefel_chart_set_skew_entry!(Ω, row, column, value)
+    Ω[row, column] = value
+    Ω[column, row] = -value
+    return Ω
+end
+
+"""
+    _stiefel_chart_omega_from_coordinates(M::Stiefel, i::StiefelChart, a)
+
+Construct the skew-symmetric generator ``Ω`` for the Cayley chart `i` from
+the coordinate vector `a`. The coordinates enumerate pairs of selected rows
+first, followed by pairs consisting of a selected row and a complementary row.
+All entries whose row and column both lie in the complement are zero.
+"""
+function _stiefel_chart_omega_from_coordinates(M::Stiefel, i::StiefelChart, a)
+    rows, complement = _stiefel_chart_data(M, i)
+    n, k = get_parameter(M.size)
+    dimension = manifold_dimension(M)
+    length(a) == dimension || throw(DimensionMismatch("Expected $dimension chart coordinates."))
+    Ω = zeros(eltype(a), n, n)
+    coordinate = 1
+    for first_position in 1:(k - 1)
+        for second_position in (first_position + 1):k
+            _stiefel_chart_set_skew_entry!(Ω, rows[first_position], rows[second_position], a[coordinate])
+            coordinate += 1
+        end
+    end
+    for row in rows, column in complement
+        _stiefel_chart_set_skew_entry!(Ω, row, column, a[coordinate])
+        coordinate += 1
+    end
+    return Ω
+end
+
+function _stiefel_chart_coordinates_from_omega!(M::Stiefel, a, i::StiefelChart, Ω)
+    rows, complement = _stiefel_chart_data(M, i)
+    _, k = get_parameter(M.size)
+    coordinate = 1
+    for first_position in 1:(k - 1)
+        for second_position in (first_position + 1):k
+            a[coordinate] = Ω[rows[first_position], rows[second_position]]
+            coordinate += 1
+        end
+    end
+    for row in rows
+        for column in complement
+            a[coordinate] = Ω[row, column]
+            coordinate += 1
+        end
+    end
+    return a
+end
+
+"""
+    _stiefel_chart_omega_from_action(M::Stiefel, i::StiefelChart, V, D)
+
+Construct the skew-symmetric matrix ``Ω`` for the Cayley chart `i` satisfying
+``D = ΩV``. The selected rows of `V` must form an invertible square minor;
+otherwise the action does not determine a generator in chart `i`.
+"""
+function _stiefel_chart_omega_from_action(M::Stiefel, i::StiefelChart, V, D)
+    rows, complement = _stiefel_chart_data(M, i)
+    n, _ = get_parameter(M.size)
+    Vrows = V[rows, :]
+    iszero(det(Vrows)) && throw(DomainError(V, "The point does not belong to the Stiefel chart at $(i.rows)."))
+    Ω = zeros(promote_type(eltype(V), eltype(D)), n, n)
+    Ω[complement, rows] .= D[complement, :] / Vrows
+    Ω[rows, complement] .= -transpose(Ω[complement, rows])
+    Ω[rows, rows] .= (D[rows, :] - Ω[rows, complement] * V[complement, :]) / Vrows
+    Ω[rows, rows] .= (Ω[rows, rows] - transpose(Ω[rows, rows])) / 2
+    return Ω
+end
+
+@doc raw"""
+    get_chart_index(M::Stiefel, A::StiefelAtlas, p)
+
+Return a Cayley chart centered at `p`, using the lexicographically first row
+minor with maximal absolute determinant.
+"""
+function get_chart_index(M::Stiefel{ℝ}, ::StiefelAtlas, p)
+    _, k = get_parameter(M.size)
+    return StiefelChart(copy(p), _stiefel_largest_minor_rows(p, k))
+end
+function get_chart_index(M::Stiefel{ℝ}, A::StiefelAtlas, i::StiefelChart, a)
+    return get_chart_index(M, A, get_point(M, A, i, a))
+end
+
+@doc raw"""
+    get_parameters!(M::Stiefel, a, A::StiefelAtlas, i::StiefelChart, p)
+
+Store the Cayley coordinates of `p` in the chart centered at `i.center`.
+"""
+function get_parameters!(M::Stiefel{ℝ}, a, ::StiefelAtlas, i::StiefelChart, p)
+    length(a) == manifold_dimension(M) || throw(DimensionMismatch("Expected $(manifold_dimension(M)) chart coordinates."))
+    Ω = _stiefel_chart_omega_from_action(M, i, p + i.center, p - i.center)
+    return _stiefel_chart_coordinates_from_omega!(M, a, i, Ω)
+end
+
+@doc raw"""
+    get_point!(M::Stiefel, p, A::StiefelAtlas, i::StiefelChart, a)
+
+Store in `p` the point represented by Cayley coordinates `a` in chart `i`.
+"""
+function get_point!(M::Stiefel{ℝ}, p, ::StiefelAtlas, i::StiefelChart, a)
+    Ω = _stiefel_chart_omega_from_coordinates(M, i, a)
+    p .= ((I + Ω) / (I - Ω)) * i.center
+    return p
+end
+
+function get_coordinates_induced_basis!(
+        M::Stiefel{ℝ}, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:StiefelAtlas}
+    )
+    length(c) == manifold_dimension(M) || throw(DimensionMismatch("Expected $(manifold_dimension(M)) basis coordinates."))
+    Ω = _stiefel_chart_omega_from_action(M, B.i, p + B.i.center, p - B.i.center)
+    V = (I - Ω) \ B.i.center
+    Δ = _stiefel_chart_omega_from_action(M, B.i, V, (I - Ω) * X / 2)
+    return _stiefel_chart_coordinates_from_omega!(M, c, B.i, Δ)
+end
+
+function get_vector_induced_basis!(
+        M::Stiefel{ℝ}, X, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:StiefelAtlas}
+    )
+    Ω = _stiefel_chart_omega_from_action(M, B.i, p + B.i.center, p - B.i.center)
+    Δ = _stiefel_chart_omega_from_coordinates(M, B.i, c)
+    X .= 2 * ((I - Ω) \ Δ) * ((I - Ω) \ B.i.center)
+    return X
+end
+
+function inner(M::Stiefel{ℝ}, A::StiefelAtlas, i::StiefelChart, a, Xc, Yc)
+    p = get_point(M, A, i, a)
+    B = induced_basis(M, A, i)
+    X = get_vector(M, p, Xc, B)
+    Y = get_vector(M, p, Yc, B)
+    return inner(M, p, X, Y)
+end
 
 function Base.show(io::IO, ::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return print(io, "Stiefel($(n), $(k), $(𝔽))")
@@ -618,29 +883,27 @@ Since this is the differentiated retraction as a vector transport, the result wi
 tangent space at ``q=\operatorname{retr}_p(d)`` using the [`CayleyRetraction`](@extref `ManifoldsBase.CayleyRetraction`).
 """
 vector_transport_direction(
-    ::Stiefel, ::Any, ::Any, ::Any,
-    ::DifferentiatedRetractionVectorTransport{CayleyRetraction},
+    ::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetractionVectorTransport{CayleyRetraction}
 )
 
 @doc raw"""
     vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetractionVectorTransport{PolarRetraction})
 
 Compute the vector transport by computing the push forward of
-[`retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref) Section 3.5 of [Zhu:2016](@cite):
+[`retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref), see Section 3.5, page 87, of [Zhu:2016](@cite):
 
 ```math
-T_{p,d}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
+T_{p,d}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(I+d^\mathrm{T}d)^{-\frac{1}{2}},
 ```
 
 where ``q = \operatorname{retr}^{\mathrm{Pol}}_p(d)``, and ``Λ`` is the unique solution of the Sylvester equation
 
 ```math
-    Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}} = q^\mathrm{T}X - X^\mathrm{T}q
+    Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}}Λ = q^\mathrm{T}X - X^\mathrm{T}q
 ```
 """
 vector_transport_direction(
-    ::Stiefel, ::Any, ::Any, ::Any,
-    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
+    ::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetractionVectorTransport{PolarRetraction}
 )
 
 @doc raw"""
@@ -664,24 +927,27 @@ A_{ij}&\text{ if } i > j\\
 ```
 """
 vector_transport_direction(
-    ::Stiefel, ::Any, ::Any, ::Any,
-    ::DifferentiatedRetractionVectorTransport{QRRetraction},
+    ::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetractionVectorTransport{QRRetraction}
 )
 
-function vector_transport_direction_diff!(::Stiefel, Y, p, X, d, ::CayleyRetraction)
+function vector_transport_direction_diff!(
+        ::Stiefel, Y, p::AbstractArray, X, d, ::CayleyRetraction
+    )
     Pp = I - 1 // 2 * p * p'
     Wpd = Pp * d * p' - p * d' * Pp
     WpX = Pp * X * p' - p * X' * Pp
     q1 = I - 1 // 2 * Wpd
     return copyto!(Y, (q1 \ WpX) * (q1 \ p))
 end
-function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::PolarRetraction)
+function vector_transport_direction_diff!(
+        M::Stiefel, Y, p::AbstractArray, X, d, ::PolarRetraction
+    )
     q = retract(M, p, d, PolarRetraction())
     Iddsqrt = sqrt(I + d' * d)
     Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
     return copyto!(Y, q * Λ + (X - q * (q' * X)) / Iddsqrt)
 end
-function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::QRRetraction)
+function vector_transport_direction_diff!(M::Stiefel, Y, p::AbstractArray, X, d, ::QRRetraction)
     q = retract(M, p, d, QRRetraction())
     # use the QR factorization with positive diagonal of R
     pdR = qr(p + d).R
@@ -690,10 +956,9 @@ function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::QRRetraction
     rf = UpperTriangular(Diagonal(s)' * pdR)
     Xrf = X / rf
     qtXrf = q' * Xrf
-    return copyto!(
-        Y,
-        q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf,
-    )
+    # ρ_skew of Absil et al. 2008, Example 8.1.5, with half the diagonal for the complex case
+    L = LowerTriangular(qtXrf) - Diagonal(qtXrf) / 2
+    return copyto!(Y, q * (L - L') + Xrf - q * qtXrf)
 end
 
 @doc raw"""
@@ -701,22 +966,21 @@ end
 
 Compute the vector transport by computing the push forward of the
 [`retract(M::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref), see
-Section 4 of [HuangGallivanAbsil:2015](@cite) or  Section 3.5 of [Zhu:2016](@cite):
+Section 4 of [HuangGallivanAbsil:2015](@cite) or Section 3.5 of [Zhu:2016](@cite):
 
 ```math
-T_{q\gets p}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
+T_{q\gets p}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(I+d^\mathrm{T}d)^{-\frac{1}{2}},
 ```
 
 where ``d = \bigl( \operatorname{retr}^{\mathrm{Pol}}_p\bigr)^{-1}(q)``,
 and ``Λ`` is the unique solution of the Sylvester equation
 
 ```math
-    Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}} = q^\mathrm{T}X - X^\mathrm{T}q
+    Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}}Λ = q^\mathrm{T}X - X^\mathrm{T}q
 ```
 """
 vector_transport_to(
-    ::Stiefel, ::Any, ::Any, ::Any,
-    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
+    ::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetractionVectorTransport{PolarRetraction}
 )
 
 @doc raw"""
@@ -730,7 +994,7 @@ see  [AbsilMahonySepulchre:2008](@cite), p. 173, or Section 3.5 of [Zhu:2016](@c
 T_{q \gets p}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},
 ```
 where ``d = \bigl(\operatorname{retr}^{\mathrm{QR}}\bigr)^{-1}_p(q)``, ``R`` is the ``R`` factor of the QR
-decomposition of ``p+X``, and
+decomposition of ``p+d``, and
 ```math
 \bigl( \rho_{\mathrm{s}}(A) \bigr)_{ij}
 = \begin{cases}
@@ -741,8 +1005,7 @@ A_{ij}&\text{ if } i > j\\
 ```
 """
 vector_transport_to(
-    ::Stiefel, ::Any, ::Any, ::Any,
-    ::DifferentiatedRetractionVectorTransport{QRRetraction},
+    ::Stiefel, ::Any, ::Any, ::Any, ::DifferentiatedRetractionVectorTransport{QRRetraction}
 )
 
 @doc raw"""
@@ -753,13 +1016,13 @@ projection it onto the tangent space at `q`.
 """
 vector_transport_to(::Stiefel, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
-function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::PolarRetraction)
+function vector_transport_to_diff!(M::Stiefel, Y, p::AbstractArray, X, q, ::PolarRetraction)
     d = inverse_retract(M, p, q, PolarInverseRetraction())
     Iddsqrt = sqrt(I + d' * d)
     Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
     return copyto!(Y, q * Λ + (X - q * (q' * X)) / Iddsqrt)
 end
-function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::QRRetraction)
+function vector_transport_to_diff!(M::Stiefel, Y, p::AbstractArray, X, q, ::QRRetraction)
     d = inverse_retract(M, p, q, QRInverseRetraction())
     # use the QR factorization with positive diagonal of R
     pdR = qr(p + d).R
@@ -768,7 +1031,7 @@ function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::QRRetraction)
     rf = UpperTriangular(Diagonal(s)' * pdR)
     Xrf = X / rf
     qtXrf = q' * Xrf
-    return copyto!(
-        Y, q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf,
-    )
+    # ρ_skew of Absil et al. 2008, Example 8.1.5, with half the diagonal for the complex case
+    L = LowerTriangular(qtXrf) - Diagonal(qtXrf) / 2
+    return copyto!(Y, q * (L - L') + Xrf - q * qtXrf)
 end

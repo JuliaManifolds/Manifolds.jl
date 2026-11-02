@@ -1,5 +1,5 @@
 @doc raw"""
-    ProbabilitySimplex{T,boundary} <: AbstractDecoratorManifold{𝔽}
+    ProbabilitySimplex{T,boundary} <: AbstractDecoratorManifold{ℝ}
 
 The (relative interior of) the probability simplex is the set
 ````math
@@ -32,7 +32,10 @@ This implementation follows the notation in [AastroemPetraSchmitzerSchnoerr:2017
 
 # Constructor
 
-    ProbabilitySimplex(n::Int; boundary::Symbol=:open)
+    ProbabilitySimplex(n::Int; boundary::Symbol=:open, parameter::Symbol=:type)
+
+`parameter`: whether a type parameter should be used to store `n`. By default size
+is stored in type. Value can either be `:field` or `:type`.
 """
 struct ProbabilitySimplex{T, boundary} <: AbstractDecoratorManifold{ℝ}
     size::T
@@ -40,12 +43,13 @@ end
 
 function ProbabilitySimplex(n::Int; boundary::Symbol = :open, parameter::Symbol = :type)
     if boundary !== :open && boundary !== :closed
-        throw(
-            ArgumentError(
-                "boundary can only be set to :open or :closed; received $boundary",
-            ),
-        )
+        throw(ArgumentError("boundary can only be set to :open or :closed; received $boundary"))
     end
+    n < 0 && throw(
+        DomainError(
+            n, "The dimension n of a probability simplex must be nonnegative, but was $(n)."
+        ),
+    )
     size = wrap_type_parameter(parameter, (n,))
     return ProbabilitySimplex{typeof(size), boundary}(size)
 end
@@ -54,8 +58,8 @@ end
     FisherRaoMetric <: AbstractMetric
 
 The Fisher-Rao metric or Fisher information metric is a particular Riemannian metric which
-can be defined on a smooth statistical manifold, i.e., a smooth manifold whose points are
-probability measures defined on a common probability space.
+can be defined on a smooth statistical manifold.
+Such a manifold is a smooth manifold whose points are probability measures defined on a common probability space.
 
 See for example the [`ProbabilitySimplex`](@ref).
 """
@@ -80,14 +84,24 @@ end
 @doc raw"""
     change_metric(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
+Change the metric representation of the tangent vector `X` from the
+[`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) to the [`FisherRaoMetric`](@ref) on the [`ProbabilitySimplex`](@ref) `M`.
+
 To change the metric, we are looking for a function ``c\colon T_pΔ^n → T_pΔ^n`` such that for all ``X,Y ∈ T_pΔ^n``
-This can be achieved by rewriting representer change in matrix form as `(Diagonal(p) - p * p') * X`
-and taking square root of the matrix
+
+```math
+⟨X, Y⟩ = g_p(c(X), c(Y)).
+```
+
+This can be achieved by rewriting the representer change in matrix form as `(Diagonal(p) - p * p') * X`
+and taking the square root of the matrix.
 """
 change_metric(::ProbabilitySimplex, ::EuclideanMetric, ::Any, ::Any)
 
 function change_metric!(::ProbabilitySimplex, Y, ::EuclideanMetric, p, X)
-    return Y .= sqrt(Diagonal(p) - p * p') * X
+    # the matrix is positive semidefinite; negative eigenvalues are rounding errors
+    e = eigen(Symmetric(Diagonal(p) - p * p'))
+    return Y .= e.vectors * Diagonal(sqrt.(max.(e.values, 0))) * e.vectors' * X
 end
 
 """
@@ -100,8 +114,7 @@ The tolerance for the last test can be set using the `kwargs...`.
 function check_point(M::ProbabilitySimplex{<:Any, boundary}, p; kwargs...) where {boundary}
     if boundary === :closed && minimum(p) < 0
         return DomainError(
-            minimum(p),
-            "The point $(p) does not lie on the $(M) since it has negative entries.",
+            minimum(p), "The point $(p) does not lie on the $(M) since it has negative entries."
         )
     end
     if boundary === :open && minimum(p) <= 0
@@ -112,8 +125,7 @@ function check_point(M::ProbabilitySimplex{<:Any, boundary}, p; kwargs...) where
     end
     if !isapprox(sum(p), 1.0; kwargs...)
         return DomainError(
-            sum(p),
-            "The point $(p) does not lie on the $(M) since its sum is not 1.",
+            sum(p), "The point $(p) does not lie on the $(M) since its sum is not 1."
         )
     end
     return nothing
@@ -122,19 +134,20 @@ end
 """
     check_vector(M::ProbabilitySimplex, p, X; kwargs... )
 
-Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`, i.e.
-after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
-`X` has to be of same dimension as `p` and its elements have to sum to one.
-The tolerance for the last test can be set using the `kwargs...`.
+Check whether `X` is a tangent vector to `p` on the [`ProbabilitySimplex`](@ref) `M`.
+After [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
+`X` has to be of same dimension as `p` and its elements have to sum to zero
+up to `max(atol, rtol * sqrt(length(X)) * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
 """
 function check_vector(
-        M::ProbabilitySimplex,
-        p,
-        X::T;
+        M::ProbabilitySimplex, p, X::T;
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
         kwargs...,
     ) where {T}
-    if !isapprox(sum(X), 0.0; atol = atol, kwargs...)
+    r = abs(sum(X))
+    if !(r <= atol || r <= rtol * sqrt(length(X)) * norm(X))
         return DomainError(
             sum(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its elements do not sum up to 0.",
@@ -159,7 +172,7 @@ function distance(::ProbabilitySimplex, p, q)
     @inbounds for i in eachindex(p, q)
         sumsqrt += sqrt(p[i] * q[i])
     end
-    return 2 * acos(sumsqrt)
+    return 2 * acos(clamp(sumsqrt, -1, 1))
 end
 
 embed(::ProbabilitySimplex, p) = p
@@ -181,9 +194,11 @@ operations $X_p^2$ and $\sqrt{p}$.
 """
 exp(::ProbabilitySimplex, ::Any...)
 
-function exp!(::ProbabilitySimplex, q, p, X)
+function exp!(::ProbabilitySimplex{<:Any, boundary}, q, p, X) where {boundary}
     s = sqrt.(p)
     Xs = X ./ s ./ 2
+    # closed simplex: where p and X both vanish, the geodesic stays in that face
+    (boundary === :closed) && (Xs = ifelse.(iszero.(s) .& iszero.(X), zero(eltype(Xs)), Xs))
     θ = norm(Xs)
     q .= (cos(θ) .* s .+ usinc(θ) .* Xs) .^ 2
     return q
@@ -192,11 +207,7 @@ end
 function get_coordinates_orthonormal!(M::ProbabilitySimplex, Xc, p, X, R::RealNumbers)
     n = get_parameter(M.size)[1]
     get_coordinates_orthonormal!(
-        Sphere(n),
-        Xc,
-        simplex_to_amplitude(M, p),
-        simplex_to_amplitude_diff(M, p, X),
-        R,
+        Sphere(n), Xc, simplex_to_amplitude(M, p), simplex_to_amplitude_diff(M, p, X), R
     )
     return Xc
 end
@@ -270,16 +281,17 @@ end
 
 Compute a first order approximation by projection. The formula reads
 ````math
-\operatorname{retr}^{-1}_p q = \bigl( I_{n+1} - \frac{1}{n}\mathbb{1}^{n+1,n+1} \bigr)(\log(q)-\log(p))
+\operatorname{retr}^{-1}_p q = p ⊙ \bigl( I_{n+1} - \mathbb{1}_{n+1}p^{\mathrm{T}} \bigr)(\log(q)-\log(p))
 ````
-where $\mathbb{1}^{m,n}$ is the size `(m,n)` matrix containing ones, and $\log$ is applied elementwise.
+where ``\mathbb{1}_{n+1}`` is the vector of length ``n+1`` containing ones, ``⊙`` is the
+elementwise product, and ``\log`` is applied elementwise.
 """
 inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
 
 function inverse_retract_softmax!(::ProbabilitySimplex, X, p, q)
     X .= log.(q) .- log.(p)
-    meanlogdiff = mean(X)
-    X .-= meanlogdiff
+    c = dot(p, X)
+    X .= p .* (X .- c)
     return X
 end
 
@@ -294,12 +306,13 @@ is_flat(M::ProbabilitySimplex) = false
     log(M::ProbabilitySimplex, p, q)
 
 Compute the logarithmic map of `p` and `q` on the [`ProbabilitySimplex`](@ref) `M`.
+The formula, Eq. (7.16b) in [AastroemPetraSchmitzerSchnoerr:2017](@cite), reads
 
 ````math
-\log_pq = \frac{d_{Δ^n}(p,q)}{\sqrt{1-⟨\sqrt{p},\sqrt{q}⟩}}(\sqrt{pq} - ⟨\sqrt{p},\sqrt{q}⟩p),
+\log_pq = \frac{d_{Δ^n}(p,q)}{\sqrt{1-⟨\sqrt{p},\sqrt{q}⟩^2}}(\sqrt{pq} - ⟨\sqrt{p},\sqrt{q}⟩p),
 ````
 
-where $pq$ and $\sqrt{p}$ is meant elementwise.
+where $pq$ and $\sqrt{p}$ is meant elementwise. For `p ≈ q` the zero vector is returned.
 """
 log(::ProbabilitySimplex, ::Any...)
 
@@ -327,13 +340,13 @@ manifold_dimension(M::ProbabilitySimplex) = get_parameter(M.size)[1]
 @doc raw"""
     manifold_volume(::ProbabilitySimplex)
 
-Return the volume of the [`ProbabilitySimplex`](@ref), i.e. volume of the `n`-dimensional
-[`Sphere`](@ref) divided by ``2^{n+1}``, corresponding to the volume of its positive
-orthant.
+Return the volume of the [`ProbabilitySimplex`](@ref), i.e. the volume of the `n`-dimensional
+[`Sphere`](@ref) of radius 2 divided by ``2^{n+1}``, corresponding to the volume of its
+positive orthant.
 """
 function manifold_volume(M::ProbabilitySimplex)
     n = get_parameter(M.size)[1]
-    return manifold_volume(Sphere(n)) / 2^(n + 1)
+    return 2^n * manifold_volume(Sphere(n)) / 2^(n + 1)
 end
 
 @doc raw"""
@@ -356,10 +369,7 @@ function parallel_transport_to!(M::ProbabilitySimplex, Y, p, X, q)
     n = get_parameter(M.size)[1]
     q_s = simplex_to_amplitude(M, q)
     Ys = parallel_transport_to(
-        Sphere(n),
-        simplex_to_amplitude(M, p),
-        simplex_to_amplitude_diff(M, p, X),
-        q_s,
+        Sphere(n), simplex_to_amplitude(M, p), simplex_to_amplitude_diff(M, p, X), q_s
     )
     return amplitude_to_simplex_diff!(M, Y, q_s, Ys)
 end
@@ -368,8 +378,9 @@ end
     rand(::ProbabilitySimplex; vector_at=nothing, σ::Real=1.0)
 
 
-When `vector_at` is `nothing`, return a random (uniform over the Fisher-Rao metric; that is, uniform with respect to the `n`-sphere whose positive orthant is mapped to the simplex).
-point `x` on the [`ProbabilitySimplex`](@ref) manifold `M` according to the isometric embedding into
+When `vector_at` is `nothing`, return a random point `x` on the [`ProbabilitySimplex`](@ref) manifold `M`.
+The point is uniform with respect to the Fisher-Rao metric, that is, uniform with respect to the `n`-sphere
+whose positive orthant is mapped to the simplex. It is generated according to the isometric embedding into
 the `n`-sphere by normalizing the vector length of a sample from a multivariate Gaussian. See [Marsaglia:1972](@cite).
 
 When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
@@ -379,11 +390,8 @@ to have a zero component sum.
 rand(::ProbabilitySimplex; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::ProbabilitySimplex,
-        pX;
-        vector_at = nothing,
-        σ = one(eltype(pX)),
+        rng::AbstractRNG, M::ProbabilitySimplex, pX;
+        vector_at = nothing, σ = one(eltype(pX)),
     )
     if isnothing(vector_at)
         Random.randn!(rng, pX)
@@ -405,7 +413,7 @@ the [`ProbabilitySimplex`](@ref) `M`. The formula reads
 
 ````math
 \operatorname{proj}_{Δ^n}(p,Y) = Y - \bar{Y}
-```
+````
 where ``\bar{Y}`` denotes mean of ``Y``.
 """
 project(::ProbabilitySimplex, ::Any, ::Any)
@@ -459,10 +467,13 @@ end
 Compute a first order approximation by applying the softmax function. The formula reads
 
 ````math
-\operatorname{retr}_p X = \frac{p\mathrm{e}^X}{⟨p,\mathrm{e}^X⟩},
+\operatorname{retr}_p X = \frac{p\mathrm{e}^{X/p}}{⟨p,\mathrm{e}^{X/p}⟩},
 ````
 
 where multiplication, exponentiation and division are meant elementwise.
+The largest exponent is subtracted from all exponents, which leaves the quotient unchanged
+and keeps the exponential from overflowing; on the closed simplex an entry with ``p_i = 0``
+stays zero.
 """
 retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxRetraction)
 
@@ -470,9 +481,15 @@ function ManifoldsBase.retract_softmax!(M::ProbabilitySimplex, q, p, X)
     return ManifoldsBase.retract_softmax_fused!(M, q, p, X, one(eltype(p)))
 end
 function ManifoldsBase.retract_softmax_fused!(::ProbabilitySimplex, q, p, X, t::Number)
+    m = maximum(t * X[i] / p[i] for i in eachindex(p, X) if !iszero(p[i]))
     s = zero(eltype(q))
     @inbounds for i in eachindex(q, p, X)
-        q[i] = p[i] * exp(t * X[i])
+        if iszero(p[i])
+            # a zero entry of p on the closed simplex stays zero
+            q[i] = p[i]
+        else
+            q[i] = p[i] * exp(t * X[i] / p[i] - m)
+        end
         s += q[i]
     end
     q ./= s
@@ -515,17 +532,49 @@ function riemann_tensor!(M::ProbabilitySimplex, Xresult, p, X, Y, Z)
     Xrs = riemann_tensor(
         Sphere(n),
         pe,
-        simplex_to_amplitude_diff(M, p, X),
-        simplex_to_amplitude_diff(M, p, Y),
-        simplex_to_amplitude_diff(M, p, Z),
+        simplex_to_amplitude_diff(M, p, X) / 2,
+        simplex_to_amplitude_diff(M, p, Y) / 2,
+        simplex_to_amplitude_diff(M, p, Z) / 2,
     )
-    amplitude_to_simplex_diff!(M, Xresult, pe, Xrs)
+    amplitude_to_simplex_diff!(M, Xresult, pe, 2 .* Xrs)
     return Xresult
 end
 
+@doc raw"""
+    sectional_curvature(M::ProbabilitySimplex, p, X, Y)
+
+Return the sectional curvature of the [`ProbabilitySimplex`](@ref) `M`, i.e.
+``\frac{1}{4}``, the curvature of the sphere of radius 2 it is isometric to (part of),
+if the dimension is greater than 1, and 0 otherwise.
+"""
+function sectional_curvature(M::ProbabilitySimplex, p, X, Y)
+    return manifold_dimension(M) > 1 ? 0.25 : 0.0
+end
+
+@doc raw"""
+    sectional_curvature_max(M::ProbabilitySimplex)
+
+Return the maximum sectional curvature of the [`ProbabilitySimplex`](@ref) `M`, i.e.
+``\frac{1}{4}``, the curvature of the sphere of radius 2 it is isometric to (part of),
+if the dimension is greater than 1, and 0 otherwise.
+"""
+function sectional_curvature_max(M::ProbabilitySimplex)
+    return manifold_dimension(M) > 1 ? 0.25 : 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::ProbabilitySimplex)
+
+Return the minimum sectional curvature of the [`ProbabilitySimplex`](@ref) `M`, i.e.
+``\frac{1}{4}``, the curvature of the sphere of radius 2 it is isometric to (part of),
+if the dimension is greater than 1, and 0 otherwise.
+"""
+function sectional_curvature_min(M::ProbabilitySimplex)
+    return manifold_dimension(M) > 1 ? 0.25 : 0.0
+end
+
 function Base.show(
-        io::IO,
-        ::ProbabilitySimplex{TypeParameter{Tuple{n}}, boundary},
+        io::IO, ::ProbabilitySimplex{TypeParameter{Tuple{n}}, boundary}
     ) where {n, boundary}
     return print(io, "ProbabilitySimplex($(n); boundary=:$boundary)")
 end
@@ -543,7 +592,7 @@ vector `X`. It is computed using isometry with positive orthant of a sphere.
 function volume_density(M::ProbabilitySimplex, p, X)
     n = get_parameter(M.size)[1]
     pe = simplex_to_amplitude(M, p)
-    return volume_density(Sphere(n), pe, simplex_to_amplitude_diff(M, p, X))
+    return volume_density(Sphere(n), pe, simplex_to_amplitude_diff(M, p, X) / 2)
 end
 
 @doc raw"""

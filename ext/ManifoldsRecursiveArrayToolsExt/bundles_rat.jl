@@ -23,9 +23,15 @@ function get_vector(M::FiberBundle, p::ArrayPartition, c::AbstractVector, B::Abs
     xp1, xp2 = submanifold_components(M, p)
     F = Fiber(M.manifold, xp1, M.type)
     return ArrayPartition(
-        get_vector(M.manifold, xp1, c[1:n], B),
-        get_vector(F, xp2, c[(n + 1):end], B),
+        get_vector(M.manifold, xp1, c[1:n], B), get_vector(F, xp2, c[(n + 1):end], B)
     )
+end
+# disambiguation
+function get_vector(
+        M::FiberBundle, p::ArrayPartition, c::AbstractVector,
+        B::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
+    ) where {𝔽}
+    return @invoke get_vector(M::AbstractManifold, p, c, B)
 end
 function get_vector(
         M::FiberBundle, p::ArrayPartition, c::AbstractVector,
@@ -47,7 +53,7 @@ function get_vectors(
     xp1, xp2 = submanifold_components(M, p)
     zero_m = zero_vector(M.manifold, xp1)
     F = Fiber(M.manifold, xp1, M.type)
-    zero_f = zero_vector(F, xp1)
+    zero_f = zero_vector(F, xp2)
     vs = typeof(ArrayPartition(zero_m, zero_f))[]
     for bv in get_vectors(M.manifold, xp1, B.data.base_basis)
         push!(vs, ArrayPartition(bv, zero_f))
@@ -81,7 +87,7 @@ component, respectively.
 end
 
 function _vector_transport_direction(
-        M::VectorBundle, p::ArrayPartition, X, d, m::FiberBundleProductVectorTransport,
+        M::VectorBundle, p::ArrayPartition, X, d, m::FiberBundleProductVectorTransport
     )
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
@@ -93,7 +99,7 @@ function _vector_transport_direction(
 end
 
 function _vector_transport_to(
-        M::VectorBundle, p::ArrayPartition, X, q, m::FiberBundleProductVectorTransport,
+        M::VectorBundle, p::ArrayPartition, X, q, m::FiberBundleProductVectorTransport
     )
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)

@@ -13,13 +13,3 @@ in
 ```@docs
 sectional_curvature_matrix
 ```
-
-### Specific exception types
-
-For some manifolds it is useful to keep an extra index, at which point on the manifold, the error occurred as well as to collect all errors that occurred on a manifold. This page contains the manifold-specific error messages this package introduces.
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["errors.jl"]
-Order = [:type, :function]
-```

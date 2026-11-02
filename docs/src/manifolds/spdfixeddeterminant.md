@@ -4,7 +4,7 @@
 SPDFixedDeterminant
 ```
 
-This manifold can is a submanifold of the [symmetric positive definite matrices](@ref SymmetricPositiveDefiniteSection) and hence inherits most properties therefrom.
+This manifold is a submanifold of the [symmetric positive definite matrices](@ref SymmetricPositiveDefiniteSection) and hence inherits most properties therefrom.
 
 The differences are the functions
 

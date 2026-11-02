@@ -31,6 +31,31 @@ ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTangentVec
 ManifoldsBase.@default_manifold_fallbacks (Stiefel{ℝ}) StiefelPoint StiefelTangentVector value value
 ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTangentVector value value
 
+@doc raw"""
+    is_vector(M::Grassmann, p, X; atol, rtol, kwargs...)
+
+Check whether `X` is a tangent vector at `p` on the [`Grassmann`](@ref) `M`, that is whether
+``p^{\mathrm{H}}X = 0`` holds up to `max(atol, rtol * norm(X))`.
+The relative tolerance `rtol` refers to the size of `X`; its default is the one of `isapprox`.
+"""
+is_vector(::Grassmann, ::Any, ::Any)
+
+function check_vector(
+        M::Grassmann, p, X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        rtol::Real = sqrt(eps(real(float(number_eltype(T))))),
+        kwargs...,
+    ) where {T}
+    r = norm(p' * X)
+    if !(r <= atol || r <= rtol * norm(X))
+        return DomainError(
+            r,
+            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X is not the zero matrix.",
+        )
+    end
+    return nothing
+end
+
 function default_vector_transport_method(::Grassmann, ::Type{<:AbstractArray})
     return ParallelTransport()
 end
@@ -41,16 +66,26 @@ default_vector_transport_method(::Grassmann, ::Type{<:StiefelPoint}) = ParallelT
 
 Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M```= \mathrm{Gr}(n,k)``.
 
-The distance is given by
+The distance is the arc length
 
 ````math
-d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\log_p(q)).
+d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\log_p(q)) = \Bigl(\sum_{i=1}^k θ_i^2\Bigr)^{1/2}
 ````
+
+of the principal angles ``θ_i`` between the spans of `p` and `q`, see Section 4.3 of [EdelmanAriasSmith:1998](@cite).
+The angles are ``θ_i = \arccos(σ_i)`` for the singular values ``σ_i`` of ``p^{\mathrm{H}}q``; the small ones
+are recomputed with the arc sine, see Algorithm 3.2 of [KnyazevArgentati:2002](@cite).
 """
 function distance(::Grassmann, p, q)
-    z = p' * q
-    S = svd(q / z - p).S
-    return norm(map(atan, S))
+    F = svd(p' * q)
+    s = min.(F.S, 1)
+    θ = acos.(s)
+    small = s .^ 2 .>= 1 / 2
+    if any(small)
+        R = q * F.V[:, small]
+        θ[small] = asin.(min.(svdvals(R - p * (p' * R)), 1))
+    end
+    return norm(θ)
 end
 
 embed(::Grassmann, p) = p
@@ -94,6 +129,45 @@ function exp!(M::Grassmann, q, p, X)
     return copyto!(q, Array(qr(z).Q))
 end
 
+
+@doc raw"""
+    get_coordinates(M::Grassmann{ℝ}, p, X, B::DefaultOrthonormalBasis)
+
+Given a point `p` on the [`Grassmann`](@ref) manifold `M` in Stiefel representation,
+i.e. ``p ∈ ℝ^{n×k}`` compute the coordinates ``c ∈ ℝ^{k(n-k)}`` representing the
+tangent vector `X` with respect to the [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`).
+
+The tangent space is characterized by ``p^{\mathrm{T}}X = 0_{k×k}``,
+where ``0_{k×k}`` is the ``k×k`` matrix containing zeros
+A default orthonormal basis can is constructed as follows: Since ``p`` has full
+column rank ``k``, the null space of ``p^{\mathrm{T}}`` is of dimension ``n-k``.
+Let ``v_1,…v_{n-k}`` be an orthonormal basis of that null space, then
+```math
+X_1 = \bigl(v_1, 0_k,…0_k), X_2 = \bigl(v_2 0_k,…,0_k), …, X_{n-k} = \bigl(v_{n-k} 0_k,…0_k),
+X_{n-k1} = \bigl(0_k, v_1, 0_k, …, 0_k), …, X_{(n-k)k} = (0_k,\ldots,0_k,v_{n-k}),
+```
+where ``0_k`` denotes the ``k``-dimensional zero vector.
+Let ``V = (v_1,…,v_{n-k}) ∈ ℝ^{n×(n-k)}`` be the matrix of the basis vectors
+
+For a tangent vector ``X`` we know that every column `X_i``, ``i=1,…,k`` lies in
+the span of ``v_1,…v_{n-k}`` by looking at every column of the matrix equation
+``p^{\mathrm{T}}X = 0_{k×k}``.
+
+Hence we can compute the coordinates ``c`` in ``k`` “blocks” ``C_1,…C_k ∈ ℝ^{n-k}``
+by solving the linear systems
+
+```math
+VC_i = X_i, \qquad i=1,…,k.
+```
+"""
+get_coordinates(::Grassmann{ℝ}, p, c, ::DefaultOrthonormalBasis)
+
+function get_coordinates_orthonormal!(M::Grassmann{ℝ}, c, p::AbstractArray, X, ::RealNumbers)
+    V = nullspace(p') # from SVD, so we have (n-k) ON columns in R^n
+    c .= vec(V \ X)
+    return c
+end
+
 function get_embedding(::Grassmann{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return Stiefel(n, k, 𝔽)
 end
@@ -106,13 +180,48 @@ function ManifoldsBase.get_embedding_type(::Grassmann)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
-function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::Type{<:StiefelPoint})
-    return ManifoldsBase.EmbeddedForwardingType()
+function ManifoldsBase.get_embedding_type(::Grassmann, ::Type{<:StiefelPoint})
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
-function ManifoldsBase.get_forwarding_type(::Stiefel, f, ::Type{<:StiefelPoint})
-    return ManifoldsBase.EmbeddedForwardingType()
+function ManifoldsBase.get_embedding_type(::Stiefel, ::Type{<:StiefelPoint})
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
+@doc raw"""
+    get_vector(M::Grassmann{ℝ}, p, c, B::DefaultOrthonormalBasis)
+
+Given a point `p` on the [`Grassmann`](@ref) manifold `M` in Stiefel representation,
+i.e. ``p ∈ ℝ^{n×k}`` reconstruct a tangent vector with respect to the [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`)
+given coefficients ``c ∈ ℝ^{k(n-k)}``.
+
+The tangent space is characterized by ``p^{\mathrm{T}}X = 0_{k×k}``,
+where ``0_{k×k}`` is the ``k×k`` matrix containing zeros
+A default orthonormal basis can is constructed as follows: Since ``p`` has full
+column rank ``k``, the null space of ``p^{\mathrm{T}}`` is of dimension ``n-k``.
+Let ``v_1,…v_{n-k}`` be an orthonormal basis of that null space, then
+```math
+X_1 = \bigl(v_1, 0_k,…0_k), X_2 = \bigl(v_2 0_k,…,0_k), …, X_{n-k} = \bigl(v_{n-k} 0_k,…0_k),
+X_{n-k1} = \bigl(0_k, v_1, 0_k, …, 0_k), …, X_{(n-k)k} = (0_k,\ldots,0_k,v_{n-k}),
+```
+where ``0_k`` denotes the ``k``-dimensional zero vector.
+Let ``V = (v_1,…,v_{n-k}) ∈ ℝ^{n×(n-k)}`` be the matrix of the basis vectors.
+
+Reconstructing a tangent vector ``X``` from a vector of coefficients ``c_1,…,c_{k(n-k)}``
+can be done based on the ONB ``v_1,…v_{n-k}``. The ``i``th column ``C_i`` of ``X``
+is given by using “blocks” ``C_1,…C_k ∈ ℝ^{n-k}`` of the coordinates and compute
+
+```math
+X_i = VC_i = \sum_{j=1}^{n-k} c_{i(n-k) + j}v_j,\qquad i=1,…k
+```
+"""
+get_vector(::Grassmann{ℝ}, p, c, ::DefaultOrthonormalBasis)
+
+function get_vector_orthonormal!(M::Grassmann{ℝ}, X, p::AbstractArray, c, ::RealNumbers)
+    n, k = get_parameter(M.size)
+    V = nullspace(p') # from SVD, so we have (n-k) ON columns in R^n
+    mul!(X, V, reshape(c, n - k, k))
+    return X
+end
 @doc raw"""
     inner(M::Grassmann, p, X, Y)
 
@@ -213,16 +322,14 @@ parallel_transport_direction(M::Grassmann, p, X, Y)
 
 # Hook into default since here we have direction first
 function parallel_transport_direction(M::Grassmann, p, X, Y)
-    Z = zero_vector(M, exp(M, p, X))
+    Z = allocate_result(M, vector_transport_direction, X, p, Y)
     return parallel_transport_direction!(M, Z, p, X, Y)
 end
 
 function parallel_transport_direction!(M::Grassmann, Z, p, X, Y)
     d = svd(Y)
     return copyto!(
-        M,
-        Z,
-        p,
+        M, Z, p,
         (-p * d.V .* sin.(d.S') + d.U .* cos.(d.S')) * (d.U' * X) + (I - d.U * d.U') * X,
     )
 end
@@ -291,20 +398,16 @@ Matrix onto the tangent space at `vector_at`.
 rand(M::Grassmann; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::Grassmann{𝔽},
-        pX;
-        σ::Real = one(real(eltype(pX))),
-        vector_at = nothing,
+        rng::AbstractRNG, M::Grassmann{𝔽}, pX;
+        σ::Real = one(real(eltype(pX))), vector_at = nothing,
     ) where {𝔽}
     if vector_at === nothing
         n, k = get_parameter(M.size)
-        V = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
+        V = σ * randn(rng, eltype(pX), (n, k))
         pX .= qr(V).Q[:, 1:k]
     else
         Z = σ * randn(rng, eltype(pX), size(pX))
         project!(M, pX, vector_at, Z)
-        pX ./= norm(pX)
     end
     return pX
 end
@@ -321,7 +424,7 @@ representation_size(M::Grassmann) = get_parameter(M.size)
     retract(M::Grassmann, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
-[`Grassmann`](@ref) `M`. With ``USV = p + X`` the retraction reads
+[`Grassmann`](@ref) `M`. With ``USV^\mathrm{H} = p + X`` the retraction reads
 ````math
 \operatorname{retr}_p X = UV^\mathrm{H},
 ````
@@ -347,9 +450,9 @@ Compute the QR-based retraction [`QRRetraction`](@extref `ManifoldsBase.QRRetrac
 ````math
 \operatorname{retr}_p X = QD,
 ````
-where D is a ``m×n`` matrix with
+where D is a ``k×k`` matrix with
 ````math
-D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_{i=1}^n \right).
+D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_{i=1}^k \right).
 ````
 """
 retract(::Grassmann, ::Any, ::Any, ::QRRetraction)
@@ -362,7 +465,7 @@ function ManifoldsBase.retract_qr_fused!(::Grassmann, q, p, X, t::Number)
     qrfac = qr(q)
     d = diag(qrfac.R)
     copyto!(q, qrfac.Q)
-    q .*= Diagonal(sign.(transpose(d) .+ 1 // 2))
+    rmul!(q, Diagonal(sign.(d .+ 1 // 2)))
     return q
 end
 
@@ -392,7 +495,7 @@ function riemannian_Hessian!(M::Grassmann, Y, p, G, H, X)
 end
 
 @doc raw"""
-    riemann_tensor(::Grassmann{<:Any,ℝ}, p, X, Y, Z)
+    riemann_tensor(::Grassmann{ℝ}, p, X, Y, Z)
 
 Compute the value of Riemann tensor on the real [`Grassmann`](@ref) manifold.
 The formula reads [Rentmeesters:2011](@cite)
@@ -408,7 +511,7 @@ function riemann_tensor!(::Grassmann{ℝ}, Xresult, p, X, Y, Z)
     YXᵀ = XYᵀ'
     YᵀX = Y' * X
     XᵀY = YᵀX'
-    Xresult .= (XYᵀ - YXᵀ) * Z .- Z * (YᵀX - XᵀY)
+    Xresult .= (XYᵀ - YXᵀ) * Z .+ Z * (YᵀX - XᵀY)
     return Xresult
 end
 
@@ -448,3 +551,118 @@ which is given by a zero matrix the same size as `p`.
 zero_vector(::Grassmann, ::Any...)
 
 zero_vector!(::Grassmann, X, p) = fill!(X, 0)
+
+# GrassmannAtlas
+
+function _grassmann_largest_minor_rows(p, k)
+    n = size(p, 1)
+    rows = collect(1:k)
+    best_rows = copy(rows)
+    best_minor = zero(real(eltype(p)))
+    while true
+        minor = abs(det(p[rows, :]))
+        if minor > best_minor
+            best_minor = minor
+            best_rows .= rows
+        end
+
+        position = k
+        while position >= 1 && rows[position] == n - k + position
+            position -= 1
+        end
+        position == 0 && break
+        rows[position] += 1
+        for next_position in (position + 1):k
+            rows[next_position] = rows[next_position - 1] + 1
+        end
+    end
+    iszero(best_minor) && throw(DomainError(p, "The point has no invertible $k-by-$k row minor."))
+    return best_rows
+end
+
+@doc raw"""
+    get_chart_index(M::Grassmann, A::GrassmannAtlas, p)
+    get_chart_index(M::Grassmann, A::GrassmannAtlas, i, a)
+
+Return a chart index suitable for a point `p` or coordinates `a` in chart `i`.
+For a point, the index of the row minor with the largest absolute determinant is
+returned, breaking ties lexicographically. For coordinates, the represented
+point is reconstructed and the same selection rule is applied.
+"""
+function get_chart_index(M::Grassmann{ℝ}, ::GrassmannAtlas, p)
+    _, k = get_parameter(M.size)
+    return _grassmann_largest_minor_rows(p, k)
+end
+function get_chart_index(M::Grassmann{ℝ}, A::GrassmannAtlas, i::AbstractVector, a)
+    return get_chart_index(M, A, get_point(M, A, i, a))
+end
+
+@doc raw"""
+    get_parameters!(M::Grassmann, a, A::GrassmannAtlas, i, p)
+
+Store the standard affine coordinates of `p` in `a` for the chart indexed by
+the row tuple `i`. The selected row minor of `p` must be invertible.
+"""
+function get_parameters!(M::Grassmann{ℝ}, a, ::GrassmannAtlas, i::AbstractVector, p)
+    rows = _grassmann_chart_rows(M, i)
+    complement = _grassmann_chart_complement(M, i)
+    p_rows = p[rows, :]
+    iszero(det(p_rows)) && throw(DomainError(p, "The point does not belong to chart $i."))
+    a .= vec((p / p_rows)[complement, :])
+    return a
+end
+
+@doc raw"""
+    get_point!(M::Grassmann, p, A::GrassmannAtlas, i::AbstractVector, a)
+
+Store in `p` the point represented by affine coordinates `a` in the chart of
+the standard [`GrassmannAtlas`](@ref) indexed by `i`.
+"""
+function get_point!(M::Grassmann{ℝ}, p, ::GrassmannAtlas, i::AbstractVector, a)
+    rows = _grassmann_chart_rows(M, i)
+    complement = _grassmann_chart_complement(M, i)
+    n, k = get_parameter(M.size)
+    length(a) == k * (n - k) || throw(DimensionMismatch("Expected $(k * (n - k)) chart coordinates."))
+    fill!(p, zero(eltype(p)))
+    copyto!(view(p, rows, :), I)
+    p[complement, :] .= reshape(a, n - k, k)
+    return project!(M, p, p)
+end
+
+@doc raw"""
+    get_coordinates_induced_basis!(M::Grassmann, c, p, X, B::InducedBasis{<:Any, <:Any, <:GrassmannAtlas})
+
+Store in `c` the coordinates of a tangent vector `X` at `p` with respect to
+the basis induced by the standard [`GrassmannAtlas`](@ref).
+"""
+function get_coordinates_induced_basis!(
+        M::Grassmann{ℝ}, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:GrassmannAtlas}
+    )
+    rows = _grassmann_chart_rows(M, B.i)
+    complement = _grassmann_chart_complement(M, B.i)
+    p_rows = p[rows, :]
+    normalized_p = p / p_rows
+    normalized_X = X / p_rows
+    c .= vec(normalized_X[complement, :] .- normalized_p[complement, :] * normalized_X[rows, :])
+    return c
+end
+
+@doc raw"""
+    get_vector_induced_basis!(M::Grassmann, X, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:GrassmannAtlas})
+
+Store in `X` the tangent vector at `p` represented by coordinates `c` with
+respect to the basis induced by the standard [`GrassmannAtlas`](@ref).
+"""
+function get_vector_induced_basis!(
+        M::Grassmann{ℝ}, X, p, c, B::InducedBasis{ℝ, TangentSpaceType, <:GrassmannAtlas}
+    )
+    rows = _grassmann_chart_rows(M, B.i)
+    complement = _grassmann_chart_complement(M, B.i)
+    n, k = get_parameter(M.size)
+    length(c) == k * (n - k) || throw(DimensionMismatch("Expected $(k * (n - k)) basis coordinates."))
+    fill!(X, zero(eltype(X)))
+    X[complement, :] .= reshape(c, n - k, k)
+    X .= X * p[rows, :]
+    project!(M, X, p, X)
+    return X
+end

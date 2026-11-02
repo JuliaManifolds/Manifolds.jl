@@ -1,8 +1,12 @@
 using LinearAlgebra, Manifolds, Test, StaticArrays, Quaternions, Random, Distributions, RecursiveArrayTools
-using ManifoldDiff
+using ManifoldDiff, ForwardDiff
+using ADTypes: AutoFiniteDifferences
+using FiniteDifferences: central_fdm
 
 
 @testset "The Spheres" begin
+    @test_throws DomainError Sphere(-1)
+    @test_throws DomainError ArraySphere(0, 2)
 
     M = Sphere(2)
     p = [1.0, 0.0, 0.0]
@@ -15,6 +19,9 @@ using ManifoldDiff
 
     @testset "Basics" begin
         @test base_manifold(M) === M
+        # tangent vectors of any length are accepted, a clearly normal part is not
+        @test is_vector(M, q, project(M, q, [100.0, 200.0, 300.0]))
+        @test !is_vector(M, q, project(M, q, [1.0, 2.0, 3.0]) .+ 1.0e-6 .* q)
     end
 
     # TODO: test ProjectedOrthonormalBasis(:svd), DiagonalizingOrthonormalBasis
@@ -28,12 +35,15 @@ using ManifoldDiff
             :EmbeddedPoints => [p],
             :EmbeddedVectors => [X],
             :Coordinates => [[π / 2, 0.0]],
+            :Atlases => [RetractionAtlas(), Manifolds.StereographicAtlas()],
             :Bases => [DefaultOrthogonalBasis(), DefaultOrthonormalBasis()],
             :InvalidPoints => [2 * p],
             :InvalidVectors => [p],
             :NormalVectors => [V],
+            :OtherMetrics => [MinkowskiMetric()],
             :Covectors => [ξ],
             :RetractionMethods => [ExponentialRetraction(), ProjectionRetraction()],
+            :InducedBasisBackend => AutoFiniteDifferences(central_fdm(5, 1)),
             :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
         ),
         # Expectations
@@ -49,6 +59,7 @@ using ManifoldDiff
             (get_vectors, DefaultOrthogonalBasis()) => :Orthogonal,
             injectivity_radius => π,
             (injectivity_radius, ProjectionRetraction()) => π / 2,
+            is_flat => false,
             is_default_metric => EuclideanMetric(),
             log => X, norm => π / 4,
             parallel_transport_to => parallel_transport_to(M, p, X, q),
@@ -56,24 +67,41 @@ using ManifoldDiff
             manifold_dimension => 2,
             repr => "Sphere(2)",
             Weingarten => -X * (p'V), # or [ 0, -π/2, 0 ]
-            :IsPointErrors => [DomainError]
+            :IsPointErrors => [DomainError],
+            :IsVectorBasepointError => ManifoldDomainError
         ),
     )
 
     @testset "Embedding test" begin
         p = [1.0, 0.0, 0.0]
-        X = [0.0, 1.0, 1.0]
-        @test embed(M, p) == p
-        q = similar(p)
-        embed!(M, q, p)
-        @test q == p
-        @test embed(M, p, X) == X
-        Y = similar(X)
-        embed!(M, Y, p, X)
-        @test Y == X
+        X1 = [0.0, 1.0, 1.0]
+        q1 = similar(p)
+        embed!(M, q1, p)
+        @test q1 == p
+        @test embed(M, p, X1) == X1
+        Y1 = similar(X1)
+        embed!(M, Y1, p, X1)
+        @test Y1 == X1
     end
 
-    Manifolds.test_atlases(M, [p, q], (RetractionAtlas(), Manifolds.StereographicAtlas()))
+    # the stereographic atlas additionally provides the metric and the connection in charts
+    Manifolds.Test.test_manifold(
+        M,
+        Dict(
+            :Functions => [
+                affine_connection, det_local_metric, get_chart_index, get_parameters, get_point,
+                get_vector, inverse_local_metric, local_metric, log_local_metric_density,
+            ],
+            :Atlases => [Manifolds.StereographicAtlas()],
+            :Points => [p, q, -p],
+            :TestChartIndexParameters => true,
+        ),
+        Dict(
+            :atol => 1.0e-12,
+            (get_chart_index, Manifolds.StereographicAtlas()) => :north,
+            (local_metric, Manifolds.StereographicAtlas()) => 4 * I(2),
+        ),
+    )
 
     @testset "Complex Sphere" begin
         M = Sphere(2, ℂ)
@@ -87,10 +115,7 @@ using ManifoldDiff
             M,
             Dict(:Functions => [repr, get_embedding], :Points => [q], :Vectors => [X]),
             # Expectations
-            Dict(
-                repr => "Sphere(2, ℂ)",
-                get_embedding => Euclidean(3; field = ℂ)
-            ),
+            Dict(repr => "Sphere(2, ℂ)", get_embedding => Euclidean(3; field = ℂ)),
         )
 
         # testing that the random point is actually a complex number with non-zero imaginary part
@@ -111,8 +136,8 @@ using ManifoldDiff
         Manifolds.Test.test_manifold(
             M,
             Dict(
-                :Functions => [repr, get_embedding, project],
-                :Points => [p],
+                :Functions => [repr, get_embedding, is_point, is_vector, project],
+                :Points => [q],
                 :EmbeddedPoints => [p],
                 :Vectors => [X],
                 :EmbeddedVectors => [X],
@@ -127,10 +152,7 @@ using ManifoldDiff
 
     Manifolds.Test.test_manifold(
         Sphere(2; parameter = :field),
-        Dict(
-            :Functions => [get_embedding, repr],
-            :Points => [p],
-        ),
+        Dict(:Functions => [get_embedding, is_point, repr], :Points => [[1.0, 0.0, 0.0]]),
         # Expectations
         Dict(
             repr => "Sphere(2; parameter=:field)",
@@ -147,6 +169,11 @@ using ManifoldDiff
         Y = [1.0 0.0; 0.0 1.1]
         X = project(M, q, Y)
         @test is_vector(M, q, X)
+        V = 2 * q  # normal vector at q
+        @test Weingarten(M, q, X, V) ≈ -2 * X
+        Z = similar(X)
+        Weingarten!(M, Z, q, X, V)
+        @test Z ≈ -2 * X
 
         Manifolds.Test.test_manifold(
             M,
@@ -166,9 +193,12 @@ using ManifoldDiff
 
     Manifolds.Test.test_manifold(
         ArraySphere(2, 2; parameter = :field),
-        Dict(:Functions => [repr]),
+        Dict(:Functions => [get_embedding, repr]),
         # Expectations
-        Dict(repr => "ArraySphere(2, 2; parameter=:field)"),
+        Dict(
+            get_embedding => Euclidean(2, 2; parameter = :field),
+            repr => "ArraySphere(2, 2; parameter=:field)",
+        ),
     )
 
     @testset "Specific Tests and boundary cases" begin
@@ -199,6 +229,10 @@ using ManifoldDiff
                 @test is_vector(M, p, v)
                 @test get_coordinates(M, p, v, B) ≈ vcoord
             end
+            @test get_coordinates(M, [0, 0, 1], [1, 0, 0], B) ==
+                get_coordinates(M, [0.0, 0.0, 1.0], [1.0, 0.0, 0.0], B)
+            @test get_vector(M, [0, 0, 1], [1, 0], B) ==
+                get_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0], B)
         end
 
         @testset "log edge case" begin
@@ -210,21 +244,67 @@ using ManifoldDiff
             vexp = normalize(project(M, x, [1, zeros(n)...]))
             @test v ≈ π * vexp
 
+            # opposite points starting at the negative end of the first axis
+            for (N, x) in [
+                    (M, [-0.9999999999999999, 0.0, 0.0]),
+                    (ArraySphere(2, 2), [-1.0 0.0; 0.0 0.0]),
+                    (Sphere(2, ℂ), [-1.0 + 0.0im, 0.0, 0.0]),
+                ]
+                v = log(N, x, -x)
+                @test is_vector(N, x, v)
+                @test norm(v) ≈ π
+                @test isapprox(N, -x, exp(N, x, v))
+            end
+
+            # nearly opposite points have a unique logarithm
+            x = [1.0, 0.0, 0.0]
+            y = [-cos(1.0e-4), 0.0, sin(1.0e-4)]
+            v = log(M, x, y)
+            @test isapprox(v, [0.0, 0.0, π - 1.0e-4])
+            @test isapprox(M, y, exp(M, x, v))
+            # a Float32 point and the opposite Float64 point
+            x = Float32[0.58818454, -0.40576735, -0.69956553]
+            v = log(M, x, [-0.5881844996901627, 0.4057673266826759, 0.6995654872283419])
+            @test norm(v) ≈ π
+            @test is_vector(M, x, v)
+
             x = [1, zeros(n)...]
             v = log(M, x, -x)
             @test norm(v) ≈ π
             @test isapprox(dot(x, v), 0; atol = 1.0e-12)
             vexp = normalize(project(M, x, [0, 1, zeros(n - 1)...]))
             @test v ≈ π * vexp
+
+            # nearly opposite and nearly equal points, compared to a BigFloat reference
+            p = [1.0, 0.0, 0.0]
+            for θ in [1.0e-12, 1.0e-6, π - 1.0e-6, π - 1.0e-9, π - 1.0e-12]
+                q = [cos(θ), 0.6 * sin(θ), 0.8 * sin(θ)]
+                X = log(M, p, q)
+                Xb = log(M, big.(p), big.(q))
+                @test isapprox(X, Xb; atol = 4 * eps())
+                @test isapprox(X, [0.0, 0.6 * θ, 0.8 * θ]; atol = 4 * eps())
+            end
         end
 
         @testset "StereographicAtlas" begin
             M = Sphere(2)
-            A = Manifolds.StereographicAtlas()
+            A = StereographicAtlas()
+            @testset "chart index from coordinates" begin
+                for (i, a, expected) in [
+                        (:north, [0.5, 0.0], :north),
+                        (:north, [1.0, 0.0], :north),
+                        (:north, [2.0, 0.0], :south),
+                        (:south, [0.5, 0.0], :south),
+                        (:south, [1.0, 0.0], :north),
+                        (:south, [2.0, 0.0], :north),
+                    ]
+                    @test get_chart_index(M, A, i, a) === expected
+                end
+            end
             p = [1 / sqrt(3), 1 / sqrt(3), 1 / sqrt(3)]
             for k in [1, -1]
                 p *= k
-                i = Manifolds.get_chart_index(M, A, p)
+                i = get_chart_index(M, A, p)
                 @test i === (p[1] < 0 ? :south : :north)
                 a = get_parameters(M, A, i, p)
                 q = get_point(M, A, i, a)
@@ -246,15 +326,15 @@ using ManifoldDiff
 
                 @testset "transition_map" begin
                     other_chart = i === :south ? :north : :south
-                    a_other = Manifolds.transition_map(M, A, i, other_chart, a)
+                    a_other = transition_map(M, A, i, other_chart, a)
                     @test isapprox(M, p, get_point(M, A, other_chart, a_other))
 
                     a_other2 = allocate(a_other)
-                    Manifolds.transition_map!(M, a_other2, A, i, A, other_chart, a)
+                    transition_map!(M, a_other2, A, i, A, other_chart, a)
                     @test isapprox(M, p, get_point(M, A, other_chart, a_other2))
 
                     a_other2 = allocate(a_other)
-                    Manifolds.transition_map!(M, a_other2, A, i, other_chart, a)
+                    transition_map!(M, a_other2, A, i, other_chart, a)
                     @test isapprox(M, p, get_point(M, A, other_chart, a_other2))
                 end
             end
@@ -264,20 +344,22 @@ using ManifoldDiff
         @testset "sectional curvature" begin
             M = Sphere(2; parameter = :field)
             K = Manifolds.sectional_curvature_matrix(
-                M,
-                [1.0, 0.0, 0.0],
-                DefaultOrthonormalBasis(),
+                M, [1.0, 0.0, 0.0], DefaultOrthonormalBasis()
             )
             @test isapprox(K, [0 1; 1 0])
             @test isapprox(
                 Manifolds.estimated_sectional_curvature_matrix(
-                    M,
-                    [1.0, 0.0, 0.0],
-                    DefaultOrthonormalBasis(),
+                    M, [1.0, 0.0, 0.0], DefaultOrthonormalBasis()
                 ),
                 [0.0 1.0; 1.0 0.0],
                 atol = 0.15,
             )
+            B = DefaultOrthonormalBasis()
+            for T in (Float32, BigFloat)
+                p_T = T[1, 0, 0]
+                @test eltype(Manifolds.sectional_curvature_matrix(M, p_T, B)) === T
+                @test eltype(Manifolds.estimated_sectional_curvature_matrix(M, p_T, B)) === T
+            end
         end
 
         @testset "Local Metric" begin
@@ -320,7 +402,7 @@ using ManifoldDiff
             @test sectional_curvature_max(M) == 1.0
             @test sectional_curvature_min(M) == 1.0
             M1 = Sphere(1)
-            @test sectional_curvature(M1, p, X, Y) == 0.0
+            @test sectional_curvature(M1, [0.0, 1.0], [1.0, 0.0], [1.0, 0.0]) == 0.0
             @test sectional_curvature_max(M1) == 0.0
             @test sectional_curvature_min(M1) == 0.0
         end
@@ -337,6 +419,11 @@ using ManifoldDiff
             gtsd_mvector =
                 Manifolds.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
             @test isa(rand(gtsd_mvector), MVector)
+
+            @test Distributions.insupport(haar_measure, [0.0, 0.6, 0.8])
+            @test !Distributions.insupport(haar_measure, [1.0, 1.0, 0.0])
+            @test Distributions.insupport(gtsd_mvector, [0.0, 1.0, 2.0])
+            @test !Distributions.insupport(gtsd_mvector, [1.0, 0.0, 0.0])
         end
     end
 end

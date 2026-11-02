@@ -14,6 +14,7 @@
 ## Contributors
 (in alphabetical order)
 
+- [Se-Eun Choi](https://github.com/sChoiKr) contributed the [Veronese manifold](../manifolds/veronese.md)
 - [Nick Dewaele](https://github.com/Nikdwal) contributed the [Tucker manifold](../manifolds/tucker.md)
 - [Renée Dornig](https://github.com/r-dornig) contributed the [centered  matrices](../manifolds/centeredmatrices.md) and the [essential manifold](../manifolds/essentialmanifold.md)
 - [David Hong](https://github.com/dahong67) contributed uniform distributions on the Stiefel and Grassmann manifolds.
@@ -31,7 +32,7 @@ Of course all further [contributions](CONTRIBUTING.md) are always welcome!
 - [Flowfusion.jl](https://github.com/MurrellGroup/Flowfusion.jl) – training and sampling from diffusion and flow matching models
 - [ManoptExamples.jl](https://github.com/JuliaManifolds/ManoptExamples.jl) – collecting examples of optimization problems on manifolds implemented using `Manifolds.jl` and [`Manopt.jl`](https://manoptjl.org/).
 
-Do you use Manifolds.jl in you package? Let us know and open an [issue](https://github.com/JuliaManifolds/Manifolds.jl/issues/new/choose) or [pull request](https://github.com/JuliaManifolds/Manifolds.jl/compare) to add it to the list!
+Do you use Manifolds.jl in your package? Let us know and open an [issue](https://github.com/JuliaManifolds/Manifolds.jl/issues/new/choose) or [pull request](https://github.com/JuliaManifolds/Manifolds.jl/compare) to add it to the list!
 
 ## License
 

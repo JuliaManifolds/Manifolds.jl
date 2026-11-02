@@ -41,7 +41,7 @@ function check_point(M::EmbeddedTorus, p; kwargs...)
 end
 
 @doc raw"""
-    check_vector(M::EmbeddedTorus, p, X; atol=eps(eltype(p)), kwargs...)
+    check_vector(M::EmbeddedTorus, p, X; atol=eps(float(eltype(p))), kwargs...)
 
 Check whether `X` is a valid vector tangent to `p` on the [`EmbeddedTorus`](@ref) `M`.
 The method checks if the vector `X` is orthogonal to the vector normal to the torus,
@@ -114,7 +114,7 @@ end
 Return true if parameters `a` lie closer than `ϵ` to chart boundary.
 """
 function check_chart_switch(::EmbeddedTorus, A::DefaultTorusAtlas, i, a; ϵ = pi / 3)
-    return abs(i[1] - a[1]) > (pi - ϵ) || abs(i[2] - a[2]) > (pi - ϵ)
+    return abs(a[1]) > (pi - ϵ) || abs(a[2]) > (pi - ϵ)
 end
 
 """
@@ -183,7 +183,7 @@ function get_chart_index(M::EmbeddedTorus, ::DefaultTorusAtlas, p)
     return _torus_theta_phi(M, p)
 end
 function get_chart_index(::EmbeddedTorus, ::DefaultTorusAtlas, i, a)
-    return (a[1], a[2])
+    return (a[1] + i[1], a[2] + i[2])
 end
 
 function get_parameters!(M::EmbeddedTorus, x, ::DefaultTorusAtlas, i::NTuple{2}, p)
@@ -197,11 +197,7 @@ function get_point!(M::EmbeddedTorus, p, ::DefaultTorusAtlas, i, x)
 end
 
 function get_coordinates_induced_basis!(
-        M::EmbeddedTorus,
-        Y,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, DefaultTorusAtlas},
+        M::EmbeddedTorus, Y, p, X, B::InducedBasis{ℝ, TangentSpaceType, DefaultTorusAtlas}
     )
     θ, φ = get_parameters(M, B.A, B.i, p)
 
@@ -218,11 +214,7 @@ function get_coordinates_induced_basis!(
 end
 
 function get_vector_induced_basis!(
-        M::EmbeddedTorus,
-        Y,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, DefaultTorusAtlas},
+        M::EmbeddedTorus, Y, p, X, B::InducedBasis{ℝ, TangentSpaceType, DefaultTorusAtlas}
     )
     θ, φ = get_parameters(M, B.A, B.i, p)
     dθ, dφ = X

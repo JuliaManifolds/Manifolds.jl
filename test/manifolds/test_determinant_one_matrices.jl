@@ -2,6 +2,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
 
 
 @testset "Matrices of Determinant 1" begin
+    @test_throws DomainError DeterminantOneMatrices(0)
     # Real case
     M = DeterminantOneMatrices(2)
     p = [1.0 0.0; 0.0 1.0]
@@ -15,18 +16,38 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     Manifolds.Test.test_manifold(
         M,
         Dict(
-            :Functions => [get_embedding, is_point, is_vector, manifold_dimension, project, embed, rand, repr],
+            :Functions => [get_embedding, is_flat, is_point, is_vector, manifold_dimension, project, embed, rand, repr],
             :Points => [p, q], :Vectors => [X, Y],
             :InvalidPoints => [pf, qf], :InvalidVectors => [Xf],
             :EmbeddedPoints => [pf], :EmbeddedVectors => [Xf],
         ),
         # Expectations
         Dict(
-            :manifold_dimension => 3,
+            manifold_dimension => 3,
             repr => "DeterminantOneMatrices(2, ℝ)",
+            is_flat => false,
             get_embedding => Euclidean(2, 2),
         ),
     )
+    @testset "embedding of tangent vectors" begin
+        # tangent vectors have trace zero, and pX is the corresponding matrix in the embedding
+        @test embed(M, q, X) == q * X
+        Y2 = similar(X)
+        embed!(M, Y2, q, X)
+        @test Y2 == q * X
+        @test project(M, q, embed(M, q, X)) ≈ X
+    end
+    @testset "projection transport" begin
+        # tangent vectors have trace zero, the matrix pZ in the embedding is projected at q
+        Z = [1.0 0.0; 0.0 -1.0]
+        W = vector_transport_to(M, p, Z, q, ProjectionTransport())
+        @test W ≈ [5.05 0.0; 0.0 -5.05] # q⁻¹pZ = diag(0.1, -10), with its trace -9.9 removed
+        @test is_vector(M, q, W)
+        W2 = similar(W)
+        vector_transport_to!(M, W2, p, Z, q, ProjectionTransport())
+        @test W2 ≈ W
+        @test vector_transport_to(M, q, Z, p, ProjectionTransport()) ≈ [5.05 0.0; 0.0 -5.05] # p⁻¹qZ = diag(10, -0.1)
+    end
     # Complex case
     Mc = DeterminantOneMatrices(2, ℂ)
     pc = [1.0im 0.0; 0.0 -1.0im]
@@ -40,14 +61,14 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     Manifolds.Test.test_manifold(
         Mc,
         Dict(
-            :Functions => [get_embedding, is_point, is_vector, manifold_dimension, rand],
+            :Functions => [get_embedding, is_point, is_vector, manifold_dimension, rand, repr],
             :Points => [pc, qc], :Vectors => [Xc, Yc],
-            :InvalidPoints => [pcf, qcf], :InvalidVectors => [Xf],
+            :InvalidPoints => Matrix[pcf, qcf], :InvalidVectors => [Xf],
             :EmbeddedPoints => [pcf], :EmbeddedVectors => [Xf],
         ),
         # Expectations
         Dict(
-            :manifold_dimension => 7,
+            manifold_dimension => 6,
             repr => "DeterminantOneMatrices(2, ℂ)",
             get_embedding => Euclidean(2, 2; field = ℂ),
         ),
@@ -60,12 +81,12 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         Dict(
             :Functions => [get_embedding, is_point, is_vector, manifold_dimension, project, embed, rand, repr],
             :Points => [p, q], :Vectors => [X, Y],
-            :InvalidPoints => [pf, qf], :InvalidVectors => [Xf],
+            :InvalidPoints => Matrix[pf, qf], :InvalidVectors => [Xf],
             :EmbeddedPoints => [p], :EmbeddedVectors => [X],
         ),
         # Expectations
         Dict(
-            :manifold_dimension => 3,
+            manifold_dimension => 3,
             repr => "DeterminantOneMatrices(2, ℝ; parameter=:field)",
             get_embedding => Euclidean(2, 2; parameter = :field),
         ),
@@ -74,9 +95,19 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     @testset "rng test" begin
         M = DeterminantOneMatrices(2)
         pX = zeros(2, 2)
-        Manifolds._ensure_nonzero_rng_determinant!(
-            Random.default_rng(), get_embedding(M), pX,
-        )
+        Manifolds._ensure_nonzero_rng_determinant!(Random.default_rng(), get_embedding(M), pX)
         @test abs(det(pX)) > 1.0e-8
+    end
+
+    @testset "Tangent vectors with a trace that vanishes up to rounding" begin
+        M = DeterminantOneMatrices(2)
+        p = [1.0 0.0; 0.0 1.0]
+        @test is_vector(M, p, [1.0e-17 0.5; -0.5 0.0])
+        @test !is_vector(M, p, [1.0 0.0; 0.0 0.0])
+    end
+    @testset "Flatness" begin
+        @test is_flat(DeterminantOneMatrices(1))
+        @test is_flat(DeterminantOneMatrices(1, ℂ))
+        @test !is_flat(DeterminantOneMatrices(2, ℂ))
     end
 end

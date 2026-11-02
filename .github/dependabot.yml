@@ -5,12 +5,22 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "crate-ci/typos"
+        update-types:
+          - "version-update:semver-patch"
+    labels:
+      - "dependencies"
+      - "no changelog necessary"
   - package-ecosystem: "julia"
     directories: # Location of Julia projects
       - "/"
+      - "/accuracy"
+      - "/benchmark"
       - "/docs"
       - "/tutorials"
       - "/test"
+      - "/test/jet"
     schedule:
       interval: "weekly"
     groups:
@@ -18,3 +28,6 @@ updates:
       all-julia-packages:
         patterns:
           - "*"
+    labels:
+      - "dependencies"
+      - "no changelog necessary"

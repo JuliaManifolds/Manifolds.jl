@@ -28,7 +28,17 @@ struct Hyperrectangle{T <: AbstractArray} <: AbstractDecoratorManifold{ℝ}
     end
 end
 
-function check_point(M::Hyperrectangle, p)
+function Base.:(==)(M::Hyperrectangle, N::Hyperrectangle)
+    return M.lb == N.lb && M.ub == N.ub
+end
+function Base.isequal(M::Hyperrectangle, N::Hyperrectangle)
+    return isequal(M.lb, N.lb) && isequal(M.ub, N.ub)
+end
+function Base.hash(M::Hyperrectangle, h::UInt)
+    return hash(M.ub, hash(M.lb, hash(:Hyperrectangle, h)))
+end
+
+function check_point(M::Hyperrectangle, p; kwargs...)
     if !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
@@ -75,9 +85,9 @@ default_retraction_method(::Hyperrectangle) = ProjectionRetraction()
 """
     distance(M::Hyperrectangle, p, q, r::Real=2)
 
-Compute the euclidean distance between two points on the [`Hyperrectangle`](@ref)
-manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
-and higher order arrays, the matrix and tensor Frobenius norm, respectively.
+Compute the Euclidean distance between two points on the [`Hyperrectangle`](@ref) manifold `M`.
+For vectors this is just the norm of the difference, for matrices and higher order arrays
+the matrix and tensor Frobenius norm, respectively.
 Specifying further an `r≠2`, distance based on other norms, like the 1-norm or the ∞-norm
 can also be computed.
 """
@@ -115,6 +125,14 @@ Embed the tangent vector `X` at point `p` in `M`. Equivalent to an identity map.
 """
 embed(::Hyperrectangle, p, X) = X
 
+"""
+    get_embedding(M::Hyperrectangle)
+
+Return the [`Euclidean`](@ref) space of the same size as the bounds of `M`, in which `M` is embedded.
+The size is stored in a field of the embedding, see the `parameter` keyword of [`Euclidean`](@ref).
+"""
+get_embedding(M::Hyperrectangle) = Euclidean(size(M.lb)...; parameter = :field)
+
 @doc raw"""
     exp(M::Hyperrectangle, p, X)
 
@@ -144,13 +162,7 @@ function get_vector_orthonormal(::Hyperrectangle{<:AbstractVector}, ::Any, c, ::
     return c
 end
 
-function get_vector_orthonormal!(
-        ::Hyperrectangle{<:AbstractVector},
-        Y,
-        ::Any,
-        c,
-        ::RealNumbers,
-    )
+function get_vector_orthonormal!(::Hyperrectangle{<:AbstractVector}, Y, ::Any, c, ::RealNumbers)
     # this method is defined just to skip a reshape
     copyto!(Y, c)
     return Y
@@ -246,9 +258,10 @@ function manifold_dimension(M::Hyperrectangle)
 end
 
 """
-    manifold_volume(::Hyperrectangle)
+    manifold_volume(M::Hyperrectangle)
 
-Return volume of the [`Hyperrectangle`](@ref) manifold, i.e. infinity.
+Return the volume of the [`Hyperrectangle`](@ref) manifold `M`, that is, the product of the
+differences between its upper and its lower bound in every coordinate.
 """
 function manifold_volume(M::Hyperrectangle)
     vol = one(eltype(M.lb))
@@ -261,10 +274,7 @@ end
 #
 # When Statistics / Statsbase.mean! is consistent with mean, we can pass this on to them as well
 function Statistics.mean!(
-        ::Hyperrectangle,
-        y,
-        x::AbstractVector,
-        ::EfficientEstimator;
+        ::Hyperrectangle, y, x::AbstractVector, ::EfficientEstimator;
         kwargs...,
     )
     n = length(x)
@@ -276,11 +286,7 @@ function Statistics.mean!(
     return y
 end
 function Statistics.mean!(
-        ::Hyperrectangle,
-        y,
-        x::AbstractVector,
-        w::AbstractWeights,
-        ::EfficientEstimator;
+        ::Hyperrectangle, y, x::AbstractVector, w::AbstractWeights, ::EfficientEstimator;
         kwargs...,
     )
     n = length(x)
@@ -337,8 +343,8 @@ parallel_transport_to!(::Hyperrectangle, Y, ::Any, X, ::Any) = copyto!(Y, X)
 @doc raw"""
     project(M::Hyperrectangle, p)
 
-Project an arbitrary point `p` onto the [`Hyperrectangle`](@ref) manifold `M`, which
-is of course just the identity map.
+Project an arbitrary point `p` onto the [`Hyperrectangle`](@ref) manifold `M`, that is, clamp
+every coordinate of `p` into the interval between the lower and the upper bound at that index.
 """
 project(::Hyperrectangle, ::Any)
 
@@ -355,8 +361,8 @@ end
 
 Project an arbitrary vector `X` into the tangent space of a point `p` on the
 [`Hyperrectangle`](@ref) `M`. For coordinates `i` at which `p[i]` is equal to the
-lower bound of `M`, `X[i]` is upper-bounded at 0. `M`. For coordinates `i` at which `p[i]`
-is equal to the upper bound of `M`, `X[i]` is lower-bounded at 0. Otherwise, `X` is
+upper bound of `M`, `X[i]` is upper-bounded at 0. For the remaining coordinates `i` at which
+`p[i]` is equal to the lower bound of `M`, `X[i]` is lower-bounded at 0. Otherwise, `X` is
 not changed.
 """
 project(::Hyperrectangle, ::Any, ::Any)
@@ -364,9 +370,12 @@ project(::Hyperrectangle, ::Any, ::Any)
 function project!(M::Hyperrectangle, Y, p, X)
     copyto!(Y, X)
     for i in eachindex(M.lb, Y)
+        # intentionally no `else` to allow for the case of a point being at both bounds,
+        # which is possible for a zero-width Hyperrectangle
         if M.ub[i] == p[i]
             Y[i] = min(Y[i], 0)
-        elseif M.lb[i] == p[i]
+        end
+        if M.lb[i] == p[i]
             Y[i] = max(Y[i], 0)
         end
     end
@@ -374,11 +383,8 @@ function project!(M::Hyperrectangle, Y, p, X)
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::Hyperrectangle,
-        pX;
-        σ = one(eltype(pX)),
-        vector_at = nothing,
+        rng::AbstractRNG, M::Hyperrectangle, pX;
+        σ = one(eltype(pX)), vector_at = nothing,
     )
     if vector_at === nothing
         for i in eachindex(M.ub)
@@ -415,7 +421,7 @@ representation_size(M::Hyperrectangle) = size(M.lb)
 
 function ManifoldsBase.retract_project!(M::Hyperrectangle, r, q, Y)
     r .= q .+ Y
-    project(M, r, r)
+    project!(M, r, r)
     return r
 end
 function ManifoldsBase.retract_project_fused!(M::Hyperrectangle, r, q, Y, t::Number)

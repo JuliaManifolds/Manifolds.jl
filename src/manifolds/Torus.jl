@@ -10,15 +10,18 @@ struct Torus{N} <: AbstractPowerManifold{ℝ, Circle{ℝ}, ArrayPowerRepresentat
     manifold::Circle{ℝ}
 end
 
-Torus(n::Int) = Torus{n}(Circle())
+function Torus(n::Int)
+    n < 0 && throw(DomainError(n, "The dimension n of a torus must be nonnegative, but was $(n)."))
+    return Torus{n}(Circle())
+end
 
-Base.:^(M::Circle, n::Int) = Torus{n}(M)
+Base.:^(::Circle{ℝ}, n::Int) = Torus(n)
 
 @doc raw"""
-    check_point(M::Torus{n},p)
+    check_point(M::Torus{n}, p; kwargs...)
 
 Checks whether `p` is a valid point on the [`Torus`](@ref) `M`, i.e. each of
-its entries is a valid point on the [`Circle`](@ref) and the length of `x` is `n`.
+its entries is a valid point on the [`Circle`](@ref) and the length of `p` is `n`.
 """
 check_point(::Torus, ::Any)
 function check_point(M::Torus{N}, p; kwargs...) where {N}
@@ -35,7 +38,19 @@ function check_vector(M::Torus{N}, p, X; kwargs...) where {N}
     return check_vector(PowerManifold(M.manifold, N), p, X; kwargs...)
 end
 
+function get_coordinates_induced_basis!(
+        ::Torus, c, p, X, ::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas}
+    )
+    copyto!(c, vec(X))
+    return c
+end
+
 get_iterator(::Torus{N}) where {N} = 1:N
+
+function get_vector_induced_basis!(::Torus, Y, ::Any, c, ::InducedBasis{ℝ, TangentSpaceType, <:PowerAtlas})
+    copyto!(Y, c)
+    return Y
+end
 
 manifold_dimension(::Torus{N}) where {N} = N
 

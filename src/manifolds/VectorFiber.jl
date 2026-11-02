@@ -12,11 +12,18 @@ TensorProductType(spaces::VectorSpaceType...) = TensorProductType{typeof(spaces)
 
 function inner(B::CotangentSpace, p, X, Y)
     return inner(
-        B.manifold,
-        B.point,
-        sharp(B.manifold, B.point, X),
-        sharp(B.manifold, B.point, Y),
+        B.manifold, B.point, sharp(B.manifold, B.point, X), sharp(B.manifold, B.point, Y)
     )
+end
+
+"""
+    metric_signature(F::Union{TangentSpace, CotangentSpace})
+
+Return the signature of the metric of the tangent or cotangent space `F`, which is the
+one of the base manifold, since the metric of a cotangent space is dual to it.
+"""
+function metric_signature(F::Union{TangentSpace, CotangentSpace})
+    return metric_signature(F.manifold)
 end
 
 function Base.show(io::IO, tpt::TensorProductType)

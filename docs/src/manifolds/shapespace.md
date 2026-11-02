@@ -23,7 +23,7 @@ fig = scatter(p[1,:], p[2,:], label="p", aspect_ratio=:equal)
 scatter!(fig, q[1,:], q[2,:], label="q")
 ```
 
-A more extensive usage example is available in the `hand_gestures.jl` tutorial.
+A more extensive usage example is available in the [hand gesture analysis](../tutorials/hand-gestures.md) tutorial.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]

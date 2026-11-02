@@ -1,0 +1,155 @@
+using LinearAlgebra, Manifolds, Random, Test
+
+@testset "Positive Numbers" begin
+    M = PositiveNumbers()
+
+    @testset "Edge cases" begin
+        @test repr(PositiveMatrices(2, 3)) == "PositiveMatrices(2, 3)"
+        @test repr(PositiveArrays(2, 3, 4)) == "PositiveArrays(2, 3, 4)"
+        # without a method the exponential map and the logarithmic map are used
+        @test retract(M, 1.0, 1.0) == exp(M, 1.0, 1.0)
+        @test inverse_retract(M, 1.0, 4.0) == log(M, 1.0, 4.0)
+        @test project(M, 1.5, 1.0) == 1.0
+        @test embed(M, 1.0) == 1.0
+        @test embed(M, 1.0, 2.0) == 2.0
+
+        @test change_metric(M, EuclideanMetric(), 2, 3) == 3 * 2
+        @test change_representer(M, EuclideanMetric(), 2, 3) == 3 * 2^2
+        @test change_metric(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2]
+        @test change_representer(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2^2]
+        @test project(PositiveVectors(2), [2.0, 4.0], [1.0, 10.0]) == [1.0, 10.0]
+
+        # the cotangent vector evaluates the inner product with the tangent vector
+        xi = flat(M, 2.0, 1.0)
+        @test xi(1.0) ≈ norm(M, 2.0, 1.0)^2
+    end
+
+    Manifolds.Test.test_manifold(
+        M,
+        Dict(
+            :Functions => [
+                default_inverse_retraction_method, default_retraction_method, default_vector_transport_method,
+                distance, exp, flat, geodesic, get_coordinates, get_vector,
+                injectivity_radius, inner, inverse_retract, is_flat, is_point, is_vector,
+                log, manifold_dimension, manifold_volume, mid_point, norm,
+                parallel_transport_direction, parallel_transport_to,
+                rand, repr, representation_size, retract, sharp, shortest_geodesic,
+                vector_transport_direction, vector_transport_to, volume_density, zero_vector,
+            ],
+            :Bases => [DefaultOrthonormalBasis()],
+            :Coordinates => [1.0],
+            :Covectors => [flat(M, 1.0, 1.0)],
+            :InvalidPoints => [-1.0],
+            :InverseRetractionMethods => [LogarithmicInverseRetraction()],
+            :Mutating => false,
+            :Name => "Manifolds.Test suite for PositiveNumbers()",
+            :Points => [1.0, 4.0, 2.0],
+            :RetractionMethods => [ExponentialRetraction()],
+            :SecondVector => 2.0,
+            :VectorTransportMethods => [ParallelTransport()],
+            :Vectors => [1.0, 2.0],
+        ),
+        Dict(
+            default_inverse_retraction_method => LogarithmicInverseRetraction(),
+            default_retraction_method => ExponentialRetraction(),
+            default_vector_transport_method => ParallelTransport(),
+            distance => log(4.0),
+            # exp(p, X) = p exp(X/p) and log(p, q) = p log(q/p)
+            exp => ℯ,
+            injectivity_radius => Inf,
+            (injectivity_radius, ExponentialRetraction()) => Inf,
+            (inverse_retract, LogarithmicInverseRetraction()) => log(4.0),
+            is_flat => false,
+            log => log(4.0),
+            manifold_dimension => 1,
+            manifold_volume => Inf,
+            parallel_transport_to => 4.0,
+            repr => "PositiveNumbers()",
+            representation_size => (),
+            (retract, ExponentialRetraction()) => ℯ,
+            sharp => 1.0,
+            volume_density => exp(1.0),
+            :IsPointErrors => [DomainError],
+        ),
+    )
+
+    @testset "Positive vectors" begin
+        M2 = PositiveVectors(2)
+        p1 = [1.0, 1.1]
+        p2 = [3.0, 3.3]
+        p3 = [2.0, 2.2]
+        X1 = [1.0, 1.1]
+        X2 = [0.5, 2.2]
+
+        Manifolds.Test.test_manifold(
+            M2,
+            Dict(
+                :Functions => [
+                    default_inverse_retraction_method, default_retraction_method, default_vector_transport_method,
+                    distance, exp, flat, geodesic, get_coordinates, get_vector,
+                    injectivity_radius, inner, inverse_retract, is_flat, is_point, is_vector,
+                    log, manifold_dimension, manifold_volume, mid_point, norm,
+                    parallel_transport_direction, parallel_transport_to,
+                    rand, repr, representation_size, retract, sharp, shortest_geodesic,
+                    vector_transport_direction, vector_transport_to, volume_density, zero_vector,
+                ],
+                :Bases => [DefaultOrthonormalBasis()],
+                :Coordinates => [[1.0, 1.0]],
+                :Covectors => [flat(M2, p1, X1)],
+                :InverseRetractionMethods => [LogarithmicInverseRetraction()],
+                :Name => "Manifolds.Test suite for PositiveVectors(2)",
+                :Points => [p1, p2, p3],
+                :RetractionMethods => [ExponentialRetraction()],
+                :SecondVector => X2,
+                :VectorTransportMethods => [ParallelTransport()],
+                :Vectors => [X1, X2],
+            ),
+            Dict(
+                default_inverse_retraction_method => LogarithmicInverseRetraction(),
+                default_retraction_method => ExponentialRetraction(),
+                default_vector_transport_method => ParallelTransport(),
+                injectivity_radius => Inf,
+                (injectivity_radius, ExponentialRetraction()) => Inf,
+                is_flat => false,
+                manifold_dimension => 2,
+                manifold_volume => Inf,
+                repr => "PositiveVectors(2)",
+                representation_size => (2,),
+                volume_density => exp(2.0),
+                :atols => Dict(shortest_geodesic => 1.0e-12),
+            ),
+        )
+    end
+
+    @testset "Riemannian gradient and Hessian" begin
+        p = 1.0
+        G = 2.0
+        H = 3.0
+        X = 4.0
+        @test riemannian_gradient(M, 2.0, 3.0) == 12.0
+        rH = riemannian_Hessian(M, p, G, H, X)
+        @test rH == p * H * p + X * G * p
+        M3 = PositiveVectors(3)
+        p3 = [1.0, 2.0, 3.0]
+        @test riemannian_Hessian(M3, p3, fill(G, 3), fill(H, 3), fill(X, 3)) ≈
+            p3 .* H .* p3 .+ X .* G .* p3
+    end
+
+    @testset "In-place random values" begin
+        p = fill(NaN)
+        X = fill(NaN)
+        rand!(M, p)
+        @test is_point(M, p)
+        rand!(M, X; vector_at = p)
+        @test is_vector(M, p, X)
+    end
+
+    @testset "Field parameter" begin
+        M1 = PositiveVectors(3; parameter = :field)
+        @test repr(M1) == "PositiveVectors(3; parameter=:field)"
+        M2 = PositiveMatrices(3, 4; parameter = :field)
+        @test repr(M2) == "PositiveMatrices(3, 4; parameter=:field)"
+        M3 = PositiveArrays(3, 4, 5; parameter = :field)
+        @test repr(M3) == "PositiveArrays(3, 4, 5; parameter=:field)"
+    end
+end

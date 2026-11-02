@@ -1,7 +1,7 @@
 function check_point(M::Hyperbolic, p::PoincareHalfSpacePoint; kwargs...)
     if !(last(p.value) > 0)
         return DomainError(
-            norm(p.value),
+            last(p.value),
             "The point $(p) does not lie on $(M) since its last entry is nonpositive.",
         )
     end
@@ -10,18 +10,14 @@ end
 function check_size(M::Hyperbolic, p::PoincareHalfSpacePoint)
     N = get_parameter(M.size)[1]
     if size(p.value, 1) != N
-        !(norm(p.value) < 1)
         return DomainError(
-            size(p.value, 1),
-            "The point $p does not lie on $M since its length is not $N.",
+            size(p.value, 1), "The point $p does not lie on $M since its length is not $N."
         )
     end
 end
 
 function check_size(
-        M::Hyperbolic,
-        p::PoincareHalfSpacePoint,
-        X::PoincareHalfSpaceTangentVector;
+        M::Hyperbolic, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTangentVector;
         kwargs...,
     )
     N = get_parameter(M.size)[1]
@@ -41,7 +37,7 @@ Poincaré ball model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ to a [`
 Denote by $\tilde p = (p_1,\ldots,p_{n-1})$. Then the isometry is defined by
 
 ````math
-π(p) = \frac{1}{\lVert \tilde p \rVert^2 - (p_n-1)^2}
+π(p) = \frac{1}{\lVert \tilde p \rVert^2 + (p_n-1)^2}
 \begin{pmatrix}2p_1\\⋮\\2p_{n-1}\\1-\lVert p\rVert^2\end{pmatrix}.
 ````
 """
@@ -72,10 +68,10 @@ end
 @doc raw"""
     convert(::Type{PoincareHalfSpaceTangentVector}, p::PoincareBallPoint, X::PoincareBallTangentVector)
 
-convert a [`PoincareBallTangentVector`](@ref) `X` at `p` to a [`PoincareHalfSpacePoint`](@ref)
-on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ by computing the push forward $π_*(p)[X]$ of
-the isometry ``π`` that maps from the Poincaré ball to the Poincaré half space,
-cf. [`convert(::Type{PoincareHalfSpacePoint}, ::PoincareBallPoint)`](@ref).
+Convert a [`PoincareBallTangentVector`](@ref) `X` at `p` to a [`PoincareHalfSpaceTangentVector`](@ref)
+on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n``.
+This computes the push forward ``π_*(p)[X]`` of the isometry ``π`` that maps from the
+Poincaré ball to the Poincaré half space, cf. [`convert(::Type{PoincareHalfSpacePoint}, ::PoincareBallPoint)`](@ref).
 
 The formula reads
 
@@ -94,7 +90,7 @@ The formula reads
 2p_1(⟨X,p⟩-X_n)\\
 ⋮\\
 2p_{n-1}(⟨X,p⟩-X_n)\\
-(\lVert p \rVert^2-1)(⟨X,p⟩-X_n)
+(1-\lVert p \rVert^2)(⟨X,p⟩-X_n)
 \end{pmatrix}
 ````
 where $\tilde p = \begin{pmatrix}p_1\\⋮\\p_{n-1}\end{pmatrix}$.
@@ -117,10 +113,10 @@ end
     convert(::Type{PoincareHalfSpaceTangentVector}, p::HyperboloidPoint, ::HyperboloidTangentVector)
     convert(::Type{PoincareHalfSpaceTangentVector}, p::P, X::T) where {P<:AbstractVector, T<:AbstractVector}
 
-convert a [`HyperboloidTangentVector`](@ref) `X` at `p` to a [`PoincareHalfSpaceTangentVector`](@ref)
-on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ by computing the push forward $π_*(p)[X]$ of
-the isometry ``π`` that maps from the Hyperboloid to the Poincaré half space,
-cf. [`convert(::Type{PoincareHalfSpacePoint}, ::HyperboloidPoint)`](@ref).
+Convert a [`HyperboloidTangentVector`](@ref) `X` at `p` to a [`PoincareHalfSpaceTangentVector`](@ref)
+on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n``.
+This computes the push forward ``π_*(p)[X]`` of the isometry ``π`` that maps from the
+Hyperboloid to the Poincaré half space, cf. [`convert(::Type{PoincareHalfSpacePoint}, ::HyperboloidPoint)`](@ref).
 
 This is done similarly to the approach there, i.e. by using the Poincaré ball model as
 an intermediate step.
@@ -134,9 +130,7 @@ function convert(
     return convert(t, convert(AbstractVector, p), convert(AbstractVector, X))
 end
 function convert(
-        ::Type{PoincareHalfSpaceTangentVector},
-        p::P,
-        X::T,
+        ::Type{PoincareHalfSpaceTangentVector}, p::P, X::T
     ) where {P <: AbstractVector, T <: AbstractVector}
     return convert(
         PoincareHalfSpaceTangentVector,
@@ -151,8 +145,8 @@ end
     )
 
 Convert a [`PoincareBallPoint`](@ref) `p` and a [`PoincareBallTangentVector`](@ref) `X`
-to a [`PoincareHalfSpacePoint`](@ref) and a [`PoincareHalfSpaceTangentVector`](@ref) simultaneously,
-see [`convert(::Type{PoincareHalfSpacePoint}, ::PoincareBallPoint)`](@ref) and
+to a [`PoincareHalfSpacePoint`](@ref) and a [`PoincareHalfSpaceTangentVector`](@ref) simultaneously.
+See [`convert(::Type{PoincareHalfSpacePoint}, ::PoincareBallPoint)`](@ref) and
 [`convert(::Type{PoincareHalfSpaceTangentVector}, ::PoincareBallPoint,::PoincareBallTangentVector)`](@ref)
 for the formulae.
 """
@@ -177,8 +171,8 @@ end
     ) where {P<:AbstractVector, T <: AbstractVector}
 
 Convert a [`HyperboloidPoint`](@ref) `p` and a [`HyperboloidTangentVector`](@ref) `X`
-to a [`PoincareHalfSpacePoint`](@ref) and a [`PoincareHalfSpaceTangentVector`](@ref) simultaneously,
-see [`convert(::Type{PoincareHalfSpacePoint}, ::HyperboloidPoint)`](@ref) and
+to a [`PoincareHalfSpacePoint`](@ref) and a [`PoincareHalfSpaceTangentVector`](@ref) simultaneously.
+See [`convert(::Type{PoincareHalfSpacePoint}, ::HyperboloidPoint)`](@ref) and
 [`convert(::Type{PoincareHalfSpaceTangentVector}, ::Tuple{HyperboloidPoint,HyperboloidTangentVector})`](@ref)
 for the formulae.
 """
@@ -218,17 +212,12 @@ end
 embed(::Hyperbolic, p::PoincareHalfSpacePoint) = p.value
 embed!(::Hyperbolic, q, p::PoincareHalfSpacePoint) = copyto!(q, p.value)
 embed(::Hyperbolic, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTangentVector) = X.value
-function embed!(
-        ::Hyperbolic,
-        Y,
-        p::PoincareHalfSpacePoint,
-        X::PoincareHalfSpaceTangentVector,
-    )
+function embed!(::Hyperbolic, Y, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTangentVector)
     return copyto!(Y, X.value)
 end
 
 function get_embedding(
-        ::Hyperbolic{TypeParameter{Tuple{n}}}, ::Type{<:PoincareHalfSpacePoint},
+        ::Hyperbolic{TypeParameter{Tuple{n}}}, ::Type{<:PoincareHalfSpacePoint}
     ) where {n}
     return Euclidean(n)
 end
@@ -238,7 +227,7 @@ function get_embedding(M::Hyperbolic{Tuple{Int}}, ::Type{<:PoincareHalfSpacePoin
 end
 
 function ManifoldsBase.get_embedding_type(::Hyperbolic, ::Type{<:PoincareHalfSpacePoint})
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
 end
 
 @doc raw"""
@@ -268,12 +257,12 @@ function norm(M::Hyperbolic, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTang
 end
 
 @doc raw"""
-    project(::Hyperbolic, ::PoincareHalfSpacePoint ::PoincareHalfSpaceTangentVector)
+    project(::Hyperbolic, ::PoincareHalfSpacePoint, ::PoincareHalfSpaceTangentVector)
 
 projection of tangent vectors in the Poincaré half space model is just the identity, since
 the tangent space consists of all $ℝ^n$.
 """
-project(::Hyperbolic, ::PoincareHalfSpacePoint::PoincareHalfSpaceTangentVector)
+project(::Hyperbolic, ::PoincareHalfSpacePoint, ::PoincareHalfSpaceTangentVector)
 
 function ManifoldsBase.allocate_result_embedding(
         ::Hyperbolic,
@@ -290,5 +279,6 @@ function project!(
         ::PoincareHalfSpacePoint,
         X::PoincareHalfSpaceTangentVector,
     )
-    return (Y.value .= X.value)
+    Y.value .= X.value
+    return Y
 end

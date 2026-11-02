@@ -1,3 +1,17 @@
 [deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 NamedColors = "51fcb6bd-ecd8-522c-95bc-4099d1d03463"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[sources]
+Manifolds = {path = ".."}
+
+[compat]
+LinearAlgebra = "1"
+Manifolds = "0.11"
+NamedColors = "0.2"
+Plots = "1"
+Random = "1"
+julia = "1.10"

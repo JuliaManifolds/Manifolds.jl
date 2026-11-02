@@ -20,6 +20,12 @@ struct KendallsPreShapeSpace{T} <: AbstractSphere{ℝ}
 end
 
 function KendallsPreShapeSpace(n::Int, k::Int; parameter::Symbol = :type)
+    (n < 1 || k < 2) && throw(
+        DomainError(
+            (n, k),
+            "Kendall's shape spaces need a positive dimension n and at least k = 2 landmarks, but n and k were $(n) and $(k).",
+        ),
+    )
     size = wrap_type_parameter(parameter, (n, k))
     return KendallsPreShapeSpace{typeof(size)}(size)
 end
@@ -27,16 +33,14 @@ end
 representation_size(M::KendallsPreShapeSpace) = get_parameter(M.size)
 
 """
-    check_point(M::KendallsPreShapeSpace, p; atol=sqrt(max_eps(X, Y)), kwargs...)
+    check_point(M::KendallsPreShapeSpace, p; atol=sqrt(eps(float(eltype(p)))), kwargs...)
 
 Check whether `p` is a valid point on [`KendallsPreShapeSpace`](@ref), i.e. whether
 each row has zero mean. Other conditions are checked via embedding in [`ArraySphere`](@ref).
 """
 function check_point(
-        M::KendallsPreShapeSpace,
-        p;
-        atol::Real = sqrt(eps(float(eltype(p)))),
-        kwargs...,
+        M::KendallsPreShapeSpace, p;
+        atol::Real = sqrt(eps(float(eltype(p)))), kwargs...,
     )
     for p_row in eachrow(p)
         if !isapprox(mean(p_row), 0; atol = atol, kwargs...)
@@ -50,17 +54,14 @@ function check_point(
 end
 
 """
-    check_vector(M::KendallsPreShapeSpace, p, X; kwargs... )
+    check_vector(M::KendallsPreShapeSpace, p, X; atol=sqrt(eps(float(eltype(X)))), kwargs...)
 
 Check whether `X` is a valid tangent vector on [`KendallsPreShapeSpace`](@ref), i.e. whether
 each row has zero mean. Other conditions are checked via embedding in [`ArraySphere`](@ref).
 """
 function check_vector(
-        M::KendallsPreShapeSpace,
-        p,
-        X;
-        atol::Real = sqrt(eps(float(eltype(X)))),
-        kwargs...,
+        M::KendallsPreShapeSpace, p, X;
+        atol::Real = sqrt(eps(float(eltype(X)))), kwargs...,
     )
     for X_row in eachrow(X)
         if !isapprox(mean(X_row), 0; atol = atol, kwargs...)
@@ -107,6 +108,59 @@ function manifold_dimension(M::KendallsPreShapeSpace)
     return n * (k - 1) - 1
 end
 
+@doc raw"""
+    helmert_submatrix(::Type{T}, k::Int)
+
+Return the (`k`-1)×`k` matrix below the first row of the Helmert matrix of order `k`, whose
+`j`-th row is ``(h_j, …, h_j, -jh_j, 0, …, 0)`` with ``h_j = (j(j+1))^{-1/2}``. With the first
+row ``(1/\sqrt{k}, …, 1/\sqrt{k})`` the Helmert matrix is orthogonal, see Eq. (8.87) in
+[Gentle:2017; Section 8.8.1](@cite).
+"""
+function helmert_submatrix(::Type{T}, k::Int) where {T}
+    H = zeros(T, k - 1, k)
+    for j in 1:(k - 1)
+        h = inv(sqrt(T(j) * (j + 1)))
+        H[j, 1:j] .= h
+        H[j, j + 1] = -j * h
+    end
+    return H
+end
+
+@doc raw"""
+    get_coordinates(M::KendallsPreShapeSpace, p, X, ::DefaultOrthonormalBasis)
+
+Compute the coordinates of the tangent vector `X` at `p` on the [`KendallsPreShapeSpace`](@ref) `M`
+in an orthonormal basis. With the [`helmert_submatrix`](@ref Manifolds.helmert_submatrix) ``H``,
+``p ↦ pH^{\mathrm{T}}`` maps `M` isometrically onto the [`ArraySphere`](@ref)`(n, k-1)`, see
+[Kendall:1989; Section 2](@cite), and the coordinates are those of ``XH^{\mathrm{T}}`` at
+``pH^{\mathrm{T}}`` on that sphere.
+"""
+get_coordinates(::KendallsPreShapeSpace, p, X, ::DefaultOrthonormalBasis)
+
+function get_coordinates_orthonormal!(M::KendallsPreShapeSpace, c, p, X, ::RealNumbers)
+    n, k = get_parameter(M.size)
+    H = helmert_submatrix(eltype(p), k)
+    return get_coordinates_orthonormal!(ArraySphere(n, k - 1), c, p * H', X * H', ℝ)
+end
+
+@doc raw"""
+    get_vector(M::KendallsPreShapeSpace, p, c, ::DefaultOrthonormalBasis)
+
+Compute the tangent vector at `p` on the [`KendallsPreShapeSpace`](@ref) `M` with the coordinates `c`
+in an orthonormal basis. It is ``YH``, where ``H`` is the
+[`helmert_submatrix`](@ref Manifolds.helmert_submatrix) and ``Y`` is the tangent vector with the
+coordinates `c` at ``pH^{\mathrm{T}}`` on the [`ArraySphere`](@ref)`(n, k-1)`, see
+[Kendall:1989; Section 2](@cite).
+"""
+get_vector(::KendallsPreShapeSpace, p, c, ::DefaultOrthonormalBasis)
+
+function get_vector_orthonormal!(M::KendallsPreShapeSpace, Y, p, c, ::RealNumbers)
+    n, k = get_parameter(M.size)
+    H = helmert_submatrix(eltype(p), k)
+    Y .= get_vector(ArraySphere(n, k - 1), p * H', c, DefaultOrthonormalBasis()) * H
+    return Y
+end
+
 """
     project(M::KendallsPreShapeSpace, p)
 
@@ -141,16 +195,13 @@ function project!(::KendallsPreShapeSpace, Y, p, X)
 end
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::KendallsPreShapeSpace,
-        pX;
-        vector_at = nothing,
-        σ = one(eltype(pX)),
+        rng::AbstractRNG, M::KendallsPreShapeSpace, pX;
+        vector_at = nothing, σ = one(eltype(pX)),
     )
     if vector_at === nothing
-        project!(M, pX, randn(rng, representation_size(M)))
+        project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
     else
-        n = σ * randn(rng, size(pX)) # Gaussian in embedding
+        n = σ * randn(rng, eltype(pX), size(pX)) # Gaussian in embedding
         project!(M, pX, vector_at, n) #project to TpM (keeps Gaussianness)
     end
     return pX
