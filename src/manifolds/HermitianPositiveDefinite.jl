@@ -305,6 +305,51 @@ Return true if the [`HermitianPositiveDefinite`](@ref) `M` is one-dimensional, i
 is_flat(M::HermitianPositiveDefinite) = get_parameter(M.size)[1] == 1
 
 @doc raw"""
+    manifold_dimension(M::HermitianPositiveDefinite{ℂ})
+
+returns the dimension of
+[`HermitianPositiveDefinite`](@ref) `M` ``=\mathcal H(n), n ∈ ℕ``, over ``𝔽 = ℂ``, i.e.
+````math
+\dim \mathcal H(n) = n^2,
+````
+the real dimension of the Hermitian matrices, see [HiaiPetz:2009](@cite).
+For the real case see [`manifold_dimension`](@ref manifold_dimension(::SymmetricPositiveDefinite)).
+"""
+function manifold_dimension(M::HermitianPositiveDefinite{ℂ})
+    n = get_parameter(M.size)[1]
+    return n^2
+end
+
+"""
+    mean(
+        M::HermitianPositiveDefinite,
+        x::AbstractVector,
+        [w::AbstractWeights,]
+        method = GeodesicInterpolation();
+        kwargs...,
+    )
+
+Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
+[`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`).
+"""
+mean(::HermitianPositiveDefinite, ::Any)
+
+function default_approximation_method(::HermitianPositiveDefinite, ::typeof(mean))
+    return GeodesicInterpolation()
+end
+
+@doc raw"""
+    convert(::Type{AbstractMatrix}, p::MatrixSqrtManifoldPoint)
+
+return the point `p` as a matrix.
+The matrix is either stored within the [`MatrixSqrtManifoldPoint`](@ref) or reconstructed from `p.eigen`.
+"""
+convert(::Type{AbstractMatrix}, p::MatrixSqrtManifoldPoint) = p.p
+function convert(::Type{AbstractMatrix}, p::MatrixSqrtManifoldPoint{Missing})
+    return (p.eigen.vectors * Diagonal(p.eigen.values) * p.eigen.vectors')
+end
+
+@doc raw"""
     hpd_sqrt(p::AbstractMatrix)
     hpd_sqrt(p::MatrixSqrtManifoldPoint)
 
@@ -395,12 +440,85 @@ function hpd_sqrt_and_sqrt_inv(
     return (Hermitian(U * Ssqrt * U'), Hermitian(U * SsqrtInv * U'))
 end
 
+Base.eltype(p::MatrixSqrtManifoldPoint) = eltype(p.eigen)
+
+@doc raw"""
+    project(M::HermitianPositiveDefinite, p, X)
+
+project a matrix from the embedding onto the tangent space ``T_p\mathcal H(n)`` of the
+[`HermitianPositiveDefinite`](@ref) matrices, i.e. the set of Hermitian matrices,
+by taking the Hermitian part ``\frac{1}{2}(X + X^{\mathrm{H}})``.
+"""
+project(::HermitianPositiveDefinite, p, X)
+
+project!(::HermitianPositiveDefinite, Y, p, X) = (Y .= Hermitian((X + X') / 2))
+
+@doc raw"""
+    rand(M::HermitianPositiveDefinite{ℂ}; vector_at=nothing, tangent_distr=:Gaussian, σ::Real=1/sqrt(n))
+
+Generate a random Hermitian positive definite matrix on the complex
+[`HermitianPositiveDefinite`](@ref) manifold `M`, or, if `vector_at` is a point ``p``, a random
+tangent vector at ``p``. The parameter `σ` has no effect on a point.
+
+For `tangent_distr = :Gaussian` the coordinates of the tangent vector in the
+[`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) of ``T_p\mathcal H(n)``
+are independent and normally distributed with standard deviation `σ`.
+For `tangent_distr = :Rician` the tangent vector is ``RR^{\mathrm{H}}`` with
+``R = L + \sqrt{σ}U``, where ``L`` is the lower triangular Cholesky factor of ``p`` and ``U`` is
+upper triangular with independent complex standard normal entries; here `σ` defaults to
+``1/\lVert p\rVert_{\mathrm{F}}`` instead.
+"""
+rand(M::HermitianPositiveDefinite{ℂ}; σ::Real = 1)
+
+function allocate_result(
+        M::HermitianPositiveDefinite, ::typeof(Random.rand), p::MatrixSqrtManifoldPoint
+    )
+    return zero_vector(M, p)
+end
+
+function Random.rand!(
+        rng::AbstractRNG,
+        M::HermitianPositiveDefinite{ℂ},
+        pX;
+        vector_at = nothing,
+        tangent_distr = :Gaussian,
+        σ::Real = (tangent_distr === :Rician && vector_at !== nothing) ?
+            one(real(eltype(pX))) / norm(convert(AbstractMatrix, vector_at)) :
+            one(real(eltype(pX))) / sqrt(get_parameter(M.size)[1]),
+    )
+    N = get_parameter(M.size)[1]
+    T = eltype(pX)
+    if vector_at === nothing
+        D = Diagonal(1 .+ rand(rng, N)) # random diagonal matrix
+        s = qr(σ * randn(rng, T, N, N)) # random unitary q
+        if pX isa MatrixSqrtManifoldPoint
+            pX.eigen.values .= D.diag
+            pX.eigen.vectors .= s.Q
+            sq = sqrt.(D.diag)
+            !ismissing(pX.p) && (pX.p .= Hermitian(s.Q * D * s.Q'))
+            !ismissing(pX.sqrt) && (pX.sqrt .= s.Q * Diagonal(sq) * s.Q')
+            !ismissing(pX.sqrt_inv) && (pX.sqrt_inv .= s.Q * Diagonal(1 ./ sq) * s.Q')
+        else
+            pX .= Hermitian(s.Q * D * s.Q')
+        end
+    elseif tangent_distr === :Gaussian
+        # an orthonormal basis of the tangent space at vector_at
+        Ξ = get_vectors(M, vector_at, get_basis(M, vector_at, DefaultOrthonormalBasis()))
+        pX .= sum(σ * randn(rng, length(Ξ)) .* Ξ)
+    elseif tangent_distr === :Rician
+        C = cholesky(Hermitian(convert(AbstractMatrix, vector_at)))
+        R = C.L + sqrt(σ) * triu(randn(rng, T, N, N), 0)
+        pX .= R * R'
+    end
+    return pX
+end
+
 @doc raw"""
     representation_size(M::HermitianPositiveDefinite)
 
 Return the size of an array representing an element on the
 [`HermitianPositiveDefinite`](@ref) manifold `M`, i.e. ``n×n``, the size of such a
-hermitian positive definite matrix on ``\mathcal M = \mathcal H(n)``.
+Hermitian positive definite matrix on ``\mathcal M = \mathcal H(n)``.
 """
 function representation_size(M::HermitianPositiveDefinite)
     n = get_parameter(M.size)[1]
@@ -413,3 +531,36 @@ function Base.show(io::IO, M::HermitianPositiveDefinite{𝔽}) where {𝔽}
     kw = get_parameter_type(M) === :type ? "" : "; parameter=:$(get_parameter_type(M))"
     return print(io, "HermitianPositiveDefinite($n$p$kw)")
 end
+
+function Base.show(io::IO, ::MIME"text/plain", p::MatrixSqrtManifoldPoint)
+    pre = " "
+    summary(io, p)
+    println(io, "\np:")
+    sp = sprint(show, "text/plain", p.p; context = io, sizehint = 0)
+    sp = replace(sp, '\n' => "\n$(pre)")
+    println(io, pre, sp)
+    println(io, "p^{1/2}:")
+    sps = sprint(show, "text/plain", p.sqrt; context = io, sizehint = 0)
+    sps = replace(sps, '\n' => "\n$(pre)")
+    println(io, pre, sps)
+    println(io, "p^{-1/2}:")
+    spi = sprint(show, "text/plain", p.sqrt_inv; context = io, sizehint = 0)
+    spi = replace(spi, '\n' => "\n$(pre)")
+    return print(io, pre, spi)
+end
+
+@doc raw"""
+    zero_vector(M::HermitianPositiveDefinite, p)
+    zero_vector!(M::HermitianPositiveDefinite, X, p)
+
+returns the zero tangent vector in the tangent space of the Hermitian positive
+definite matrix `p` on the [`HermitianPositiveDefinite`](@ref) manifold `M`.
+It can be returned in place of `X`.
+"""
+zero_vector(::HermitianPositiveDefinite, ::Any)
+
+function zero_vector(M::HermitianPositiveDefinite, p::MatrixSqrtManifoldPoint)
+    return zero_vector(M, convert(AbstractMatrix, p))
+end
+
+zero_vector!(::HermitianPositiveDefinite, X, ::Any) = fill!(X, 0)

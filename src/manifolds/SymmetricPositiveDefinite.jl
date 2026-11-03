@@ -48,35 +48,6 @@ function manifold_dimension(M::SymmetricPositiveDefinite)
     return div(n * (n + 1), 2)
 end
 
-"""
-    mean(
-        M::SymmetricPositiveDefinite,
-        x::AbstractVector,
-        [w::AbstractWeights,]
-        method = GeodesicInterpolation();
-        kwargs...,
-    )
-
-Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
-[`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`).
-"""
-mean(::SymmetricPositiveDefinite, ::Any)
-
-function default_approximation_method(::SymmetricPositiveDefinite, ::typeof(mean))
-    return GeodesicInterpolation()
-end
-
-@doc raw"""
-    convert(::Type{AbstractMatrix}, p::SPDPoint)
-
-return the point `p` as a matrix.
-The matrix is either stored within the [`SPDPoint`](@ref) or reconstructed from `p.eigen`.
-"""
-convert(::Type{AbstractMatrix}, p::SPDPoint) = p.p
-function convert(::Type{AbstractMatrix}, p::SPDPoint{Missing})
-    return (p.eigen.vectors * Diagonal(p.eigen.values) * p.eigen.vectors')
-end
-
 @doc raw"""
     spd_sqrt(p::AbstractMatrix)
     spd_sqrt(p::SPDPoint)
@@ -166,8 +137,6 @@ function spd_sqrt_and_sqrt_inv(
     return (Symmetric(U * Ssqrt * transpose(U)), Symmetric(U * SsqrtInv * transpose(U)))
 end
 
-Base.eltype(p::SPDPoint) = eltype(p.eigen)
-
 @doc raw"""
     project(M::SymmetricPositiveDefinite, p, X)
 
@@ -175,8 +144,6 @@ project a matrix from the embedding onto the tangent space ``T_p\mathcal P(n)`` 
 [`SymmetricPositiveDefinite`](@ref) matrices, i.e. the set of symmetric matrices.
 """
 project(::SymmetricPositiveDefinite, p, X)
-
-project!(::SymmetricPositiveDefinite, Y, p, X) = (Y .= Symmetric((X + X') / 2))
 
 @doc raw"""
     rand(M::SymmetricPositiveDefinite; vector_at=nothing, tangent_distr=:Gaussian, σ::Real=1/sqrt(n))
@@ -193,10 +160,6 @@ upper triangular with independent standard normal entries; here `σ` defaults to
 ``1/\lVert p\rVert_{\mathrm{F}}`` instead.
 """
 rand(M::SymmetricPositiveDefinite; σ::Real = 1)
-
-function allocate_result(M::SymmetricPositiveDefinite, ::typeof(Random.rand), p::SPDPoint)
-    return zero_vector(M, p)
-end
 
 function Random.rand!(
         rng::AbstractRNG,
@@ -235,51 +198,18 @@ function Random.rand!(
     return pX
 end
 
-@doc raw"""
-    representation_size(M::SymmetricPositiveDefinite)
-
-Return the size of an array representing an element on the
-[`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. ``n×n``, the size of such a
-symmetric positive definite matrix on ``\mathcal M = \mathcal P(n)``.
-"""
-function representation_size(M::SymmetricPositiveDefinite)
-    N = get_parameter(M.size)[1]
-    return (N, N)
-end
-
 function Base.show(io::IO, M::SymmetricPositiveDefinite)
     n = get_parameter(M.size)[1]
     kw = get_parameter_type(M) === :type ? "" : "; parameter=:$(get_parameter_type(M))"
     return print(io, "SymmetricPositiveDefinite($n$kw)")
 end
 
-function Base.show(io::IO, ::MIME"text/plain", p::SPDPoint)
-    pre = " "
-    summary(io, p)
-    println(io, "\np:")
-    sp = sprint(show, "text/plain", p.p; context = io, sizehint = 0)
-    sp = replace(sp, '\n' => "\n$(pre)")
-    println(io, pre, sp)
-    println(io, "p^{1/2}:")
-    sps = sprint(show, "text/plain", p.sqrt; context = io, sizehint = 0)
-    sps = replace(sps, '\n' => "\n$(pre)")
-    println(io, pre, sps)
-    println(io, "p^{-1/2}:")
-    spi = sprint(show, "text/plain", p.sqrt_inv; context = io, sizehint = 0)
-    spi = replace(spi, '\n' => "\n$(pre)")
-    return print(io, pre, spi)
-end
-
 @doc raw"""
     zero_vector(M::SymmetricPositiveDefinite, p)
+    zero_vector!(M::SymmetricPositiveDefinite, X, p)
 
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `p` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
+It can be returned in place of `X`.
 """
 zero_vector(::SymmetricPositiveDefinite, ::Any)
-
-function zero_vector(M::SymmetricPositiveDefinite, p::SPDPoint)
-    return zero_vector(M, convert(AbstractMatrix, p))
-end
-
-zero_vector!(::SymmetricPositiveDefinite, X, ::Any) = fill!(X, 0)
