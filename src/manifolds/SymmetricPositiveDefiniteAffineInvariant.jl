@@ -1,12 +1,4 @@
 @doc raw"""
-    AffineInvariantMetric <: AbstractMetric
-
-The linear affine metric is the metric for symmetric positive definite matrices, that employs
-matrix logarithms and exponentials, which yields a linear and affine metric.
-"""
-struct AffineInvariantMetric <: RiemannianMetric end
-
-@doc raw"""
     change_representer(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
 Compute the representer of the linear function given by ``X ∈ T_p\mathcal M`` with respect to
@@ -24,11 +16,6 @@ it holds
 and hence ``Z = pXp``.
 """
 change_representer(::SymmetricPositiveDefinite, ::EuclideanMetric, ::Any, ::Any)
-
-function change_representer!(::SymmetricPositiveDefinite, Y, ::EuclideanMetric, p, X)
-    Y .= p * X * p
-    return Y
-end
 
 @doc raw"""
     change_metric(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
