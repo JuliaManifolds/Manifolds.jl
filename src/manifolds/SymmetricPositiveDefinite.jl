@@ -32,7 +32,16 @@ function SymmetricPositiveDefinite(n::Int; parameter::Symbol = :type)
     return HermitianPositiveDefinite(n, ℝ; parameter = parameter)
 end
 
-const SPDPoint = MatrixSqrtManifoldPoint
+@doc raw"""
+    injectivity_radius(M::SymmetricPositiveDefinite[, p])
+    injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}[, p])
+    injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}[, p])
+
+Return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref).
+Since `M` is a Hadamard manifold with respect to the [`AffineInvariantMetric`](@ref) and the
+[`LogCholeskyMetric`](@ref), the injectivity radius is globally ``∞``.
+"""
+injectivity_radius(::SymmetricPositiveDefinite, ::Any...)
 
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)
@@ -46,95 +55,6 @@ returns the dimension of
 function manifold_dimension(M::SymmetricPositiveDefinite)
     n = get_parameter(M.size)[1]
     return div(n * (n + 1), 2)
-end
-
-@doc raw"""
-    spd_sqrt(p::AbstractMatrix)
-    spd_sqrt(p::SPDPoint)
-
-return ``p^{\frac{1}{2}}`` by either computing it (if it is missing or for the `AbstractMatrix`)
-or returning the stored value from within the [`SPDPoint`](@ref).
-
-This method assumes that `p` represents an spd matrix.
-"""
-spd_sqrt(p)
-
-function spd_sqrt(p::AbstractMatrix)
-    e = eigen(Symmetric(p))
-    U = e.vectors
-    S = max.(e.values, floatmin(eltype(e.values)))
-    Ssqrt = Diagonal(sqrt.(S))
-    return Symmetric(U * Ssqrt * transpose(U))
-end
-spd_sqrt(p::SPDPoint) = Symmetric(p.sqrt)
-function spd_sqrt(p::SPDPoint{P, Missing}) where {P <: Union{AbstractMatrix, Missing}}
-    U = p.eigen.vectors
-    S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
-    Ssqrt = Diagonal(sqrt.(S))
-    return Symmetric(U * Ssqrt * transpose(U))
-end
-
-@doc raw"""
-    spd_sqrt_inv(p::SPDPoint)
-
-return ``p^{-\frac{1}{2}}`` by either computing it (if it is missing or for the `AbstractMatrix`)
-or returning the stored value from within the [`SPDPoint`](@ref).
-
-This method assumes that `p` represents an spd matrix.
-"""
-spd_sqrt_inv(p::SPDPoint) = Symmetric(p.sqrt_inv)
-function spd_sqrt_inv(
-        p::SPDPoint{P, Q, Missing}
-    ) where {P <: Union{AbstractMatrix, Missing}, Q <: Union{AbstractMatrix, Missing}}
-    U = p.eigen.vectors
-    S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
-    SsqrtInv = Diagonal(1 ./ sqrt.(S))
-    return Symmetric(U * SsqrtInv * transpose(U))
-end
-
-@doc raw"""
-    spd_sqrt_and_sqrt_inv(p::AbstractMatrix)
-    spd_sqrt_and_sqrt_inv(p::SPDPoint)
-
-return ``p^{\frac{1}{2}}`` and ``p^{-\frac{1}{2}}`` by either computing them (if they are missing or for the `AbstractMatrix`)
-or returning their stored value from within the [`SPDPoint`](@ref).
-
-Compared to calling single methods [`spd_sqrt`](@ref Manifolds.spd_sqrt) and [`spd_sqrt_inv`](@ref Manifolds.spd_sqrt_inv) this method
-only computes the eigenvectors once for the case of the `AbstractMatrix` or if both are missing.
-
-This method assumes that `p` represents an spd matrix.
-"""
-spd_sqrt_and_sqrt_inv(p)
-
-function spd_sqrt_and_sqrt_inv(p::AbstractMatrix)
-    e = eigen(Symmetric(p))
-    U = e.vectors
-    S = max.(e.values, floatmin(eltype(e.values)))
-    Ssqrt = Diagonal(sqrt.(S))
-    SsqrtInv = Diagonal(1 ./ sqrt.(S))
-    return (Symmetric(U * Ssqrt * transpose(U)), Symmetric(U * SsqrtInv * transpose(U)))
-end
-function spd_sqrt_and_sqrt_inv(p::SPDPoint{P}) where {P <: Union{Missing, AbstractMatrix}}
-    return (Symmetric(p.sqrt), Symmetric(p.sqrt_inv))
-end
-function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Q, Missing}
-    ) where {P <: Union{Missing, AbstractMatrix}, Q <: AbstractMatrix}
-    return (Symmetric(p.sqrt), spd_sqrt_inv(p))
-end
-function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Missing, R}
-    ) where {P <: Union{Missing, AbstractMatrix}, R <: AbstractMatrix}
-    return (spd_sqrt(p), Symmetric(p.sqrt_inv))
-end
-function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Missing, Missing}
-    ) where {P <: Union{Missing, AbstractMatrix}}
-    S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
-    U = p.eigen.vectors
-    Ssqrt = Diagonal(sqrt.(S))
-    SsqrtInv = Diagonal(1 ./ sqrt.(S))
-    return (Symmetric(U * Ssqrt * transpose(U)), Symmetric(U * SsqrtInv * transpose(U)))
 end
 
 @doc raw"""
@@ -175,7 +95,7 @@ function Random.rand!(
     if vector_at === nothing
         D = Diagonal(1 .+ rand(rng, N)) # random diagonal matrix
         s = qr(σ * randn(rng, N, N)) # random q
-        if pX isa SPDPoint
+        if pX isa MatrixSqrtManifoldPoint
             pX.eigen.values .= D.diag
             pX.eigen.vectors .= s.Q
             sq = sqrt.(D.diag)

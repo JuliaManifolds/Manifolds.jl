@@ -280,12 +280,10 @@ get_parameter_type(::HermitianPositiveDefinite{𝔽, Tuple{Int}}) where {𝔽} =
 @doc raw"""
     injectivity_radius(M::HermitianPositiveDefinite[, p])
     injectivity_radius(M::MetricManifold{HermitianPositiveDefinite,AffineInvariantMetric}[, p])
-    injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}[, p])
 
 Return the injectivity radius of the [`HermitianPositiveDefinite`](@ref).
 Since `M` is a Hadamard manifold with respect to the [`AffineInvariantMetric`](@ref),
-where the exponential map is a global diffeomorphism [ChauVonSachs:2021](@cite), Section 2,
-and, for ``𝔽=ℝ``, with respect to the [`LogCholeskyMetric`](@ref), the injectivity radius is globally ``∞``.
+see [Smith:2005](@cite), Section II-B and Section III-C, the injectivity radius is globally ``∞``.
 """
 injectivity_radius(::HermitianPositiveDefinite) = Inf
 injectivity_radius(::HermitianPositiveDefinite, p) = Inf
@@ -312,7 +310,7 @@ returns the dimension of
 ````math
 \dim \mathcal H(n) = n^2,
 ````
-the real dimension of the Hermitian matrices, see [HiaiPetz:2009](@cite).
+the real dimension of the Hermitian matrices.
 For the real case see [`manifold_dimension`](@ref manifold_dimension(::SymmetricPositiveDefinite)).
 """
 function manifold_dimension(M::HermitianPositiveDefinite{ℂ})

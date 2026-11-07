@@ -12,24 +12,26 @@ The manifold can be equipped with different metrics
 
 ## Common and metric independent functions
 
+The symmetric positive definite matrices are the real case of the [Hermitian positive definite matrices](@ref HermitianPositiveDefiniteSection),
+and all functions that do not depend on the field are documented there.
+The following keep their real docstrings.
+
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
 Pages = ["manifolds/SymmetricPositiveDefinite.jl"]
 Order = [:function]
 Public=true
 Private=false
-Filter = t -> t !== mean
 ```
 
 ## Default metric: the affine invariant metric
 
-```@autodocs
-Modules = [Manifolds]
-Pages = ["manifolds/SymmetricPositiveDefiniteAffineInvariant.jl"]
-Order = [:type]
+```@docs
+AffineInvariantMetric
 ```
 
 This metric is also the default metric, i.e. any call of the following functions with `P=SymmetricPositiveDefinite(3)` will result in `MetricManifold(P,AffineInvariantMetric())`and hence yield the formulae described in this section.
+The same formulas hold for the [Hermitian positive definite matrices](@ref HermitianPositiveDefiniteSection).
 
 ```@autodocs
 Modules = [Manifolds]
@@ -69,33 +71,11 @@ Pages = ["manifolds/SymmetricPositiveDefiniteLogCholesky.jl"]
 Order = [:type, :function]
 ```
 
-## Statistics
-
-```@autodocs
-Modules = [Manifolds]
-Pages   = ["SymmetricPositiveDefinite.jl"]
-Order = [:function]
-Filter = t -> t === mean
-```
-
 ## Efficient representation
 
 When a point `p` is used in several occasions, it might be beneficial to store the eigenvalues
 and vectors of `p` and optionally its square root and the inverse of the square root.
-The [`SPDPoint`](@ref) can be used for exactly that.
-
-```@docs
-SPDPoint
-```
-
-and there are three internal functions to be able to use [`SPDPoint`](@ref) interchangeably
-with the default representation as a matrix.
-
-```@docs
-Manifolds.spd_sqrt
-Manifolds.spd_sqrt_inv
-Manifolds.spd_sqrt_and_sqrt_inv
-```
+The [`MatrixSqrtManifoldPoint`](@ref) can be used for exactly that; `SPDPoint` is deprecated in its favour.
 
 ## Literature
 

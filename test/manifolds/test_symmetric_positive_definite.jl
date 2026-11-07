@@ -22,7 +22,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
     basis = DefaultOrthonormalBasis()
 
     @testset "Affine invariant metric with $T points" for T in
-        [Matrix{Float64}, MMatrix{3, 3, Float64, 9}, SPDPoint]
+        [Matrix{Float64}, MMatrix{3, 3, Float64, 9}, MatrixSqrtManifoldPoint]
         Manifolds.Test.test_manifold(
             M,
             Dict(
@@ -37,8 +37,8 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
                     parallel_transport_direction, parallel_transport_to, rand, repr,
                     representation_size, retract, shortest_geodesic,
                     vector_transport_direction, vector_transport_to, zero_vector,
-                    # embedding and curvature are not yet available for SPDPoint
-                    (T === SPDPoint ? () : (embed, sectional_curvature))...,
+                    # embedding and curvature are not yet available for MatrixSqrtManifoldPoint
+                    (T === MatrixSqrtManifoldPoint ? () : (embed, sectional_curvature))...,
                 ],
                 :InvalidPoints => invalid_points,
                 :InvalidVectors => invalid_vectors,
@@ -89,7 +89,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
     end
 
     @testset "Affine invariant metric as a metric manifold with $T points" for T in
-        [Matrix{Float64}, SPDPoint]
+        [Matrix{Float64}, MatrixSqrtManifoldPoint]
         M2 = MetricManifold(M, AffineInvariantMetric())
         Manifolds.Test.test_manifold(
             M2,
@@ -412,15 +412,15 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
             @test get_coordinates(M, p2, Z, Bd) ≈ 2 * z
             Z2 = rand(MersenneTwister(42), M; vector_at = p2)
             @test get_coordinates(M, p2, Z2, Bd) ≈ z / sqrt(3)
-            # the Rician draw at an SPDPoint equals the one at its matrix
-            qS = SPDPoint(p2)
+            # the Rician draw at a MatrixSqrtManifoldPoint equals the one at its matrix
+            qS = MatrixSqrtManifoldPoint(p2)
             ZR = rand(MersenneTwister(42), M; vector_at = p2, tangent_distr = :Rician)
             @test rand(MersenneTwister(42), M; vector_at = qS, tangent_distr = :Rician) ≈ ZR
-            # a random point drawn into an SPDPoint stores its matrix square roots
-            pR = rand!(MersenneTwister(42), M, SPDPoint(p2))
-            @test pR.sqrt ≈ SPDPoint(pR.p).sqrt
-            @test pR.sqrt_inv ≈ SPDPoint(pR.p).sqrt_inv
-            pN = SPDPoint(p2; store_sqrt = false, store_sqrt_inv = false)
+            # a random point drawn into a MatrixSqrtManifoldPoint stores its matrix square roots
+            pR = rand!(MersenneTwister(42), M, MatrixSqrtManifoldPoint(p2))
+            @test pR.sqrt ≈ MatrixSqrtManifoldPoint(pR.p).sqrt
+            @test pR.sqrt_inv ≈ MatrixSqrtManifoldPoint(pR.p).sqrt_inv
+            pN = MatrixSqrtManifoldPoint(p2; store_sqrt = false, store_sqrt_inv = false)
             @test rand!(MersenneTwister(42), M, pN).p == pR.p
         end
         @testset "Riemann tensor" begin
@@ -492,29 +492,29 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
         end
     end
 
-    @testset "SPDPoint functions" begin
-        p = SPDPoint(2 * Matrix{Float64}(I, 3, 3))
+    @testset "MatrixSqrtManifoldPoint functions" begin
+        p = MatrixSqrtManifoldPoint(2 * Matrix{Float64}(I, 3, 3))
         p2 = copy(p)
-        @test SPDPoint(p2) === p2
+        @test MatrixSqrtManifoldPoint(p2) === p2
         @test p2.eigen == p.eigen
         @test ManifoldsBase.check_size(M, p; atol = 1.0e-8) === nothing
         @test ManifoldsBase.check_size(M, p, Matrix{Float64}(I, 3, 3); atol = 1.0e-8) === nothing
-        pS = SPDPoint(
+        pS = MatrixSqrtManifoldPoint(
             2 * Matrix{Float64}(I, 3, 3);
             store_p = false, store_sqrt = false, store_sqrt_inv = false,
         )
         m = missing
         s = "$(typeof(pS))\np:\n $m\np^{1/2}:\n $m\np^{-1/2}:\n $m"
         @test sprint(show, "text/plain", pS) == s
-        pF = SPDPoint(Matrix{Float64}(I, 3, 3))
+        pF = MatrixSqrtManifoldPoint(Matrix{Float64}(I, 3, 3))
         copyto!(pF, pS) # fill values in F
         @test pF == p
-        pF2 = SPDPoint(Matrix{Float64}(I, 3, 3))
+        pF2 = MatrixSqrtManifoldPoint(Matrix{Float64}(I, 3, 3))
         copyto!(pF2, pF) # copy values in F
         @test !ismissing(pF2.p)
         @test !ismissing(pF2.sqrt)
         @test !ismissing(pF2.sqrt_inv)
-        pF3 = SPDPoint(
+        pF3 = MatrixSqrtManifoldPoint(
             Matrix{Float64}(I, 3, 3);
             store_p = false, store_sqrt = false, store_sqrt_inv = false,
         )
@@ -522,24 +522,24 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
         @test ismissing(pF3.p)
         @test ismissing(pF3.sqrt)
         @test ismissing(pF3.sqrt_inv)
-        @test isapprox(Manifolds.spd_sqrt(pS), pF.sqrt) # recreate
-        @test isapprox(Manifolds.spd_sqrt_inv(pF), pF.sqrt_inv) #identity
-        pF4 = SPDPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt_inv = false)
-        pF5 = SPDPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt = false)
+        @test isapprox(Manifolds.hpd_sqrt(pS), pF.sqrt) # recreate
+        @test isapprox(Manifolds.hpd_sqrt_inv(pF), pF.sqrt_inv) #identity
+        pF4 = MatrixSqrtManifoldPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt_inv = false)
+        pF5 = MatrixSqrtManifoldPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt = false)
         ssi = (pF.sqrt, pF.sqrt_inv)
-        @test Manifolds.spd_sqrt_and_sqrt_inv(pF4) == ssi # comp sqrt inv
-        @test Manifolds.spd_sqrt_and_sqrt_inv(pF5) == ssi # comp sqrt
-        @test Manifolds.spd_sqrt_and_sqrt_inv(pS) == ssi # com both
+        @test Manifolds.hpd_sqrt_and_sqrt_inv(pF4) == ssi # comp sqrt inv
+        @test Manifolds.hpd_sqrt_and_sqrt_inv(pF5) == ssi # comp sqrt
+        @test Manifolds.hpd_sqrt_and_sqrt_inv(pS) == ssi # com both
         @test isapprox(exp!(M, pS, p, zero_vector(M, p)), p)
         @test ismissing(pS.sqrt)
         @test ismissing(pS.sqrt_inv)
-        qR = SPDPoint(Matrix{Float64}(I, 3, 3); store_p = false)
+        qR = MatrixSqrtManifoldPoint(Matrix{Float64}(I, 3, 3); store_p = false)
         exp!(M, qR, p, ones(3, 3))
         @test isapprox(M, qR, exp(M, p, ones(3, 3)))
         @test exp(M, p, ones(3, 3)) == qR
         # allocation keeps the stored fields and leaves the missing ones missing
         pA = allocate(pF4)
-        @test pA isa SPDPoint
+        @test pA isa MatrixSqrtManifoldPoint
         @test pA.p isa Matrix{Float64} && pA.p !== pF4.p
         @test pA.sqrt isa Matrix{Float64} && pA.sqrt !== pF4.sqrt
         @test ismissing(pA.sqrt_inv)

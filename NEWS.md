@@ -9,9 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* `HermitianPositiveDefinite` manifold of Hermitian positive definite matrices.
-* `MatrixSqrtManifoldPoint` as a generalization/replacement for the `SPDPoint`
-* `SymmetricPositiveDefinite` is now a `const` of `HermitianPositiveDefinite` over the reals
+* `HermitianPositiveDefinite`, the manifold of Hermitian positive definite matrices over `ℝ` or `ℂ`, with the `AffineInvariantMetric`: `exp`, `log`, `distance`, `inner`, `parallel_transport_to`, `get_basis`, `get_coordinates` and `get_vector` in the `DefaultOrthonormalBasis`, `project`, `rand`, `change_metric`, `change_representer`, `riemannian_Hessian` and `sectional_curvature_max`. The curvature tensor, the curvature-diagonalizing basis, `sectional_curvature_min` and `volume_density` remain available for the real case only.
+* `MatrixSqrtManifoldPoint`, the point representation that stores the eigenvalue decomposition, the matrix square root and its inverse, for both fields.
+
+### Changed
+
+* `SymmetricPositiveDefinite` is now a `const` of `HermitianPositiveDefinite` over the reals.
+
+### Deprecated
+
+* The internal functions `spd_sqrt`, `spd_sqrt_inv` and `spd_sqrt_and_sqrt_inv` are deprecated in favour of `hpd_sqrt`, `hpd_sqrt_inv` and `hpd_sqrt_and_sqrt_inv`, which return `Hermitian` matrices.
+* `SPDPoint` is deprecated in favour of `MatrixSqrtManifoldPoint`, which represents points on both the real and the complex manifold.
 
 ## [0.11.37] 2026-10-31
 
