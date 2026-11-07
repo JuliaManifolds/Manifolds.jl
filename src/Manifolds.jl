@@ -477,6 +477,8 @@ include("manifolds/FlagStiefel.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/HeisenbergMatrices.jl")
+include("manifolds/HermitianPositiveDefinite.jl")
+include("manifolds/HermitianPositiveDefiniteAffineInvariant.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/Hyperrectangle.jl")
 include("manifolds/InvertibleMatrices.jl")
@@ -640,6 +642,7 @@ export Euclidean,
     Grassmann,
     HamiltonianMatrices,
     HeisenbergMatrices,
+    HermitianPositiveDefinite,
     Hyperbolic,
     Hyperrectangle,
     InvertibleMatrices,
@@ -689,7 +692,7 @@ export HyperboloidPoint,
     SVDMPoint,
     TuckerPoint,
     ProjectorPoint,
-    SPDPoint
+    MatrixSqrtManifoldPoint
 # Tangent vector representation types
 export HyperboloidTangentVector,
     OrthogonalTangentVector,

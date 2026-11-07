@@ -78,7 +78,7 @@ hash_allocations(a) = (hash(a); @allocated hash(a))
         sf(U) = Manifolds.StiefelFactorization(copy(U), [1.0 0.0; 0.0 1.0])
         test_value_equality(() -> sf([1.0 0.0; 0.0 1.0; 0.0 0.0]), () -> sf([0.0 0.0; 0.0 1.0; 1.0 0.0]))
         P = [2.0 0.5; 0.5 1.0]
-        test_value_equality(() -> SPDPoint(copy(P)), () -> SPDPoint(2 * P))
+        test_value_equality(() -> MatrixSqrtManifoldPoint(copy(P)), () -> MatrixSqrtManifoldPoint(2 * P))
         U = [1.0 0.0; 0.0 1.0; 0.0 0.0]
         test_value_equality(() -> SVDMPoint(copy(U), [2.0, 1.0], [1.0 0.0; 0.0 1.0]), () -> SVDMPoint(U, [3.0, 1.0], [1.0 0.0; 0.0 1.0]))
         test_value_equality(() -> UMVTangentVector(copy(U), [1.0 0.0; 0.0 1.0], zeros(2, 2)), () -> UMVTangentVector(U, [2.0 0.0; 0.0 1.0], zeros(2, 2)))
@@ -101,7 +101,7 @@ hash_allocations(a) = (hash(a); @allocated hash(a))
                 TangentBundle(GS(B)),
                 induced_basis(S, RetractionAtlas(), copy(p), TangentSpaceType()),
                 RetractionAtlas(),
-                SPDPoint(P),
+                MatrixSqrtManifoldPoint(P),
                 SVDMPoint(U, [2.0, 1.0], [1.0 0.0; 0.0 1.0]),
                 UMVTangentVector(U, [1.0 0.0; 0.0 1.0], zeros(2, 2)),
                 VeronesePoint(p, [1.0]),

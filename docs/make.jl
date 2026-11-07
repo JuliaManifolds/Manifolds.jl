@@ -198,6 +198,7 @@ makedocs(;
                 "Grassmann" => "manifolds/grassmann.md",
                 "Hamiltonian" => "manifolds/hamiltonian.md",
                 "Heisenberg matrices" => "manifolds/heisenberg.md",
+                "Hermitian positive definite" => "manifolds/hermitianpositivedefinite.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Hyperrectangle" => "manifolds/hyperrectangle.md",
                 "Invertible matrices" => "manifolds/invertible.md",
