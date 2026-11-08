@@ -380,7 +380,10 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
             @test is_point(SymmetricPositiveDefinite(3; parameter = :field), q_near)
         end
         @testset "Metric change" begin
-            @test change_metric(M, EuclideanMetric(), p1, X) == p1 * X
+            Y = change_metric(M, EuclideanMetric(), p2, X2)
+            @test Y ≈ sqrt(p2) * X2 * sqrt(p2)
+            @test is_vector(M, p2, Y)
+            @test norm(M, p2, Y) ≈ norm(X2)
             @test change_representer(M, EuclideanMetric(), p1, X) == p1 * X * p1
         end
         @testset "Distance and logarithm of points far apart" begin

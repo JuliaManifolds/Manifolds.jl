@@ -41,15 +41,18 @@ To be precise we are looking for ``c\colon T_p\mathcal H(n) → T_p\mathcal H(n)
 such that for all ``Y,Z ∈ T_p\mathcal H(n)`` it holds
 
 ```math
-⟨Y,Z⟩ = \operatorname{Re}\operatorname{tr}(Y^{\mathrm{H}}Z) = \operatorname{tr}(YZ) = \operatorname{tr}(p^{-1}c(Y)p^{-1}c(Z)) = g_p(c(Z),c(Y))
+⟨Y,Z⟩ = \operatorname{Re}\operatorname{tr}(Y^{\mathrm{H}}Z) = \operatorname{tr}(YZ) = \operatorname{tr}(p^{-1}c(Y)p^{-1}c(Z)) = g_p(c(Y),c(Z)).
 ```
 
-and hence ``c(X) = pX`` is computed.
+Since ``g_p(Y,Z) = \operatorname{tr}(p^{-1}Yp^{-1}Z) = \operatorname{tr}\bigl((p^{-\frac{1}{2}}Yp^{-\frac{1}{2}})(p^{-\frac{1}{2}}Zp^{-\frac{1}{2}})\bigr)``
+by the cyclic property of the trace is the Frobenius inner product of ``p^{-\frac{1}{2}}Yp^{-\frac{1}{2}}`` and ``p^{-\frac{1}{2}}Zp^{-\frac{1}{2}}``,
+see [BhatiaHolbrook:2006](@cite), Eq. (5), the map ``c(X) = p^{\frac{1}{2}}Xp^{\frac{1}{2}}`` is computed, which is Hermitian whenever ``X`` is.
 """
 change_metric(::HermitianPositiveDefinite, ::EuclideanMetric, ::Any, ::Any)
 
 function change_metric!(::HermitianPositiveDefinite, Y, ::EuclideanMetric, p, X)
-    Y .= p * X
+    p_sqrt = hpd_sqrt(p)
+    Y .= p_sqrt * X * p_sqrt
     return Y
 end
 

@@ -116,7 +116,10 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
             @test is_point(M, q)
         end
         @testset "Metric change" begin
-            @test change_metric(M, EuclideanMetric(), p3, X2) == p3 * X2
+            Y = change_metric(M, EuclideanMetric(), p3, X2)
+            @test Y ≈ sqrt(Hermitian(p3)) * X2 * sqrt(Hermitian(p3))
+            @test is_vector(M, p3, Y)
+            @test norm(M, p3, Y) ≈ norm(X2)
             @test change_representer(M, EuclideanMetric(), p3, X2) == p3 * X2 * p3
         end
         @testset "Projection onto the tangent space" begin

@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The internal functions `spd_sqrt`, `spd_sqrt_inv` and `spd_sqrt_and_sqrt_inv` are deprecated in favour of `hpd_sqrt`, `hpd_sqrt_inv` and `hpd_sqrt_and_sqrt_inv`, which return `Hermitian` matrices.
 * `SPDPoint` is deprecated in favour of `MatrixSqrtManifoldPoint`, which represents points on both the real and the complex manifold.
 
+### Fixed
+
+* `change_metric` from the `EuclideanMetric` to the `AffineInvariantMetric` returns the tangent vector ``p^{1/2} X p^{1/2}`` instead of ``pX``, which is in general not symmetric.
+
 ## [0.11.37] 2026-10-31
 
 ### Fixed

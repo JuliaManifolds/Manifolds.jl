@@ -28,10 +28,12 @@ To be precise we are looking for ``c\colon T_p\mathcal P(n) → T_p\mathcal P(n)
 such that for all ``Y,Z ∈ T_p\mathcal P(n)`` it holds
 
 ```math
-⟨Y,Z⟩ = \operatorname{tr}(YZ) = \operatorname{tr}(p^{-1}c(Y)p^{-1}c(Z)) = g_p(c(Z),c(Y))
+⟨Y,Z⟩ = \operatorname{tr}(YZ) = \operatorname{tr}(p^{-1}c(Y)p^{-1}c(Z)) = g_p(c(Y),c(Z)).
 ```
 
-and hence ``c(X) = pX`` is computed.
+Since ``g_p(Y,Z) = \operatorname{tr}(p^{-1}Yp^{-1}Z) = \operatorname{tr}\bigl((p^{-\frac{1}{2}}Yp^{-\frac{1}{2}})(p^{-\frac{1}{2}}Zp^{-\frac{1}{2}})\bigr)``
+by the cyclic property of the trace is the Frobenius inner product of ``p^{-\frac{1}{2}}Yp^{-\frac{1}{2}}`` and ``p^{-\frac{1}{2}}Zp^{-\frac{1}{2}}``,
+see [PennecFillardAyache:2006](@cite), Section 3.3, the map ``c(X) = p^{\frac{1}{2}}Xp^{\frac{1}{2}}`` is computed, which is symmetric whenever ``X`` is.
 """
 change_metric(::SymmetricPositiveDefinite, ::EuclideanMetric, ::Any, ::Any)
 
