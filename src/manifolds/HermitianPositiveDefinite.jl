@@ -395,7 +395,7 @@ end
     hpd_sqrt_and_sqrt_inv(p::AbstractMatrix)
     hpd_sqrt_and_sqrt_inv(p::MatrixSqrtManifoldPoint)
 
-return ``p^{\frac{1}{2}}`` and ``p^{-\frac{1}{2}}`` by either computing them (if they are missing or for the `AbstractMatrix`)
+Return ``p^{\frac{1}{2}}`` and ``p^{-\frac{1}{2}}`` by either computing them (if they are missing or for the `AbstractMatrix`)
 or returning their stored value from within the [`MatrixSqrtManifoldPoint`](@ref).
 
 Compared to calling single methods [`hpd_sqrt`](@ref Manifolds.hpd_sqrt) and [`hpd_sqrt_inv`](@ref Manifolds.hpd_sqrt_inv) this method
