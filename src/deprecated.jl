@@ -410,22 +410,4 @@ in an embedded space.
 """
 solve_exp_ode(M::AbstractManifold, p, X, t::Number; kwargs...)
 
-@doc raw"""
-    spd_sqrt(p::AbstractMatrix)
-    spd_sqrt(p::MatrixSqrtManifoldPoint)
-
-return ``p^{\frac{1}{2}}`` by either computing it (if it is missing or for the `AbstractMatrix`)
-or returning the stored value from within the [`MatrixSqrtManifoldPoint`](@ref).
-
-This method assumes that `p` represents an spd matrix.
-
-!!! warning "Deprecated"
-    This function is deprecated and will be removed in a future release.
-    Use [`hpd_sqrt`](@ref Manifolds.hpd_sqrt) instead, which returns a `Hermitian` matrix.
-"""
-function spd_sqrt(p)
-    @warn "`spd_sqrt(p)` is deprecated. Consider using `hpd_sqrt(p)` instead" maxlog = 1
-    return Symmetric(parent(hpd_sqrt(p)))
-end
-
 Base.@deprecate_binding SPDPoint MatrixSqrtManifoldPoint
