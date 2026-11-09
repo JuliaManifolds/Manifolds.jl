@@ -1,12 +1,4 @@
 @doc raw"""
-    AffineInvariantMetric <: AbstractMetric
-
-The linear affine metric is the metric for symmetric positive definite matrices, that employs
-matrix logarithms and exponentials, which yields a linear and affine metric.
-"""
-struct AffineInvariantMetric <: RiemannianMetric end
-
-@doc raw"""
     change_representer(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
 Compute the representer of the linear function given by ``X ∈ T_p\mathcal M`` with respect to
@@ -25,11 +17,6 @@ and hence ``Z = pXp``.
 """
 change_representer(::SymmetricPositiveDefinite, ::EuclideanMetric, ::Any, ::Any)
 
-function change_representer!(::SymmetricPositiveDefinite, Y, ::EuclideanMetric, p, X)
-    Y .= p * X * p
-    return Y
-end
-
 @doc raw"""
     change_metric(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
@@ -41,17 +28,14 @@ To be precise we are looking for ``c\colon T_p\mathcal P(n) → T_p\mathcal P(n)
 such that for all ``Y,Z ∈ T_p\mathcal P(n)`` it holds
 
 ```math
-⟨Y,Z⟩ = \operatorname{tr}(YZ) = \operatorname{tr}(p^{-1}c(Y)p^{-1}c(Z)) = g_p(c(Z),c(Y))
+⟨Y,Z⟩ = \operatorname{tr}(YZ) = \operatorname{tr}(p^{-1}c(Y)p^{-1}c(Z)) = g_p(c(Y),c(Z)).
 ```
 
-and hence ``c(X) = pX`` is computed.
+Since ``g_p(Y,Z) = \operatorname{tr}(p^{-1}Yp^{-1}Z) = \operatorname{tr}\bigl((p^{-\frac{1}{2}}Yp^{-\frac{1}{2}})(p^{-\frac{1}{2}}Zp^{-\frac{1}{2}})\bigr)``
+by the cyclic property of the trace is the Frobenius inner product of ``p^{-\frac{1}{2}}Yp^{-\frac{1}{2}}`` and ``p^{-\frac{1}{2}}Zp^{-\frac{1}{2}}``,
+see [PennecFillardAyache:2006](@cite), Section 3.3, the map ``c(X) = p^{\frac{1}{2}}Xp^{\frac{1}{2}}`` is computed, which is symmetric whenever ``X`` is.
 """
 change_metric(::SymmetricPositiveDefinite, ::EuclideanMetric, ::Any, ::Any)
-
-function change_metric!(::SymmetricPositiveDefinite, Y, ::EuclideanMetric, p, X)
-    Y .= p * X
-    return Y
-end
 
 @doc raw"""
     distance(M::SymmetricPositiveDefinite, p, q)
@@ -67,16 +51,7 @@ d_{\mathcal P(n)}(p,q)
 where ``\operatorname{Log}`` denotes the matrix logarithm and
 ``\lVert⋅\rVert_{\mathrm{F}}`` denotes the matrix Frobenius norm.
 """
-function distance(::SymmetricPositiveDefinite, p, q)
-    # avoid numerical instabilities in cholesky
-    p == q && return zero(eltype(p + q))
-    cq = cholesky(Symmetric(q)) # to avoid numerical inaccuracies
-    s = eigvals(Symmetric(cq.L \ p / cq.U))
-    return sqrt(sum(abs.(log.(max.(s, floatmin(eltype(s))))) .^ 2))
-end
-function distance(M::SymmetricPositiveDefinite, p::SPDPoint, q::SPDPoint)
-    return distance(M, convert(AbstractMatrix, p), convert(AbstractMatrix, q))
-end
+distance(::SymmetricPositiveDefinite, ::Any, ::Any)
 
 @doc raw"""
     exp(M::SymmetricPositiveDefinite, p, X)
@@ -90,58 +65,9 @@ Compute the exponential map from `p` with tangent vector `X` on the
 \exp_p X = p^{\frac{1}{2}}\operatorname{Exp}(p^{-\frac{1}{2}} X p^{-\frac{1}{2}})p^{\frac{1}{2}},
 ```
 
-where ``\operatorname{Exp}`` denotes to the matrix exponential.
+where ``\operatorname{Exp}`` denotes the matrix exponential.
 """
 exp(::SymmetricPositiveDefinite, ::Any...)
-
-function exp(::SymmetricPositiveDefinite, p::SPDPoint, X)
-    (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
-    T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
-    eig1 = eigen(T) # numerical stabilization
-    Se = Diagonal(exp.(eig1.values))
-    U_e = eig1.vectors
-    pU_e = p_sqrt * U_e
-    q = SPDPoint(
-        pU_e * Se * transpose(pU_e),
-        store_p = !ismissing(p.p),
-        store_sqrt = !ismissing(p.sqrt),
-        store_sqrt_inv = !ismissing(p.sqrt_inv),
-    )
-    return q
-end
-
-function exp_fused!(M::SymmetricPositiveDefinite, q, p, X, t::Number)
-    return exp!(M, q, p, t * X)
-end
-function exp!(::SymmetricPositiveDefinite, q, p, X)
-    (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
-    T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
-    eig1 = eigen(T) # numerical stabilization
-    Se = Diagonal(exp.(eig1.values))
-    U_e = eig1.vectors
-    pU_e = p_sqrt * U_e
-    return copyto!(q, pU_e * Se * transpose(pU_e))
-end
-function exp!(::SymmetricPositiveDefinite, q::SPDPoint, p, X)
-    (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
-    T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
-    eig1 = eigen(T) # numerical stabilization
-    Se = Diagonal(exp.(eig1.values))
-    U_e = eig1.vectors
-    pU_e = p_sqrt * U_e
-    Q = pU_e * Se * transpose(pU_e)
-    !ismissing(q.p) && copyto!(q.p, Q)
-    Q_e = eigen(Symmetric(Q))
-    copyto!(q.eigen.values, Q_e.values)
-    copyto!(q.eigen.vectors, Q_e.vectors)
-    if !ismissing(q.sqrt) && !ismissing(q.sqrt_inv)
-        copyto!.([q.sqrt, q.sqrt_inv], spd_sqrt_and_sqrt_inv(Q))
-    else
-        !ismissing(q.sqrt) && copyto!(q.sqrt, spd_sqrt(Q))
-        !ismissing(q.sqrt_inv) && copyto!(q.sqrt_inv, spd_sqrt_inv(Q))
-    end
-    return q
-end
 
 @doc raw"""
     [Ξ,κ] = get_basis_diagonalizing(M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis)
@@ -159,7 +85,7 @@ function get_basis_diagonalizing(
         M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis
     )
     N = get_parameter(M.size)[1]
-    (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
+    (p_sqrt, p_sqrt_inv) = hpd_sqrt_and_sqrt_inv(p)
     eigv = eigen(Symmetric(p_sqrt_inv * B.frame_direction * p_sqrt_inv))
     V = eigv.vectors
     Ξ = [
@@ -207,7 +133,7 @@ get_basis(::SymmetricPositiveDefinite, p, B::DefaultOrthonormalBasis)
 
 function get_basis_orthonormal(M::SymmetricPositiveDefinite, p, Ns::RealNumbers)
     N = get_parameter(M.size)[1]
-    p_sqrt = spd_sqrt(p)
+    p_sqrt = hpd_sqrt(p)
     Ξ = [similar(convert(AbstractMatrix, p)) for _ in 1:manifold_dimension(M)]
     k = 1
     for i in 1:N, j in i:N
@@ -240,7 +166,7 @@ function get_coordinates_orthonormal!(M::SymmetricPositiveDefinite, c, p, X, ::R
     @assert size(c) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
-    p_sqrt = spd_sqrt(p)
+    p_sqrt = hpd_sqrt(p)
     pM = convert(AbstractMatrix, p)
     k = 1
     V = similar(pM)
@@ -276,7 +202,7 @@ function get_vector_orthonormal!(M::SymmetricPositiveDefinite, X, p, c, ::RealNu
     N = get_parameter(M.size)[1]
     @assert size(c) == (div(N * (N + 1), 2),)
     @assert size(X) == (N, N)
-    p_sqrt = spd_sqrt(p)
+    p_sqrt = hpd_sqrt(p)
     X .= 0
     k = 1
     V = similar(convert(AbstractMatrix, p))
@@ -306,10 +232,7 @@ a [`MetricManifold`](@extref ManifoldsBase.MetricManifold) with [`AffineInvarian
 g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
 ````
 """
-function inner(::SymmetricPositiveDefinite, p, X, Y)
-    F = cholesky(Symmetric(convert(AbstractMatrix, p)))
-    return dot((F \ Symmetric(X)), (Symmetric(Y) / F))
-end
+inner(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any)
 
 """
     is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,AffineInvariantMetric})
@@ -317,9 +240,7 @@ end
 Return true if the [`SymmetricPositiveDefinite`](@ref) with [`AffineInvariantMetric`](@ref)
 is one-dimensional, i.e. for ``n = 1``, and false otherwise.
 """
-function is_flat(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, AffineInvariantMetric})
-    return is_flat(M.manifold)
-end
+is_flat(::MetricManifold{ℝ, <:SymmetricPositiveDefinite, AffineInvariantMetric})
 
 @doc raw"""
     log(M::SymmetricPositiveDefinite, p, q)
@@ -332,33 +253,16 @@ as a [`MetricManifold`](@extref ManifoldsBase.MetricManifold) with [`AffineInvar
 \log_p q =
 p^{\frac{1}{2}}\operatorname{Log}(p^{-\frac{1}{2}}qp^{-\frac{1}{2}})p^{\frac{1}{2}},
 ```
-where ``\operatorname{Log}`` denotes to the matrix logarithm.
+where ``\operatorname{Log}`` denotes the matrix logarithm.
 """
 log(::SymmetricPositiveDefinite, ::Any...)
-
-function allocate_result(M::SymmetricPositiveDefinite, ::typeof(log), q::SPDPoint, p::SPDPoint)
-    return allocate_result(M, log, convert(AbstractMatrix, q), convert(AbstractMatrix, p))
-end
-
-function log!(::SymmetricPositiveDefinite, X, p, q)
-    (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
-    T = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv)
-    e2 = eigen(T)
-    R = eltype(e2.values)
-    a = norm(e2.values, Inf)
-    # below eps() clamp at the LAPACK eigenvalue error bound (Anderson et al. 1999, Sec. 4.7)
-    c = a < eps() ? max(eps(R) / 2 * a, floatmin(R)) : eps()
-    Se = Diagonal(log.(max.(e2.values, c)))
-    pU_e = p_sqrt * e2.vectors
-    return mul!(X, pU_e, Se * transpose(pU_e))
-end
 
 """
     manifold_volume(::SymmetricPositiveDefinite)
 
 Return volume of the [`SymmetricPositiveDefinite`](@ref) manifold, i.e. infinity.
 """
-manifold_volume(::SymmetricPositiveDefinite) = Inf
+manifold_volume(::SymmetricPositiveDefinite)
 
 @doc raw"""
     parallel_transport_to(M::SymmetricPositiveDefinite, p, X, q)
@@ -387,23 +291,6 @@ and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
 """
 parallel_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any)
 
-function parallel_transport_to!(M::SymmetricPositiveDefinite, Y, p, X, q)
-    distance(M, p, q) < 2 * eps(eltype(p)) && return copyto!(Y, X)
-    (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
-    tv = Symmetric(p_sqrt_inv * X * p_sqrt_inv) # p^(-1/2)Xp^{-1/2}
-    ty = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv) # p^(-1/2)qp^(-1/2)
-    e2 = eigen(ty)
-    Se = Diagonal(log.(max.(e2.values, floatmin(eltype(e2.values)))))
-    U_e = e2.vectors
-    logty = Symmetric(U_e * Se * transpose(U_e)) # nearly log_pq without the outer p^1/2
-    e3 = eigen(logty) # since they cancel with the pInvSqrt in the next line
-    Sf = Diagonal(exp.(e3.values / 2)) # Uf * Sf * Uf' is the Exp
-    Uf = e3.vectors
-    pU_e = p_sqrt * Uf * Sf * transpose(Uf) # factors left of tv (and transposed right)
-    vtp = Symmetric(pU_e * tv * transpose(pU_e)) # so this is the documented formula
-    return copyto!(Y, vtp)
-end
-
 @doc raw"""
     riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)
 
@@ -421,14 +308,6 @@ the symmetrization operator. Then the formula reads
 ```
 """
 riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)
-
-function riemannian_Hessian!(::SymmetricPositiveDefinite, Y, p, G, H, X)
-    symmetrize!(Y, G)
-    symmetrize!(Y, X * Y * p)
-    Z = symmetrize(H)
-    Y .+= p * Z * p
-    return Y
-end
 
 @doc raw"""
     riemann_tensor(::SymmetricPositiveDefinite, p, X, Y, Z)
@@ -476,9 +355,7 @@ end
 Return maximum sectional curvature of [`SymmetricPositiveDefinite`](@ref) manifold,
 that is 0.
 """
-function sectional_curvature_max(::SymmetricPositiveDefinite)
-    return 0.0
-end
+sectional_curvature_max(::SymmetricPositiveDefinite)
 
 @doc raw"""
     volume_density(::SymmetricPositiveDefinite, p, X)
@@ -497,7 +374,7 @@ where a factor with ``λ_i = λ_j`` is ``1``,
 see [DeSurrelLotteChevallierYger:2025](@cite), Proposition 4.3.
 """
 function volume_density(::SymmetricPositiveDefinite, p, X)
-    (_, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
+    (_, p_sqrt_inv) = hpd_sqrt_and_sqrt_inv(p)
     eig = eigvals(Symmetric(p_sqrt_inv * X * p_sqrt_inv))
     dens = 1.0
     for i in 1:length(eig)

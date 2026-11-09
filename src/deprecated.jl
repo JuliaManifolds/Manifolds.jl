@@ -409,3 +409,5 @@ in an embedded space.
     Consider using the chart-based variant [`solve_chart_exp_ode`](@ref Manifolds.solve_chart_exp_ode)`(M::AbstractManifold, a, Xc, A::AbstractAtlas, i)` instead.
 """
 solve_exp_ode(M::AbstractManifold, p, X, t::Number; kwargs...)
+
+Base.@deprecate_binding SPDPoint MatrixSqrtManifoldPoint

@@ -1,24 +1,24 @@
 @doc raw"""
-    SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
+    SymmetricPositiveDefinite{T} = HermitianPositiveDefinite{ℝ,T}
 
 The manifold of symmetric positive definite matrices, i.e.
 
 ````math
-\mathcal P(n) =
-\bigl\{
-p ∈ ℝ^{n×n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
+\mathcal P(n) = \bigl\{
+  p ∈ ℝ^{n×n}\ \big|\ p = p^{\mathrm{T}} \text{ and } a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
 \bigr\}
 ````
 
-The tangent space at ``T_p\mathcal P(n)`` reads
+The tangent space at ``p ∈ \mathcal P(n)`` reads
 
 ```math
     T_p\mathcal P(n) =
-    \bigl\{
-        X \in \mathbb R^{n×n} \big|\ X=X^\mathrm{T}
-    \bigr\},
+    \bigl\{ X \in \mathbb R^{n×n} \big|\ X=X^\mathrm{T} \bigr\},
 ```
-i.e. the set of symmetric matrices,
+i.e. the set of symmetric matrices.
+
+This manifold is the real case ``𝔽 = ℝ`` of the [`HermitianPositiveDefinite`](@ref) matrices,
+``\mathcal P(n) = \mathcal H(n)``.
 
 # Constructor
 
@@ -26,222 +26,11 @@ i.e. the set of symmetric matrices,
 
 generates the manifold ``\mathcal P(n) \subset ℝ^{n×n}``
 """
-struct SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
-    size::T
-end
+const SymmetricPositiveDefinite{T} = HermitianPositiveDefinite{ℝ, T}
 
 function SymmetricPositiveDefinite(n::Int; parameter::Symbol = :type)
-    n < 0 && throw(
-        DomainError(n, "The matrix size n of symmetric positive definite matrices must be nonnegative, but was $(n).")
-    )
-    size = wrap_type_parameter(parameter, (n,))
-    return SymmetricPositiveDefinite{typeof(size)}(size)
+    return HermitianPositiveDefinite(n, ℝ; parameter = parameter)
 end
-
-@doc raw"""
-    SPDPoint <: AbstractManifoldsPoint
-
-Store the result of `eigen(p)` of an SPD matrix and (optionally) ``p^{1/2}`` and ``p^{-1/2}``
-to avoid their repeated computations.
-
-This result only has the result of `eigen` as a mandatory storage, the other three
-can be stored. If they are not stored they are computed and returned (but then still not stored)
-when required.
-
-# Constructor
-
-    SPDPoint(p::AbstractMatrix; store_p=true, store_sqrt=true, store_sqrt_inv=true)
-
-Create an SPD point using a symmetric positive definite matrix `p`, where you can optionally
-store `p`, `sqrt` and `sqrt_inv`.
-"""
-struct SPDPoint{
-        P <: Union{AbstractMatrix, Missing},
-        Q <: Union{AbstractMatrix, Missing},
-        R <: Union{AbstractMatrix, Missing},
-        E <: Eigen,
-    } <: AbstractManifoldPoint
-    p::P
-    eigen::E
-    sqrt::Q
-    sqrt_inv::R
-end
-
-ManifoldsBase.@fieldwise_equality SPDPoint (eigen,)
-
-SPDPoint(p::SPDPoint) = p
-function SPDPoint(p::AbstractMatrix; store_p = true, store_sqrt = true, store_sqrt_inv = true)
-    e = eigen(Symmetric(p))
-    U = e.vectors
-    S = max.(e.values, floatmin(eltype(e.values)))
-    if store_sqrt
-        s_sqrt = Diagonal(sqrt.(S))
-        p_sqrt = U * s_sqrt * transpose(U)
-    else
-        p_sqrt = missing
-    end
-    if store_sqrt_inv
-        s_sqrt_inv = Diagonal(1 ./ sqrt.(S))
-        p_sqrt_inv = U * s_sqrt_inv * transpose(U)
-    else
-        p_sqrt_inv = missing
-    end
-    if store_p
-        q = p
-    else
-        q = missing
-    end
-    return SPDPoint{typeof(q), typeof(p_sqrt), typeof(p_sqrt_inv), typeof(e)}(
-        q, e, p_sqrt, p_sqrt_inv
-    )
-end
-convert(::Type{SPDPoint}, p::AbstractMatrix) = SPDPoint(p)
-
-
-function allocate(p::SPDPoint)
-    return SPDPoint(
-        ismissing(p.p) ? missing : allocate(p.p),
-        Eigen(allocate(p.eigen.values), allocate(p.eigen.vectors)),
-        ismissing(p.sqrt) ? missing : allocate(p.sqrt),
-        ismissing(p.sqrt_inv) ? missing : allocate(p.sqrt_inv),
-    )
-end
-function allocate(p::SPDPoint, ::Type{T}) where {T}
-    return SPDPoint(
-        ismissing(p.p) ? missing : allocate(p.p, T),
-        Eigen(allocate(p.eigen.values, T), allocate(p.eigen.vectors, T)),
-        ismissing(p.sqrt) ? missing : allocate(p.sqrt, T),
-        ismissing(p.sqrt_inv) ? missing : allocate(p.sqrt_inv, T),
-    )
-end
-
-function allocate_result(M::SymmetricPositiveDefinite, ::typeof(zero_vector), p::SPDPoint)
-    return allocate_result(M, zero_vector, convert(AbstractMatrix, p))
-end
-function allocate_coordinates(M::SymmetricPositiveDefinite, p::SPDPoint, T, n::Int)
-    return allocate_coordinates(M, convert(AbstractMatrix, p), T, n)
-end
-function allocate_result(M::SymmetricPositiveDefinite, ::typeof(get_vector), p::SPDPoint, c)
-    return allocate_result(M, get_vector, convert(AbstractMatrix, p), c)
-end
-
-@doc raw"""
-    check_point(M::SymmetricPositiveDefinite, p; kwargs...)
-
-checks, whether `p` is a valid point on the [`SymmetricPositiveDefinite`](@ref) `M`, i.e. is a matrix
-of size `(N,N)`, symmetric and positive definite.
-The tolerance for the second to last test can be set using the `kwargs...`.
-"""
-function check_point(M::SymmetricPositiveDefinite, p; kwargs...)
-    if !isapprox(p, transpose(p); kwargs...)
-        return DomainError(
-            norm(p - transpose(p)),
-            "The point $(p) does not lie on $(M) since its not a symmetric matrix:",
-        )
-    end
-    if !isposdef(Symmetric(p))
-        return DomainError(
-            eigvals(p),
-            "The point $p does not lie on $(M) since its not a positive definite matrix.",
-        )
-    end
-    return nothing
-end
-function check_point(M::SymmetricPositiveDefinite, p::SPDPoint; kwargs...)
-    return check_point(M, convert(AbstractMatrix, p); kwargs...)
-end
-
-"""
-    check_vector(M::SymmetricPositiveDefinite, p, X; kwargs... )
-
-Check whether `X` is a tangent vector to `p` on the [`SymmetricPositiveDefinite`](@ref) `M`.
-After [`check_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p` and a symmetric
-matrix, i.e. this stores tangent vectors as elements of the corresponding Lie group.
-The tolerance for the last test can be set using the `kwargs...`.
-"""
-function check_vector(M::SymmetricPositiveDefinite, p, X; kwargs...)
-    if !isapprox(X, transpose(X); kwargs...)
-        return DomainError(
-            X,
-            "The vector $(X) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric.",
-        )
-    end
-    return nothing
-end
-function check_vector(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
-    return check_vector(M, convert(AbstractMatrix, p), X; kwargs...)
-end
-
-function check_size(M::SymmetricPositiveDefinite, p::SPDPoint; kwargs...)
-    return check_size(M, convert(AbstractMatrix, p))
-end
-function check_size(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
-    return check_size(M, convert(AbstractMatrix, p), X)
-end
-
-function Base.copy(p::SPDPoint)
-    return SPDPoint(
-        ismissing(p.p) ? missing : copy(p.p),
-        Eigen(copy(p.eigen.values), copy(p.eigen.vectors)),
-        ismissing(p.sqrt) ? missing : copy(p.sqrt),
-        ismissing(p.sqrt_inv) ? missing : copy(p.sqrt_inv),
-    )
-end
-
-#
-# Lazy copyto, only copy if both are not missing,
-# create from `p` if it is a nonmissing field in q.
-#
-function copyto!(q::SPDPoint, p::SPDPoint)
-    if !ismissing(q.p) # we have to fill the Fields
-        if !ismissing(p.p)
-            !ismissing(q.p) && copyto!(q.p, p.p)
-        else # otherwise compute and copy
-            copyto!(q.p, convert(AbstractMatrix, p))
-        end
-    end
-    copyto!(q.eigen.values, p.eigen.values)
-    copyto!(q.eigen.vectors, p.eigen.vectors)
-    if !ismissing(q.sqrt)
-        if !ismissing(p.sqrt)
-            copyto!(q.sqrt, p.sqrt)
-        else # otherwise compute and copy
-            copyto!(q.sqrt, spd_sqrt(p))
-        end
-    end
-    if !ismissing(q.sqrt_inv)
-        if !ismissing(p.sqrt_inv)
-            copyto!(q.sqrt_inv, p.sqrt_inv)
-        else # otherwise compute and copy
-            copyto!(q.sqrt_inv, spd_sqrt_inv(p))
-        end
-    end
-    return q
-end
-
-metric(::SymmetricPositiveDefinite) = AffineInvariantMetric()
-
-embed(::SymmetricPositiveDefinite, p) = p
-embed(::SymmetricPositiveDefinite, p::SPDPoint) = convert(AbstractMatrix, p)
-embed(::SymmetricPositiveDefinite, p, X) = X
-
-function get_embedding(::SymmetricPositiveDefinite{TypeParameter{Tuple{n}}}) where {n}
-    return Euclidean(n, n; field = ℝ)
-end
-function get_embedding(M::SymmetricPositiveDefinite{Tuple{Int}})
-    n = get_parameter(M.size)[1]
-    return Euclidean(n, n; field = ℝ, parameter = :field)
-end
-
-function ManifoldsBase.get_embedding_type(::SymmetricPositiveDefinite, ::Type{<:SPDPoint})
-    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.IndirectEmbedding())
-end
-function ManifoldsBase.get_embedding_type(::SymmetricPositiveDefinite)
-    return ManifoldsBase.EmbeddedManifoldType()
-end
-
-get_parameter_type(::SymmetricPositiveDefinite{<:TypeParameter}) = :type
-get_parameter_type(::SymmetricPositiveDefinite{Tuple{Int}}) = :field
 
 @doc raw"""
     injectivity_radius(M::SymmetricPositiveDefinite[, p])
@@ -252,22 +41,7 @@ Return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref).
 Since `M` is a Hadamard manifold with respect to the [`AffineInvariantMetric`](@ref) and the
 [`LogCholeskyMetric`](@ref), the injectivity radius is globally ``∞``.
 """
-injectivity_radius(::SymmetricPositiveDefinite) = Inf
-injectivity_radius(::SymmetricPositiveDefinite, p) = Inf
-injectivity_radius(::SymmetricPositiveDefinite, ::AbstractRetractionMethod) = Inf
-injectivity_radius(::SymmetricPositiveDefinite, p, ::AbstractRetractionMethod) = Inf
-
-function isapprox(p::SPDPoint, q::SPDPoint; kwargs...)
-    return isapprox(convert(AbstractMatrix, p), convert(AbstractMatrix, q); kwargs...)
-end
-
-"""
-    is_flat(M::SymmetricPositiveDefinite)
-
-Return true if the [`SymmetricPositiveDefinite`](@ref) `M` is one-dimensional, i.e. for
-``n = 1``, and false otherwise.
-"""
-is_flat(M::SymmetricPositiveDefinite) = get_parameter(M.size)[1] == 1
+injectivity_radius(::SymmetricPositiveDefinite, ::Any...)
 
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)
@@ -283,126 +57,6 @@ function manifold_dimension(M::SymmetricPositiveDefinite)
     return div(n * (n + 1), 2)
 end
 
-"""
-    mean(
-        M::SymmetricPositiveDefinite,
-        x::AbstractVector,
-        [w::AbstractWeights,]
-        method = GeodesicInterpolation();
-        kwargs...,
-    )
-
-Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
-[`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`).
-"""
-mean(::SymmetricPositiveDefinite, ::Any)
-
-function default_approximation_method(::SymmetricPositiveDefinite, ::typeof(mean))
-    return GeodesicInterpolation()
-end
-
-@doc raw"""
-    convert(::Type{AbstractMatrix}, p::SPDPoint)
-
-return the point `p` as a matrix.
-The matrix is either stored within the [`SPDPoint`](@ref) or reconstructed from `p.eigen`.
-"""
-convert(::Type{AbstractMatrix}, p::SPDPoint) = p.p
-function convert(::Type{AbstractMatrix}, p::SPDPoint{Missing})
-    return (p.eigen.vectors * Diagonal(p.eigen.values) * p.eigen.vectors')
-end
-
-@doc raw"""
-    spd_sqrt(p::AbstractMatrix)
-    spd_sqrt(p::SPDPoint)
-
-return ``p^{\frac{1}{2}}`` by either computing it (if it is missing or for the `AbstractMatrix`)
-or returning the stored value from within the [`SPDPoint`](@ref).
-
-This method assumes that `p` represents an spd matrix.
-"""
-spd_sqrt(p)
-
-function spd_sqrt(p::AbstractMatrix)
-    e = eigen(Symmetric(p))
-    U = e.vectors
-    S = max.(e.values, floatmin(eltype(e.values)))
-    Ssqrt = Diagonal(sqrt.(S))
-    return Symmetric(U * Ssqrt * transpose(U))
-end
-spd_sqrt(p::SPDPoint) = Symmetric(p.sqrt)
-function spd_sqrt(p::SPDPoint{P, Missing}) where {P <: Union{AbstractMatrix, Missing}}
-    U = p.eigen.vectors
-    S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
-    Ssqrt = Diagonal(sqrt.(S))
-    return Symmetric(U * Ssqrt * transpose(U))
-end
-
-@doc raw"""
-    spd_sqrt_inv(p::SPDPoint)
-
-return ``p^{-\frac{1}{2}}`` by either computing it (if it is missing or for the `AbstractMatrix`)
-or returning the stored value from within the [`SPDPoint`](@ref).
-
-This method assumes that `p` represents an spd matrix.
-"""
-spd_sqrt_inv(p::SPDPoint) = Symmetric(p.sqrt_inv)
-function spd_sqrt_inv(
-        p::SPDPoint{P, Q, Missing}
-    ) where {P <: Union{AbstractMatrix, Missing}, Q <: Union{AbstractMatrix, Missing}}
-    U = p.eigen.vectors
-    S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
-    SsqrtInv = Diagonal(1 ./ sqrt.(S))
-    return Symmetric(U * SsqrtInv * transpose(U))
-end
-
-@doc raw"""
-    spd_sqrt_and_sqrt_inv(p::AbstractMatrix)
-    spd_sqrt_and_sqrt_inv(p::SPDPoint)
-
-return ``p^{\frac{1}{2}}`` and ``p^{-\frac{1}{2}}`` by either computing them (if they are missing or for the `AbstractMatrix`)
-or returning their stored value from within the [`SPDPoint`](@ref).
-
-Compared to calling single methods [`spd_sqrt`](@ref Manifolds.spd_sqrt) and [`spd_sqrt_inv`](@ref Manifolds.spd_sqrt_inv) this method
-only computes the eigenvectors once for the case of the `AbstractMatrix` or if both are missing.
-
-This method assumes that `p` represents an spd matrix.
-"""
-spd_sqrt_and_sqrt_inv(p)
-
-function spd_sqrt_and_sqrt_inv(p::AbstractMatrix)
-    e = eigen(Symmetric(p))
-    U = e.vectors
-    S = max.(e.values, floatmin(eltype(e.values)))
-    Ssqrt = Diagonal(sqrt.(S))
-    SsqrtInv = Diagonal(1 ./ sqrt.(S))
-    return (Symmetric(U * Ssqrt * transpose(U)), Symmetric(U * SsqrtInv * transpose(U)))
-end
-function spd_sqrt_and_sqrt_inv(p::SPDPoint{P}) where {P <: Union{Missing, AbstractMatrix}}
-    return (Symmetric(p.sqrt), Symmetric(p.sqrt_inv))
-end
-function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Q, Missing}
-    ) where {P <: Union{Missing, AbstractMatrix}, Q <: AbstractMatrix}
-    return (Symmetric(p.sqrt), spd_sqrt_inv(p))
-end
-function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Missing, R}
-    ) where {P <: Union{Missing, AbstractMatrix}, R <: AbstractMatrix}
-    return (spd_sqrt(p), Symmetric(p.sqrt_inv))
-end
-function spd_sqrt_and_sqrt_inv(
-        p::SPDPoint{P, Missing, Missing}
-    ) where {P <: Union{Missing, AbstractMatrix}}
-    S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
-    U = p.eigen.vectors
-    Ssqrt = Diagonal(sqrt.(S))
-    SsqrtInv = Diagonal(1 ./ sqrt.(S))
-    return (Symmetric(U * Ssqrt * transpose(U)), Symmetric(U * SsqrtInv * transpose(U)))
-end
-
-Base.eltype(p::SPDPoint) = eltype(p.eigen)
-
 @doc raw"""
     project(M::SymmetricPositiveDefinite, p, X)
 
@@ -410,8 +64,6 @@ project a matrix from the embedding onto the tangent space ``T_p\mathcal P(n)`` 
 [`SymmetricPositiveDefinite`](@ref) matrices, i.e. the set of symmetric matrices.
 """
 project(::SymmetricPositiveDefinite, p, X)
-
-project!(::SymmetricPositiveDefinite, Y, p, X) = (Y .= Symmetric((X + X') / 2))
 
 @doc raw"""
     rand(M::SymmetricPositiveDefinite; vector_at=nothing, tangent_distr=:Gaussian, σ::Real=1/sqrt(n))
@@ -429,10 +81,6 @@ upper triangular with independent standard normal entries; here `σ` defaults to
 """
 rand(M::SymmetricPositiveDefinite; σ::Real = 1)
 
-function allocate_result(M::SymmetricPositiveDefinite, ::typeof(Random.rand), p::SPDPoint)
-    return zero_vector(M, p)
-end
-
 function Random.rand!(
         rng::AbstractRNG,
         M::SymmetricPositiveDefinite,
@@ -447,7 +95,7 @@ function Random.rand!(
     if vector_at === nothing
         D = Diagonal(1 .+ rand(rng, N)) # random diagonal matrix
         s = qr(σ * randn(rng, N, N)) # random q
-        if pX isa SPDPoint
+        if pX isa MatrixSqrtManifoldPoint
             pX.eigen.values .= D.diag
             pX.eigen.vectors .= s.Q
             sq = sqrt.(D.diag)
@@ -470,53 +118,18 @@ function Random.rand!(
     return pX
 end
 
-@doc raw"""
-    representation_size(M::SymmetricPositiveDefinite)
-
-Return the size of an array representing an element on the
-[`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. ``n×n``, the size of such a
-symmetric positive definite matrix on ``\mathcal M = \mathcal P(n)``.
-"""
-function representation_size(M::SymmetricPositiveDefinite)
-    N = get_parameter(M.size)[1]
-    return (N, N)
-end
-
-function Base.show(io::IO, ::SymmetricPositiveDefinite{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "SymmetricPositiveDefinite($(n))")
-end
-function Base.show(io::IO, M::SymmetricPositiveDefinite{Tuple{Int}})
+function Base.show(io::IO, M::SymmetricPositiveDefinite)
     n = get_parameter(M.size)[1]
-    return print(io, "SymmetricPositiveDefinite($(n); parameter=:field)")
-end
-
-function Base.show(io::IO, ::MIME"text/plain", p::SPDPoint)
-    pre = " "
-    summary(io, p)
-    println(io, "\np:")
-    sp = sprint(show, "text/plain", p.p; context = io, sizehint = 0)
-    sp = replace(sp, '\n' => "\n$(pre)")
-    println(io, pre, sp)
-    println(io, "p^{1/2}:")
-    sps = sprint(show, "text/plain", p.sqrt; context = io, sizehint = 0)
-    sps = replace(sps, '\n' => "\n$(pre)")
-    println(io, pre, sps)
-    println(io, "p^{-1/2}:")
-    spi = sprint(show, "text/plain", p.sqrt_inv; context = io, sizehint = 0)
-    spi = replace(spi, '\n' => "\n$(pre)")
-    return print(io, pre, spi)
+    kw = get_parameter_type(M) === :type ? "" : "; parameter=:$(get_parameter_type(M))"
+    return print(io, "SymmetricPositiveDefinite($n$kw)")
 end
 
 @doc raw"""
     zero_vector(M::SymmetricPositiveDefinite, p)
+    zero_vector!(M::SymmetricPositiveDefinite, X, p)
 
 returns the zero tangent vector in the tangent space of the symmetric positive
 definite matrix `p` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
+It can be returned in place of `X`.
 """
 zero_vector(::SymmetricPositiveDefinite, ::Any)
-
-function zero_vector(M::SymmetricPositiveDefinite, p::SPDPoint)
-    return zero_vector(M, convert(AbstractMatrix, p))
-end
-
-zero_vector!(::SymmetricPositiveDefinite, X, ::Any) = fill!(X, 0)

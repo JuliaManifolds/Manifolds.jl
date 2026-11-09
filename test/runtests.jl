@@ -64,6 +64,7 @@ end
         include_test("manifolds/test_graph.jl")
         include_test("manifolds/test_hamiltonian.jl")
         include_test("manifolds/test_heisenberg_matrices.jl")
+        include_test("manifolds/test_hermitian_positive_definite.jl")
         include_test("manifolds/test_hyperbolic.jl")
         include_test("manifolds/test_hyperrectangle.jl")
         include_test("manifolds/test_invertible_matrices.jl")

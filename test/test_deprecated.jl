@@ -25,4 +25,9 @@ using Manifolds, Test
         cm = Manifolds.estimated_sectional_curvature_matrix(M, p, B; r = 1.0e-3, N = 200)
         @test (@test_logs (:warn, msg) Manifolds.estimated_sectional_curvature_matrix(M, p, B; r = 1.0e-3, N_pts = 200)) == cm
     end
+
+    @testset "SPDPoint" begin
+        @test Base.isdeprecated(Manifolds, :SPDPoint)
+        @test Manifolds.SPDPoint === MatrixSqrtManifoldPoint
+    end
 end

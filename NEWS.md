@@ -5,6 +5,29 @@ All notable changes to `Manifolds.jl` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.38] 2026-11-09
+
+### Added
+
+* `HermitianPositiveDefinite`, the manifold of Hermitian positive definite matrices over `ℝ` or `ℂ`, with the `AffineInvariantMetric`: `exp`, `log`, `distance`, `inner`, `parallel_transport_to`, `get_basis`, `get_coordinates` and `get_vector` in the `DefaultOrthonormalBasis`, `project`, `rand`, `change_metric`, `change_representer`, `riemannian_Hessian` and `sectional_curvature_max`. The curvature tensor, the curvature-diagonalizing basis, `sectional_curvature_min` and `volume_density` remain available for the real case only.
+* `MatrixSqrtManifoldPoint`, the point representation that stores the eigenvalue decomposition, the matrix square root and its inverse, for both fields.
+
+### Changed
+
+* `SymmetricPositiveDefinite` is now a `const` of `HermitianPositiveDefinite` over the reals.
+
+### Deprecated
+
+* `SPDPoint` is deprecated in favour of `MatrixSqrtManifoldPoint`, which represents points on both the real and the complex manifold.
+
+### Fixed
+
+* `change_metric` from the `EuclideanMetric` to the `AffineInvariantMetric` returns the tangent vector ``p^{1/2} X p^{1/2}`` instead of ``pX``, which is in general not symmetric.
+
+### Removed
+
+* The internal functions `spd_sqrt`, `spd_sqrt_inv` and `spd_sqrt_and_sqrt_inv` are removed in favour of `hpd_sqrt`, `hpd_sqrt_inv` and `hpd_sqrt_and_sqrt_inv`, which return `Hermitian` matrices.
+
 ## [0.11.37] 2026-10-31
 
 ### Fixed
