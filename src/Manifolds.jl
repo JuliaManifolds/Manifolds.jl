@@ -692,7 +692,8 @@ export HyperboloidPoint,
     SVDMPoint,
     TuckerPoint,
     ProjectorPoint,
-    MatrixSqrtManifoldPoint
+    MatrixSqrtManifoldPoint,
+    SPDPoint # deprecated in favor of the previous line's type, remove on next breaking release.
 # Tangent vector representation types
 export HyperboloidTangentVector,
     OrthogonalTangentVector,
