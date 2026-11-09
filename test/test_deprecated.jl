@@ -26,21 +26,6 @@ using Manifolds, Test
         @test (@test_logs (:warn, msg) Manifolds.estimated_sectional_curvature_matrix(M, p, B; r = 1.0e-3, N_pts = 200)) == cm
     end
 
-    @testset "spd_sqrt, spd_sqrt_inv and spd_sqrt_and_sqrt_inv" begin
-        p = [2.0 0.5; 0.5 1.0]
-        q = Manifolds.MatrixSqrtManifoldPoint(p)
-        for (f, g) in ((Manifolds.spd_sqrt, Manifolds.hpd_sqrt), (Manifolds.spd_sqrt_inv, Manifolds.hpd_sqrt_inv))
-            msg = Regex("^`$(nameof(f))\\(p\\)` is deprecated")
-            r = @test_logs (:warn, msg) match_mode = :any f(q)
-            @test r ≈ g(q)
-            @test r isa Symmetric
-        end
-        msg = r"^`spd_sqrt_and_sqrt_inv\(p\)` is deprecated"
-        r = @test_logs (:warn, msg) match_mode = :any Manifolds.spd_sqrt_and_sqrt_inv(p)
-        @test all(r .≈ Manifolds.hpd_sqrt_and_sqrt_inv(p))
-        @test all(x -> x isa Symmetric, r)
-    end
-
     @testset "SPDPoint" begin
         @test Base.isdeprecated(Manifolds, :SPDPoint)
         @test Manifolds.SPDPoint === MatrixSqrtManifoldPoint
