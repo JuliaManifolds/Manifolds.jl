@@ -16,9 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * `SymmetricPositiveDefinite` is now a `const` of `HermitianPositiveDefinite` over the reals.
 
-### Deprecated
+### Removed
 
 * The internal functions `spd_sqrt`, `spd_sqrt_inv` and `spd_sqrt_and_sqrt_inv` are removed in favour of `hpd_sqrt`, `hpd_sqrt_inv` and `hpd_sqrt_and_sqrt_inv`, which return `Hermitian` matrices.
+
+### Deprecated
+
 * `SPDPoint` is deprecated in favour of `MatrixSqrtManifoldPoint`, which represents points on both the real and the complex manifold.
 
 ### Fixed
