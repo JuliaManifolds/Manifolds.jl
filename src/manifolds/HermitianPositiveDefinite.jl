@@ -129,7 +129,8 @@ end
 function allocate(p::MatrixSqrtManifoldPoint, ::Type{T}) where {T}
     return MatrixSqrtManifoldPoint(
         ismissing(p.p) ? missing : allocate(p.p, T),
-        Eigen(allocate(p.eigen.values, T), allocate(p.eigen.vectors, T)),
+        # eigenvalues of a Hermitian matrix are real, also for a complex `T`
+        Eigen(allocate(p.eigen.values, real(T)), allocate(p.eigen.vectors, T)),
         ismissing(p.sqrt) ? missing : allocate(p.sqrt, T),
         ismissing(p.sqrt_inv) ? missing : allocate(p.sqrt_inv, T),
     )

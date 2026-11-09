@@ -178,4 +178,11 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, StaticArrays, Test
         @test isapprox(M, q, exp(M, 2 * p1, X))
         @test eltype(q) == ComplexF64
     end
+
+    @testset "allocate MatrixSqrtManifoldPoint with a complex number type" begin
+        pS = MatrixSqrtManifoldPoint(p3; store_sqrt = false)
+        q = copyto!(allocate(pS, ComplexF32), pS)
+        @test eltype(q.eigen.values) == Float32 # eigenvalues stay real
+        @test isapprox(Manifolds.hpd_sqrt(q), Manifolds.hpd_sqrt(p3); atol = 1.0e-5)
+    end
 end

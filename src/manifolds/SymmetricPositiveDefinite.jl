@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
+    SymmetricPositiveDefinite{T} = HermitianPositiveDefinite{ℝ,T}
 
 The manifold of symmetric positive definite matrices, i.e.
 
